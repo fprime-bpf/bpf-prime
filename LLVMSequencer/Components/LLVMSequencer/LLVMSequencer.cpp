@@ -54,6 +54,30 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 // ----------------------------------------------------------------------
 
 void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const char* sequenceFilePath) {
+    if (sequencer_getState() != State::IDLE) {
+        // If the sequencer is not in the IDLE state, command response out and error
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+
+    // We are in the IDLE state, so we can load the sequence
+    // Pass in the sequence file path to the sequencer state machine so that it can load the sequence
+    this->sequencer_sendSignal_cmd_LOAD(sequenceFilePath);
+}
+
+void LLVMSequencer ::COMPILE_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+    
+}
+
+void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& fileName) {
+
+}
+
+// ----------------------------------------------------------------------
+// OLD HANDLERS - Keeping for reference
+// ----------------------------------------------------------------------
+
+void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const char* sequenceFilePath) {
     // Open the sequence file
     Os::File file;
     Os::File::Status status = file.open(sequenceFilePath, Os::File::OPEN_READ, Os::File::NO_OVERWRITE);

@@ -18,6 +18,9 @@ module Components {
         include "LLVMSequencerEvents.fppi"
         include "LLVMSequencerStateMachine.fppi"
 
+        #Create the state machine
+        state machine instance sequencer: LLVMSequencerStateMachine priority 9 assert
+
         # Ports for the Sequencer
         @ output port for commands from the sequencer
         output port cmdOut: Fw.Com
