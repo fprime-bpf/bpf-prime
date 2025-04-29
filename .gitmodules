@@ -1,0 +1,3 @@
+[submodule "LLVMSequencer/Components/LLVMSequencer/llvmbpf"]
+	path = LLVMSequencer/Components/LLVMSequencer/llvmbpf
+	url = git@github.com:fprime-bpf/llvmbpf.git
