@@ -1,10 +1,10 @@
 ####
-# This sets up the build system for the 'llvmSequencer' project, including
+# This sets up the build system for the 'LLVMSequencer' project, including
 # components and deployments from project.cmake. In addition, it imports the core F Prime components.
 ####
 
 cmake_minimum_required(VERSION 3.13)
-project(llvmSequencer C CXX)
+project(LLVMSequencer C CXX)
 
 ###
 # F' Core Setup
