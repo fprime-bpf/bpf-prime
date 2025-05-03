@@ -1,7 +1,5 @@
 ## This is a state machine for the LLVM Sequencer
-struct FilePath{
-    path: string
-}
+
 state machine LLVMSequencerStateMachine{
 
     initial enter IDLE
@@ -14,7 +12,7 @@ state machine LLVMSequencerStateMachine{
 
     action signalEntered
 
-    signal cmd_LOAD
+    signal cmd_LOAD: string
 
     state IDLE{
         # #TODO - Determine if we need to clear the sequence file or not when you enter the state
@@ -40,8 +38,10 @@ state machine LLVMSequencerStateMachine{
     signal compile_failure
     signal compile_success
 
+    signal cmd_COMPILE
+
     state COMPILING{
-        entry do { compileSequence } 
+        on cmd_COMPILE do { compileSequence } 
         #The results from compilation
         on compile_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on compile_success enter RUNNING
@@ -51,8 +51,10 @@ state machine LLVMSequencerStateMachine{
     signal run_failure
     signal run_success
 
+    signal cmd_RUN
+
     state RUNNING{
-        entry do { runSequence } 
+        on cmd_RUN do { runSequence } 
         #The results from running
         on run_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
 

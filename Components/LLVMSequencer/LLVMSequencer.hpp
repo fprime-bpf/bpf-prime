@@ -10,11 +10,13 @@
 #include "Components/LLVMSequencer/LLVMSequencerComponentAc.hpp"
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
+#include "Fw/Types/StringBase.hpp"
+
 
 namespace Components {
 
-using Signal = LLVMSequencer_SequencerStateMachineStateMachineBase::Signal;
-using State = LLVMSequencer_SequencerStateMachineStateMachineBase::State;
+using Signal = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::Signal;
+using State = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::State;
 
 class LLVMSequencer : public LLVMSequencerComponentBase {
   public:
@@ -79,7 +81,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Load a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  String sequenceFilePath);
+                                  const Fw::CmdStringArg& sequenceFilePath);
 
     //! Handler implementation for command COMPILE_SEQUENCE
     //!
@@ -92,37 +94,37 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //!
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq,           //!< The command sequence number
+                                 U32 cmdSeq           //!< The command sequence number
                                  );
     // ----------------------------------------------------------------------
     // Handler implementations for state machine actions
     // ----------------------------------------------------------------------
-    void Components_LLVMSequencer_SequencerStateMachine_action_setSequenceFilePath(
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
       SmId smId,
-      Components_LLVMSequencer_SequencerStateMachineState::signal signal,
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal,
       const char* filePath //!< The sequence file path
     );
 
     //Handler for sending the execution error response
-    void Components_LLVMSequencer_SequencerStateMachine_action_sendCmdResponse_EXECUTION_ERROR(
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_sendCmdResponse_EXECUTION_ERROR(
       SmId smId,
-      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
 
     //Action for action load of state machine
-    void Components_LLVMSequencer_SequencerStateMachine_action_loadSequence(
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_loadSequence(
       SmId smId,
-      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
 
-    void Components_LLVMSequencer_SequencerStateMachine_action_compileSequence(
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_compileSequence(
       SmId smId,
-      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
 
-    void Components_LLVMSequencer_SequencerStateMachine_action_runSequence(
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_runSequence(
       SmId smId,
-      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
     
 };

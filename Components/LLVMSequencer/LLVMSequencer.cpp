@@ -53,7 +53,7 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, string sequenceFilePath) {
+void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& sequenceFilePath) {
     if (sequencer_getState() != State::IDLE) {
         // If the sequencer is not in the IDLE state, command response out and error
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
@@ -74,7 +74,7 @@ void LLVMSequencer ::COMPILE_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq
     this->sequencer_sendSignal_cmd_COMPILE(); //The sequence is loaded, so we can compile it 
 }
 
-void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& fileName) {
+void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     if (sequencer_getState() != State::COMPILING){
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;

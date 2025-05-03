@@ -7,6 +7,7 @@ module Components {
         include "LLVMSequencerCommands.fppi"
         include "LLVMSequencerEvents.fppi"
         include "LLVMSequencerStateMachine.fppi"
+        
 
         #Create the state machine
         state machine instance sequencer: LLVMSequencerStateMachine priority 9 assert
