@@ -41,7 +41,7 @@ state machine LLVMSequencerStateMachine{
     signal compile_success
 
     state COMPILING{
-        entry do { compile } 
+        entry do { compileSequence } 
         #The results from compilation
         on compile_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on compile_success enter RUNNING
@@ -52,7 +52,7 @@ state machine LLVMSequencerStateMachine{
     signal run_success
 
     state RUNNING{
-        entry do { run } 
+        entry do { runSequence } 
         #The results from running
         on run_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
 
