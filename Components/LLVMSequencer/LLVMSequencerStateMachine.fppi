@@ -1,6 +1,7 @@
 ## This is a state machine for the LLVM Sequencer
-type filePath string
-
+struct FilePath{
+    string path
+}
 state machine LLVMSequencerStateMachine{
 
     initial enter IDLE
@@ -22,7 +23,7 @@ state machine LLVMSequencerStateMachine{
         on cmd_LOAD do {setSequenceFilePath} enter LOADING
     }
 
-    action loadSequence: filePath
+    action loadSequence: string
     action sendCmdResponse_EXECUTION_ERROR
     signal load_failure
     signal load_success
