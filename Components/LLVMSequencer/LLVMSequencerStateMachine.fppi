@@ -22,38 +22,39 @@ state machine LLVMSequencerStateMachine{
         on cmd_LOAD do {setSequenceFilePath} enter LOADING
     }
 
-    action loadSequence
+    action loadSequence: FilePath
     action sendCmdResponse_EXECUTION_ERROR
     signal load_failure
     signal load_success
 
     state LOADING{
         # When you enter the state, raise a signal that you entered the state
-        on entry do {signalEntered}
-
-        on entered do { loadSequence } 
+        on entry do { loadSequence } 
         #The results from loading
         on load_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on load_success enter COMPILING
     }
 
-    state COMPILING{
-        # When you enter the state, raise a signal that you entered the state
-        on entry do {signalEntered}
+    action compileSequence
+    signal compile_failure
+    signal compile_success
 
-        on entered do { compile } 
-        #The results from loading
+    state COMPILING{
+        on entry do { compile } 
+        #The results from compilation
         on compile_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on compile_success enter RUNNING
     }
 
-    state RUNNING{
-        # When you enter the state, raise a signal that you entered the state
-        on entry do {signalEntered}
+    action runSequence
+    signal run_failure
+    signal run_success
 
-        on entered do { run } 
-        #The results from loading
+    state RUNNING{
+        on entry do { run } 
+        #The results from running
         on run_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
+
         on run_success enter IDLE
     }
 }

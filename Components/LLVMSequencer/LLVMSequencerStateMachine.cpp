@@ -2,17 +2,14 @@
 
 
 namespace Components {
-    // Command handlers
-
-    //Handler for sending the entered signal
-    void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_signalEntered(
+    // Command handlers:
+    void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_setSequenceFilePath(
         SmId smId,
-        Components_LLVMSequencer_SequencerStateMachineState::signal signal
+        Components_LLVMSequencer_SequencerStateMachineState::signal signal,
+        const char* filePath //!< The sequence file path
     ){
-        this->sequencer_sendSignal_entered();
+        this->sequenceFilePath = filePath; 
     }
-
-    void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_setSequenceFilePath
 
     //Handler for sending the execution error response
     void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_sendCmdResponse_EXECUTION_ERROR(
@@ -30,11 +27,44 @@ namespace Components {
         SmId smId,
         Components_LLVMSequencer_SequencerStateMachineState::signal signal
     ){
-        Fw::Success result = this->load(); //TODO - Implement load function
+        /*
+        Fw::Success result = this->load(this->sequenceFilePath); //TODO - Implement compile function
         if (result == Fw::SUCCESS) {
             this->sequencer_sendSignal_load_success();
         } else {
             this->sequencer_sendSignal_load_failure();
         }
+        */
+        this->sequencer_sendSignal_load_success();
+    }
+
+    void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_compileSequence(
+        SmId smId,
+        Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    ){
+        /*
+        Fw::Success result = this->compile(); //TODO - Implement compile function
+        if (result == Fw::SUCCESS) {
+            this->sequencer_sendSignal_compile_success();
+        } else {
+            this->sequencer_sendSignal_compile_failure();
+        }
+        */
+        this->sequencer_sendSignal_compile_success();
+    }
+
+    void LLVMSequencer::Components_LLVMSequencer_SequencerStateMachine_action_runSequence(
+        SmId smId,
+        Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    ){
+        /*
+        Fw::Success result = this->run(); //TODO - Implement run function
+        if (result == Fw::SUCCESS) {
+            this->sequencer_sendSignal_run_success();
+        } else {
+            this->sequencer_sendSignal_run_failure();
+        }
+        */
+        this->sequencer_sendSignal_run_success();
     }
 }

@@ -2,16 +2,6 @@ module Components {
     @ Sequencer Module using llvmbpf runtime
     active component LLVMSequencer {
 
-        enum BlockState {
-            BLOCK
-            NO_BLOCK
-        }
-
-        enum GoalState {
-            RUNNING
-            VALID
-            IDLE
-        }
 
         ############ Commands ############
         include "LLVMSequencerCommands.fppi"

@@ -13,6 +13,9 @@
 
 namespace Components {
 
+using Signal = LLVMSequencer_SequencerStateMachineStateMachineBase::Signal;
+using State = LLVMSequencer_SequencerStateMachineStateMachineBase::State;
+
 class LLVMSequencer : public LLVMSequencerComponentBase {
   public:
     // ----------------------------------------------------------------------
@@ -31,6 +34,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
     size_t bpf_mem_size;
+    const char* sequenceFilePath;
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
@@ -89,8 +93,37 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                  U32 cmdSeq,           //!< The command sequence number
-                                 const Fw::CmdStringArg& fileName) override;
-    
+                                 );
+    // ----------------------------------------------------------------------
+    // Handler implementations for state machine actions
+    // ----------------------------------------------------------------------
+    void Components_LLVMSequencer_SequencerStateMachine_action_setSequenceFilePath(
+      SmId smId,
+      Components_LLVMSequencer_SequencerStateMachineState::signal signal,
+      const char* filePath //!< The sequence file path
+    );
+
+    //Handler for sending the execution error response
+    void Components_LLVMSequencer_SequencerStateMachine_action_sendCmdResponse_EXECUTION_ERROR(
+      SmId smId,
+      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    );
+
+    //Action for action load of state machine
+    void Components_LLVMSequencer_SequencerStateMachine_action_loadSequence(
+      SmId smId,
+      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    );
+
+    void Components_LLVMSequencer_SequencerStateMachine_action_compileSequence(
+      SmId smId,
+      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    );
+
+    void Components_LLVMSequencer_SequencerStateMachine_action_runSequence(
+      SmId smId,
+      Components_LLVMSequencer_SequencerStateMachineState::signal signal
+    );
     
 };
 
