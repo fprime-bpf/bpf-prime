@@ -79,7 +79,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Load a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  const char* sequenceFilePath);
+                                  String sequenceFilePath);
 
     //! Handler implementation for command COMPILE_SEQUENCE
     //!
