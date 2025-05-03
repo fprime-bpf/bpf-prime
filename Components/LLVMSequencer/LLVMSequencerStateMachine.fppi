@@ -16,7 +16,6 @@ state machine LLVMSequencerStateMachine{
 
     state IDLE{
         # #TODO - Determine if we need to clear the sequence file or not when you enter the state
-        on entry do {clearSequenceFile}
  
         # Wait for the 
         on cmd_LOAD do {setSequenceFilePath} enter LOADING
@@ -29,7 +28,7 @@ state machine LLVMSequencerStateMachine{
 
     state LOADING{
         # When you enter the state, raise a signal that you entered the state
-        on entry do { loadSequence } 
+        entry do { loadSequence } 
         #The results from loading
         on load_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on load_success enter COMPILING
@@ -40,7 +39,7 @@ state machine LLVMSequencerStateMachine{
     signal compile_success
 
     state COMPILING{
-        on entry do { compile } 
+        entry do { compile } 
         #The results from compilation
         on compile_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
         on compile_success enter RUNNING
@@ -51,7 +50,7 @@ state machine LLVMSequencerStateMachine{
     signal run_success
 
     state RUNNING{
-        on entry do { run } 
+        entry do { run } 
         #The results from running
         on run_failure do {sendCmdResponse_EXECUTION_ERROR} enter IDLE
 
