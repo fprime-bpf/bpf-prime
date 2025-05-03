@@ -10,7 +10,7 @@ state machine LLVMSequencerStateMachine{
     action clearSequenceFile
 
     @ This will set the sequence file path 
-    action setSequenceFilePath
+    action setSequenceFilePath: string
 
     action signalEntered
 
@@ -23,7 +23,7 @@ state machine LLVMSequencerStateMachine{
         on cmd_LOAD do {setSequenceFilePath} enter LOADING
     }
 
-    action loadSequence: string
+    action loadSequence
     action sendCmdResponse_EXECUTION_ERROR
     signal load_failure
     signal load_success
