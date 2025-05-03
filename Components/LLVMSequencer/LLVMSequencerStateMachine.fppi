@@ -1,6 +1,6 @@
 ## This is a state machine for the LLVM Sequencer
 struct FilePath{
-    string path
+    path: string
 }
 state machine LLVMSequencerStateMachine{
 
