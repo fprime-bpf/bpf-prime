@@ -1,7 +1,6 @@
 #include <new>
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
 
-
 namespace Components {
     // Command handlers:
     void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
@@ -28,44 +27,38 @@ namespace Components {
         SmId smId,
         Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     ){
-        /*
         Fw::Success result = this->load(this->sequenceFilePath); //TODO - Implement compile function
-        if (result == Fw::SUCCESS) {
+        if (result == Fw::Success::SUCCESS) {
             this->sequencer_sendSignal_load_success();
         } else {
             this->sequencer_sendSignal_load_failure();
         }
-        */
-        this->sequencer_sendSignal_load_success();
+        //this->sequencer_sendSignal_load_success();
     }
 
     void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_compileSequence(
         SmId smId,
         Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     ){
-        /*
         Fw::Success result = this->compile(); //TODO - Implement compile function
-        if (result == Fw::SUCCESS) {
+        if (result == Fw::Success::SUCCESS) {
             this->sequencer_sendSignal_compile_success();
         } else {
             this->sequencer_sendSignal_compile_failure();
         }
-        */
-        this->sequencer_sendSignal_compile_success();
+        //this->sequencer_sendSignal_compile_success();
     }
 
     void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_runSequence(
         SmId smId,
         Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     ){
-        /*
         Fw::Success result = this->run(); //TODO - Implement run function
-        if (result == Fw::SUCCESS) {
+        if (result == Fw::Success::SUCCESS) {
             this->sequencer_sendSignal_run_success();
         } else {
             this->sequencer_sendSignal_run_failure();
         }
-        */
-        this->sequencer_sendSignal_run_success();
+        //this->sequencer_sendSignal_run_success();
     }
 }

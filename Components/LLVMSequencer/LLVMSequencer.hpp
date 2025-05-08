@@ -11,6 +11,7 @@
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
 #include "Fw/Types/StringBase.hpp"
+#include "Fw/Types/SuccessEnumAc.hpp"
 
 
 namespace Components {
@@ -126,7 +127,17 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
       SmId smId,
       Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
+
+    // ----------------------------------------------------------------------
+    // Handler implementations for wrapper functions
+    // ----------------------------------------------------------------------
     
+    Fw::Success load(const char* sequenceFilePath);
+
+    Fw::Success compile();
+
+    Fw::Success run();
+
 };
 
 }  // namespace Components

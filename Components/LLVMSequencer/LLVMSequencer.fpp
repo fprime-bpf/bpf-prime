@@ -2,12 +2,16 @@ module Components {
     @ Sequencer Module using llvmbpf runtime
     active component LLVMSequencer {
 
+        #Typedef SUCCESS
+        enum SUCCESS {
+            SUCCESS
+            FAILURE 
+        }
 
         ############ Commands ############
         include "LLVMSequencerCommands.fppi"
         include "LLVMSequencerEvents.fppi"
         include "LLVMSequencerStateMachine.fppi"
-        
 
         #Create the state machine
         state machine instance sequencer: LLVMSequencerStateMachine priority 9 assert
