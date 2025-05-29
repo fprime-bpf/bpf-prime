@@ -37,7 +37,7 @@ add_subdirectory(llvmbpf)
 # Include the headers
 include_directories(llvmbpf)
 include_directories(${CMAKE_BINARY_DIR}/llvmbpf)
-include_directories(/llvmbpf/src)
+include_directories(llvmbpf/src)
 
 register_fprime_module()
 
