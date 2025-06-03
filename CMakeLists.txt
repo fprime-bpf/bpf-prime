@@ -6,6 +6,9 @@
 cmake_minimum_required(VERSION 3.13)
 project(LLVMSequencer C CXX)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 ###
 # F' Core Setup
 # This includes all of the F prime core components, and imports the make-system.

@@ -9,6 +9,7 @@
 # https://fprime.jpl.nasa.gov/latest/documentation/reference
 #
 ####
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -17,8 +18,6 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencerStateMachine.cpp"
 )
-
-
 
 # Uncomment and add any modules that this component depends on, else
 # they might not be available when cmake tries to build this component.
