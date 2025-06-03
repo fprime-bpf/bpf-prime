@@ -83,6 +83,9 @@ enum { WARN = 3, FATAL = 5 };
 namespace LLVMSequencerTest_rateGroup3 {
 enum { WARN = 3, FATAL = 5 };
 }
+namespace LLVMSequencerTest_llvmSequencer {
+enum { WARN = 3, FATAL = 5 };
+}
 }  // namespace PingEntries
 }  // namespace LLVMSequencerTest
 #endif

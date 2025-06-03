@@ -6,9 +6,17 @@ namespace Components {
     void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
         SmId smId,
         Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal,
-        const char* filePath //!< The sequence file path
+        const Fw::StringBase& filePath //!< The sequence file path
     ){
-        this->sequenceFilePath = filePath; 
+        this->sequenceFilePath = filePath.toChar(); 
+    }
+
+    void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_clearSequenceFile(
+        SmId smId,
+        Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
+    ){
+        this->sequenceFilePath = "";
+        this->vm.unload_code();
     }
 
     //Handler for sending the execution error response
@@ -60,5 +68,12 @@ namespace Components {
             this->sequencer_sendSignal_run_failure();
         }
         //this->sequencer_sendSignal_run_success();
+    }
+
+    void LLVMSequencer::Components_LLVMSequencer_LLVMSequencerStateMachine_action_signalEntered(
+      SmId smId,
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
+    ){
+        // stub
     }
 }

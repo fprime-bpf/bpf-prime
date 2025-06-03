@@ -103,7 +103,12 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
       SmId smId,
       Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal,
-      const char* filePath //!< The sequence file path
+      const Fw::StringBase& filePath //!< The sequence file path
+    );
+
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_clearSequenceFile(
+      SmId smId,
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
 
     //Handler for sending the execution error response
@@ -124,6 +129,11 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     );
 
     void Components_LLVMSequencer_LLVMSequencerStateMachine_action_runSequence(
+      SmId smId,
+      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
+    );
+
+    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_signalEntered(
       SmId smId,
       Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     );
