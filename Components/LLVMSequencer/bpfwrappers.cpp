@@ -9,35 +9,33 @@ namespace Components {
        Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
        if (openStatus != Os::File::OP_OK) {
            // File open failed, return error
-           return Fw::CmdResponse::EXECUTION_ERROR;
+           return Fw::Success::FAILURE;
        }
 
        // Get the size of the file
-       U32 size_result = 0;
-       Os::File::Status sizeStatus = file.getSize(size_result);
+       FwSignedSizeType size_result = 0;
+       Os::File::Status sizeStatus = file.size(size_result);
        if (sizeStatus != Os::File::OP_OK) {
            // File size retrieval failed, return error
            file.close();
-           return Fw::CmdResponse::EXECUTION_ERROR;
+           return Fw::Success::FAILURE;
        }
 
        // Allocate memory for the buffer
        U8* buffer = new U8[size_result];
        if (buffer == nullptr) {
            // Memory allocation failed, return error
-           this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
            file.close();
-           return Fw::CmdResponse::EXECUTION_ERROR;
+           return Fw::Success::FAILURE;
        }
 
        // Read the sequence file into memory
        Os::File::Status readStatus = file.read(buffer, size_result, Os::File::WAIT);
        if (readStatus != Os::File::OP_OK) {
            // File read failed, return error
-           this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
            delete[] buffer;
            file.close();
-           return Fw::CmdResponse::EXECUTION_ERROR;
+           return Fw::Success::FAILURE;
        }
       
        file.flush();
@@ -50,31 +48,32 @@ namespace Components {
        // Load the binary into the VM
        res = vm.load_code(buffer, size_result);
        if (res) {
-           this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
            delete[] buffer;
-           return Fw::CmdResponse::EXECUTION_ERROR;
+           return Fw::Success::FAILURE;
        }
 
        // Close the file and return successful command response
        delete[] buffer;
-       this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+       return Fw::Success::SUCCESS; 
    }
+
    Fw::Success LLVMSequencer::compile() {
        // Compile the loaded sequence
-       uint64_t res = vm.compile();
-       if (res) {
-           return Fw::CmdResponse::EXECUTION_ERROR;
+       auto res = vm.compile();
+       if (!res) {
+           return Fw::Success::FAILURE;
        }
-       return Fw::CmdResponse::OK;
+       return Fw::Success::SUCCESS;
    }
 
    Fw::Success LLVMSequencer::run() {
        // Run the compiled sequence
-       uint64_t res = vm.run();
-       if (res) {
-           return Fw::CmdResponse::EXECUTION_ERROR;
+       uint64_t res = 0, err = 0;
+       err = vm.exec(&bpf_mem, bpf_mem_size, res);
+       if (err) {
+           return Fw::Success::FAILURE;
        }
-       return Fw::CmdResponse::OK;
+       return Fw::Success::SUCCESS;
    }
 
 }

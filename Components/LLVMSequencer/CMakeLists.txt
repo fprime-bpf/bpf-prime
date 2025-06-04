@@ -15,6 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.fpp"
+  "${CMAKE_CURRENT_LIST_DIR}/bpfwrappers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencerStateMachine.cpp"
 )
