@@ -40,6 +40,8 @@ include_directories(llvmbpf/src)
 
 register_fprime_module()
 
+get_module_name("${CMAKE_CURRENT_LIST_DIR}")
+target_link_libraries("${MODULE_NAME}" PUBLIC llvmbpf_vm)
 
 ### Unit Tests ###
 # set(UT_SOURCE_FILES

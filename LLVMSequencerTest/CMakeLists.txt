@@ -21,4 +21,8 @@ add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Top/")
 set(SOURCE_FILES "${CMAKE_CURRENT_LIST_DIR}/Main.cpp")
 set(MOD_DEPS ${FPRIME_CURRENT_MODULE}/Top)
 
+include_directories(${PROJECT_SOURCE_DIR}/Components/LLVMSequencer/llvmbpf)
+include_directories(${CMAKE_BINARY_DIR}/llvmbpf)
+include_directories(${PROJECT_SOURCE_DIR}/Components/LLVMSequencer/llvmbpf/src)
+
 register_fprime_deployment()

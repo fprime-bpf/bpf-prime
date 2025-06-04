@@ -22,8 +22,4 @@ set(MOD_DEPS
   Drv/TcpClient
 )
 
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../../Components/LLVMSequencer/llvmbpf)
-include_directories(${CMAKE_BINARY_DIR}/llvmbpf)
-include_directories(${CMAKE_CURRENT_LIST_DIR}/../../Components/LLVMSequencer/llvmbpf/src)
-
 register_fprime_module()
