@@ -54,33 +54,42 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 // ----------------------------------------------------------------------
 
 void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& sequenceFilePath) {
+    /*
     if (sequencer_getState() != State::IDLE) {
         // If the sequencer is not in the IDLE state, command response out and error
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
     }
+    */
 
     // We are in the IDLE state, so we can load the sequence
-    // Pass in the sequence file path to the sequencer state machine so that it can load the sequence
-    this->sequencer_sendSignal_cmd_LOAD(sequenceFilePath);
-}
+    Fw::Success result = this->load(sequenceFilePath.toChar()); //TODO - Implement compile function
+    this->sequenceFilePath = sequenceFilePath.toChar();
 
-void LLVMSequencer ::COMPILE_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    if (sequencer_getState() != State::LOADING){
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_load_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_load_failure();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-        return;
     }
-
-    this->sequencer_sendSignal_cmd_COMPILE(); //The sequence is loaded, so we can compile it 
 }
 
 void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    if (sequencer_getState() != State::COMPILING){
+    if (sequencer_getState() != State::READY){
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
     }
+
     // The sequence is compiled, so we can run it
-    this->sequencer_sendSignal_cmd_RUN(); //Now we run the sequence!
+    Fw::Success result = this->run(); //Now we run the sequence!
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 }  // namespace Components

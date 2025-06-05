@@ -4,6 +4,8 @@
 namespace Components {
 
    Fw::Success LLVMSequencer::load(const char* sequenceFilePath) {
+       delete[] this->buffer;
+
        // Open the file
        Os::File file;
        Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
@@ -22,18 +24,18 @@ namespace Components {
        }
 
        // Allocate memory for the buffer
-       U8* buffer = new U8[size_result];
-       if (buffer == nullptr) {
+       this->buffer = new U8[size_result];
+       if (this->buffer == nullptr) {
            // Memory allocation failed, return error
            file.close();
            return Fw::Success::FAILURE;
        }
 
        // Read the sequence file into memory
-       Os::File::Status readStatus = file.read(buffer, size_result, Os::File::WAIT);
+       Os::File::Status readStatus = file.read(this->buffer, size_result, Os::File::WAIT);
        if (readStatus != Os::File::OP_OK) {
            // File read failed, return error
-           delete[] buffer;
+           delete[] this->buffer;
            file.close();
            return Fw::Success::FAILURE;
        }
@@ -46,24 +48,19 @@ namespace Components {
        std::memcpy(bpf_mem.get(), buffer, bpf_mem_size);
 
        // Load the binary into the VM
-       res = vm.load_code(buffer, size_result);
-       if (res) {
-           delete[] buffer;
+       auto load_res = vm.load_code(buffer, size_result);
+       if (load_res) {
+           delete[] this->buffer;
+           return Fw::Success::FAILURE;
+       }
+
+       auto compile_res = vm.compile();
+       if (!compile_res) {
            return Fw::Success::FAILURE;
        }
 
        // Close the file and return successful command response
-       delete[] buffer;
        return Fw::Success::SUCCESS; 
-   }
-
-   Fw::Success LLVMSequencer::compile() {
-       // Compile the loaded sequence
-       auto res = vm.compile();
-       if (!res) {
-           return Fw::Success::FAILURE;
-       }
-       return Fw::Success::SUCCESS;
    }
 
    Fw::Success LLVMSequencer::run() {
@@ -75,6 +72,5 @@ namespace Components {
        }
        return Fw::Success::SUCCESS;
    }
-
 }
 

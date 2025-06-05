@@ -38,6 +38,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     std::unique_ptr<uint8_t[]> bpf_mem;
     size_t bpf_mem_size;
     const char* sequenceFilePath;
+    U8* buffer;
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
