@@ -64,6 +64,5 @@ module Components {
 
         @Port to set the value of a parameter
         param set port prmSetOut
-
     }
 }

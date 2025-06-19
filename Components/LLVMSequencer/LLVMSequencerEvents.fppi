@@ -1,23 +1,21 @@
 event CommandLoaded(filePath: string) \ 
-    severity activity high \
-    format "Command Loaded: {}" 
+    severity diagnostic \
+    format "{} load success" 
 
-event CommandLoadFailed(filePath: string) \
+event CommandLoadFailed(
+                          filePath: string
+                          errMsg: string
+                       ) \
     severity activity high \
-    format "Command Load Failed: {}"
-
-event CommandCompile(filePath: string) \
-    severity activity high \
-    format "Command Compile: {}"
-
-event CommandCompileFailed(filePath: string) \
-    severity activity high \
-    format "Command Compile Failed: {}"
+    format "{} load failed: {}"
 
 event CommandRun(filePath: string) \
-    severity activity high \
-    format "Command Run: {}"
+    severity diagnostic \
+    format "{} run"
 
-event CommandRunFailed(filePath: string) \  
+event CommandRunFailed(
+                         filePath: string
+                         errMsg: string
+                      ) \
     severity activity high \
-    format "Command Run Failed: {}"
+    format "{} run failed: {}"
