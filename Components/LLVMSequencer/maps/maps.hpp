@@ -10,6 +10,9 @@ namespace Components {
 class map {
     public:
         virtual ~map() {}
+        virtual void *lookup_elem(const void *key) = 0;
+        virtual long update_elem(const void *key, const void *value, uint64_t flags) = 0;
+        virtual long delete_elem(const void *key) = 0;
         virtual void *get_addr_of_first_val() = 0;
 };
 
@@ -31,6 +34,10 @@ class maps {
         static uint64_t map_by_fd(uint32_t fd);
         static uint64_t map_by_idx(uint32_t idx);
         static uint64_t map_val(uint64_t map_ptr);
+
+        static void *bpf_map_lookup_elem(void *map_ptr, const void *key);
+        static long bpf_map_update_elem(void *map_ptr, const void *key, const void *value, uint64_t flags);
+        static long bpf_map_delete_elem(void *map_ptr, const void *key);
 };
 
 }

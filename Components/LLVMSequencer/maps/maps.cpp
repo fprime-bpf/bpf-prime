@@ -51,6 +51,27 @@ void maps::register_functions(bpftime::llvmbpf_vm *vm) {
 
     // Register lddw helpers
     vm->set_lddw_helpers(map_by_fd, map_by_idx, map_val, nullptr, nullptr);
+
+    // Register BPF functions
+    std::vector<std::tuple<int, const char *, void *>> external_functions = {
+        { 1, "bpf_map_lookup_elem", reinterpret_cast<void*>(bpf_map_lookup_elem) },
+        { 2, "bpf_map_update_elem", reinterpret_cast<void*>(bpf_map_update_elem) },
+        { 3, "bpf_map_delete_elem", reinterpret_cast<void*>(bpf_map_delete_elem) }
+    };
+    
+    for (const auto& external_function : external_functions) {
+
+        auto index = std::get<0>(external_function);
+        auto name = std::get<1>(external_function);
+        auto fn = std::get<2>(external_function);
+
+        res = vm->register_external_function(index, name, fn);
+
+        if (res) {
+            throw std::runtime_error("Failed to register functions (vm error): " + vm->get_error_message());
+        }
+    }
+
 }
 
 }
