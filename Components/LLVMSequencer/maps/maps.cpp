@@ -1,6 +1,7 @@
 #include <memory>
 #include <stdexcept>
 #include "maps.hpp"
+#include <llvmbpf.hpp>
 #include "Components/LLVMSequencer/bpf.hpp"
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
 
@@ -32,6 +33,24 @@ void maps::create_maps() {
 
         this->map_instances.push_back(std::move(map));
 	}
+}
+
+map *maps::get_map_from_ptr(bpf_map_def *map) {
+    auto map_value = reinterpret_cast<uint64_t>(map);
+    auto idx = map_value / sizeof(bpf_map_def);
+    
+    if (map_value % sizeof(bpf_map_def) != 0 || idx >= LLVMSequencer::maps.map_instances.size()) {
+        return nullptr;
+    }
+
+    return LLVMSequencer::maps.map_instances[idx].get();
+}
+
+void maps::register_functions(bpftime::llvmbpf_vm *vm) {
+    int res;
+
+    // Register lddw helpers
+    vm->set_lddw_helpers(map_by_fd, map_by_idx, map_val, nullptr, nullptr);
 }
 
 }

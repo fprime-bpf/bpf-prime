@@ -12,7 +12,7 @@
 #include "Os/File.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
-
+#include "maps/maps.hpp"
 
 namespace Components {
 
@@ -21,6 +21,7 @@ using State = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::State;
 
 class LLVMSequencer : public LLVMSequencerComponentBase {
   public:
+    inline static Components::maps maps;
     // ----------------------------------------------------------------------
     // Component construction and destruction
     // ----------------------------------------------------------------------

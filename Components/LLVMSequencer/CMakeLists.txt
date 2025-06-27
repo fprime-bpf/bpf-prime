@@ -18,6 +18,7 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/bpfwrappers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencerStateMachine.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/maps/map_lddw_helpers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/maps.cpp"
 )
 
