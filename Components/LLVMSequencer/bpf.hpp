@@ -1,7 +1,13 @@
 #pragma once
 
 namespace Components {
-    
+
+/* flags for BPF_MAP_UPDATE_ELEM command */
+#define BPF_ANY         0 /* create new element or update existing */
+#define BPF_NOEXIST     1 /* create new element if it didn't exist */
+#define BPF_EXIST       2 /* update existing element */
+#define BPF_F_LOCK      4 /* spin_lock-ed map_lookup/map_update */
+
 enum bpf_map_type {
     BPF_MAP_TYPE_UNSPEC,
     BPF_MAP_TYPE_HASH,

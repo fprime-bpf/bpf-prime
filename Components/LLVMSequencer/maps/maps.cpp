@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "maps.hpp"
 #include "array_map.hpp"
+#include "hash_map.hpp"
 #include <llvmbpf.hpp>
 #include "Components/LLVMSequencer/bpf.hpp"
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
@@ -30,6 +31,9 @@ void maps::create_maps() {
         switch (map_def->type) {
             case bpf_map_type::BPF_MAP_TYPE_ARRAY:
                 map = std::make_unique<array_map>(*map_def);
+            break;
+            case bpf_map_type::BPF_MAP_TYPE_HASH:
+                map = std::make_unique<hash_map>(*map_def);
             break;
             default:
                 throw std::invalid_argument("Failed to create maps: unsupported BPF map type " + std::to_string(map_def->type));
