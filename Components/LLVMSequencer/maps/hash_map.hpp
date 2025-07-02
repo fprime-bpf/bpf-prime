@@ -12,7 +12,7 @@ struct hash_map_key {
     const uint8_t *value;
     unsigned int size;
     
-    hash_map_key(const void *value_ptr, unsigned int size, bool copy);
+    hash_map_key(const void *value_ptr, unsigned int size);
 };
 
 struct key_hash {
@@ -25,9 +25,9 @@ struct key_equality {
 
 class hash_map : public map {
     private:
-        std::unordered_map<hash_map_key, std::unique_ptr<uint8_t[]>, key_hash, key_equality> mem;
-        unsigned int key_size;
-        unsigned int value_size;
+        std::unordered_map<hash_map_key, uint8_t*, key_hash, key_equality> mem;
+        std::unique_ptr<uint8_t[]> keys, values;
+        unsigned int max_entries, key_size, value_size;
     public:
         hash_map(bpf_map_def map_def);
         void *lookup_elem(const void *key) override;
@@ -35,8 +35,6 @@ class hash_map : public map {
         long delete_elem(const void *key) override;
         
         void *get_addr_of_first_val() override;
-
-        ~hash_map();
 };
 
 }

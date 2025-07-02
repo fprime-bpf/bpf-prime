@@ -4,19 +4,8 @@
 
 namespace Components {
 
-hash_map_key::hash_map_key(const void *value_ptr, unsigned int size, bool copy) {
-    
-    if (copy) {
-        auto value = new uint8_t[size];
-        std::memcpy(value, value_ptr, size);
-        this->value = value;
-    }
-    else {
-        this->value = static_cast<const uint8_t *>(value_ptr);
-    }
-    
-    this->size = size;
-}
+hash_map_key::hash_map_key(const void *value_ptr, unsigned int size) : 
+    value(static_cast<const uint8_t *>(value_ptr)), size(size) { }
 
 std::size_t key_hash::operator()(const hash_map_key& key) const {
     return std::hash<std::string_view>{}({reinterpret_cast<const char*>(key.value), key.size});
