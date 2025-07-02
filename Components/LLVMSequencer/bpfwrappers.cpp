@@ -1,5 +1,6 @@
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
+#include <new>
 
 namespace Components {
 
@@ -29,7 +30,7 @@ namespace Components {
        }
 
        // Allocate memory for the buffer
-       this->buffer = new U8[size_result];
+       this->buffer = new(std::nothrow) U8[size_result];
        if (this->buffer == nullptr) {
            // Memory allocation failed, return error
            file.close();
