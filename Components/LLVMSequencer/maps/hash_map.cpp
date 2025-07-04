@@ -3,6 +3,7 @@
 #include <memory>
 #include "hash_map.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
+#include <cerrno>
 
 namespace Components {
 
@@ -22,13 +23,13 @@ long hash_map::update_elem(const void *key, const void *value, uint64_t flags) {
         case BPF_ANY:
             break;
         case BPF_NOEXIST: 
-            if (mem.exists(map_key)) return 0;
+            if (mem.exists(map_key)) return -EEXIST;
             break;
         case BPF_EXIST: 
-            if (!mem.exists(map_key)) return 0;
+            if (!mem.exists(map_key)) return -ENOENT;
             break;
         default:
-            return -1;
+            return -EINVAL;
     }
 
     return mem.insert(map_key, map_value);

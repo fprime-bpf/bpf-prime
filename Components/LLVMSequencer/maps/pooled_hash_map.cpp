@@ -4,6 +4,7 @@
 #include <memory>
 #include <cstring>
 #include <string_view>
+#include <cerrno>
 
 namespace Components {
 
@@ -69,7 +70,7 @@ int pooled_hash_map::insert(const uint8_t *key, const uint8_t *value) {
         cur_node = cur_node->next;
     }
 
-    if (!free_list) return -1;
+    if (!free_list) return -E2BIG;
 
     node *new_node = free_list;
     free_list = free_list->next;
@@ -95,7 +96,7 @@ int pooled_hash_map::remove(const uint8_t *key) {
         }
         ptr = &(*ptr)->next;
     }
-    return -1;
+    return -ENOENT;
 }
 
 bool pooled_hash_map::exists(const uint8_t *key) {

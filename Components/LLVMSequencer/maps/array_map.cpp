@@ -4,6 +4,7 @@
 #include <memory>
 #include "array_map.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
+#include <cerrno>
 
 namespace Components {
     
@@ -27,15 +28,15 @@ void *array_map::lookup_elem(const void *key) {
 long array_map::update_elem(const void *key, const void *value, uint64_t flags) {
     auto elem = lookup_elem(key);
 
-    if (!elem) 
-        return -1;
+    if (!elem)
+        return -E2BIG;
 
     std::memcpy(elem, value, value_size);
     return 0;
 }
 
 long array_map::delete_elem(const void *key) {
-    return -1;
+    return -EINVAL;
 }
 
 void *array_map::get_addr_of_first_val() {
