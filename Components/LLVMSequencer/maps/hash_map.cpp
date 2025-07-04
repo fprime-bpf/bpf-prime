@@ -7,7 +7,7 @@
 
 namespace Components {
 
-hash_map::hash_map(bpf_map_def map_def) :
+hash_map::hash_map(bpf_map_def map_def, int& res) :
     mem(pooled_hash_map(map_def.max_entries, map_def.key_size, map_def.value_size)) { }
 
 void *hash_map::lookup_elem(const void *key) {

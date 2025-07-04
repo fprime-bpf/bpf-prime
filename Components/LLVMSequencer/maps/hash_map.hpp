@@ -13,7 +13,7 @@ class hash_map : public map {
     private:
         pooled_hash_map mem;
     public:
-        hash_map(bpf_map_def map_def);
+        hash_map(bpf_map_def map_def, int& res);
         void *lookup_elem(const void *key) override;
         long update_elem(const void *key, const void *value, uint64_t flags) override;
         long delete_elem(const void *key) override;

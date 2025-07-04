@@ -24,23 +24,29 @@ void maps::load_maps(const void *maps, size_t maps_len) {
     }
 }
 
-void maps::create_maps() {
+int maps::create_maps() {
 	for (const auto& map_def : map_defs) {
 
+        int res = 0;
         std::unique_ptr<map> map;
+
         switch (map_def->type) {
             case bpf_map_type::BPF_MAP_TYPE_ARRAY:
-                map = std::make_unique<array_map>(*map_def);
+                map = std::make_unique<array_map>(*map_def, res);
             break;
             case bpf_map_type::BPF_MAP_TYPE_HASH:
-                map = std::make_unique<hash_map>(*map_def);
+                map = std::make_unique<hash_map>(*map_def, res);
             break;
             default:
-                throw std::invalid_argument("Failed to create maps: unsupported BPF map type " + std::to_string(map_def->type));
+                return -EINVAL;
         }
+
+        if (res) return res;
 
         this->map_instances.push_back(std::move(map));
 	}
+
+    return 0;
 }
 
 map *maps::get_map_from_ptr(bpf_map_def *map) {
@@ -54,7 +60,7 @@ map *maps::get_map_from_ptr(bpf_map_def *map) {
     return LLVMSequencer::maps.map_instances[idx].get();
 }
 
-void maps::register_functions(bpftime::llvmbpf_vm *vm) {
+int maps::register_functions(bpftime::llvmbpf_vm *vm) {
     int res;
 
     // Register lddw helpers
@@ -75,11 +81,10 @@ void maps::register_functions(bpftime::llvmbpf_vm *vm) {
 
         res = vm->register_external_function(index, name, fn);
 
-        if (res) {
-            throw std::runtime_error("Failed to register functions (vm error): " + vm->get_error_message());
-        }
+        if (res) return res;
     }
 
+    return 0;
 }
 
 }

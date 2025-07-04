@@ -8,8 +8,11 @@
 
 namespace Components {
     
-array_map::array_map(bpf_map_def map_def) {
-    assert(map_def.key_size == sizeof(uint32_t));
+array_map::array_map(bpf_map_def map_def, int& res) {
+    if (map_def.key_size != sizeof(uint32_t)) {
+        res = -EINVAL;
+        return;
+    }
     
     this->mem = std::make_unique<uint8_t[]>(map_def.key_size * map_def.max_entries);
     this->size = map_def.max_entries;

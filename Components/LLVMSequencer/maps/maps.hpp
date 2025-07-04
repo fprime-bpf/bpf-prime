@@ -27,9 +27,9 @@ class maps {
         // Load BPF map definitions
         void load_maps(const void *maps, size_t maps_len);
         // Parse BPF map definitions and allocate maps
-        void create_maps();
+        int create_maps();
         // Set the LDDW helpers and register the BPF helpers in the vm
-        void register_functions(bpftime::llvmbpf_vm *vm);
+        int register_functions(bpftime::llvmbpf_vm *vm);
         
         static uint64_t map_by_fd(uint32_t fd);
         static uint64_t map_by_idx(uint32_t idx);

@@ -12,7 +12,7 @@ class array_map : public map {
         uint32_t size;
         uint32_t value_size;
     public:
-        array_map(bpf_map_def map_def);
+        array_map(bpf_map_def map_def, int& res);
         void *lookup_elem(const void *key) override;
         long update_elem(const void *key, const void *value, uint64_t flags) override;
         long delete_elem(const void *key) override;
