@@ -1,10 +1,10 @@
 #include "pooled_hash_map.hpp"
 #include <cmath>
-#include <bit>
 #include <cstring>
-#include <string_view>
 #include <cerrno>
 #include <new>
+#include "hash/murmurhash2/MurmurHash2.h"
+#include <cstdint>
 
 namespace Components {
 
@@ -63,9 +63,20 @@ bool pooled_hash_map::key_equal(const U8 *key_a, const U8 *key_b) noexcept {
     return std::memcmp(key_a, key_b, key_size) == 0;
 }
 
-size_t pooled_hash_map::hash(const U8 *key) noexcept {
-    return std::hash<std::string_view>{}({reinterpret_cast<const char*>(key), key_size}) & (bucket_count - 1);
+size_t pooled_hash_map::hash(const U8 *key, U32 key_size, size_t seed) noexcept {
+    #if SIZE_MAX == UINT64_MAX
+        return MurmurHash64A(key, key_size, seed);
+    #elif SIZE_MAX == UINT32_MAX
+        return MurmurHash2(key, key_size, seed);
+    #else
+        static_assert(false, "Unsupported size_t size for hash");
+    #endif
 }
+
+size_t pooled_hash_map::hash(const U8 *key) noexcept {
+    size_t seed = static_cast<size_t>(0xc70f6907UL);
+    return hash(key, key_size, seed) & (bucket_count - 1);
+} 
 
 U8 *pooled_hash_map::lookup(const U8 *key) noexcept {
     node *node = buckets[hash(key)];

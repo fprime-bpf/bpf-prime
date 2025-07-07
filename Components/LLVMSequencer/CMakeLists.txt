@@ -24,6 +24,7 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/maps/map_lddw_helpers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/map_bpf_helpers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/maps.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/maps/hash/murmurhash2/MurmurHash2.cpp"
 )
 
 # Uncomment and add any modules that this component depends on, else
