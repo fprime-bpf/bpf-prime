@@ -1,90 +1,117 @@
-#include <memory>
-#include <stdexcept>
 #include "maps.hpp"
 #include "array_map.hpp"
 #include "hash_map.hpp"
 #include <llvmbpf.hpp>
 #include "Components/LLVMSequencer/bpf.hpp"
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
+#include <new>
 
 namespace Components {
 
-void maps::load_maps(const void *maps, size_t maps_len) {
-
+I32 maps::load_maps(const void *maps, size_t maps_len) noexcept {
     auto map_def_size = sizeof(bpf_map_def);
 
-    size_t count = maps_len / map_def_size;
+    maps_count = maps_len / map_def_size;
+    map_defs = new bpf_map_def[maps_count];
+
+    if (!map_defs) return -ENOMEM;
+
     auto buffer = reinterpret_cast<const bpf_map_def*>(maps);
 
-    for (size_t i = 0; i < count; i++) {
-        auto map_def = std::make_unique<bpf_map_def>();
-
-        std::memcpy(map_def.get(), &buffer[i], map_def_size);
-        this->map_defs.push_back(std::move(map_def));
+    for (size_t i = 0; i < maps_count; i++) {
+        std::memcpy(&map_defs[i], &buffer[i], map_def_size);
     }
-}
-
-int maps::create_maps() {
-	for (const auto& map_def : map_defs) {
-
-        int res = 0;
-        std::unique_ptr<map> map;
-
-        switch (map_def->type) {
-            case bpf_map_type::BPF_MAP_TYPE_ARRAY:
-                map = std::make_unique<array_map>(*map_def, res);
-            break;
-            case bpf_map_type::BPF_MAP_TYPE_HASH:
-                map = std::make_unique<hash_map>(*map_def, res);
-            break;
-            default:
-                return -EINVAL;
-        }
-
-        if (res) return res;
-
-        this->map_instances.push_back(std::move(map));
-	}
-
+    
     return 0;
 }
 
-map *maps::get_map_from_ptr(bpf_map_def *map) {
+I32 maps::create_maps() noexcept {
+    if (!map_defs) return -EINVAL;
+
+    map_instances = new(std::nothrow) map*[maps_count]; 
+    if (!map_instances) return -ENOMEM;
+
+	for (size_t i = 0; i < maps_count; i++) {
+        const auto& map_def = map_defs[i];
+
+        I32 res = 0;
+        map *map;
+
+        switch (map_def.type) {
+            case bpf_map_type::BPF_MAP_TYPE_ARRAY:
+                map = new(std::nothrow) array_map(map_def, res);
+            break;
+            case bpf_map_type::BPF_MAP_TYPE_HASH:
+                map = new(std::nothrow) hash_map(map_def, res);
+            break;
+            default:
+                free_map_instances(i);
+                return -EINVAL;
+        }
+
+        if (!map || res) {
+            free_map_instances(i);
+            delete map;
+            return res;
+        }
+
+        map_instances[i] = map;
+	}
+
+    delete[] map_defs;
+    map_defs = nullptr;
+    return 0;
+}
+
+map *maps::get_map_from_ptr(bpf_map_def *map) noexcept {
     auto map_value = reinterpret_cast<uint64_t>(map);
     auto idx = map_value / sizeof(bpf_map_def);
     
-    if (map_value % sizeof(bpf_map_def) != 0 || idx >= LLVMSequencer::maps.map_instances.size()) {
+    if (map_value % sizeof(bpf_map_def) != 0 || idx >= LLVMSequencer::maps.size()) {
         return nullptr;
     }
 
-    return LLVMSequencer::maps.map_instances[idx].get();
+    return LLVMSequencer::maps.map_instances[idx];
 }
 
-int maps::register_functions(bpftime::llvmbpf_vm *vm) {
-    int res;
+I32 maps::register_functions(bpftime::llvmbpf_vm *vm) noexcept {
+    I32 res;
 
     // Register lddw helpers
     vm->set_lddw_helpers(map_by_fd, map_by_idx, map_val, nullptr, nullptr);
 
     // Register BPF functions
-    std::vector<std::tuple<int, const char *, void *>> external_functions = {
+    bpf_external_function external_functions[] = {
         { 1, "bpf_map_lookup_elem", reinterpret_cast<void*>(bpf_map_lookup_elem) },
         { 2, "bpf_map_update_elem", reinterpret_cast<void*>(bpf_map_update_elem) },
         { 3, "bpf_map_delete_elem", reinterpret_cast<void*>(bpf_map_delete_elem) }
     };
     
-    for (const auto& external_function : external_functions) {
+    size_t count = sizeof(external_functions) / sizeof(bpf_external_function);
 
-        auto index = std::get<0>(external_function);
-        auto name = std::get<1>(external_function);
-        auto fn = std::get<2>(external_function);
-
-        res = vm->register_external_function(index, name, fn);
-
+    for (size_t i = 0; i < count; i++) {
+        const auto& bpf_func = external_functions[i];
+        res = vm->register_external_function(bpf_func.index, bpf_func.name, bpf_func.fn);
         if (res) return res;
     }
 
     return 0;
+}
+
+void maps::free_map_instances(size_t count) noexcept {
+    for (size_t i = 0; i < count; i++) {
+        delete map_instances[i];
+    }
+    delete[] map_instances;
+}
+
+void maps::free_maps() noexcept {
+    delete[] map_defs;
+    free_map_instances(maps_count);
+}
+
+size_t maps::size() noexcept {
+    return maps_count;
 }
 
 }

@@ -1,5 +1,3 @@
-#include <memory>
-#include <unordered_map>
 #include <cstring>
 #include "maps.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
@@ -10,15 +8,15 @@
 namespace Components {
 
 class hash_map : public map {
-    private:
+    PRIVATE:
         pooled_hash_map mem;
     public:
-        hash_map(bpf_map_def map_def, int& res);
-        void *lookup_elem(const void *key) override;
-        long update_elem(const void *key, const void *value, uint64_t flags) override;
-        long delete_elem(const void *key) override;
+        hash_map(const bpf_map_def& map_def, I32& res) noexcept;
+        void *lookup_elem(const void *key) noexcept override;
+        long update_elem(const void *key, const void *value, U64 flags) noexcept override;
+        long delete_elem(const void *key) noexcept override;
         
-        void *get_addr_of_first_val() override;
+        void *get_addr_of_first_val() noexcept override;
 };
 
 }

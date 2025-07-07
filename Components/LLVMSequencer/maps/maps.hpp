@@ -1,7 +1,7 @@
-#include <vector>
-#include <memory>
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
+#include <Fw/Types/BasicTypes.hpp>
+#include <cstddef>
 
 #pragma once
 
@@ -10,34 +10,46 @@ namespace Components {
 class map {
     public:
         virtual ~map() {}
-        virtual void *lookup_elem(const void *key) = 0;
-        virtual long update_elem(const void *key, const void *value, uint64_t flags) = 0;
-        virtual long delete_elem(const void *key) = 0;
-        virtual void *get_addr_of_first_val() = 0;
+        virtual void *lookup_elem(const void *key) noexcept = 0;
+        virtual long update_elem(const void *key, const void *value, U64 flags) noexcept = 0;
+        virtual long delete_elem(const void *key) noexcept = 0;
+        virtual void *get_addr_of_first_val() noexcept = 0;
 };
 
 class maps {
-    private:
-        std::vector<std::unique_ptr<bpf_map_def>> map_defs;
-        std::vector<std::unique_ptr<map>> map_instances;
+    PRIVATE:
+        struct bpf_external_function {
+            size_t index;
+            const char *name;
+            void *fn;
+        };
 
-        static map *get_map_from_ptr(bpf_map_def *map);
+        size_t maps_count;
+        bpf_map_def *map_defs = nullptr;
+        map **map_instances;
+        
+        void free_map_instances(size_t count) noexcept;
+        STATIC map *get_map_from_ptr(bpf_map_def *map) noexcept;
 
     public:
         // Load BPF map definitions
-        void load_maps(const void *maps, size_t maps_len);
+        I32 load_maps(const void *maps, size_t maps_len) noexcept;
         // Parse BPF map definitions and allocate maps
-        int create_maps();
+        I32 create_maps() noexcept;
         // Set the LDDW helpers and register the BPF helpers in the vm
-        int register_functions(bpftime::llvmbpf_vm *vm);
+        I32 register_functions(bpftime::llvmbpf_vm *vm) noexcept;
+        // Free all maps
+        void free_maps() noexcept;
+        // Return the number of loaded map definitions
+        size_t size() noexcept;
         
-        static uint64_t map_by_fd(uint32_t fd);
-        static uint64_t map_by_idx(uint32_t idx);
-        static uint64_t map_val(uint64_t map_ptr);
+        STATIC U64 map_by_fd(U32 fd) noexcept;
+        STATIC U64 map_by_idx(U32 idx) noexcept;
+        STATIC U64 map_val(U64 map_ptr) noexcept;
 
-        static void *bpf_map_lookup_elem(void *map_ptr, const void *key);
-        static long bpf_map_update_elem(void *map_ptr, const void *key, const void *value, uint64_t flags);
-        static long bpf_map_delete_elem(void *map_ptr, const void *key);
+        STATIC void *bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept;
+        STATIC long bpf_map_update_elem(void *map_ptr, const void *key, const void *value, U64 flags) noexcept;
+        STATIC long bpf_map_delete_elem(void *map_ptr, const void *key) noexcept;
 };
 
 }

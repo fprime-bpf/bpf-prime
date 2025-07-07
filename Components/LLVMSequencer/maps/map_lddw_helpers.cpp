@@ -4,19 +4,19 @@
 
 namespace Components {
 
-uint64_t maps::map_by_fd(uint32_t fd) {
+U64 maps::map_by_fd(U32 fd) noexcept {
     // TODO: 
     return 0;
 }
 
-uint64_t maps::map_by_idx(uint32_t idx) {
-    auto map = LLVMSequencer::maps.map_instances[idx].get();
-    return reinterpret_cast<uint64_t>(map); 
+U64 maps::map_by_idx(U32 idx) noexcept {
+    auto map = LLVMSequencer::maps.map_instances[idx];
+    return reinterpret_cast<U64>(map); 
 }
 
-uint64_t maps::map_val(uint64_t map_ptr) {
+U64 maps::map_val(U64 map_ptr) noexcept {
     auto map = get_map_from_ptr((bpf_map_def *)map_ptr);
-    return reinterpret_cast<uint64_t>(map->get_addr_of_first_val());
+    return reinterpret_cast<U64>(map->get_addr_of_first_val());
 }
 
 }

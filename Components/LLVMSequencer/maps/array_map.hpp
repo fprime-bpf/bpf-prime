@@ -1,23 +1,25 @@
-#include <memory>
 #include "maps.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
+#include <Fw/Types/BasicTypes.hpp>
 
 #pragma once
 
 namespace Components {
 
 class array_map : public map {
-    private:
-        std::unique_ptr<uint8_t[]> mem;
-        uint32_t size;
-        uint32_t value_size;
+    PRIVATE:
+        U8 *mem;
+        U32 size;
+        U32 value_size;
     public:
-        array_map(bpf_map_def map_def, int& res);
-        void *lookup_elem(const void *key) override;
-        long update_elem(const void *key, const void *value, uint64_t flags) override;
-        long delete_elem(const void *key) override;
+        array_map(const bpf_map_def& map_def, I32& res) noexcept;
+        ~array_map();
 
-        void *get_addr_of_first_val() override;
+        void *lookup_elem(const void *key) noexcept override;
+        long update_elem(const void *key, const void *value, U64 flags) noexcept override;
+        long delete_elem(const void *key) noexcept override;
+
+        void *get_addr_of_first_val() noexcept override;
 };
 
 }

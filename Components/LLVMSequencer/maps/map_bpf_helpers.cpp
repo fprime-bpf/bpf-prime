@@ -2,7 +2,7 @@
 
 namespace Components {
 
-void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) {
+void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept {
 
     auto map = get_map_from_ptr(static_cast<bpf_map_def *>(map_ptr));
     
@@ -12,7 +12,7 @@ void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) {
     return nullptr;
 }
 
-long maps::bpf_map_update_elem(void *map_ptr, const void *key, const void *value, uint64_t flags) {
+long maps::bpf_map_update_elem(void *map_ptr, const void *key, const void *value, U64 flags) noexcept {
 
     auto map = get_map_from_ptr(static_cast<bpf_map_def *>(map_ptr));
     
@@ -22,7 +22,7 @@ long maps::bpf_map_update_elem(void *map_ptr, const void *key, const void *value
     return -EBADF;
 }
 
-long maps::bpf_map_delete_elem(void *map_ptr, const void *key) {
+long maps::bpf_map_delete_elem(void *map_ptr, const void *key) noexcept {
 
     auto map = get_map_from_ptr(static_cast<bpf_map_def *>(map_ptr));
     

@@ -1,38 +1,41 @@
-#include <memory>
+#include <Fw/Types/BasicTypes.hpp>
+#include <cstddef>
 
 #pragma once
 
 namespace Components {
 
 class pooled_hash_map {
-    private:
+    PRIVATE:
         struct node {
-            std::unique_ptr<uint8_t[]> key;
-            std::unique_ptr<uint8_t[]> value;
-            node *next = nullptr;
+            U8 *key;
+            U8 *value;
+            node *next;
         };
 
+        U8 *keys, *values;
+        
         size_t bucket_count;
-        std::unique_ptr<node*[]> buckets;
-        std::unique_ptr<node[]> node_pool;
+        node **buckets;
+        node *node_pool;
         node *free_list = nullptr;
 
-        uint32_t key_size, value_size, max_entries;
-
-        void mark_free(node *node);
-        size_t next_power_of_two(uint32_t n);
-        size_t hash(const uint8_t *key);
-        bool key_equal(const uint8_t *key_a, const uint8_t *key_b);
+        U32 key_size, value_size, max_entries;
+        size_t next_power_of_two(U32 n) noexcept;
+        size_t hash(const U8 *key) noexcept;
+        bool key_equal(const U8 *key_a, const U8 *key_b) noexcept;
+        void cleanup() noexcept;
 
     public:
-        pooled_hash_map(uint32_t max_entries, uint32_t key_size, uint32_t value_size);
+        pooled_hash_map(U32 max_entries, U32 key_size, U32 value_size, I32& res) noexcept;
+        ~pooled_hash_map();
 
-        uint8_t *first_element_value();
+        U8 *first_element_value() noexcept;
 
-        uint8_t *lookup(const uint8_t *key);
-        int insert(const uint8_t *key, const uint8_t *value);
-        int remove(const uint8_t *key);
-        bool exists(const uint8_t *key);
+        U8 *lookup(const U8 *key) noexcept;
+        I32 insert(const U8 *key, const U8 *value) noexcept;
+        I32 remove(const U8 *key) noexcept;
+        bool exists(const U8 *key) noexcept;
 
 };
 
