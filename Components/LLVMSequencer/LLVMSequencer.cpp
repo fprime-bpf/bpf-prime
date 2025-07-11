@@ -101,21 +101,63 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
                                                U32 value_size,
                                                U32 max_entries,
                                                U32 map_flags) {
-    // TODO
-    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    
+    const auto max_bytes_size = LLVMSequencer_Bytes::SIZE;
+    if (key_size > max_bytes_size || value_size > max_bytes_size) {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+
+    // Set the map definition
+    bpf_map_def map_def {
+        .type = type,
+        .key_size = key_size,
+        .value_size = value_size,
+        .max_entries = max_entries,
+        .map_flags = map_flags
+    };
+
+    // Create the map
+    Fw::Success result = this->map_create(map_def);
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 void LLVMSequencer ::BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 fd) {
-    // TODO
-    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    // Close the map
+    Fw::Success result = this->map_close(fd);
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
                                                     Components::LLVMSequencer_Bytes key) {
-    // TODO
-    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    
+    // Serialize buffers
+    Fw::CmdArgBuffer key_buffer;
+    key.serialize(key_buffer);
+    
+    // Lookup an element in the map
+    Fw::Success result = this->map_lookup_elem(fd, key_buffer.getBuffAddr());
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
@@ -124,16 +166,40 @@ void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     Components::LLVMSequencer_Bytes key,
                                                     Components::LLVMSequencer_Bytes value,
                                                     U64 flags) {
-    // TODO
-    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+
+    // Serialize buffers
+    Fw::CmdArgBuffer key_buffer, value_buffer;
+    key.serialize(key_buffer);
+    value.serialize(value_buffer);
+
+    // Update an element in the map
+    Fw::Success result = this->map_update_elem(fd, key_buffer.getBuffAddr(), value_buffer.getBuffAddr(), flags);
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
                                                     Components::LLVMSequencer_Bytes key) {
-    // TODO
-    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    // Serialize buffers
+    Fw::CmdArgBuffer key_buffer;
+    key.serialize(key_buffer);
+    
+    // Delete an element in the map
+    Fw::Success result = this->map_delete_elem(fd, key_buffer.getBuffAddr());
+    if (result == Fw::Success::SUCCESS) {
+        this->sequencer_sendSignal_run_success();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+    } else {
+        this->sequencer_sendSignal_run_failure();
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
 }
 
 }  // namespace Components

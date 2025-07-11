@@ -189,6 +189,16 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     Fw::Success run();
 
+    Fw::Success map_create(const bpf_map_def& map_def);
+
+    Fw::Success map_close(U32 fd);
+
+    Fw::Success map_lookup_elem(U32 fd, void *key);
+    
+    Fw::Success map_update_elem(U32 fd, void *key, void *value, U64 flags);
+    
+    Fw::Success map_delete_elem(U32 fd, void *key);
+
 };
 
 }  // namespace Components

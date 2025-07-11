@@ -1,5 +1,7 @@
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "maps/maps.hpp"
+#include "bpf.hpp"
 
 namespace Components {
 
@@ -86,6 +88,52 @@ namespace Components {
        if (err) {
            Fw::LogStringArg errMsg(vm.get_error_message().c_str());
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
+           return Fw::Success::FAILURE;
+       }
+       return Fw::Success::SUCCESS;
+   }
+
+   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def) {
+       I32 res;
+
+       res = this->maps.load_maps(&map_def, sizeof(bpf_map_def));
+       if (res) {
+           return Fw::Success::FAILURE;
+       }
+
+       res = this->maps.create_maps();
+       if (res) {
+           return Fw::Success::FAILURE;
+       }
+
+       return Fw::Success::SUCCESS;
+   }
+
+   Fw::Success LLVMSequencer::map_close(U32 fd) {
+       // TODO:
+       return Fw::Success::SUCCESS;
+   }
+
+   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key) {
+       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       auto elem = map->lookup_elem(key);
+       // TODO:
+       return Fw::Success::SUCCESS;
+   }
+    
+   Fw::Success LLVMSequencer::map_update_elem(U32 fd, void *key, void *value, U64 flags) {
+       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       auto res = map->update_elem(key, value, flags);
+       if (res) {
+           return Fw::Success::FAILURE;
+       }
+       return Fw::Success::SUCCESS;
+   }
+    
+   Fw::Success LLVMSequencer::map_delete_elem(U32 fd, void *key) {
+       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       auto res = map->delete_elem(key);
+       if (res) {
            return Fw::Success::FAILURE;
        }
        return Fw::Success::SUCCESS;
