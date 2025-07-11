@@ -81,24 +81,63 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     //! Handler implementation for command LOAD_SEQUENCE
     //!
-    //! Load a sequence
+    //! Load and compile a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  const Fw::CmdStringArg& sequenceFilePath);
-
-    //! Handler implementation for command COMPILE_SEQUENCE
-    //!
-    //! Compile a sequence
-    void COMPILE_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                     U32 cmdSeq           //!< The command sequence number
-                                     );
+                                  const Fw::CmdStringArg& sequenceFilePath) override;
 
     //! Handler implementation for command RUN_SEQUENCE
     //!
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq           //!< The command sequence number
-                                 );
+                                 U32 cmdSeq            //!< The command sequence number
+                                 ) override;
+
+    //! Handler implementation for command BPF_MAP_CREATE
+    //!
+    //! Create a map
+    void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                   U32 cmdSeq,           //!< The command sequence number
+                                   Components::LLVMSequencer_BPF_MAP_TYPE type,
+                                   U32 key_size,
+                                   U32 value_size,
+                                   U32 max_entries,
+                                   U32 map_flags) override;
+
+    //! Handler implementation for command BPF_MAP_CLOSE
+    //!
+    //! Close and free a map
+    void BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 fd) override;
+
+    //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
+    //!
+    //! Lookup an element from a map
+    void BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                        U32 cmdSeq,           //!< The command sequence number
+                                        U32 fd,
+                                        Components::LLVMSequencer_Bytes key) override;
+
+    //! Handler implementation for command BPF_MAP_UPDATE_ELEM
+    //!
+    //! Update an element in a map
+    void BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                        U32 cmdSeq,           //!< The command sequence number
+                                        U32 fd,
+                                        Components::LLVMSequencer_Bytes key,
+                                        Components::LLVMSequencer_Bytes value,
+                                        U64 flags) override;
+
+    //! Handler implementation for command BPF_MAP_DELETE_ELEM
+    //!
+    //! Delete an element in a map
+    void BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                        U32 cmdSeq,           //!< The command sequence number
+                                        U32 fd,
+                                        Components::LLVMSequencer_Bytes key) override;
+
+  PRIVATE:
     // ----------------------------------------------------------------------
     // Handler implementations for state machine actions
     // ----------------------------------------------------------------------

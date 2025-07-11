@@ -10,6 +10,7 @@ module Components {
 
         ############ Commands ############
         include "LLVMSequencerCommands.fppi"
+        include "LLVMSequencerMapCommands.fppi"
         include "LLVMSequencerEvents.fppi"
         include "LLVMSequencerStateMachine.fppi"
 

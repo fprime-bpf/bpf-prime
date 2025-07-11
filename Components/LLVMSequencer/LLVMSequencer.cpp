@@ -53,7 +53,9 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& sequenceFilePath) {
+void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
+                                              U32 cmdSeq,
+                                              const Fw::CmdStringArg& sequenceFilePath) {
     /*
     if (sequencer_getState() != State::IDLE) {
         // If the sequencer is not in the IDLE state, command response out and error
@@ -90,6 +92,48 @@ void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
         this->sequencer_sendSignal_run_failure();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     }
+}
+
+void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
+                                               U32 cmdSeq,
+                                               Components::LLVMSequencer_BPF_MAP_TYPE type,
+                                               U32 key_size,
+                                               U32 value_size,
+                                               U32 max_entries,
+                                               U32 map_flags) {
+    // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void LLVMSequencer ::BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 fd) {
+    // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
+                                                    U32 cmdSeq,
+                                                    U32 fd,
+                                                    Components::LLVMSequencer_Bytes key) {
+    // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
+                                                    U32 cmdSeq,
+                                                    U32 fd,
+                                                    Components::LLVMSequencer_Bytes key,
+                                                    Components::LLVMSequencer_Bytes value,
+                                                    U64 flags) {
+    // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
+                                                    U32 cmdSeq,
+                                                    U32 fd,
+                                                    Components::LLVMSequencer_Bytes key) {
+    // TODO
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
 }  // namespace Components
