@@ -9,8 +9,6 @@ namespace Components {
 class array_map : public map {
     PRIVATE:
         U8 *mem;
-        U32 size;
-        U32 value_size;
     public:
         array_map(const bpf_map_def& map_def, I32& res) noexcept;
         ~array_map();

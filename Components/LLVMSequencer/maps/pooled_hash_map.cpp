@@ -8,8 +8,7 @@
 
 namespace Components {
 
-pooled_hash_map::pooled_hash_map(U32 max_entries, U32 key_size, U32 value_size, I32& res) noexcept :
-    max_entries(max_entries), key_size(key_size), value_size(value_size) {
+pooled_hash_map::pooled_hash_map(U32 key_size, U32 value_size, U32 max_entries, I32& res) noexcept {
 
     float load_factor = 1.0f;
     this->bucket_count = next_power_of_two((U32)std::ceil(max_entries / load_factor));
@@ -56,7 +55,7 @@ U8 *pooled_hash_map::first_element_value() noexcept {
     return node ? node->value : nullptr;
 }
 
-bool pooled_hash_map::key_equal(const U8 *key_a, const U8 *key_b) noexcept {
+bool pooled_hash_map::key_equal(const U8 *key_a, const U8 *key_b, U32 key_size) noexcept {
     if (key_a == nullptr || key_b == nullptr) {
         return key_a == key_b;
     }
@@ -73,15 +72,15 @@ size_t pooled_hash_map::hash(const U8 *key, U32 key_size, size_t seed) noexcept 
     #endif
 }
 
-size_t pooled_hash_map::hash(const U8 *key) noexcept {
+size_t pooled_hash_map::hash(const U8 *key, U32 key_size) noexcept {
     size_t seed = static_cast<size_t>(0xc70f6907UL);
     return hash(key, key_size, seed) & (bucket_count - 1);
 } 
 
-U8 *pooled_hash_map::lookup(const U8 *key) noexcept {
-    node *node = buckets[hash(key)];
+U8 *pooled_hash_map::lookup(const U8 *key, U32 key_size) noexcept {
+    node *node = buckets[hash(key, key_size)];
     while (node) {
-        if (key_equal(node->key, key)) {
+        if (key_equal(node->key, key, key_size)) {
             return node->value;
         }
         node = node->next;
@@ -89,12 +88,12 @@ U8 *pooled_hash_map::lookup(const U8 *key) noexcept {
     return nullptr;
 }
 
-I32 pooled_hash_map::insert(const U8 *key, const U8 *value) noexcept {
-    node **bucket = &buckets[hash(key)];
+I32 pooled_hash_map::insert(const U8 *key, U32 key_size, const U8 *value, U32 value_size) noexcept {
+    node **bucket = &buckets[hash(key, key_size)];
 
     node *current = *bucket;
     while (current) {
-        if (key_equal(current->key, key)) {
+        if (key_equal(current->key, key, key_size)) {
             std::memcpy(current->value, value, value_size);
             return 0;
         }
@@ -114,11 +113,11 @@ I32 pooled_hash_map::insert(const U8 *key, const U8 *value) noexcept {
     return 0;
 }
 
-I32 pooled_hash_map::remove(const U8 *key) noexcept {
-    node **ptr = &buckets[hash(key)];
+I32 pooled_hash_map::remove(const U8 *key, U32 key_size) noexcept {
+    node **ptr = &buckets[hash(key, key_size)];
 
     while (*ptr) {
-        if (key_equal((*ptr)->key, key)) {
+        if (key_equal((*ptr)->key, key, key_size)) {
             node *to_remove = *ptr;
             *ptr = to_remove->next;
             to_remove->next = free_list;
@@ -130,8 +129,8 @@ I32 pooled_hash_map::remove(const U8 *key) noexcept {
     return -ENOENT;
 }
 
-bool pooled_hash_map::exists(const U8 *key) noexcept {
-    return lookup(key) != nullptr;
+bool pooled_hash_map::exists(const U8 *key, U32 key_size) noexcept {
+    return lookup(key, key_size) != nullptr;
 }
 
 }

@@ -117,7 +117,8 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                         U32 cmdSeq,           //!< The command sequence number
                                         U32 fd,
-                                        Components::LLVMSequencer_Bytes key) override;
+                                        Components::LLVMSequencer_Bytes key,
+                                        const Fw::CmdStringArg& output_path) override;
 
     //! Handler implementation for command BPF_MAP_UPDATE_ELEM
     //!
@@ -193,7 +194,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     Fw::Success map_close(U32 fd);
 
-    Fw::Success map_lookup_elem(U32 fd, void *key);
+    Fw::Success map_lookup_elem(U32 fd, void *key, const char *output_path);
     
     Fw::Success map_update_elem(U32 fd, void *key, void *value, U64 flags);
     

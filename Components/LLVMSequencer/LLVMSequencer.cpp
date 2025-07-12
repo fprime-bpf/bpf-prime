@@ -143,14 +143,15 @@ void LLVMSequencer ::BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U
 void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
-                                                    Components::LLVMSequencer_Bytes key) {
+                                                    Components::LLVMSequencer_Bytes key,
+                                                    const Fw::CmdStringArg& output_path) {
     
     // Serialize buffers
     Fw::CmdArgBuffer key_buffer;
     key.serialize(key_buffer);
     
     // Lookup an element in the map
-    Fw::Success result = this->map_lookup_elem(fd, key_buffer.getBuffAddr());
+    Fw::Success result = this->map_lookup_elem(fd, key_buffer.getBuffAddr(), output_path.toChar());
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

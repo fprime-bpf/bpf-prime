@@ -13,7 +13,6 @@ class pooled_hash_map {
             node *next;
         };
         
-        U32 key_size, value_size, max_entries;
         U8 *keys, *values;
         
         size_t bucket_count;
@@ -23,20 +22,20 @@ class pooled_hash_map {
 
         size_t next_power_of_two(U32 n) noexcept;
         size_t hash(const U8 *key, U32 key_size, size_t seed) noexcept;
-        size_t hash(const U8 *key) noexcept;
-        bool key_equal(const U8 *key_a, const U8 *key_b) noexcept;
+        size_t hash(const U8 *key, U32 key_size) noexcept;
+        bool key_equal(const U8 *key_a, const U8 *key_b, U32 key_size) noexcept;
         void cleanup() noexcept;
 
     public:
-        pooled_hash_map(U32 max_entries, U32 key_size, U32 value_size, I32& res) noexcept;
+        pooled_hash_map(U32 key_size, U32 value_size, U32 max_entries, I32& res) noexcept;
         ~pooled_hash_map();
 
         U8 *first_element_value() noexcept;
 
-        U8 *lookup(const U8 *key) noexcept;
-        I32 insert(const U8 *key, const U8 *value) noexcept;
-        I32 remove(const U8 *key) noexcept;
-        bool exists(const U8 *key) noexcept;
+        U8 *lookup(const U8 *key, U32 key_size) noexcept;
+        I32 insert(const U8 *key, U32 key_size, const U8 *value, U32 value_size) noexcept;
+        I32 remove(const U8 *key, U32 key_size) noexcept;
+        bool exists(const U8 *key, U32 key_size) noexcept;
 
 };
 

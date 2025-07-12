@@ -34,7 +34,8 @@ async command BPF_MAP_CLOSE(
 @ Lookup an element in a map
 async command BPF_MAP_LOOKUP_ELEM(
             fd : U32,
-            key : Bytes
+            key : Bytes,
+            output_path : string
         ) \
         opcode 5 priority 7 assert
 

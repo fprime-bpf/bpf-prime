@@ -8,20 +8,19 @@
 
 namespace Components {
     
-array_map::array_map(const bpf_map_def& map_def, I32& res) noexcept {
-    if (map_def.key_size != sizeof(U32)) {
+array_map::array_map(const bpf_map_def& map_def, I32& res) noexcept :
+    map(map_def.key_size, map_def.value_size, map_def.max_entries) {
+
+    if (key_size != sizeof(U32)) {
         res = -EINVAL;
         return;
     }
     
-    this->mem = new(std::nothrow) U8[map_def.key_size * map_def.max_entries]();
+    this->mem = new(std::nothrow) U8[key_size * max_entries]();
     if (!mem) {
         res = -ENOMEM;
         return;
     }
-
-    this->size = map_def.max_entries;
-    this->value_size = map_def.value_size;
 }
 
 array_map::~array_map() {
@@ -31,7 +30,7 @@ array_map::~array_map() {
 void *array_map::lookup_elem(const void *key) noexcept {
     U32 map_key = *static_cast<const U32 *>(key);
 
-    if (map_key >= size) 
+    if (map_key >= max_entries) 
         return nullptr;
 
     return &mem[map_key * value_size];

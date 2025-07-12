@@ -9,6 +9,9 @@ namespace Components {
 
 class map {
     public:
+        const U32 key_size, value_size, max_entries;
+
+        map(U32 key_size, U32 value_size, U32 max_entries);
         virtual ~map() {}
         virtual void *lookup_elem(const void *key) noexcept = 0;
         virtual long update_elem(const void *key, const void *value, U64 flags) noexcept = 0;

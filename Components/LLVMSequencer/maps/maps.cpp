@@ -8,6 +8,9 @@
 
 namespace Components {
 
+map::map(U32 key_size, U32 value_size, U32 max_entries) : 
+    key_size(key_size), value_size(value_size), max_entries(max_entries) {}
+
 I32 maps::load_maps(const void *maps, size_t maps_len) noexcept {
     auto map_def_size = sizeof(bpf_map_def);
 

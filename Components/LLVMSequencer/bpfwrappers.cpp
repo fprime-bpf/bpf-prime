@@ -114,10 +114,27 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
-   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key) {
+   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key, const char *output_path) {
        auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
-       auto elem = map->lookup_elem(key);
-       // TODO:
+       FwSignedSizeType size = map->value_size;
+       auto elem = static_cast<U8 *>(map->lookup_elem(key));
+       if (!elem) {
+           return Fw::Success::FAILURE;
+       }
+       
+       Os::File file;
+       Os::File::Status fileStatus;
+       fileStatus = file.open(output_path, Os::File::OPEN_CREATE);
+       if (fileStatus != Os::File::OP_OK) {
+           return Fw::Success::FAILURE;
+       }
+       fileStatus = file.write(elem, size);       
+       if (fileStatus != Os::File::OP_OK) {
+           return Fw::Success::FAILURE;
+       }
+       file.flush();
+       file.close();
+
        return Fw::Success::SUCCESS;
    }
     
