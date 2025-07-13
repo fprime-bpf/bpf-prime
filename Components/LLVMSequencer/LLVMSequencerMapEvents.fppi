@@ -9,3 +9,7 @@ event MapCommandFailed(commandName: string, errorMsg: string) \
 event MapCommandFailedErrno(commandName: string, errorMsg: string, errnoMsg: string) \
     severity activity high \
     format "BPF map command '{}' failed: {} ({})"
+
+event RegisterFunctionsFailed(errnoMsg: string) \
+    severity warning high \
+    format "Failed to register BPF functions in VM ({})"

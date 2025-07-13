@@ -6,7 +6,7 @@
 
 #include "Components/LLVMSequencer/LLVMSequencer.hpp"
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
-
+#include <cstring>
 
 namespace Components {
 
@@ -18,7 +18,15 @@ LLVMSequencer ::LLVMSequencer(const char* const compName) :
 LLVMSequencerComponentBase(compName), 
 vm(),
 bpf_mem(nullptr),
-bpf_mem_size(0) {}
+bpf_mem_size(0) {
+    
+    I32 res = maps.register_functions(vm);
+    if (res) {
+        this->log_WARNING_HI_RegisterFunctionsFailed(
+            Fw::LogStringArg(std::strerror(-res))
+        );
+    }
+}
 
 LLVMSequencer ::~LLVMSequencer() {}
 

@@ -40,7 +40,7 @@ class maps {
         // Parse BPF map definitions and allocate maps
         I32 create_maps() noexcept;
         // Set the LDDW helpers and register the BPF helpers in the vm
-        I32 register_functions(bpftime::llvmbpf_vm *vm) noexcept;
+        I32 register_functions(bpftime::llvmbpf_vm& vm) noexcept;
         // Free all maps
         void free_maps() noexcept;
         // Return the number of loaded map definitions
