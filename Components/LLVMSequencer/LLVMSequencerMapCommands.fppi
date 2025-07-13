@@ -33,24 +33,24 @@ async command BPF_MAP_CLOSE(
 
 @ Lookup an element in a map
 async command BPF_MAP_LOOKUP_ELEM(
-            fd : U32,
-            key : Bytes,
-            output_path : string
+            fd: U32,
+            key: Bytes,
+            output_path: string
         ) \
         opcode 5 priority 7 assert
 
 @ Update an element in a map
 async command BPF_MAP_UPDATE_ELEM(
-            fd : U32,
-            key : Bytes,
-            value : Bytes,
-            flags : U64
+            fd: U32,
+            key: Bytes,
+            value: Bytes,
+            flags: U64
         ) \
         opcode 6 priority 7 assert
     
 @ Delete an element in a map
 async command BPF_MAP_DELETE_ELEM(
-            fd : U32,
-            key : Bytes
+            fd: U32,
+            key: Bytes
         ) \
         opcode 7 priority 7 assert

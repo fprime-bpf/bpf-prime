@@ -2,6 +2,7 @@
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "maps/maps.hpp"
 #include "bpf.hpp"
+#include <cstring>
 
 namespace Components {
 
@@ -94,31 +95,45 @@ namespace Components {
    }
 
    Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def) {
+       Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
-
+       
        res = this->maps.load_maps(&map_def, sizeof(bpf_map_def));
        if (res) {
+           Fw::LogStringArg errMsg("Failed to load maps");
+           Fw::LogStringArg errnoMsg(std::strerror(-res));
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
            return Fw::Success::FAILURE;
        }
 
        res = this->maps.create_maps();
        if (res) {
+           Fw::LogStringArg errMsg("Failed to create maps");
+           Fw::LogStringArg errnoMsg(std::strerror(-res));
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
            return Fw::Success::FAILURE;
        }
 
+       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
 
    Fw::Success LLVMSequencer::map_close(U32 fd) {
+       Fw::LogStringArg commandName("BPF_MAP_CLOSE");
        // TODO:
+       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
 
    Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key, const char *output_path) {
+       Fw::LogStringArg commandName("BPF_MAP_LOOKUP_ELEM");
+
        auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
        FwSignedSizeType size = map->value_size;
        auto elem = static_cast<U8 *>(map->lookup_elem(key));
        if (!elem) {
+           Fw::LogStringArg errMsg("Invalid key");
+           this->log_ACTIVITY_HI_MapCommandFailed(commandName, errMsg);
            return Fw::Success::FAILURE;
        }
        
@@ -126,33 +141,52 @@ namespace Components {
        Os::File::Status fileStatus;
        fileStatus = file.open(output_path, Os::File::OPEN_CREATE);
        if (fileStatus != Os::File::OP_OK) {
+           Fw::LogStringArg errMsg("Failed to open file");
+           this->log_ACTIVITY_HI_MapCommandFailed(commandName, errMsg);
            return Fw::Success::FAILURE;
        }
        fileStatus = file.write(elem, size);       
        if (fileStatus != Os::File::OP_OK) {
+           Fw::LogStringArg errMsg("Failed to write to file");
+           this->log_ACTIVITY_HI_MapCommandFailed(commandName, errMsg);
            return Fw::Success::FAILURE;
        }
        file.flush();
        file.close();
-
+       
+       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
     
    Fw::Success LLVMSequencer::map_update_elem(U32 fd, void *key, void *value, U64 flags) {
+       Fw::LogStringArg commandName("BPF_MAP_UPDATE_ELEM");
+
        auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
        auto res = map->update_elem(key, value, flags);
        if (res) {
+           Fw::LogStringArg errMsg("Failed to update element");
+           Fw::LogStringArg errnoMsg(std::strerror(-res));
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
            return Fw::Success::FAILURE;
        }
+
+       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
     
    Fw::Success LLVMSequencer::map_delete_elem(U32 fd, void *key) {
+       Fw::LogStringArg commandName("BPF_MAP_DELETE_ELEM");
+
        auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
        auto res = map->delete_elem(key);
        if (res) {
+           Fw::LogStringArg errMsg("Failed to delete element");
+           Fw::LogStringArg errnoMsg(std::strerror(-res));
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
            return Fw::Success::FAILURE;
        }
+
+       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
 }

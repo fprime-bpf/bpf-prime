@@ -102,8 +102,12 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
                                                U32 max_entries,
                                                U32 map_flags) {
     
+    // Ensure the key and value can fit in a Components::LLVMSequencer_Bytes array
     const auto max_bytes_size = LLVMSequencer_Bytes::SIZE;
     if (key_size > max_bytes_size || value_size > max_bytes_size) {
+        Fw::LogStringArg commandName = "BPF_MAP_CREATE";
+        Fw::LogStringArg errMsg((key_size > max_bytes_size)? "Invalid key size" : "Invalid value size");
+        this->log_ACTIVITY_HI_MapCommandFailed(commandName, errMsg);
         this->sequencer_sendSignal_run_failure();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     }

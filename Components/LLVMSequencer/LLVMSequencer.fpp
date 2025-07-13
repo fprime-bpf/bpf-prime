@@ -10,8 +10,9 @@ module Components {
 
         ############ Commands ############
         include "LLVMSequencerCommands.fppi"
-        include "LLVMSequencerMapCommands.fppi"
         include "LLVMSequencerEvents.fppi"
+        include "LLVMSequencerMapCommands.fppi"
+        include "LLVMSequencerMapEvents.fppi"
         include "LLVMSequencerStateMachine.fppi"
 
         #Create the state machine
