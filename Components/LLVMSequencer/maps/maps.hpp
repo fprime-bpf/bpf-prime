@@ -27,24 +27,26 @@ class maps {
             void *fn;
         };
 
-        size_t maps_count;
-        bpf_map_def *map_defs = nullptr;
-        map **map_instances;
+        const U8 Map_Instances_Defualt_Size = 4;
+        const U8 Map_Instances_Max_Size = sizeof(map_instances_bitmask) * 8;
+
+        U8 map_instances_size = Map_Instances_Defualt_Size / 2;
+        U32 map_instances_bitmask = 0;
+        map **map_instances = nullptr;
         
-        void free_map_instances(size_t count) noexcept;
-        STATIC map *get_map_from_ptr(bpf_map_def *map) noexcept;
+        I32 resize_map_instances() noexcept;
 
     public:
-        // Load BPF map definitions
-        I32 load_maps(const void *maps, size_t maps_len) noexcept;
-        // Parse BPF map definitions and allocate maps
-        I32 create_maps() noexcept;
+        ~maps();
+
+        // Parse BPF map definition and allocate map
+        I32 create_map(const bpf_map_def& map_def, U32& fd) noexcept;
         // Set the LDDW helpers and register the BPF helpers in the vm
         I32 register_functions(bpftime::llvmbpf_vm& vm) noexcept;
+        // Free a map
+        void close_map(U32 fd) noexcept;
         // Free all maps
-        void free_maps() noexcept;
-        // Return the number of loaded map definitions
-        size_t size() noexcept;
+        void close_all_maps() noexcept;
         
         STATIC U64 map_by_fd(U32 fd) noexcept;
         STATIC U64 map_by_idx(U32 idx) noexcept;

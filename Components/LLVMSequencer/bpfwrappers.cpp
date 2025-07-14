@@ -4,6 +4,8 @@
 #include "bpf.hpp"
 #include <cstring>
 
+#define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
+
 namespace Components {
 
    Fw::Success LLVMSequencer::load(const char* sequenceFilePath) {
@@ -98,29 +100,22 @@ namespace Components {
        Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
        
-       res = this->maps.load_maps(&map_def, sizeof(bpf_map_def));
-       if (res) {
-           Fw::LogStringArg errMsg("Failed to load maps");
-           Fw::LogStringArg errnoMsg(std::strerror(-res));
-           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
-           return Fw::Success::FAILURE;
-       }
-
-       res = this->maps.create_maps();
+       U32 fd;
+       res = this->maps.create_map(map_def, fd);
        if (res) {
            Fw::LogStringArg errMsg("Failed to create maps");
-           Fw::LogStringArg errnoMsg(std::strerror(-res));
-           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, CREATE_ERRNO_MSG(res));
            return Fw::Success::FAILURE;
        }
 
        this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
+       this->log_ACTIVITY_HI_MapCreated(fd);
        return Fw::Success::SUCCESS;
    }
 
    Fw::Success LLVMSequencer::map_close(U32 fd) {
        Fw::LogStringArg commandName("BPF_MAP_CLOSE");
-       // TODO:
+       maps.close_map(fd);
        this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
        return Fw::Success::SUCCESS;
    }
@@ -165,8 +160,7 @@ namespace Components {
        auto res = map->update_elem(key, value, flags);
        if (res) {
            Fw::LogStringArg errMsg("Failed to update element");
-           Fw::LogStringArg errnoMsg(std::strerror(-res));
-           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, CREATE_ERRNO_MSG(res));
            return Fw::Success::FAILURE;
        }
 
@@ -181,8 +175,7 @@ namespace Components {
        auto res = map->delete_elem(key);
        if (res) {
            Fw::LogStringArg errMsg("Failed to delete element");
-           Fw::LogStringArg errnoMsg(std::strerror(-res));
-           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, errnoMsg);
+           this->log_ACTIVITY_HI_MapCommandFailedErrno(commandName, errMsg, CREATE_ERRNO_MSG(res));
            return Fw::Success::FAILURE;
        }
 
