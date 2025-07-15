@@ -140,18 +140,6 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
     }
 }
 
-void LLVMSequencer ::BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 fd) {
-    // Close the map
-    Fw::Success result = this->map_close(fd);
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
-}
-
 void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,

@@ -13,7 +13,7 @@ map::map(U32 key_size, U32 value_size, U32 max_entries) :
 
 
 I32 maps::resize_map_instances() noexcept {
-    if ((map_instances_size * 2) > Map_Instances_Max_Size) return -ENOMEM;
+    if (map_instances_size == UINT32_MAX) return -ENOMEM;
 
     auto new_map_instances = new(std::nothrow) map*[map_instances_size * 2]();
     if (!new_map_instances) return -ENOMEM;
@@ -30,9 +30,7 @@ I32 maps::resize_map_instances() noexcept {
 I32 maps::create_map(const bpf_map_def& map_def, U32& fd) noexcept {
     I32 res = 0;
 
-    U32 next_idx = __builtin_ctz(~map_instances_bitmask);
-
-    if (next_idx >= map_instances_size || !map_instances) {
+    if (maps_count >= map_instances_size || !map_instances) {
         res = resize_map_instances();
         if (res) return res;
     }
@@ -53,9 +51,8 @@ I32 maps::create_map(const bpf_map_def& map_def, U32& fd) noexcept {
     if (!map) return -ENOMEM;
     if (res) return res;
 
-    map_instances[next_idx] = map;
-    map_instances_bitmask |= ((U32)1 << next_idx);
-    fd = next_idx;
+    fd = maps_count;
+    map_instances[maps_count++] = map;
     return 0;
 }
 
@@ -83,20 +80,13 @@ I32 maps::register_functions(bpftime::llvmbpf_vm& vm) noexcept {
     return 0;
 }
 
-void maps::close_map(U32 fd) noexcept {
-    map *map = reinterpret_cast<Components::map *>(map_by_fd(fd));
-    delete map;
-    map_instances[fd] = nullptr;
-    map_instances_bitmask &= ~((U32)1 << fd);
-}
-
 void maps::close_all_maps() noexcept {
     for (U8 i = 0; i < map_instances_size; i++) {
         delete map_instances[i];
     }
     delete[] map_instances;
     map_instances = nullptr;
-    map_instances_bitmask = 0;
+    maps_count = 0;
     map_instances_size = 0;
 }
 

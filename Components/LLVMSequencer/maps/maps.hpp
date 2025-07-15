@@ -28,10 +28,9 @@ class maps {
         };
 
         const U8 Map_Instances_Defualt_Size = 4;
-        const U8 Map_Instances_Max_Size = sizeof(map_instances_bitmask) * 8;
 
-        U8 map_instances_size = Map_Instances_Defualt_Size / 2;
-        U32 map_instances_bitmask = 0;
+        U32 map_instances_size = Map_Instances_Defualt_Size / 2;
+        U32 maps_count = 0;
         map **map_instances = nullptr;
         
         I32 resize_map_instances() noexcept;
@@ -43,8 +42,6 @@ class maps {
         I32 create_map(const bpf_map_def& map_def, U32& fd) noexcept;
         // Set the LDDW helpers and register the BPF helpers in the vm
         I32 register_functions(bpftime::llvmbpf_vm& vm) noexcept;
-        // Free a map
-        void close_map(U32 fd) noexcept;
         // Free all maps
         void close_all_maps() noexcept;
         

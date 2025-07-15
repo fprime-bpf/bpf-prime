@@ -10,16 +10,7 @@ U64 maps::map_by_fd(U32 fd) noexcept {
 }
 
 U64 maps::map_by_idx(U32 idx) noexcept {
-    auto& maps = LLVMSequencer::maps;
-
-    U32 count = 0, map_idx = -1;
-    while (count != (idx + 1)) {
-        map_idx++;
-        if (map_idx >= maps.Map_Instances_Max_Size) return 0;
-        count += (maps.map_instances_bitmask >> map_idx) & (U32)1;
-    }
-
-    auto map = LLVMSequencer::maps.map_instances[map_idx];
+    auto map = LLVMSequencer::maps.map_instances[idx];
     return reinterpret_cast<U64>(map); 
 }
 

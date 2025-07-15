@@ -25,12 +25,6 @@ async command BPF_MAP_CREATE(
         ) \ 
         opcode 3 priority 7 assert
 
-@ Close and free a map
-async command BPF_MAP_CLOSE(
-            fd: U32
-        ) \ 
-        opcode 4 priority 7 assert
-
 @ Lookup an element in a map
 async command BPF_MAP_LOOKUP_ELEM(
             fd: U32,

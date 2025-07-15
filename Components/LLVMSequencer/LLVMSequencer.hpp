@@ -104,13 +104,6 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
                                    U32 max_entries,
                                    U32 map_flags) override;
 
-    //! Handler implementation for command BPF_MAP_CLOSE
-    //!
-    //! Close and free a map
-    void BPF_MAP_CLOSE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                  U32 cmdSeq,           //!< The command sequence number
-                                  U32 fd) override;
-
     //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
     //!
     //! Lookup an element from a map
@@ -191,8 +184,6 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     Fw::Success run();
 
     Fw::Success map_create(const bpf_map_def& map_def);
-
-    Fw::Success map_close(U32 fd);
 
     Fw::Success map_lookup_elem(U32 fd, void *key, const char *output_path);
     

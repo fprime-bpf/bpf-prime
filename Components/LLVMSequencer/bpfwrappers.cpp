@@ -113,13 +113,6 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
-   Fw::Success LLVMSequencer::map_close(U32 fd) {
-       Fw::LogStringArg commandName("BPF_MAP_CLOSE");
-       maps.close_map(fd);
-       this->log_DIAGNOSTIC_MapCommandSuccess(commandName);
-       return Fw::Success::SUCCESS;
-   }
-
    Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key, const char *output_path) {
        Fw::LogStringArg commandName("BPF_MAP_LOOKUP_ELEM");
 
