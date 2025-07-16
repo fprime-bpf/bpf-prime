@@ -1,5 +1,3 @@
-constant dataSize = 256
-array Bytes = [dataSize] U8
 
 enum BPF_MAP_TYPE : U32 {
     BPF_MAP_TYPE_UNSPEC,
@@ -28,7 +26,7 @@ async command BPF_MAP_CREATE(
 @ Lookup an element in a map
 async command BPF_MAP_LOOKUP_ELEM(
             fd: U32,
-            key: Bytes,
+            key: string,
             output_path: string
         ) \
         opcode 5 priority 7 assert
@@ -36,8 +34,8 @@ async command BPF_MAP_LOOKUP_ELEM(
 @ Update an element in a map
 async command BPF_MAP_UPDATE_ELEM(
             fd: U32,
-            key: Bytes,
-            value: Bytes,
+            key: string,
+            value: string,
             flags: U64
         ) \
         opcode 6 priority 7 assert
@@ -45,6 +43,6 @@ async command BPF_MAP_UPDATE_ELEM(
 @ Delete an element in a map
 async command BPF_MAP_DELETE_ELEM(
             fd: U32,
-            key: Bytes
+            key: string
         ) \
         opcode 7 priority 7 assert

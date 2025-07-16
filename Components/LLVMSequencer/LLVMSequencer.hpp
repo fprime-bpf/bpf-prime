@@ -110,7 +110,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                         U32 cmdSeq,           //!< The command sequence number
                                         U32 fd,
-                                        Components::LLVMSequencer_Bytes key,
+                                        const Fw::CmdStringArg& key,
                                         const Fw::CmdStringArg& output_path) override;
 
     //! Handler implementation for command BPF_MAP_UPDATE_ELEM
@@ -119,8 +119,8 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                         U32 cmdSeq,           //!< The command sequence number
                                         U32 fd,
-                                        Components::LLVMSequencer_Bytes key,
-                                        Components::LLVMSequencer_Bytes value,
+                                        const Fw::CmdStringArg& key,
+                                        const Fw::CmdStringArg& value,
                                         U64 flags) override;
 
     //! Handler implementation for command BPF_MAP_DELETE_ELEM
@@ -129,7 +129,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                         U32 cmdSeq,           //!< The command sequence number
                                         U32 fd,
-                                        Components::LLVMSequencer_Bytes key) override;
+                                        const Fw::CmdStringArg& key) override;
 
   PRIVATE:
     // ----------------------------------------------------------------------
