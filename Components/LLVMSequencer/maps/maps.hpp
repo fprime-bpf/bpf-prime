@@ -2,6 +2,7 @@
 #include "Components/LLVMSequencer/bpf.hpp"
 #include <Fw/Types/BasicTypes.hpp>
 #include <cstddef>
+#include <Os/Mutex.hpp>
 
 #pragma once
 
@@ -32,6 +33,8 @@ class maps {
         U32 map_instances_size = Map_Instances_Defualt_Size / 2;
         U32 maps_count = 0;
         map **map_instances = nullptr;
+
+        Os::Mutex maps_mutex;
         
         I32 resize_map_instances() noexcept;
 
