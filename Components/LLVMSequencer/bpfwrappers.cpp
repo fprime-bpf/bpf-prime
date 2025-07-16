@@ -96,6 +96,27 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
+    bool LLVMSequencer::get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name) {
+        map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+        if (!map) {
+            Fw::LogStringArg errMsg("Map does not exist");
+            this->log_ACTIVITY_HI_MapCommandFailed(command_name, errMsg);
+            return false;
+        }
+        return true;
+    }
+
+    bool LLVMSequencer::validate_data_size(U32 size, bool key, map *map, Fw::LogStringArg& command_name) {
+        U32 expected_size = key ? map->key_size : map->value_size;
+
+        if (size != expected_size) {
+            Fw::LogStringArg dataType(key ? "key" : "value");
+            this->log_ACTIVITY_HI_MapDataSizeMismatch(command_name, dataType, expected_size, size);
+            return false;
+        }
+        return true;
+    }
+   
    Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def) {
        Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
@@ -113,10 +134,15 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
-   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, void *key, const char *output_path) {
+   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path) {
        Fw::LogStringArg commandName("BPF_MAP_LOOKUP_ELEM");
 
-       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       map *map;
+       if (!get_map_by_fd(fd, map, commandName)) 
+           return Fw::Success::FAILURE;
+       if (!validate_data_size(key_size, true, map, commandName)) 
+           return Fw::Success::FAILURE;
+
        FwSignedSizeType size = map->value_size;
        auto elem = static_cast<U8 *>(map->lookup_elem(key));
        if (!elem) {
@@ -146,10 +172,17 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
     
-   Fw::Success LLVMSequencer::map_update_elem(U32 fd, void *key, void *value, U64 flags) {
+   Fw::Success LLVMSequencer::map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags) {
        Fw::LogStringArg commandName("BPF_MAP_UPDATE_ELEM");
 
-       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       map *map;
+       if (!get_map_by_fd(fd, map, commandName)) 
+           return Fw::Success::FAILURE;
+       if (!validate_data_size(key_size, true, map, commandName)) 
+           return Fw::Success::FAILURE;
+       if (!validate_data_size(value_size, false, map, commandName)) 
+           return Fw::Success::FAILURE;
+
        auto res = map->update_elem(key, value, flags);
        if (res) {
            Fw::LogStringArg errMsg("Failed to update element");
@@ -161,10 +194,15 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
     
-   Fw::Success LLVMSequencer::map_delete_elem(U32 fd, void *key) {
+   Fw::Success LLVMSequencer::map_delete_elem(U32 fd, U8 *key, U32 key_size) {
        Fw::LogStringArg commandName("BPF_MAP_DELETE_ELEM");
 
-       auto map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
+       map *map;
+       if (!get_map_by_fd(fd, map, commandName)) 
+           return Fw::Success::FAILURE;
+       if (!validate_data_size(key_size, true, map, commandName)) 
+           return Fw::Success::FAILURE;
+
        auto res = map->delete_elem(key);
        if (res) {
            Fw::LogStringArg errMsg("Failed to delete element");

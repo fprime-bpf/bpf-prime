@@ -16,7 +16,7 @@ array_map::array_map(const bpf_map_def& map_def, I32& res) noexcept :
         return;
     }
     
-    this->mem = new(std::nothrow) U8[key_size * max_entries]();
+    this->mem = new(std::nothrow) U8[value_size * max_entries]();
     if (!mem) {
         res = -ENOMEM;
         return;

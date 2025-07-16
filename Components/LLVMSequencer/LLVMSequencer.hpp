@@ -185,11 +185,16 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     Fw::Success map_create(const bpf_map_def& map_def);
 
-    Fw::Success map_lookup_elem(U32 fd, void *key, const char *output_path);
+    Fw::Success map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path);
     
-    Fw::Success map_update_elem(U32 fd, void *key, void *value, U64 flags);
+    Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
     
-    Fw::Success map_delete_elem(U32 fd, void *key);
+    Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
+
+  PRIVATE:
+    bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
+
+    bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);
 
 };
 

@@ -131,11 +131,12 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
 }
 
 namespace {
-    void escape_hex_str(const char *str, U8 buffer[]) {
+    U32 escape_hex_str(const char *str, U8 buffer[]) {
         U32 size = 0;
         while (*str && size++ < Fw::CmdStringArg::STRING_SIZE) {
-            *(buffer++) = (U8)std::strtol(str, const_cast<char**>(&str), 16);
+            *(buffer++) = static_cast<U8>(std::strtol(str, const_cast<char**>(&str), 16));
         }
+        return size;
     }
 }
 
@@ -147,10 +148,10 @@ void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
     
     // Serialize buffers
     U8 key_buffer[Fw::CmdStringArg::STRING_SIZE];
-    escape_hex_str(key.toChar(), key_buffer);
+    U32 key_size = escape_hex_str(key.toChar(), key_buffer);
     
     // Lookup an element in the map
-    Fw::Success result = this->map_lookup_elem(fd, key_buffer, output_path.toChar());
+    Fw::Success result = this->map_lookup_elem(fd, key_buffer, key_size, output_path.toChar());
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -169,12 +170,12 @@ void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
 
     // Serialize buffers
     U8 key_buffer[Fw::CmdStringArg::STRING_SIZE];
-    escape_hex_str(key.toChar(), key_buffer);
+    U32 key_size = escape_hex_str(key.toChar(), key_buffer);
     U8 value_buffer[Fw::CmdStringArg::STRING_SIZE];
-    escape_hex_str(value.toChar(), value_buffer);
+    U32 value_size = escape_hex_str(value.toChar(), value_buffer);
 
     // Update an element in the map
-    Fw::Success result = this->map_update_elem(fd, key_buffer, value_buffer, flags);
+    Fw::Success result = this->map_update_elem(fd, key_buffer, key_size, value_buffer, value_size, flags);
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
@@ -190,10 +191,10 @@ void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     const Fw::CmdStringArg& key) {
     // Serialize buffers
     U8 key_buffer[Fw::CmdStringArg::STRING_SIZE];
-    escape_hex_str(key.toChar(), key_buffer);
+    U32 key_size = escape_hex_str(key.toChar(), key_buffer);
     
     // Delete an element in the map
-    Fw::Success result = this->map_delete_elem(fd, key_buffer);
+    Fw::Success result = this->map_delete_elem(fd, key_buffer, key_size);
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

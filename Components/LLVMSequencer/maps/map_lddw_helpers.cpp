@@ -5,13 +5,14 @@
 namespace Components {
 
 U64 maps::map_by_fd(U32 fd) noexcept {
+    if (fd >= LLVMSequencer::maps.maps_count) return 0;
+    
     auto map = LLVMSequencer::maps.map_instances[fd];
     return reinterpret_cast<U64>(map); 
 }
 
 U64 maps::map_by_idx(U32 idx) noexcept {
-    auto map = LLVMSequencer::maps.map_instances[idx];
-    return reinterpret_cast<U64>(map); 
+    return map_by_fd(idx);
 }
 
 U64 maps::map_val(U64 map_ptr) noexcept {
