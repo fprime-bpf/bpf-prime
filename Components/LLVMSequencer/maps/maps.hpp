@@ -4,7 +4,7 @@
 #include "Components/LLVMSequencer/bpf.hpp"
 #include <Fw/Types/BasicTypes.hpp>
 #include <cstddef>
-#include <shared_mutex>
+#include "shared_mutex.hpp"
 
 #pragma once
 
@@ -17,7 +17,7 @@ namespace Components {
 class map {
     public:
         const U32 key_size, value_size, max_entries;
-        std::shared_mutex mutex;
+        shared_mutex mutex;
 
         /**
          * @brief Construct a new map object
