@@ -4,7 +4,7 @@
 #include "Components/LLVMSequencer/bpf.hpp"
 #include <Fw/Types/BasicTypes.hpp>
 #include <cstddef>
-#include <Os/Mutex.hpp>
+#include <shared_mutex>
 
 #pragma once
 
@@ -17,6 +17,7 @@ namespace Components {
 class map {
     public:
         const U32 key_size, value_size, max_entries;
+        std::shared_mutex mutex;
 
         /**
          * @brief Construct a new map object
@@ -75,8 +76,6 @@ class maps {
         U32 map_instances_size = Map_Instances_Defualt_Size / 2;
         U32 maps_count = 0;
         map **map_instances = nullptr;
-
-        Os::Mutex maps_mutex;
         
         I32 resize_map_instances() noexcept;
 
