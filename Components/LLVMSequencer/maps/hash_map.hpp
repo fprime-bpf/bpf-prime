@@ -1,3 +1,5 @@
+//! @file hash_map.hpp
+
 #include <cstring>
 #include "maps.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
@@ -7,6 +9,10 @@
 
 namespace Components {
 
+/**
+ * @brief BPF hash map implementation
+ * 
+ */
 class hash_map : public map {
     PRIVATE:
         pooled_hash_map mem;

@@ -1,3 +1,5 @@
+//! @file array_map.hpp
+
 #include "maps.hpp"
 #include "Components/LLVMSequencer/bpf.hpp"
 #include <Fw/Types/BasicTypes.hpp>
@@ -6,6 +8,10 @@
 
 namespace Components {
 
+/**
+ * @brief BPF array map implementation
+ * 
+ */
 class array_map : public map {
     PRIVATE:
         U8 *mem;
