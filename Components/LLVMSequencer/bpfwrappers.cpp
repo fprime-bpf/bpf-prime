@@ -2,7 +2,9 @@
 #include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "maps/maps.hpp"
 #include "bpf.hpp"
+
 #include <cstring>
+#include <new>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
 
@@ -34,7 +36,7 @@ namespace Components {
        }
 
        // Allocate memory for the buffer
-       this->buffer = new U8[size_result];
+       this->buffer = new(std::nothrow) U8[size_result];
        if (this->buffer == nullptr) {
            // Memory allocation failed, return error
            file.close();
