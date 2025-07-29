@@ -1,3 +1,6 @@
+# doxygen output
+docs/
+
 # fprime items
 logs/
 cmake-build-*

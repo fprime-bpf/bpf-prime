@@ -12,7 +12,7 @@
 #include "Os/File.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
-
+#include "maps/maps.hpp"
 
 namespace Components {
 
@@ -21,6 +21,7 @@ using State = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::State;
 
 class LLVMSequencer : public LLVMSequencerComponentBase {
   public:
+    inline static Components::maps maps;
     // ----------------------------------------------------------------------
     // Component construction and destruction
     // ----------------------------------------------------------------------
@@ -80,26 +81,70 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     //! Handler implementation for command LOAD_SEQUENCE
     //!
-    //! Load a sequence
+    //! Load and compile a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  const Fw::CmdStringArg& sequenceFilePath);
-
-    //! Handler implementation for command COMPILE_SEQUENCE
-    //!
-    //! Compile a sequence
-    void COMPILE_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                     U32 cmdSeq           //!< The command sequence number
-                                     );
+                                  const Fw::CmdStringArg& sequenceFilePath) override;
 
     //! Handler implementation for command RUN_SEQUENCE
     //!
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq           //!< The command sequence number
-                                 );
+                                 U32 cmdSeq            //!< The command sequence number
+                                 ) override;
+
+    //! Handler implementation for command BPF_MAP_CREATE
+    //!
+    //! Create a map
+    void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,                          //!< The opcode
+                                   U32 cmdSeq,                                   //!< The command sequence number
+                                   Components::LLVMSequencer_BPF_MAP_TYPE type,  //!< Map type
+                                   U32 key_size,                                 //!< Size of map keys (in bytes)
+                                   U32 value_size,                               //!< Size of map values (in bytes)
+                                   U32 max_entries,                              //!< Maximum amount of entries
+                                   U32 map_flags                                 //!< Map flags
+                                   ) override;
+
+    //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
+    //!
+    //! Lookup an element in a map
+    //! @note The actual value of `key` is dependent on the endianness of your system
+    void BPF_MAP_LOOKUP_ELEM_cmdHandler(
+        FwOpcodeType opCode,                 //!< The opcode
+        U32 cmdSeq,                          //!< The command sequence number
+        U32 fd,                              //!< File descriptor
+        const Fw::CmdStringArg& key,         //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
+        const Fw::CmdStringArg& output_path  //!< File path to output element
+        ) override;
+
+    //! Handler implementation for command BPF_MAP_UPDATE_ELEM
+    //!
+    //! Update an element in a map
+    //! @note The actual value of `key` is dependent on the endianness of your system
+    //! @note The actual value of `value` is dependent on the endianness of your system
+    void BPF_MAP_UPDATE_ELEM_cmdHandler(
+        FwOpcodeType opCode,            //!< The opcode
+        U32 cmdSeq,                     //!< The command sequence number
+        U32 fd,                         //!< File descriptor
+        const Fw::CmdStringArg& key,    //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
+        const Fw::CmdStringArg& value,  //!< Value data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
+        U64 flags                       //!< Map-specific flags
+        ) override;
+
+    //! Handler implementation for command BPF_MAP_DELETE_ELEM
+    //!
+    //! Delete an element in a map
+    //! @note The actual value of `key` is dependent on the endianness of your system
+    void BPF_MAP_DELETE_ELEM_cmdHandler(
+        FwOpcodeType opCode,         //!< The opcode
+        U32 cmdSeq,                  //!< The command sequence number
+        U32 fd,                      //!< File descriptor
+        const Fw::CmdStringArg& key  //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
+        ) override;
+
+  PRIVATE:
     // ----------------------------------------------------------------------
-    // Handler implementations for state machine actions
+    // Implementations for internal state machine actions
     // ----------------------------------------------------------------------
     void Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
       SmId smId,
@@ -148,6 +193,19 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     Fw::Success compile();
 
     Fw::Success run();
+
+    Fw::Success map_create(const bpf_map_def& map_def);
+
+    Fw::Success map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path);
+    
+    Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
+    
+    Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
+
+  PRIVATE:
+    bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
+
+    bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);
 
 };
 
