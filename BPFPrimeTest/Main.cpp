@@ -4,7 +4,7 @@
 //
 // ======================================================================
 // Used to access topology functions
-#include <LLVMSequencerTest/Top/LLVMSequencerTestTopology.hpp>
+#include <BPFPrimeTest/Top/BPFPrimeTestTopology.hpp>
 // OSAL initialization
 #include <Os/Os.hpp>
 // Used for signal handling shutdown
@@ -34,7 +34,7 @@ void print_usage(const char* app) {
  * @param signum
  */
 static void signalHandler(int signum) {
-    LLVMSequencerTest::stopSimulatedCycle();
+    BPFPrimeTest::stopRateGroups();
 }
 
 /**
@@ -51,6 +51,7 @@ int main(int argc, char* argv[]) {
     I32 option = 0;
     CHAR* hostname = nullptr;
     U16 port_number = 0;
+
     Os::init();
 
     // Loop while reading the getopt supplied options
@@ -74,8 +75,8 @@ int main(int argc, char* argv[]) {
                 return (option == 'h') ? 0 : 1;
         }
     }
-    // Object for communicating state to the reference topology
-    LLVMSequencerTest::TopologyState inputs;
+    // Object for communicating state to the topology
+    BPFPrimeTest::TopologyState inputs;
     inputs.hostname = hostname;
     inputs.port = port_number;
 
@@ -85,9 +86,9 @@ int main(int argc, char* argv[]) {
     (void)printf("Hit Ctrl-C to quit\n");
 
     // Setup, cycle, and teardown topology
-    LLVMSequencerTest::setupTopology(inputs);
-    LLVMSequencerTest::startSimulatedCycle(Fw::TimeInterval(1,0));  // Program loop cycling rate groups at 1Hz
-    LLVMSequencerTest::teardownTopology(inputs);
+    BPFPrimeTest::setupTopology(inputs);
+    BPFPrimeTest::startRateGroups(Fw::TimeInterval(1,0));  // Program loop cycling rate groups at 1Hz
+    BPFPrimeTest::teardownTopology(inputs);
     (void)printf("Exiting...\n");
     return 0;
 }

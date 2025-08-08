@@ -25,7 +25,7 @@ namespace Components {
        }
 
        // Get the size of the file
-       FwSignedSizeType size_result = 0;
+       FwSizeType size_result = 0;
        Os::File::Status sizeStatus = file.size(size_result);
        if (sizeStatus != Os::File::OP_OK) {
            // File size retrieval failed, return error
@@ -145,7 +145,7 @@ namespace Components {
        if (!validate_data_size(key_size, true, map, commandName)) 
            return Fw::Success::FAILURE;
 
-       FwSignedSizeType size = map->value_size;
+       FwSizeType size = map->value_size;
        auto elem = static_cast<U8 *>(map->lookup_elem(key));
        if (!elem) {
            Fw::LogStringArg errMsg("Invalid key");

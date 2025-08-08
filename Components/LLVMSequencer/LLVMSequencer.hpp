@@ -33,7 +33,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Destroy LLVMSequencer object
     ~LLVMSequencer();
 
-  PRIVATE:
+  private:
     bpftime::llvmbpf_vm vm;  
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
@@ -74,7 +74,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
                           U32 context           //!< The call order
                           ) override;
 
-  PRIVATE:
+  private:
     // ----------------------------------------------------------------------
     // Handler implementations for commands
     // ----------------------------------------------------------------------
@@ -142,7 +142,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
         const Fw::CmdStringArg& key  //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
         ) override;
 
-  PRIVATE:
+  private:
     // ----------------------------------------------------------------------
     // Implementations for internal state machine actions
     // ----------------------------------------------------------------------
@@ -202,7 +202,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
-  PRIVATE:
+  private:
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 
     bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);
