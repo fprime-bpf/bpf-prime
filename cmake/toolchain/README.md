@@ -8,6 +8,12 @@ For the first build step, we'll use the toolchain's C compiler to build and inst
 ```bash
 cd zlib-1.3.1
 CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --prefix=../riscv/sysroot
+```
+
+First, in the zlib source directory, we'll use the toolchain's C compiler to build and install it:
+```bash
+cd zlib-1.3.1
+CC=riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --prefix=riscv/sysroot
 make && make install
 ```
 
@@ -18,7 +24,7 @@ CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --build=x86_64-linux-g
 make && make install
 ```
 
-Our last dependency is the custom fork of LLVM we use to compile BPF programs.
+Our last dependency is the custom fork of LLVM we use to compile BPF programs. We'll also need to build this in the same way.
 ```bash
 cd llvm-project
 CC=clang CXX=clang++ cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_TARGETS_TO_BUILD=BPF\;RISCV -DLLVM_USE_LINKER=lld -DCMAKE_TOOLCHAIN_FILE=../../riscv.cmake -DHAVE_POSIX_REGEX=0 -DHAVE_STEADY_CLOCK=0 -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-oe-linux ../llvm
@@ -30,3 +36,4 @@ Finally, we can target RISC-V when generating our BPF-Prime deployment:
 CC=clang CXX=clang++ fprime-util generate riscv -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DLLVM_DIR=toolchain/llvm-project/build/lib/cmake/llvm
 ninja
 ```
+

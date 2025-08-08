@@ -1,5 +1,6 @@
-set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR riscv64)
+
+set(CMAKE_LINKER_TYPE LLD)
 
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
@@ -8,9 +9,12 @@ set(CMAKE_AR llvm-ar)
 set(CMAKE_NM llvm-nm)
 set(CMAKE_RANLIB llvm-ranlib)
 
-set(CMAKE_FIND_ROOT_PATH "${CMAKE_CURRENT_LIST_DIR}/riscv64")
-set(TOOLCHAIN "${CMAKE_CURRENT_LIST_DIR}/riscv64")
+set(CMAKE_FIND_ROOT_PATH "${CMAKE_CURRENT_LIST_DIR}/riscv")
+set(TOOLCHAIN "${CMAKE_CURRENT_LIST_DIR}/riscv")
 set(CMAKE_SYSROOT "${TOOLCHAIN}/sysroot")
+
+set(CMAKE_C_COMPILER_TARGET riscv64-linux-gnu)
+set(CMAKE_CXX_COMPILER_TARGET riscv64-linux-gnu)
 
 set(CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN "${TOOLCHAIN}")
 set(CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN "${TOOLCHAIN}")
@@ -18,12 +22,10 @@ set(CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN "${TOOLCHAIN}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-add_compile_options(
-	--target=riscv64-unknown-linux-gnu
-)
+set(LLVM_DIR "${CMAKE_CURRENT_LIST_DIR}/llvm-project/build/lib/cmake/llvm")
 
 add_link_options(
-	--target=riscv64-unknown-linux-gnu
 	-fuse-ld=lld
 )
