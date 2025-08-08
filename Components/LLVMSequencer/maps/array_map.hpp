@@ -13,7 +13,7 @@ namespace Components {
  * 
  */
 class array_map : public map {
-    PRIVATE:
+    private:
         U8 *mem;
     public:
         array_map(const bpf_map_def& map_def, I32& res) noexcept;

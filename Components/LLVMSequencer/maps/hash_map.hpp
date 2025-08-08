@@ -14,7 +14,7 @@ namespace Components {
  * 
  */
 class hash_map : public map {
-    PRIVATE:
+    private:
         pooled_hash_map mem;
     public:
         hash_map(const bpf_map_def& map_def, I32& res) noexcept;

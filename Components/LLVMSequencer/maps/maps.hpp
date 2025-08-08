@@ -64,7 +64,7 @@ class map {
  * 
  */
 class maps {
-    PRIVATE:
+    private:
         struct bpf_external_function {
             size_t index;
             const char *name;
@@ -111,21 +111,21 @@ class maps {
          * @param fd File descriptor
          * @return Address of specified map
          */
-        STATIC U64 map_by_fd(U32 fd) noexcept;
+        static U64 map_by_fd(U32 fd) noexcept;
         /**
          * @brief Get BPF map from its index
          * 
          * @param idx Index
          * @return Address of specified map 
          */
-        STATIC U64 map_by_idx(U32 idx) noexcept;
+        static U64 map_by_idx(U32 idx) noexcept;
         /**
          * @brief Get the address of the first element of a BPF map
          * 
          * @param map_ptr Address of map
          * @return Address of first element of map 
          */
-        STATIC U64 map_val(U64 map_ptr) noexcept;
+        static U64 map_val(U64 map_ptr) noexcept;
 
         /**
          * @brief Lookup an element in a BPF map
@@ -134,7 +134,7 @@ class maps {
          * @param key Pointer to key data
          * @return Pointer to specified element
          */
-        STATIC void *bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept;
+        static void *bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept;
         /**
          * @brief Update an element in a BPF map
          * 
@@ -144,7 +144,7 @@ class maps {
          * @param flags Map-specific flags
          * @return Negative errno status on failure (0 on success)
          */
-        STATIC long bpf_map_update_elem(void *map_ptr, const void *key, const void *value, U64 flags) noexcept;
+        static long bpf_map_update_elem(void *map_ptr, const void *key, const void *value, U64 flags) noexcept;
         /**
          * @brief Delete an element in a BPF map
          * 
@@ -152,7 +152,7 @@ class maps {
          * @param key Pointer to key data
          * @return Negative errno status on failure (0 on success)
          */
-        STATIC long bpf_map_delete_elem(void *map_ptr, const void *key) noexcept;
+        static long bpf_map_delete_elem(void *map_ptr, const void *key) noexcept;
 };
 
 }

@@ -5,7 +5,7 @@
 #pragma once
 
 class shared_mutex {
-    PRIVATE:
+    private:
         Os::Mutex mutex;
         Os::ConditionVariable condvar;
 
@@ -22,7 +22,7 @@ class shared_mutex {
 };
 
 class shared_lock {
-    PRIVATE:
+    private:
         shared_mutex& mutex;
 
     public:
@@ -39,7 +39,7 @@ class shared_lock {
 };
 
 class unique_lock {
-    PRIVATE:
+    private:
         shared_mutex& mutex;
 
     public:

@@ -14,7 +14,7 @@ namespace Components {
  * 
  */
 class pooled_hash_map {
-    PRIVATE:
+    private:
         struct node {
             U8 *key;
             U8 *value;
