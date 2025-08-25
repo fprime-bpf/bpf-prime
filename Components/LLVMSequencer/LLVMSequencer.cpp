@@ -15,18 +15,9 @@ namespace Components {
 // ----------------------------------------------------------------------
 
 LLVMSequencer ::LLVMSequencer(const char* const compName) : 
-LLVMSequencerComponentBase(compName), 
-vm(),
+LLVMSequencerComponentBase(compName),
 bpf_mem(nullptr),
-bpf_mem_size(0) {
-    
-    I32 res = maps.register_functions(vm);
-    if (res) {
-        this->log_WARNING_HI_RegisterFunctionsFailed(
-            Fw::LogStringArg(std::strerror(-res))
-        );
-    }
-}
+bpf_mem_size(0) { }
 
 LLVMSequencer ::~LLVMSequencer() {}
 

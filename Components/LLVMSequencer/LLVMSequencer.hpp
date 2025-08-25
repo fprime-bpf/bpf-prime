@@ -34,12 +34,12 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     ~LLVMSequencer();
 
   private:
-    bpftime::llvmbpf_vm vm;  
+    std::unique_ptr<bpftime::llvmbpf_vm> vm;  
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
     size_t bpf_mem_size;
     std::string sequenceFilePath;
-    U8* buffer;
+    U8* buffer = nullptr;
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
