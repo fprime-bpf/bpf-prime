@@ -7,11 +7,5 @@ int main() {
 
     bpf_map_update_elem(map, &key, &value, 0);
 
-    map = MAP_BY_FD(1);
-    key = 2;
-    value = 0xABADCAFE;
-
-    bpf_map_update_elem(map, &key, &value, 0);
-
     return 0;
 }
