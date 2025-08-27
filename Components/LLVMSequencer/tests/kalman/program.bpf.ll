@@ -14,7 +14,6 @@ entry:
   %ret1 = alloca ptr, align 8
   %tmp2 = alloca ptr, align 8
   %result = alloca ptr, align 8
-  %key = alloca i32, align 4
   %ins = alloca [7 x float], align 4
   %preds = alloca [7 x float], align 4
   %i = alloca i32, align 4
@@ -32,7 +31,6 @@ entry:
   store ptr %4, ptr %tmp2, align 8
   %5 = load ptr, ptr %tmp2, align 8
   store ptr %5, ptr %out_map, align 8
-  store i32 0, ptr %key, align 4
   store i32 0, ptr %i, align 4
   br label %for.cond
 
@@ -143,8 +141,8 @@ attributes #2 = { nounwind }
 !3 = !{i32 7, !"uwtable", i32 2}
 !4 = !{i32 7, !"frame-pointer", i32 1}
 !5 = !{!"clang version 20.1.0 (git@github.com:h313/llvm-duotronic.git 859c3b906df7604a0ad759c23448e36339b081df)"}
-!6 = !{i64 2147503782}
-!7 = !{i64 2147504220}
+!6 = !{i64 2147503763}
+!7 = !{i64 2147504201}
 !8 = distinct !{!8, !9}
 !9 = !{!"llvm.loop.mustprogress"}
 !10 = distinct !{!10, !9}
