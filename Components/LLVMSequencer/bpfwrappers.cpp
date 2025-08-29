@@ -130,11 +130,10 @@ namespace Components {
         return true;
     }
    
-   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def) {
+   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def, U32 fd) {
        Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
        
-       U32 fd;
        res = this->maps.create_map(map_def, fd);
        if (res) {
            Fw::LogStringArg errMsg("Failed to create maps");

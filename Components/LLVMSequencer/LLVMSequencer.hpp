@@ -98,6 +98,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Create a map
     void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,                          //!< The opcode
                                    U32 cmdSeq,                                   //!< The command sequence number
+                                   U32 fd,                                       //!< Map file descriptor
                                    Components::LLVMSequencer_BPF_MAP_TYPE type,  //!< Map type
                                    U32 key_size,                                 //!< Size of map keys (in bytes)
                                    U32 value_size,                               //!< Size of map values (in bytes)
@@ -194,7 +195,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
 
     Fw::Success run();
 
-    Fw::Success map_create(const bpf_map_def& map_def);
+    Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
 
     Fw::Success map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path);
     

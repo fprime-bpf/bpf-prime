@@ -11,29 +11,17 @@ namespace Components {
 map::map(U32 key_size, U32 value_size, U32 max_entries) : 
     key_size(key_size), value_size(value_size), max_entries(max_entries) {}
 
-
-I32 maps::resize_map_instances() noexcept {
-    if (map_instances_size == UINT32_MAX) return -ENOMEM;
-
-    auto new_map_instances = new(std::nothrow) map*[map_instances_size * 2]();
-    if (!new_map_instances) return -ENOMEM;
-
-    if (map_instances)
-        std::memcpy(new_map_instances, map_instances, sizeof(map*) * map_instances_size);
-    
-    delete[] map_instances;
-    map_instances = new_map_instances;
-    map_instances_size *= 2;
-    return 0;
+maps::maps() {
+    map_instances.reserve(Max_Map_Instances);
 }
 
-I32 maps::create_map(const bpf_map_def& map_def, U32& fd) noexcept {
+I32 maps::create_map(const bpf_map_def& map_def, U32 fd) noexcept {
     I32 res = 0;
 
-    if (maps_count >= map_instances_size || !map_instances) {
-        res = resize_map_instances();
-        if (res) return res;
-    }
+    if (map_instances.size() >= Max_Map_Instances)
+        return -ENOSPC;
+    if (map_instances.find(fd) != map_instances.end())
+        return -EEXIST;
 
     map *map;
 
@@ -51,8 +39,7 @@ I32 maps::create_map(const bpf_map_def& map_def, U32& fd) noexcept {
     if (!map) return -ENOMEM;
     if (res) return res;
 
-    fd = maps_count;
-    map_instances[maps_count++] = map;
+    map_instances[fd] = map;
     return 0;
 }
 
@@ -81,13 +68,10 @@ I32 maps::register_functions(bpftime::llvmbpf_vm& vm) noexcept {
 }
 
 void maps::close_all_maps() noexcept {
-    for (U8 i = 0; i < map_instances_size; i++) {
-        delete map_instances[i];
+    for (auto& [fd, map] : map_instances) {
+        delete map;
     }
-    delete[] map_instances;
-    map_instances = nullptr;
-    maps_count = 0;
-    map_instances_size = 0;
+    map_instances.clear();
 }
 
 maps::~maps() {

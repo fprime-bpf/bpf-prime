@@ -95,6 +95,7 @@ void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
 
 void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
                                                U32 cmdSeq,
+                                               U32 fd,
                                                Components::LLVMSequencer_BPF_MAP_TYPE type,
                                                U32 key_size,
                                                U32 value_size,
@@ -111,7 +112,7 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
     };
 
     // Create the map
-    Fw::Success result = this->map_create(map_def);
+    Fw::Success result = this->map_create(map_def, fd);
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
