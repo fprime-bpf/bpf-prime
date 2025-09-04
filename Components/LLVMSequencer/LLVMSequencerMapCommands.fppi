@@ -15,6 +15,7 @@ enum BPF_MAP_TYPE : U32 {
 
 @ Create a map
 async command BPF_MAP_CREATE(
+            fd: U32, @< Map file descriptor
             $type: BPF_MAP_TYPE, @< Map type
             key_size: U32, @< Size of map keys (in bytes)
             value_size: U32, @< Size of map values (in bytes)

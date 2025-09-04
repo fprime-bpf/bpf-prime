@@ -15,18 +15,9 @@ namespace Components {
 // ----------------------------------------------------------------------
 
 LLVMSequencer ::LLVMSequencer(const char* const compName) : 
-LLVMSequencerComponentBase(compName), 
-vm(),
+LLVMSequencerComponentBase(compName),
 bpf_mem(nullptr),
-bpf_mem_size(0) {
-    
-    I32 res = maps.register_functions(vm);
-    if (res) {
-        this->log_WARNING_HI_RegisterFunctionsFailed(
-            Fw::LogStringArg(std::strerror(-res))
-        );
-    }
-}
+bpf_mem_size(0) { }
 
 LLVMSequencer ::~LLVMSequencer() {}
 
@@ -104,6 +95,7 @@ void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
 
 void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
                                                U32 cmdSeq,
+                                               U32 fd,
                                                Components::LLVMSequencer_BPF_MAP_TYPE type,
                                                U32 key_size,
                                                U32 value_size,
@@ -120,7 +112,7 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
     };
 
     // Create the map
-    Fw::Success result = this->map_create(map_def);
+    Fw::Success result = this->map_create(map_def, fd);
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

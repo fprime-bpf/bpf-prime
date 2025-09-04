@@ -14,6 +14,17 @@ namespace Components {
        delete[] this->buffer;
        Fw::LogStringArg loggerFilePath(sequenceFilePath);
 
+       // Create the VM
+       this->vm = std::make_unique<bpftime::llvmbpf_vm>();
+    
+       I32 res = maps.register_functions(*vm);
+       if (res) {
+           this->log_WARNING_HI_RegisterFunctionsFailed(
+               Fw::LogStringArg(std::strerror(-res))
+           );
+           return Fw::Success::FAILURE;
+       }
+
        // Open the file
        Os::File file;
        Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
@@ -64,17 +75,17 @@ namespace Components {
        std::memcpy(bpf_mem.get(), buffer, bpf_mem_size);
 
        // Load the binary into the VM
-       auto load_res = vm.load_code(buffer, size_result);
+       auto load_res = vm->load_code(buffer, size_result);
        if (load_res) {
            delete[] this->buffer;
-           Fw::LogStringArg errMsg(std::string("Failed to load binary into VM - " + vm.get_error_message()).c_str());
+           Fw::LogStringArg errMsg(std::string("Failed to load binary into VM - " + vm->get_error_message()).c_str());
            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
 
-       auto compile_res = vm.compile();
+       auto compile_res = vm->compile();
        if (!compile_res) {
-           Fw::LogStringArg errMsg(std::string("Failed to compile BPF program - " + vm.get_error_message()).c_str());
+           Fw::LogStringArg errMsg(std::string("Failed to compile BPF program - " + vm->get_error_message()).c_str());
            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
@@ -89,9 +100,9 @@ namespace Components {
        uint64_t res = 0, err = 0;
        Fw::LogStringArg loggerFilePath(sequenceFilePath.c_str());
 
-       err = vm.exec(&bpf_mem, bpf_mem_size, res);
+       err = vm->exec(&bpf_mem, bpf_mem_size, res);
        if (err) {
-           Fw::LogStringArg errMsg(vm.get_error_message().c_str());
+           Fw::LogStringArg errMsg(vm->get_error_message().c_str());
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
@@ -119,11 +130,10 @@ namespace Components {
         return true;
     }
    
-   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def) {
+   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def, U32 fd) {
        Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
        
-       U32 fd;
        res = this->maps.create_map(map_def, fd);
        if (res) {
            Fw::LogStringArg errMsg("Failed to create maps");

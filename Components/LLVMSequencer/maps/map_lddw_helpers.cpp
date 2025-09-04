@@ -5,7 +5,8 @@
 namespace Components {
 
 U64 maps::map_by_fd(U32 fd) noexcept {
-    if (fd >= LLVMSequencer::maps.maps_count) return 0;
+    if (LLVMSequencer::maps.map_instances.find(fd) == LLVMSequencer::maps.map_instances.end())
+        return 0;
     
     auto map = LLVMSequencer::maps.map_instances[fd];
     return reinterpret_cast<U64>(map); 
