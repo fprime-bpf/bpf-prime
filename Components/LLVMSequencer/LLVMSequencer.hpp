@@ -1,6 +1,6 @@
 // ======================================================================
 // \title  LLVMSequencer.hpp
-// \author rpendergrast
+// \author ezrak
 // \brief  hpp file for LLVMSequencer component implementation class
 // ======================================================================
 
@@ -15,9 +15,6 @@
 #include "maps/maps.hpp"
 
 namespace Components {
-
-using Signal = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::Signal;
-using State = LLVMSequencer_LLVMSequencerStateMachineStateMachineBase::State;
 
 class LLVMSequencer : public LLVMSequencerComponentBase {
   public:
@@ -84,7 +81,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Load and compile a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  U32 vmId,              //!< The index of the selected BPF VM (0-63)
+                                  U32 vmId,             //!< The index of the selected BPF VM (0-63)
                                   const Fw::CmdStringArg& sequenceFilePath) override;
 
     //! Handler implementation for command RUN_SEQUENCE
@@ -92,7 +89,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                  U32 cmdSeq,           //!< The command sequence number
-                                 U32 vmId               //!< The index of the selected BPF VM (0-63)
+                                 U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
@@ -145,73 +142,30 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
         const Fw::CmdStringArg& key  //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
         ) override;
 
-  private:
-    // ----------------------------------------------------------------------
-    // Implementations for internal state machine actions
-    // ----------------------------------------------------------------------
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_setSequenceFilePath(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal,
-      const Fw::StringBase& filePath //!< The sequence file path
-    );
-
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_clearSequenceFile(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    //Handler for sending the execution error response
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_sendCmdResponse_EXECUTION_ERROR(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    //Action for action load of state machine
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_loadSequence(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_compileSequence(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_runSequence(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    void Components_LLVMSequencer_LLVMSequencerStateMachine_action_signalEntered(
-      SmId smId,
-      Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
-    );
-
-    // ----------------------------------------------------------------------
+          // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
     
     Fw::Success load(U32 vmId, const char* sequenceFilePath);
-
+    
     Fw::Success compile();
-
+    
     Fw::Success run(U32 vmId);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
-
+    
     Fw::Success map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path);
     
     Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
-
+    
   private:
     bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
 
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 
     bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);
-
 };
 
 }  // namespace Components
