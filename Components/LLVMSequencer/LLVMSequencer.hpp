@@ -34,7 +34,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     ~LLVMSequencer();
 
   private:
-    std::unique_ptr<bpftime::llvmbpf_vm> vm;  
+    bpftime::llvmbpf_vm *vms[64] = {};  
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
     size_t bpf_mem_size;
@@ -84,13 +84,15 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     //! Load and compile a sequence
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
+                                  U32 vmId,              //!< The index of the selected BPF VM (0-63)
                                   const Fw::CmdStringArg& sequenceFilePath) override;
 
     //! Handler implementation for command RUN_SEQUENCE
     //!
     //! Runs a sequence
     void RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq            //!< The command sequence number
+                                 U32 cmdSeq,           //!< The command sequence number
+                                 U32 vmId               //!< The index of the selected BPF VM (0-63)
                                  ) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
@@ -189,11 +191,11 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
     
-    Fw::Success load(const char* sequenceFilePath);
+    Fw::Success load(U32 vmId, const char* sequenceFilePath);
 
     Fw::Success compile();
 
-    Fw::Success run();
+    Fw::Success run(U32 vmId);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
 
@@ -204,6 +206,8 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
   private:
+    bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
+
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 
     bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);

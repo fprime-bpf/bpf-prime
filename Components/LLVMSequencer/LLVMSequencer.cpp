@@ -54,6 +54,7 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 
 void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
                                               U32 cmdSeq,
+                                              U32 vmId,
                                               const Fw::CmdStringArg& sequenceFilePath) {
     /*
     if (sequencer_getState() != State::IDLE) {
@@ -64,7 +65,7 @@ void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
     */
 
     // We are in the IDLE state, so we can load the sequence
-    Fw::Success result = this->load(sequenceFilePath.toChar()); //TODO - Implement compile function
+    Fw::Success result = this->load(vmId, sequenceFilePath.toChar()); //TODO - Implement compile function
     this->sequenceFilePath = sequenceFilePath.toChar();
 
     if (result == Fw::Success::SUCCESS) {
@@ -76,14 +77,14 @@ void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
     }
 }
 
-void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
     if (sequencer_getState() != State::READY){
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
     }
 
     // The sequence is compiled, so we can run it
-    Fw::Success result = this->run(); //Now we run the sequence!
+    Fw::Success result = this->run(vmId); //Now we run the sequence!
     if (result == Fw::Success::SUCCESS) {
         this->sequencer_sendSignal_run_success();
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

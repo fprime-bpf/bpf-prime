@@ -10,14 +10,24 @@
 
 namespace Components {
 
-   Fw::Success LLVMSequencer::load(const char* sequenceFilePath) {
+   Fw::Success LLVMSequencer::load(U32 vmId, const char* sequenceFilePath) {
        delete[] this->buffer;
        Fw::LogStringArg loggerFilePath(sequenceFilePath);
 
        // Create the VM
-       this->vm = std::make_unique<bpftime::llvmbpf_vm>();
-    
-       I32 res = maps.register_functions(*vm);
+       if (!validate_vm_id(vmId, loggerFilePath)) return Fw::Success::FAILURE;
+       
+       delete vms[vmId];
+       this->vms[vmId] = new(std::nothrow) bpftime::llvmbpf_vm();
+
+       if (!vms[vmId]) {
+           Fw::LogStringArg errMsg("Failed to allocate VM");
+           this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+           return Fw::Success::FAILURE;
+       }
+       auto& vm = *this->vms[vmId];
+       
+       I32 res = maps.register_functions(vm);
        if (res) {
            this->log_WARNING_HI_RegisterFunctionsFailed(
                Fw::LogStringArg(std::strerror(-res))
@@ -75,17 +85,17 @@ namespace Components {
        std::memcpy(bpf_mem.get(), buffer, bpf_mem_size);
 
        // Load the binary into the VM
-       auto load_res = vm->load_code(buffer, size_result);
+       auto load_res = vm.load_code(buffer, size_result);
        if (load_res) {
            delete[] this->buffer;
-           Fw::LogStringArg errMsg(std::string("Failed to load binary into VM - " + vm->get_error_message()).c_str());
+           Fw::LogStringArg errMsg(std::string("Failed to load binary into VM - " + vm.get_error_message()).c_str());
            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
 
-       auto compile_res = vm->compile();
+       auto compile_res = vm.compile();
        if (!compile_res) {
-           Fw::LogStringArg errMsg(std::string("Failed to compile BPF program - " + vm->get_error_message()).c_str());
+           Fw::LogStringArg errMsg(std::string("Failed to compile BPF program - " + vm.get_error_message()).c_str());
            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
@@ -95,18 +105,37 @@ namespace Components {
        return Fw::Success::SUCCESS; 
    }
 
-   Fw::Success LLVMSequencer::run() {
-       // Run the compiled sequence
+   Fw::Success LLVMSequencer::run(U32 vmId) {
        uint64_t res = 0, err = 0;
        Fw::LogStringArg loggerFilePath(sequenceFilePath.c_str());
 
-       err = vm->exec(&bpf_mem, bpf_mem_size, res);
+       // Get VM instance
+       if (!validate_vm_id(vmId, loggerFilePath)) return Fw::Success::FAILURE;
+       
+       if (!vms[vmId]) {
+           Fw::LogStringArg errMsg("VM ID Invalid");
+           this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
+           return Fw::Success::FAILURE;
+       }
+       auto& vm = *this->vms[vmId];
+
+       // Run the compiled sequence
+       err = vm.exec(&bpf_mem, bpf_mem_size, res);
        if (err) {
-           Fw::LogStringArg errMsg(vm->get_error_message().c_str());
+           Fw::LogStringArg errMsg(vm.get_error_message().c_str());
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
        return Fw::Success::SUCCESS;
+   }
+
+    bool LLVMSequencer::validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath) {
+       if (vmId >= (sizeof(vms) / sizeof(bpftime::llvmbpf_vm*))) {
+           Fw::LogStringArg errMsg("VM ID Invalid");
+           this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+           return false;
+       }
+       return true;
    }
 
     bool LLVMSequencer::get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name) {

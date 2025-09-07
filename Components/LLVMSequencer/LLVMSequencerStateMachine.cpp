@@ -16,6 +16,8 @@ namespace Components {
         Components_LLVMSequencer_LLVMSequencerStateMachine::Signal signal
     ){
         this->sequenceFilePath = "";
-        this->vm->unload_code();
+        for (auto *vm : vms) {
+            if (vm) vm->unload_code();
+        }
     }
 }
