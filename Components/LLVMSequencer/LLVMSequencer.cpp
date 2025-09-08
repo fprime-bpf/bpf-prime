@@ -1,6 +1,6 @@
 // ======================================================================
 // \title  LLVMSequencer.cpp
-// \author rpendergrast
+// \author ezrak
 // \brief  cpp file for LLVMSequencer component implementation class
 // ======================================================================
 
@@ -52,45 +52,30 @@ void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
-                                              U32 cmdSeq,
-                                              const Fw::CmdStringArg& sequenceFilePath) {
-    /*
-    if (sequencer_getState() != State::IDLE) {
-        // If the sequencer is not in the IDLE state, command response out and error
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-        return;
-    }
-    */
-
-    // We are in the IDLE state, so we can load the sequence
-    Fw::Success result = this->load(sequenceFilePath.toChar()); //TODO - Implement compile function
-    this->sequenceFilePath = sequenceFilePath.toChar();
-
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_load_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_load_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+namespace { 
+    Fw::CmdResponse result_to_response(Fw::Success result) {
+        return  (result == Fw::Success::SUCCESS) ? 
+            Fw::CmdResponse::OK : 
+            Fw::CmdResponse::EXECUTION_ERROR;
     }
 }
 
-void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    if (sequencer_getState() != State::READY){
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-        return;
-    }
+void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
+                                              U32 cmdSeq,
+                                              U32 vmId,
+                                              const Fw::CmdStringArg& sequenceFilePath) {
 
+    // Load the sequence
+    Fw::Success result = this->load(vmId, sequenceFilePath.toChar());
+    this->sequenceFilePath = sequenceFilePath.toChar();
+
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
+}
+
+void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
     // The sequence is compiled, so we can run it
-    Fw::Success result = this->run(); //Now we run the sequence!
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
+    Fw::Success result = this->run(vmId); //Now we run the sequence!
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
@@ -113,13 +98,7 @@ void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
 
     // Create the map
     Fw::Success result = this->map_create(map_def, fd);
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 namespace {
@@ -144,13 +123,7 @@ void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
     
     // Lookup an element in the map
     Fw::Success result = this->map_lookup_elem(fd, key_buffer, key_size, output_path.toChar());
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
@@ -168,13 +141,7 @@ void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
 
     // Update an element in the map
     Fw::Success result = this->map_update_elem(fd, key_buffer, key_size, value_buffer, value_size, flags);
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
@@ -187,13 +154,7 @@ void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
     
     // Delete an element in the map
     Fw::Success result = this->map_delete_elem(fd, key_buffer, key_size);
-    if (result == Fw::Success::SUCCESS) {
-        this->sequencer_sendSignal_run_success();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
-    } else {
-        this->sequencer_sendSignal_run_failure();
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
-    }
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 }  // namespace Components
