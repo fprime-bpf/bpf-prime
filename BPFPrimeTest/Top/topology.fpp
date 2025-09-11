@@ -32,7 +32,7 @@ module BPFPrimeTest {
     instance timer
     instance comDriver
     instance cmdSeq
-    instance llvmSequencer
+    instance bpfSequencer
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers

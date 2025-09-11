@@ -1,11 +1,11 @@
 // ======================================================================
-// \title  LLVMSequencer.cpp
+// \title  BpfSequencer.cpp
 // \author ezrak
-// \brief  cpp file for LLVMSequencer component implementation class
+// \brief  cpp file for BpfSequencer component implementation class
 // ======================================================================
 
-#include "Components/LLVMSequencer/LLVMSequencer.hpp"
-#include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <cstring>
 
 namespace Components {
@@ -14,22 +14,22 @@ namespace Components {
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
-LLVMSequencer ::LLVMSequencer(const char* const compName) : 
-LLVMSequencerComponentBase(compName),
+BpfSequencer ::BpfSequencer(const char* const compName) : 
+BpfSequencerComponentBase(compName),
 bpf_mem(nullptr),
 bpf_mem_size(0) { }
 
-LLVMSequencer ::~LLVMSequencer() {}
+BpfSequencer ::~BpfSequencer() {}
 
 // ----------------------------------------------------------------------
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-void LLVMSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
+void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
     // Not yet needed 
 }
 
-void LLVMSequencer ::cmdResponseIn_handler(FwIndexType portNum,
+void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,
                                            FwOpcodeType opCode,
                                            U32 cmdSeq,
                                            const Fw::CmdResponse& response) {
@@ -39,11 +39,11 @@ void LLVMSequencer ::cmdResponseIn_handler(FwIndexType portNum,
 }
 
 //Just ping in and out
-void LLVMSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
+void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
     this->pingOut_out(0, key);
 }
 
-void LLVMSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
+void BpfSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
     // Telemetry currently not implemented, but this will just write telemetry
     // to the port
 }
@@ -60,7 +60,7 @@ namespace {
     }
 }
 
-void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
+void BpfSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
                                               U32 cmdSeq,
                                               U32 vmId,
                                               const Fw::CmdStringArg& sequenceFilePath) {
@@ -72,16 +72,16 @@ void LLVMSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-void LLVMSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
+void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
     // The sequence is compiled, so we can run it
     Fw::Success result = this->run(vmId); //Now we run the sequence!
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-void LLVMSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
+void BpfSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
                                                U32 cmdSeq,
                                                U32 fd,
-                                               Components::LLVMSequencer_BPF_MAP_TYPE type,
+                                               Components::BpfSequencer_BPF_MAP_TYPE type,
                                                U32 key_size,
                                                U32 value_size,
                                                U32 max_entries,
@@ -111,7 +111,7 @@ namespace {
     }
 }
 
-void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
+void BpfSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
                                                     const Fw::CmdStringArg& key,
@@ -126,7 +126,7 @@ void LLVMSequencer ::BPF_MAP_LOOKUP_ELEM_cmdHandler(FwOpcodeType opCode,
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
+void BpfSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
                                                     const Fw::CmdStringArg& key,
@@ -144,7 +144,7 @@ void LLVMSequencer ::BPF_MAP_UPDATE_ELEM_cmdHandler(FwOpcodeType opCode,
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-void LLVMSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
+void BpfSequencer ::BPF_MAP_DELETE_ELEM_cmdHandler(FwOpcodeType opCode,
                                                     U32 cmdSeq,
                                                     U32 fd,
                                                     const Fw::CmdStringArg& key) {

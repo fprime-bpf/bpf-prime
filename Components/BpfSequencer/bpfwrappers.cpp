@@ -1,5 +1,5 @@
-#include "Components/LLVMSequencer/LLVMSequencer.hpp"
-#include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "maps/maps.hpp"
 #include "bpf.hpp"
 
@@ -10,7 +10,7 @@
 
 namespace Components {
 
-   Fw::Success LLVMSequencer::load(U32 vmId, const char* sequenceFilePath) {
+   Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
        delete[] this->buffer;
        Fw::LogStringArg loggerFilePath(sequenceFilePath);
 
@@ -105,7 +105,7 @@ namespace Components {
        return Fw::Success::SUCCESS; 
    }
 
-   Fw::Success LLVMSequencer::run(U32 vmId) {
+   Fw::Success BpfSequencer::run(U32 vmId) {
        uint64_t res = 0, err = 0;
        Fw::LogStringArg loggerFilePath(sequenceFilePath.c_str());
 
@@ -129,7 +129,7 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
-    bool LLVMSequencer::validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath) {
+    bool BpfSequencer::validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath) {
        if (vmId >= (sizeof(vms) / sizeof(bpftime::llvmbpf_vm*))) {
            Fw::LogStringArg errMsg("VM ID Invalid");
            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
@@ -138,7 +138,7 @@ namespace Components {
        return true;
    }
 
-    bool LLVMSequencer::get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name) {
+    bool BpfSequencer::get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name) {
         map = reinterpret_cast<Components::map *>(maps::map_by_fd(fd));
         if (!map) {
             Fw::LogStringArg errMsg("Map does not exist");
@@ -148,7 +148,7 @@ namespace Components {
         return true;
     }
 
-    bool LLVMSequencer::validate_data_size(U32 size, bool key, map *map, Fw::LogStringArg& command_name) {
+    bool BpfSequencer::validate_data_size(U32 size, bool key, map *map, Fw::LogStringArg& command_name) {
         U32 expected_size = key ? map->key_size : map->value_size;
 
         if (size != expected_size) {
@@ -159,7 +159,7 @@ namespace Components {
         return true;
     }
    
-   Fw::Success LLVMSequencer::map_create(const bpf_map_def& map_def, U32 fd) {
+   Fw::Success BpfSequencer::map_create(const bpf_map_def& map_def, U32 fd) {
        Fw::LogStringArg commandName("BPF_MAP_CREATE");
        I32 res;
        
@@ -175,7 +175,7 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
 
-   Fw::Success LLVMSequencer::map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path) {
+   Fw::Success BpfSequencer::map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path) {
        Fw::LogStringArg commandName("BPF_MAP_LOOKUP_ELEM");
 
        map *map;
@@ -213,7 +213,7 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
     
-   Fw::Success LLVMSequencer::map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags) {
+   Fw::Success BpfSequencer::map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags) {
        Fw::LogStringArg commandName("BPF_MAP_UPDATE_ELEM");
 
        map *map;
@@ -235,7 +235,7 @@ namespace Components {
        return Fw::Success::SUCCESS;
    }
     
-   Fw::Success LLVMSequencer::map_delete_elem(U32 fd, U8 *key, U32 key_size) {
+   Fw::Success BpfSequencer::map_delete_elem(U32 fd, U8 *key, U32 key_size) {
        Fw::LogStringArg commandName("BPF_MAP_DELETE_ELEM");
 
        map *map;

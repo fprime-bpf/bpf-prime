@@ -19,9 +19,9 @@ add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Top/")
 # Add custom components to this specific deployment here
 # add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/MyComponent/")
 
-include_directories(${PROJECT_SOURCE_DIR}/Components/LLVMSequencer/llvmbpf)
+include_directories(${PROJECT_SOURCE_DIR}/Components/BpfSequencer/llvmbpf)
 include_directories(${CMAKE_BINARY_DIR}/llvmbpf)
-include_directories(${PROJECT_SOURCE_DIR}/Components/LLVMSequencer/llvmbpf/src)
+include_directories(${PROJECT_SOURCE_DIR}/Components/BpfSequencer/llvmbpf/src)
 
 register_fprime_deployment(
     SOURCES

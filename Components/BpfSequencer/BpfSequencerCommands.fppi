@@ -1,4 +1,3 @@
-
 @ Load and compile a sequence
 async command LOAD_SEQUENCE(
             vmId: U32, @< The index of the selected BPF VM (0-63)

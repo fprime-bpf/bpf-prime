@@ -49,7 +49,7 @@ namespace PingEntries {
     namespace BPFPrimeTest_rateGroup2 {enum { WARN = 3, FATAL = 5 };}
     namespace BPFPrimeTest_rateGroup3 {enum { WARN = 3, FATAL = 5 };}
     namespace BPFPrimeTest_cmdSeq {enum { WARN = 3, FATAL = 5 };}
-    namespace BPFPrimeTest_llvmSequencer {enum { WARN = 3, FATAL = 5 };}
+    namespace BPFPrimeTest_bpfSequencer {enum { WARN = 3, FATAL = 5 };}
 }  // namespace PingEntries
 
 // Definitions are placed within a namespace named after the deployment

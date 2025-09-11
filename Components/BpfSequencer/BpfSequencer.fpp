@@ -1,6 +1,6 @@
 module Components {
     @ Sequencer Module using llvmbpf runtime
-    active component LLVMSequencer {
+    active component BpfSequencer {
 
         #Typedef SUCCESS
         enum SUCCESS {
@@ -9,10 +9,10 @@ module Components {
         }
 
         ############ Commands ############
-        include "LLVMSequencerCommands.fppi"
-        include "LLVMSequencerEvents.fppi"
-        include "LLVMSequencerMapCommands.fppi"
-        include "LLVMSequencerMapEvents.fppi"
+        include "BpfSequencerCommands.fppi"
+        include "BpfSequencerEvents.fppi"
+        include "BpfSequencerMapCommands.fppi"
+        include "BpfSequencerMapEvents.fppi"
 
         # Ports for the Sequencer
         @ output port for commands from the sequencer

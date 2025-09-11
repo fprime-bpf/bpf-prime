@@ -14,9 +14,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(SOURCE_FILES
-  "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.fpp"
+  "${CMAKE_CURRENT_LIST_DIR}/BpfSequencer.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/bpfwrappers.cpp"
-  "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/BpfSequencer.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/array_map.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/hash_map.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/pooled_hash_map.cpp"
@@ -53,9 +53,9 @@ target_link_libraries("${MODULE_NAME}" PUBLIC llvmbpf_vm)
 
 ### Unit Tests ###
 # set(UT_SOURCE_FILES
-#   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.fpp"
-#   "${CMAKE_CURRENT_LIST_DIR}/test/ut/LLVMSequencerTestMain.cpp"
-#   "${CMAKE_CURRENT_LIST_DIR}/test/ut/LLVMSequencerTester.cpp"
+#   "${CMAKE_CURRENT_LIST_DIR}/BpfSequencer.fpp"
+#   "${CMAKE_CURRENT_LIST_DIR}/test/ut/BpfSequencerTestMain.cpp"
+#   "${CMAKE_CURRENT_LIST_DIR}/test/ut/BpfSequencerTester.cpp"
 # )
 # set(UT_MOD_DEPS
 #   STest

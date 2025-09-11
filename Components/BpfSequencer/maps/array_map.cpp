@@ -2,7 +2,7 @@
 #include <cassert>
 #include <cstring>
 #include "array_map.hpp"
-#include "Components/LLVMSequencer/bpf.hpp"
+#include "Components/BpfSequencer/bpf.hpp"
 #include <cerrno>
 #include <new>
 

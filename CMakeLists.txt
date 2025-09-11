@@ -1,10 +1,10 @@
 ####
-# This sets up the build system for the 'LLVMSequencer' project, including
+# This sets up the build system for the 'BpfSequencer' project, including
 # components and deployments from project.cmake. In addition, it imports the core F Prime components.
 ####
 
 cmake_minimum_required(VERSION 3.13)
-project(LLVMSequencer C CXX)
+project(BpfSequencer C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

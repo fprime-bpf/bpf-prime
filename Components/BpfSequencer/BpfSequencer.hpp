@@ -1,14 +1,14 @@
 // ======================================================================
-// \title  LLVMSequencer.hpp
+// \title  BpfSequencer.hpp
 // \author ezrak
-// \brief  hpp file for LLVMSequencer component implementation class
+// \brief  hpp file for BpfSequencer component implementation class
 // ======================================================================
 
-#ifndef Components_LLVMSequencer_HPP
-#define Components_LLVMSequencer_HPP
+#ifndef Components_BpfSequencer_HPP
+#define Components_BpfSequencer_HPP
 
-#include "Components/LLVMSequencer/LLVMSequencerComponentAc.hpp"
-#include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
@@ -16,19 +16,19 @@
 
 namespace Components {
 
-class LLVMSequencer : public LLVMSequencerComponentBase {
+class BpfSequencer : public BpfSequencerComponentBase {
   public:
     inline static Components::maps maps;
     // ----------------------------------------------------------------------
     // Component construction and destruction
     // ----------------------------------------------------------------------
 
-    //! Construct LLVMSequencer object
-    LLVMSequencer(const char* const compName  //!< The component name
+    //! Construct BpfSequencer object
+    BpfSequencer(const char* const compName  //!< The component name
     );
 
-    //! Destroy LLVMSequencer object
-    ~LLVMSequencer();
+    //! Destroy BpfSequencer object
+    ~BpfSequencer();
 
   private:
     bpftime::llvmbpf_vm *vms[64] = {};  
@@ -98,7 +98,7 @@ class LLVMSequencer : public LLVMSequencerComponentBase {
     void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,                          //!< The opcode
                                    U32 cmdSeq,                                   //!< The command sequence number
                                    U32 fd,                                       //!< Map file descriptor
-                                   Components::LLVMSequencer_BPF_MAP_TYPE type,  //!< Map type
+                                   Components::BpfSequencer_BPF_MAP_TYPE type,  //!< Map type
                                    U32 key_size,                                 //!< Size of map keys (in bytes)
                                    U32 value_size,                               //!< Size of map values (in bytes)
                                    U32 max_entries,                              //!< Maximum amount of entries
