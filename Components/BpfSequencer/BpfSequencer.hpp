@@ -1,6 +1,6 @@
 // ======================================================================
 // \title  BpfSequencer.hpp
-// \author ezrak
+// \author ezrak, pendergrast
 // \brief  hpp file for BpfSequencer component implementation class
 // ======================================================================
 
