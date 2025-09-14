@@ -142,7 +142,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
         const Fw::CmdStringArg& key  //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
         ) override;
 
-          // ----------------------------------------------------------------------
+    // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
     

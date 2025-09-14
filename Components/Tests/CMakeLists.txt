@@ -16,6 +16,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Tests.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/Tests.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/Kalman.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/LowPassFilter.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/Matmul.cpp"
 )
 
 # Uncomment and add any modules that this component depends on, else
@@ -26,9 +29,9 @@ set(SOURCE_FILES
 # `Ref/SignalGen/CMakeLists.txt` will be named `Ref_SignalGen`.  `Ref/SignalGen`
 # is an acceptable alternative and will be internally converted to `Ref_SignalGen`.
 #
-# set(MOD_DEPS
-#   MyPackage_MyOtherModule
-# )
+set(MOD_DEPS
+  Components_BpfSequencer
+)
 
 register_fprime_module()
 

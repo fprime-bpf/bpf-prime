@@ -2,7 +2,22 @@ module Components {
     @ Component for testing the BpfSequencer
     active component Tests {
 
-        async command COMMAND()
+        @ Run kalman filter test natively (without an eBPF runtime)
+        async command KALMAN()
+
+        @ Run low pass filter test natively
+        async command LOW_PASS_FILTER()
+
+        @ Run matmul test natively
+        async command MATMUL()
+
+        @ Report failed test
+        event TestFailed(
+                testName: string,
+                exitCode: I32 
+            ) \
+            severity warning high \
+            format "Test '{}' failed! Exit code: {}"
 
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
