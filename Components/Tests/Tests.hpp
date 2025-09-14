@@ -50,6 +50,16 @@ class Tests final : public TestsComponentBase {
                            U32 cmdSeq            //!< The command sequence number
                            ) override;
 
+    //! Handler implementation for command POPULATE_MAP_RANDOM
+    //!
+    //! Populate a BPF map with random values. Intended for arraymaps
+    void POPULATE_MAP_RANDOM_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                        U32 cmdSeq,           //!< The command sequence number
+                                        U32 fd,               //!< Map file descriptor
+                                        U32 start,            //!< Starting index
+                                        U32 length            //!< Number of entries to write
+                                        ) override;
+
     // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------

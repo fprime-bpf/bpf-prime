@@ -5,9 +5,14 @@
 // ======================================================================
 
 #include "Components/Tests/Tests.hpp"
+#include "Components/BpfSequencer/maps/maps.hpp"
 #include "Kalman.hpp"
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
+#include <random>
+#include <climits>
+#include <algorithm>
+#include <functional>
 
 namespace Components {
 
@@ -47,6 +52,48 @@ void Tests ::MATMUL_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     I32 exit_status = Matmul::main();
     auto response = test_status_to_response("Matmul", exit_status);
     this->cmdResponse_out(opCode, cmdSeq, response);
+}
+
+void Tests ::POPULATE_MAP_RANDOM_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 fd, U32 start, U32 length) {
+
+    auto map = reinterpret_cast<Components::map*>(maps::map_by_fd(fd));
+    if (!map) {
+        Fw::LogStringArg errMsg(("Could not find map with fd " + std::to_string(fd)).c_str());
+        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+
+    const auto max_key_size = sizeof(size_t);
+    if (map->key_size > max_key_size) {
+        Fw::LogStringArg errMsg(("Map keys may not be greater than " + std::to_string(max_key_size) + " bytes").c_str());
+        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+    if (map->max_entries < start + length) {
+        Fw::LogStringArg errMsg("Requested range exceeds map bounds");
+        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+    
+    const size_t totalBytes = map->value_size * length;
+    U8 values[totalBytes];
+
+    static std::random_device rd;
+    static std::default_random_engine rng(rd());
+    static std::independent_bits_engine<std::default_random_engine, CHAR_BIT, U8> engine(rng);
+
+    std::generate(values, values + totalBytes, std::ref(engine));
+
+    for (size_t i = 0; i < length; ++i) {
+        size_t key = start + i;
+        U8 *value = &values[i * map->value_size];
+        map->update_elem(&key, value, 0);
+    }
+
+    this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
 }  // namespace Components

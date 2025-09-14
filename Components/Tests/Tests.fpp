@@ -19,6 +19,18 @@ module Components {
             severity warning high \
             format "Test '{}' failed! Exit code: {}"
 
+        @ Populate a BPF map with random values. Indended for arraymaps
+        async command POPULATE_MAP_RANDOM(
+                fd : U32, @< Map file descriptor
+                start : U32, @< Starting index
+                length : U32 @< Number of entries to write
+            )
+
+        @ Report error with POPULATE_MAP_RANDOM command
+        event FailedToPopulateMap(errMsg: string) \
+            severity warning low \
+            format "Failed to populate map: {}"
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################
