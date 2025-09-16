@@ -12,7 +12,6 @@
 #include <random>
 #include <climits>
 #include <algorithm>
-#include <functional>
 
 namespace Components {
 
@@ -81,10 +80,8 @@ void Tests ::POPULATE_MAP_RANDOM_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     const size_t totalBytes = map->value_size * length;
     U8 values[totalBytes];
 
-    static std::random_device rd;
-    static std::default_random_engine rng(rd());
-    static std::independent_bits_engine<std::default_random_engine, CHAR_BIT, U8> engine(rng);
-
+    std::independent_bits_engine<std::mt19937, CHAR_BIT, U8> engine(std::random_device{}());
+    
     std::generate(values, values + totalBytes, std::ref(engine));
 
     for (size_t i = 0; i < length; ++i) {
