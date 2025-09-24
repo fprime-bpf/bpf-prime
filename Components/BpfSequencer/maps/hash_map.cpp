@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <cassert>
 #include "hash_map.hpp"
-#include "Components/LLVMSequencer/bpf.hpp"
+#include "Components/BpfSequencer/bpf.hpp"
 #include <cerrno>
 
 namespace Components {

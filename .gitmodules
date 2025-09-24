@@ -1,6 +1,6 @@
 [submodule "lib/fprime"]
 	path = lib/fprime
 	url = https://github.com/nasa/fprime.git
-[submodule "Components/LLVMSequencer/llvmbpf"]
-	path = Components/LLVMSequencer/llvmbpf
+[submodule "Components/BpfSequencer/llvmbpf"]
+	path = Components/BpfSequencer/llvmbpf
 	url = git@github.com:fprime-bpf/llvmbpf.git

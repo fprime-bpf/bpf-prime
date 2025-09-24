@@ -1,14 +1,14 @@
 #include "maps.hpp"
-#include "Components/LLVMSequencer/LLVMSequencer.hpp"
-#include "Components/LLVMSequencer/bpf.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/bpf.hpp"
 
 namespace Components {
 
 U64 maps::map_by_fd(U32 fd) noexcept {
-    if (LLVMSequencer::maps.map_instances.find(fd) == LLVMSequencer::maps.map_instances.end())
+    if (BpfSequencer::maps.map_instances.find(fd) == BpfSequencer::maps.map_instances.end())
         return 0;
     
-    auto map = LLVMSequencer::maps.map_instances[fd];
+    auto map = BpfSequencer::maps.map_instances[fd];
     return reinterpret_cast<U64>(map); 
 }
 

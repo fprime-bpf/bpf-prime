@@ -2,8 +2,8 @@
 #include "array_map.hpp"
 #include "hash_map.hpp"
 #include <llvmbpf.hpp>
-#include "Components/LLVMSequencer/bpf.hpp"
-#include "Components/LLVMSequencer/LLVMSequencer.hpp"
+#include "Components/BpfSequencer/bpf.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
 #include <new>
 
 namespace Components {

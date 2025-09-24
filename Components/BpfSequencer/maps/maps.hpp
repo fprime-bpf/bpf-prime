@@ -1,7 +1,7 @@
 //! @file maps.hpp
 
-#include "Components/LLVMSequencer/llvmbpf/include/llvmbpf.hpp"
-#include "Components/LLVMSequencer/bpf.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Components/BpfSequencer/bpf.hpp"
 #include <Fw/Types/BasicTypes.hpp>
 #include <cstddef>
 #include "shared_mutex.hpp"

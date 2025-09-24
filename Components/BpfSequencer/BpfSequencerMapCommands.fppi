@@ -1,4 +1,3 @@
-
 enum BPF_MAP_TYPE : U32 {
     BPF_MAP_TYPE_UNSPEC,
     BPF_MAP_TYPE_HASH,

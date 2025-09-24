@@ -46,7 +46,12 @@ module BPFPrimeTest {
     stack size Default.STACK_SIZE \
     priority 117
 
-  instance llvmSequencer: Components.LLVMSequencer base id 0x0F00 \
+  instance bpfSequencer: Components.BpfSequencer base id 0x10005000 \
+    queue size Default.QUEUE_SIZE \
+    stack size Default.STACK_SIZE \
+    priority 118
+
+  instance tests: Components.Tests base id 0x10006000 \
     queue size Default.QUEUE_SIZE \
     stack size Default.STACK_SIZE \
     priority 118

@@ -1,5 +1,5 @@
 #include "maps.hpp"
-#include "Components/LLVMSequencer/LLVMSequencer.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "shared_mutex.hpp"
 
 namespace Components {
