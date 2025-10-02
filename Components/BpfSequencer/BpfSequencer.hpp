@@ -48,6 +48,12 @@ class BpfSequencer : public BpfSequencerComponentBase {
                              U32 context           //!< The call order
                              ) override;
 
+    void schedInOne_handler(FwIndexType portNum, U32 context);
+
+    void schedInTwo_handler(FwIndexType portNum, U32 context);
+
+    void schedInThree_handler(FwIndexType portNum, U32 context);
+
     //! Handler implementation for cmdResponseIn
     //!
     //! responses back from commands from the sequencer

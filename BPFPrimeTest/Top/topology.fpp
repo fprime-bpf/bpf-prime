@@ -101,24 +101,25 @@ module BPFPrimeTest {
       # timer to drive rate group
       timer.CycleOut -> rateGroupDriver.CycleIn
 
-      # Rate group 1
+      # Rate group 1 (1Hz)
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> rateGroup1.CycleIn
       rateGroup1.RateGroupMemberOut[0] -> CdhCore.tlmSend.Run
       rateGroup1.RateGroupMemberOut[1] -> FileHandling.fileDownlink.Run
       rateGroup1.RateGroupMemberOut[2] -> systemResources.run
       rateGroup1.RateGroupMemberOut[3] -> ComCcsds.comQueue.run
+      rateGroup1.RateGroupMemberOut[4] -> cmdSeq.schedIn
+      rateGroup1.RateGroupMemberOut[5] -> CdhCore.$health.Run
+      rateGroup1.RateGroupMemberOut[6] -> ComCcsds.commsBufferManager.schedIn
+      rateGroup1.RateGroupMemberOut[7] -> DataProducts.dpBufferManager.schedIn
+      rateGroup1.RateGroupMemberOut[8] -> DataProducts.dpWriter.schedIn
+      rateGroup1.RateGroupMemberOut[9] -> DataProducts.dpMgr.schedIn
 
-      # Rate group 2
+      # Rate group 2 (10Hz)
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> rateGroup2.CycleIn
-      rateGroup2.RateGroupMemberOut[0] -> cmdSeq.schedIn
 
-      # Rate group 3
+      # Rate group 3 (100Hz)
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup3] -> rateGroup3.CycleIn
-      rateGroup3.RateGroupMemberOut[0] -> CdhCore.$health.Run
-      rateGroup3.RateGroupMemberOut[1] -> ComCcsds.commsBufferManager.schedIn
-      rateGroup3.RateGroupMemberOut[2] -> DataProducts.dpBufferManager.schedIn
-      rateGroup3.RateGroupMemberOut[3] -> DataProducts.dpWriter.schedIn
-      rateGroup3.RateGroupMemberOut[4] -> DataProducts.dpMgr.schedIn
+      
     }
 
     connections CdhCore_cmdSeq {
@@ -128,7 +129,9 @@ module BPFPrimeTest {
     }
 
     connections BPFPrimeTest {
-
+      rateGroup1.RateGroupMemberOut[4] -> bpfSequencer.schedIn1Hz
+      rateGroup2.RateGroupMemberOut[1] -> bpfSequencer.schedIn10Hz
+      rateGroup3.RateGroupMemberOut[5] -> bpfSequencer.schedIn100Hz
     }
 
   }

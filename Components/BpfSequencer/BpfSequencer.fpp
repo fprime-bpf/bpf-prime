@@ -33,6 +33,11 @@ module Components {
         @ Port to write all telemetry
         async input port writeTlm: Svc.Sched priority 1 assert
 
+        @ Port to handle rate groups
+        sync input port schedInOne: Svc.Sched 
+        sync input port schedInTwo: Svc.Sched 
+        sync input port schedInThree: Svc.Sched 
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

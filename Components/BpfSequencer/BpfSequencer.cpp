@@ -25,8 +25,22 @@ BpfSequencer ::~BpfSequencer() {}
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
+
 void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
     // Not yet needed 
+}
+
+// Port for handling rate groups
+void BpfSequencer ::schedInOne_handler(FwIndexType portNum, U32 context) {
+    
+}
+
+void BpfSequencer ::schedInTwo_handler(FwIndexType portNum, U32 context) {
+
+}
+
+void BpfSequencer ::schedInThree_handler(FwIndexType portNum, U32 context) {
+
 }
 
 void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,

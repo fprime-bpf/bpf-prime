@@ -18,13 +18,19 @@ using namespace BPFPrimeTest;
 Fw::MallocAllocator mallocator;
 
 // The reference topology divides the incoming clock signal (1Hz) into sub-signals: 1Hz, 1/2Hz, and 1/4Hz with 0 offset
-Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1, 0}, {2, 0}, {4, 0}}};
+      
+// Incoming clock signal is 1MHz, we step down to 1kHz, 100Hz, 1Hz, 1/2Hz and 1/4Hz with 0 offset
+Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1,0},{2,0},{4,0}}};
 
 // Rate groups may supply a context token to each of the attached children whose purpose is set by the project. The
 // reference topology sets each token to zero as these contexts are unused in this project.
 U32 rateGroup1Context[Svc::ActiveRateGroup::CONNECTION_COUNT_MAX] = {};
 U32 rateGroup2Context[Svc::ActiveRateGroup::CONNECTION_COUNT_MAX] = {};
 U32 rateGroup3Context[Svc::ActiveRateGroup::CONNECTION_COUNT_MAX] = {};
+
+
+
+
 
 enum TopologyConstants {
     COMM_PRIORITY = 100,

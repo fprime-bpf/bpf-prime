@@ -50,7 +50,7 @@ module BPFPrimeTest {
     queue size Default.QUEUE_SIZE \
     stack size Default.STACK_SIZE \
     priority 118
-
+  
   # ----------------------------------------------------------------------
   # Queued component instances
   # ----------------------------------------------------------------------
