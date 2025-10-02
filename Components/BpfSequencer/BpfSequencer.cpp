@@ -25,24 +25,6 @@ BpfSequencer ::~BpfSequencer() {}
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-
-void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
-    // Not yet needed 
-}
-
-// Port for handling rate groups
-void BpfSequencer ::schedInOne_handler(FwIndexType portNum, U32 context) {
-    
-}
-
-void BpfSequencer ::schedInTwo_handler(FwIndexType portNum, U32 context) {
-
-}
-
-void BpfSequencer ::schedInThree_handler(FwIndexType portNum, U32 context) {
-
-}
-
 void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,
                                            FwOpcodeType opCode,
                                            U32 cmdSeq,
@@ -52,14 +34,47 @@ void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,
     // Will implement when the statemachine is implemented. 
 }
 
-//Just ping in and out
-void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
-    this->pingOut_out(0, key);
-}
-
 void BpfSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
     // Telemetry currently not implemented, but this will just write telemetry
     // to the port
+}
+
+void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
+    // Not yet needed 
+}
+
+// Port for handling rate groups
+void BpfSequencer ::schedIn100Hz_handler(FwIndexType portNum, U32 context) {
+    this->ticks++;
+
+    for(int i = 0; i<64; i++){
+        if(this->rg_100hz[i]){ // 1 indicates on 
+            Fw::Success result = this->run(i);
+        }
+    }
+
+    if(((this->ticks)%10)==0){
+        for(int i = 0; i<64; i++){
+            if(this->rg_10hz[i]){ // 1 indicates on 
+                Fw::Success result = this->run(i);
+            }
+        }
+    }
+
+    if(((this->ticks)%100)==0){
+        for(int i = 0; i<64; i++){
+            if(this->rg_1hz[i]){ // 1 indicates on 
+                Fw::Success result = this->run(i);
+            }
+        }
+        this->ticks = 0;
+    }
+}
+
+
+// Ping in and out
+void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
+    this->pingOut_out(0, key);
 }
 
 // ----------------------------------------------------------------------
@@ -90,6 +105,36 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     // The sequence is compiled, so we can run it
     Fw::Success result = this->run(vmId); //Now we run the sequence!
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
+}
+
+void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, U32 rate_group_hz) {
+    // We want to set a command to a certain rate group.
+    // TODO: Do we want to have commands running at multiple rate groups - NO
+    
+    if (rate_group_hz != 100 || rate_group_hz != 10 || rate_group_hz != 1){
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    } else { 
+        if (!vms[vm_id]){ // If we don't have a vm loaded vm
+            return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        } else {
+            // Remove this vm from all other rate groups
+            this->rg_100hz[vm_id] = 0;
+            this->rg_10hz[vm_id] = 0;
+            this->rg_1hz[vm_id] = 0;     
+            
+            // Set the rate group on 
+            if(rate_group_hz == 100) {
+                this->rg_100hz[vm_id] = 1;
+            } else if (rate_group_hz == 10){
+                this->rg_10hz[vm_id] = 1;
+            } else if (rate_group_hz == 1){
+                this->rg_1hz[vm_id] = 1;
+            }
+            this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
+        }
+    }
+    
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
 void BpfSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,

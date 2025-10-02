@@ -37,6 +37,12 @@ class BpfSequencer : public BpfSequencerComponentBase {
     size_t bpf_mem_size;
     std::string sequenceFilePath;
     U8* buffer = nullptr;
+    U64 ticks = 0;
+
+    // boolean arrays for different rate groups
+    bool rg_100hz[64] = {};
+    bool rg_10hz[64] = {};
+    bool rg_1hz[64] = {};
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
@@ -48,11 +54,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
                              U32 context           //!< The call order
                              ) override;
 
-    void schedInOne_handler(FwIndexType portNum, U32 context);
+    void schedIn100Hz_handler(FwIndexType portNum, U32 context);
 
-    void schedInTwo_handler(FwIndexType portNum, U32 context);
-
-    void schedInThree_handler(FwIndexType portNum, U32 context);
+    //! Handler implementation for pingIn
+    //!
+    //! Ping in port - highest priority
+    void pingIn_handler(FwIndexType portNum,  //!< The port number
+                        U32 key               //!< Value to return to pinger
+                        ) override;
 
     //! Handler implementation for cmdResponseIn
     //!
@@ -62,13 +71,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                U32 cmdSeq,                      //!< Command Sequence
                                const Fw::CmdResponse& response  //!< The command response argument
                                ) override;
-
-    //! Handler implementation for pingIn
-    //!
-    //! Ping in port - highest priority
-    void pingIn_handler(FwIndexType portNum,  //!< The port number
-                        U32 key               //!< Value to return to pinger
-                        ) override;
 
     //! Handler implementation for writeTlm
     //!
@@ -97,6 +99,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 cmdSeq,           //!< The command sequence number
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
+    
+    void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id,
+                                  U32 rate_group_hz);                                 
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -110,6 +117,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                    U32 max_entries,                              //!< Maximum amount of entries
                                    U32 map_flags                                 //!< Map flags
                                    ) override;
+                                   
 
     //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
     //!
@@ -148,7 +156,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
         const Fw::CmdStringArg& key  //!< Key data as whitespace-separated hex bytes, e.g. "01 02 03 A0 B0 C0"
         ) override;
 
-          // ----------------------------------------------------------------------
+    
+
+    // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
     

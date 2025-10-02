@@ -34,9 +34,10 @@ module Components {
         async input port writeTlm: Svc.Sched priority 1 assert
 
         @ Port to handle rate groups
-        sync input port schedInOne: Svc.Sched 
-        sync input port schedInTwo: Svc.Sched 
-        sync input port schedInThree: Svc.Sched 
+        sync input port schedIn100Hz: Svc.Sched 
+
+        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: U32)
+        event RateGroupSet(vm_id: U32, rate_group_hz: U32) severity activity low format "VM {} set to rate group {} hz"
 
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
