@@ -18,26 +18,21 @@ module Components {
         @ output port for commands from the sequencer
         output port cmdOut: Fw.Com
 
-        @ responses back from commands from the sequencer
-        async input port cmdResponseIn: Fw.CmdResponse priority 5 assert
-
         @ Ping in port - highest priority
         async input port pingIn: Svc.Ping priority 10 assert
 
         @ Ping out port
         output port pingOut: Svc.Ping 
 
-        @ Port to check the timers
-        async input port checkTimers: Svc.Sched priority 4 assert
-
-        @ Port to write all telemetry
-        async input port writeTlm: Svc.Sched priority 1 assert
-
         @ Port to handle rate groups
         sync input port schedIn100Hz: Svc.Sched 
 
+        telemetry ticks: U32
+
         sync command SetVMRateGroup(vm_id: U32, rate_group_hz: U32)
         event RateGroupSet(vm_id: U32, rate_group_hz: U32) severity activity low format "VM {} set to rate group {} hz"
+        event SchedInTick() severity activity low format "Tick Received"
+
 
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
@@ -68,5 +63,7 @@ module Components {
 
         @Port to set the value of a parameter
         param set port prmSetOut
+
+        
     }
 }

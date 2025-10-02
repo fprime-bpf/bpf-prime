@@ -101,27 +101,25 @@ module BPFPrimeTest {
       # timer to drive rate group
       timer.CycleOut -> rateGroupDriver.CycleIn
 
-      # Rate group 1 (1Hz)
+      # Rate group 1
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> rateGroup1.CycleIn
       rateGroup1.RateGroupMemberOut[0] -> CdhCore.tlmSend.Run
       rateGroup1.RateGroupMemberOut[1] -> FileHandling.fileDownlink.Run
       rateGroup1.RateGroupMemberOut[2] -> systemResources.run
       rateGroup1.RateGroupMemberOut[3] -> ComCcsds.comQueue.run
-      rateGroup1.RateGroupMemberOut[4] -> cmdSeq.schedIn
 
-      # Rate group 2 (1/4Hz)
+
+      # Rate group 2
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> rateGroup2.CycleIn
-      rateGroup2.RateGroupMemberOut[0] -> CdhCore.$health.Run
-      rateGroup2.RateGroupMemberOut[1] -> ComCcsds.commsBufferManager.schedIn
-      rateGroup2.RateGroupMemberOut[2] -> DataProducts.dpBufferManager.schedIn
-      rateGroup2.RateGroupMemberOut[3] -> DataProducts.dpWriter.schedIn
-      rateGroup2.RateGroupMemberOut[4] -> DataProducts.dpMgr.schedIn
-      
+      rateGroup2.RateGroupMemberOut[0] -> cmdSeq.schedIn
 
-      # Rate group 3 (100Hz)
+      # Rate group 3
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup3] -> rateGroup3.CycleIn
-      
-      
+      rateGroup3.RateGroupMemberOut[0] -> CdhCore.$health.Run
+      rateGroup3.RateGroupMemberOut[1] -> ComCcsds.commsBufferManager.schedIn
+      rateGroup3.RateGroupMemberOut[2] -> DataProducts.dpBufferManager.schedIn
+      rateGroup3.RateGroupMemberOut[3] -> DataProducts.dpWriter.schedIn
+      rateGroup3.RateGroupMemberOut[4] -> DataProducts.dpMgr.schedIn
     }
 
     connections CdhCore_cmdSeq {
@@ -129,9 +127,9 @@ module BPFPrimeTest {
       cmdSeq.comCmdOut -> CdhCore.cmdDisp.seqCmdBuff
       CdhCore.cmdDisp.seqCmdStatus -> cmdSeq.cmdResponseIn
     }
-
+  
     connections BPFPrimeTest {
-      rateGroup3.RateGroupMemberOut[0] -> bpfSequencer.schedIn100Hz
+      rateGroup1.RateGroupMemberOut[4] -> bpfSequencer.schedIn100Hz # RUn this is 1 Hz
     }
 
   }

@@ -25,45 +25,29 @@ BpfSequencer ::~BpfSequencer() {}
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,
-                                           FwOpcodeType opCode,
-                                           U32 cmdSeq,
-                                           const Fw::CmdResponse& response) {
-    // Not going to worry about his for now 
-    // Port handles the command response - mainly for error checking
-    // Will implement when the statemachine is implemented. 
-}
-
-void BpfSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
-    // Telemetry currently not implemented, but this will just write telemetry
-    // to the port
-}
-
-void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
-    // Not yet needed 
-}
-
 // Port for handling rate groups
 void BpfSequencer ::schedIn100Hz_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
+    // this->log_ACTIVITY_LO_SchedInTick();
+    this->tlmWrite_ticks(this->ticks);
 
-    for(int i = 0; i<64; i++){
-        if(this->rg_100hz[i]){ // 1 indicates on 
+    for(int i = 0; i<64; i++){ // DEMO PURPOSES: 1HZ
+        if(this->rg_1[i]){ // 1 indicates on 
             Fw::Success result = this->run(i);
         }
     }
 
-    if(((this->ticks)%10)==0){
+    if(((this->ticks)%5)==0){ // DEMO PURPOSES: 1/5HZ
         for(int i = 0; i<64; i++){
-            if(this->rg_10hz[i]){ // 1 indicates on 
+            if(this->rg_2[i]){ // 1 indicates on 
                 Fw::Success result = this->run(i);
             }
         }
     }
 
-    if(((this->ticks)%100)==0){
+    if(((this->ticks)%10)==0){ // DEMO PURPOSES: 1/10 HZ
         for(int i = 0; i<64; i++){
-            if(this->rg_1hz[i]){ // 1 indicates on 
+            if(this->rg_3[i]){ // 1 indicates on 
                 Fw::Success result = this->run(i);
             }
         }
@@ -111,24 +95,24 @@ void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U
     // We want to set a command to a certain rate group.
     // TODO: Do we want to have commands running at multiple rate groups - NO
     
-    if (rate_group_hz != 100 || rate_group_hz != 10 || rate_group_hz != 1){
-        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    if (rate_group_hz != 10 && rate_group_hz != 5 && rate_group_hz != 1){
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::INVALID_OPCODE);
     } else { 
         if (!vms[vm_id]){ // If we don't have a vm loaded vm
-            return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+            return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
         } else {
             // Remove this vm from all other rate groups
-            this->rg_100hz[vm_id] = 0;
-            this->rg_10hz[vm_id] = 0;
-            this->rg_1hz[vm_id] = 0;     
+            this->rg_1[vm_id] = 0;
+            this->rg_2[vm_id] = 0;
+            this->rg_3[vm_id] = 0;     
             
             // Set the rate group on 
-            if(rate_group_hz == 100) {
-                this->rg_100hz[vm_id] = 1;
-            } else if (rate_group_hz == 10){
-                this->rg_10hz[vm_id] = 1;
+            if(rate_group_hz == 10) {
+                this->rg_3[vm_id] = 1;
+            } else if (rate_group_hz == 5){
+                this->rg_2[vm_id] = 1;
             } else if (rate_group_hz == 1){
-                this->rg_1hz[vm_id] = 1;
+                this->rg_1[vm_id] = 1;
             }
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
         }

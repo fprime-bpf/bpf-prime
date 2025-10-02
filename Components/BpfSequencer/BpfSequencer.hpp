@@ -40,19 +40,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U64 ticks = 0;
 
     // boolean arrays for different rate groups
-    bool rg_100hz[64] = {};
-    bool rg_10hz[64] = {};
-    bool rg_1hz[64] = {};
+    bool rg_1[64] = {};
+    bool rg_2[64] = {};
+    bool rg_3[64] = {};
+    
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
-    //! Handler implementation for checkTimers
-    //!
-    //! Port to check the timers
-    void checkTimers_handler(FwIndexType portNum,  //!< The port number
-                             U32 context           //!< The call order
-                             ) override;
 
     void schedIn100Hz_handler(FwIndexType portNum, U32 context);
 
@@ -62,22 +57,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void pingIn_handler(FwIndexType portNum,  //!< The port number
                         U32 key               //!< Value to return to pinger
                         ) override;
-
-    //! Handler implementation for cmdResponseIn
-    //!
-    //! responses back from commands from the sequencer
-    void cmdResponseIn_handler(FwIndexType portNum,             //!< The port number
-                               FwOpcodeType opCode,             //!< Command Op Code
-                               U32 cmdSeq,                      //!< Command Sequence
-                               const Fw::CmdResponse& response  //!< The command response argument
-                               ) override;
-
-    //! Handler implementation for writeTlm
-    //!
-    //! Port to write all telemetry
-    void writeTlm_handler(FwIndexType portNum,  //!< The port number
-                          U32 context           //!< The call order
-                          ) override;
 
   private:
     // ----------------------------------------------------------------------
