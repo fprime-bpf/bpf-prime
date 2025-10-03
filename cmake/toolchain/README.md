@@ -4,20 +4,13 @@ The ideal way to build BPF-Prime for Polarfire is to use latest Clang, while lin
 a RISCV64 glibc toolchain from [here](https://github.com/riscv-collab/riscv-gnu-toolchain/releases/tag/2021.12.22), as well as [zlib](https://zlib.net/) and [elfutils](https://sourceware.org/elfutils/)
 source releases. We'll have to install those into the sysroot provided by the toolchain. Once downloaded, extract the files into this directory.
 
-For the first build step, we'll use the toolchain's C compiler to build and install zlib:
+For the first build step, we'll use the toolchain's C compiler to build and install zlib, which LLVM needs:
 ```bash
 cd zlib-1.3.1
 CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --prefix=../riscv/sysroot
 ```
 
-First, in the zlib source directory, we'll use the toolchain's C compiler to build and install it:
-```bash
-cd zlib-1.3.1
-CC=riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --prefix=riscv/sysroot
-make && make install
-```
-
-Next, let's do the same thing for the elfutils dependency:
+Next, let's do the same thing for the elfutils dependency, which LLVM also relies on:
 ```bash
 cd elfutils-0.193
 CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=../riscv/sysroot --enable-maintainer-mode
