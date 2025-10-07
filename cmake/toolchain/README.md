@@ -14,7 +14,7 @@ make && make install
 Next, let's do the same thing for the elfutils dependency, which LLVM also relies on:
 ```bash
 cd elfutils-0.193
-CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=../riscv/sysroot --enable-maintainer-mode
+CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=$(pwd)../riscv/sysroot --enable-maintainer-mode
 make && make install
 ```
 
