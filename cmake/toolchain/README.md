@@ -31,7 +31,10 @@ ninja
 
 Finally, we can target RISC-V when generating our BPF-Prime deployment:
 ```bash
-CC=clang CXX=clang++ fprime-util generate riscv -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DLLVM_DIR=toolchain/llvm-project/build/lib/cmake/llvm
-ninja
-```
+virtualenv venv
+source venv/bin/activate
+pip install -r lib/fprime/requirements.txt
 
+CC=clang CXX=clang++ fprime-util generate riscv -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DLLVM_DIR=toolchain/llvm-project/build/lib/cmake/llvm
+fprime-util build riscv
+```
