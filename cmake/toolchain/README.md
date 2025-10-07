@@ -8,6 +8,7 @@ For the first build step, we'll use the toolchain's C compiler to build and inst
 ```bash
 cd zlib-1.3.1
 CC=../riscv/bin/riscv64-unknown-linux-gnu-gcc ./configure --prefix=../riscv/sysroot
+make && make install
 ```
 
 Next, let's do the same thing for the elfutils dependency, which LLVM also relies on:
