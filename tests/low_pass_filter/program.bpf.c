@@ -10,10 +10,11 @@ int main() {
         return -1;
     }
 
-    map = MAP_BY_FD(2);
-    key = 1;
-    char value = (*(char *)result) * 2;
-    bpf_map_update_elem(map, &key, &value, 0);
+    map = MAP_BY_FD(4);
+    key = 0;
+    float value = (*(float *)result);
+    if (value >= 0.05f)
+        bpf_map_update_elem(map, &key, &value, 0);
 
     return 0;
 }
