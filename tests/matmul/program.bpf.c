@@ -9,7 +9,7 @@ int main() {
         result = bpf_map_lookup_elem(mat_map_1, &i);
         mat_1[i] = *(float *)result;
 
-        result = bpf_map_lookup_elem(mat_map_1, &i);
+        result = bpf_map_lookup_elem(mat_map_2, &i);
         mat_2[i] = *(float *)result;
     }
 
