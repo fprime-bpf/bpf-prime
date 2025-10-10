@@ -1,0 +1,24 @@
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 0, BPF_MAP_TYPE_HASH, 4, 4, 100, 0
+
+; TODO: need to figure out a more efficient way to update 100 elements
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 00 00", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 00 01", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 00 10", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 00 11", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 01 00", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 01 01", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 0, "00 00 01 11", "01 01 00 01", 0
+
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 1, BPF_MAP_TYPE_HASH, 4, 4, 100, 0
+
+; TODO: need to figure out a more efficient way to update 100 elements
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 00 00", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 00 01", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 00 10", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 00 11", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 01 00", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 01 01", "01 01 00 01", 0
+R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_UPDATE_ELEM 1, "00 00 01 11", "01 01 00 01", 0
+
+R00:00:00 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/matmul/a.o"
+R00:00:00 BPFPrimeTest.bpfSequencer.RUN_SEQUENCE 0
