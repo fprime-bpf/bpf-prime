@@ -9,18 +9,17 @@ static long (* const bpf_map_update_elem)(void *map, const void *key, const void
 static long (* const bpf_map_delete_elem)(void *map, const void *key) = (void *) 3;
 
 #define MAP_BY_FD(MAP_FD) ({ \
-    void *ret; \
+    register void *map_ptr_reg asm("r1");                                \
     asm volatile ( \
         ".byte 0x18, 0x11, 0x00, 0x00, " \
         "%c[fd0], %c[fd1], %c[fd2], %c[fd3], " \
         "0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00" \
-        : "=r"(ret) \
+        : "=r"(map_ptr_reg) \
         : [fd0] "i" ((MAP_FD >> 0) & 0xFF), \
         [fd1] "i" ((MAP_FD >> 8) & 0xFF), \
         [fd2] "i" ((MAP_FD >> 16) & 0xFF), \
         [fd3] "i" ((MAP_FD >> 24) & 0xFF) \
         : \
     ); \
-    ret; \
+    map_ptr_reg; \
 })
-

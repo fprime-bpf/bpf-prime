@@ -9,8 +9,8 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %2 = alloca [7 x float], align 4
   %3 = alloca i32, align 4
   %4 = alloca i32, align 4
-  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "=r,i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #3, !srcloc !3
-  %6 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "=r,i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #3, !srcloc !4
+  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #3, !srcloc !3
+  %6 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #3, !srcloc !4
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %1) #3
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %2) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %3) #3
@@ -120,9 +120,15 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
+<<<<<<< HEAD
 !2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
 !3 = !{i64 2147501771}
 !4 = !{i64 2147502209}
+=======
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
+!3 = !{i64 2147501969}
+!4 = !{i64 2147502481}
+>>>>>>> 14f06be (Fix bug with map result register assignment in MAP_BY_FD inline assembly)
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
