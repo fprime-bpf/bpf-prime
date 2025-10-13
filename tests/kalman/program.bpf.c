@@ -1,14 +1,5 @@
 #include "../bpf_shim.h"
 
-inline void predict(float *preds) {
-    for (int i = 0; i < 7; i++) {
-        if (i != 6)
-            preds[i] = preds[i + 1] / 1.5f;
-        else
-            preds[i] = preds[0] / 1.5f;
-    }
-}
-
 int main() {
     void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1), *result;
     float ins[7], preds[7];
@@ -21,7 +12,12 @@ int main() {
     }
 
     // Get predictions
-    predict(preds);
+    for (int i = 0; i < 7; i++) {
+        if (i != 6)
+            preds[i] = preds[i + 1] / 1.5f;
+        else
+            preds[i] = preds[0] / 1.5f;
+    }
 
     for (int i = 0; i < 7; i++) {
         // Diff with actual and multiply with factor
