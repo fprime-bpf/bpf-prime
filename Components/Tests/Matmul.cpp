@@ -5,7 +5,7 @@ namespace Components {
 
 namespace Matmul {
 
-const int MAT_DIM = 4, MAT_SIZE = 16;
+const int MAT_DIM = 10, MAT_SIZE = 100;
 
 int main() {
     void *mat_map_1 = (void*)maps::map_by_fd(0), *mat_map_2 = (void*)maps::map_by_fd(1), *mat_map_res = (void*)maps::map_by_fd(2), *result;
