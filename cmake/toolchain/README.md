@@ -15,7 +15,7 @@ Next, let's do the same thing for the elfutils dependency, which LLVM also relie
 ```bash
 cd elfutils-0.193
 export PATH="$(pwd)/../riscv/bin:$PATH"
-./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=$(pwd)../riscv/sysroot --enable-maintainer-mode
+./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=$(pwd)/../riscv/sysroot --enable-maintainer-mode
 make && make install
 ```
 
@@ -25,7 +25,7 @@ Our last dependency is the custom fork of LLVM we use to compile BPF programs. W
 ```bash
 cd llvm-project
 mkdir build && cd build
-CC=clang CXX=clang++ cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_TARGETS_TO_BUILD=BPF\;RISCV -DLLVM_USE_LINKER=lld -DCMAKE_TOOLCHAIN_FILE=../../riscv.cmake -DHAVE_POSIX_REGEX=0 -DHAVE_STEADY_CLOCK=0 -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-oe-linux ../llvm
+CC=clang CXX=clang++ cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_TARGETS_TO_BUILD=BPF\;RISCV -DLLVM_USE_LINKER=lld -DCMAKE_TOOLCHAIN_FILE=../../riscv.cmake -DHAVE_POSIX_REGEX=0 -DHAVE_STEADY_CLOCK=0 -DLLVM_DEFAULT_TARGET_TRIPLE=riscv64-oe-linux -DLLVM_USE_HOST_TOOLS=ON ../llvm
 ninja
 ```
 
