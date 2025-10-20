@@ -86,6 +86,7 @@ class Tests final : public TestsComponentBase {
     Fw::CmdResponse test_status_to_response(const char *test_name, I32 result);
     Fw::Success populate_map_random(U32 fd, U32 start, U32 length);
     Fw::Success benchmark();
+    Fw::Success benchmark_test(U32 passes, BENCHMARK_TEST test, const char *test_name, void (*fill_maps)(Tests*));
     F64 get_benchmark_native(BENCHMARK_TEST test);
 };
 
