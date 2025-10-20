@@ -57,6 +57,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                const Fw::CmdResponse& response  //!< The command response argument
                                ) override;
 
+    //! Handler implementation for getVmBenchmark
+    //!
+    //! Run vm benchmark, return runtime (IN)
+    F64 getVmBenchmark_handler(FwIndexType portNum,  //!< The port number
+                               const Components::BENCHMARK_TEST& test,
+                               bool compile) override;
+
     //! Handler implementation for pingIn
     //!
     //! Ping in port - highest priority
@@ -159,6 +166,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
+
+    F64 get_benchmark_vm(BENCHMARK_TEST test, bool compile);
+
+  public:
+    static Fw::CmdResponse result_to_response(Fw::Success result);
     
   private:
     bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
