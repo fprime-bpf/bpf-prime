@@ -129,7 +129,7 @@ module BPFPrimeTest {
     }
 
     connections BPFPrimeTest {
-
+      tests.getVmBenchmark -> bpfSequencer.getVmBenchmark
     }
 
   }

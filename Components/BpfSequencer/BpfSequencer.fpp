@@ -8,6 +8,9 @@ module Components {
             FAILURE 
         }
 
+        @ Run vm benchmark, return runtime (IN)
+        sync input port getVmBenchmark: RunVmBenchmark
+
         ############ Commands ############
         include "BpfSequencerCommands.fppi"
         include "BpfSequencerEvents.fppi"

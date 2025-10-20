@@ -120,15 +120,9 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-<<<<<<< HEAD
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
-!3 = !{i64 2147501771}
-!4 = !{i64 2147502209}
-=======
 !2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
-!3 = !{i64 2147501969}
-!4 = !{i64 2147502481}
->>>>>>> 14f06be (Fix bug with map result register assignment in MAP_BY_FD inline assembly)
+!3 = !{i64 2147501910}
+!4 = !{i64 2147502422}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
