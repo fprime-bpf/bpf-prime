@@ -8,20 +8,6 @@ namespace Components {
 #define BPF_EXIST       2 /* update existing element */
 #define BPF_F_LOCK      4 /* spin_lock-ed map_lookup/map_update */
 
-enum bpf_map_type {
-    BPF_MAP_TYPE_UNSPEC,
-    BPF_MAP_TYPE_HASH,
-    BPF_MAP_TYPE_ARRAY,
-    BPF_MAP_TYPE_PROG_ARRAY,
-    BPF_MAP_TYPE_PERF_EVENT_ARRAY,
-    BPF_MAP_TYPE_PERCPU_HASH,
-    BPF_MAP_TYPE_PERCPU_ARRAY,
-    BPF_MAP_TYPE_STACK_TRACE,
-    BPF_MAP_TYPE_CGROUP_ARRAY,
-    BPF_MAP_TYPE_LRU_HASH,
-    BPF_MAP_TYPE_LRU_PERCPU_HASH,
-};
-
 #pragma push(pack, 1)
 struct bpf_map_def {
     unsigned int type;

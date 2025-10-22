@@ -5,7 +5,6 @@
 namespace Components {
 
 void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept {
-
     auto map = static_cast<Components::map *>(map_ptr);
     
     if (map) {

@@ -1,20 +1,18 @@
 #include "../bpf_shim.h"
 
 int main() {
-    void *map = MAP_BY_FD(2);
+    void *in_map = MAP_BY_FD(2), *out_map = MAP_BY_FD(4);
     int key = 0;
 
-    void *result = bpf_map_lookup_elem(map, &key);
+    void *input_result = bpf_map_lookup_elem(in_map, &key);
+    float value = *((float *)input_result);
 
-    if (result == 0) {
-        return -1;
-    }
+    key = 1;
+    void *min_result = bpf_map_lookup_elem(in_map, &key);
+    float min = *((float *) min_result);
 
-    map = MAP_BY_FD(4);
-    key = 0;
-    float value = (*(float *)result);
-    if (value >= 0.05f)
-        bpf_map_update_elem(map, &key, &value, 0);
+    if (value > min)
+        bpf_map_update_elem(out_map, &key, &value, 0);
 
     return 0;
 }

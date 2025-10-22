@@ -26,10 +26,10 @@ I32 maps::create_map(const bpf_map_def& map_def, U32 fd) noexcept {
     map *map;
 
     switch (map_def.type) {
-        case bpf_map_type::BPF_MAP_TYPE_ARRAY:
+        case Components::BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY:
             map = new(std::nothrow) array_map(map_def, res);
         break;
-        case bpf_map_type::BPF_MAP_TYPE_HASH:
+        case Components::BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_HASH:
             map = new(std::nothrow) hash_map(map_def, res);
         break;
         default:

@@ -33,6 +33,7 @@ module BPFPrimeTest {
     instance comDriver
     instance cmdSeq
     instance bpfSequencer
+    instance tests
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers
