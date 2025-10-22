@@ -1,6 +1,6 @@
-event CommandLoaded(filePath: string) \ 
+event CommandLoaded(filePath: string, vmId: U32) \ 
     severity activity high \
-    format "{} load success" 
+    format "{} load success into VM {}" 
 
 event CommandLoadFailed(
                           filePath: string
@@ -8,8 +8,8 @@ event CommandLoadFailed(
                        ) \
     severity activity high \
     format "{} load failed: {}"
-event CommandRunSuccessfully(filePath: string) \
-    severity activity low format "{} run successfully"
+event CommandRunSuccessfully(filePath: string, vmId: U32   ) \
+    severity activity low format "{} run successfully in VM {}"
 
 event CommandRunFailed(
                          filePath: string
