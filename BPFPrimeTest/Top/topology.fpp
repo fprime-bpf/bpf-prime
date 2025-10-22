@@ -130,7 +130,7 @@ module BPFPrimeTest {
     }
   
     connections BPFPrimeTest {
-      rateGroup1.RateGroupMemberOut[4] -> bpfSequencer.schedIn100Hz # RUn this is 1 Hz
+      rateGroup1.RateGroupMemberOut[4] -> bpfSequencer.schedIn # RUn this is 1 Hz
     }
 
   }

@@ -30,6 +30,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Destroy BpfSequencer object
     ~BpfSequencer();
 
+    // User will set up rate groups via this function
+    void configure(U32 rate_groups[5]);
+
   private:
     bpftime::llvmbpf_vm *vms[64] = {};  
     uint64_t res;
@@ -38,18 +41,20 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::string sequenceFilePath;
     U8* buffer = nullptr;
     U64 ticks = 0;
+    bool configured = false;
+    U32 k_max_rate_groups = 5;
+    U32 num_rate_groups = 0;
+    U32 rate_group_intervals[5] = {};
 
     // boolean arrays for different rate groups
-    bool rg_1[64] = {};
-    bool rg_2[64] = {};
-    bool rg_3[64] = {};
+    bool rate_group_map[5][64] = {};
     
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
 
-    void schedIn100Hz_handler(FwIndexType portNum, U32 context);
+    void schedIn_handler(FwIndexType portNum, U32 context);
 
     //! Handler implementation for pingIn
     //!
@@ -66,6 +71,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Handler implementation for command LOAD_SEQUENCE
     //!
     //! Load and compile a sequence
+
+
+    
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vmId,             //!< The index of the selected BPF VM (0-63)
@@ -82,7 +90,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
-                                  U32 rate_group_hz);                                 
+                                  U32 rate_group_hz);            
+                                  
+    void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id);
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!

@@ -101,7 +101,7 @@ namespace Components {
        }
 
        // Close the file and return successful command response
-       this->log_DIAGNOSTIC_CommandLoaded(loggerFilePath);
+       this->log_ACTIVITY_HI_CommandLoaded(loggerFilePath);
        return Fw::Success::SUCCESS; 
    }
 
@@ -126,7 +126,7 @@ namespace Components {
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
-       this->log_ACTIVITY_LO_CommandRunSuccessfully();
+       this->log_ACTIVITY_LO_CommandRunSuccessfully(loggerFilePath);
        return Fw::Success::SUCCESS;
    }
 

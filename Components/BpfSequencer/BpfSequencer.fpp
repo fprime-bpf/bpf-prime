@@ -25,7 +25,7 @@ module Components {
         output port pingOut: Svc.Ping 
 
         @ Port to handle rate groups
-        sync input port schedIn100Hz: Svc.Sched 
+        sync input port schedIn: Svc.Sched 
 
         telemetry ticks: U32
 
@@ -33,6 +33,10 @@ module Components {
         event RateGroupSet(vm_id: U32, rate_group_hz: U32) severity activity low format "VM {} set to rate group {} hz"
         event SchedInTick() severity activity low format "Tick Received"
 
+        sync command StopRateGroup(vm_id: U32)
+        event RateGroupStopped(vm_id: U32) severity activity low format "VM {} rate group stopped"
+
+        
 
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
@@ -63,6 +67,7 @@ module Components {
 
         @Port to set the value of a parameter
         param set port prmSetOut
+
 
         
     }

@@ -21,37 +21,34 @@ bpf_mem_size(0) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
+void BpfSequencer ::configure(U32 rate_groups[5]) {
+    for (int i = 0; i < this->k_max_rate_groups; i++) {
+        this->rate_group_intervals[i] = rate_groups[i];
+        if (rate_groups[i] != 0) {
+            this->num_rate_groups++;
+        }
+    }
+    this->configured = true;
+}
+
 // ----------------------------------------------------------------------
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
 // Port for handling rate groups
-void BpfSequencer ::schedIn100Hz_handler(FwIndexType portNum, U32 context) {
+void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     // this->log_ACTIVITY_LO_SchedInTick();
     this->tlmWrite_ticks(this->ticks);
 
-    for(int i = 0; i<64; i++){ // DEMO PURPOSES: 1HZ
-        if(this->rg_1[i]){ // 1 indicates on 
-            Fw::Success result = this->run(i);
-        }
-    }
-
-    if(((this->ticks)%5)==0){ // DEMO PURPOSES: 1/5HZ
-        for(int i = 0; i<64; i++){
-            if(this->rg_2[i]){ // 1 indicates on 
-                Fw::Success result = this->run(i);
+    for(int i = 0; i<this->num_rate_groups; i++){
+        if (this->ticks % this->rate_group_intervals[i] == 0){
+            for(int j = 0; j<64; j++){
+                if(this->rate_group_map[i][j]){ // 1 indicates on 
+                    Fw::Success result = this->run(j);
+                }
             }
         }
-    }
-
-    if(((this->ticks)%10)==0){ // DEMO PURPOSES: 1/10 HZ
-        for(int i = 0; i<64; i++){
-            if(this->rg_3[i]){ // 1 indicates on 
-                Fw::Success result = this->run(i);
-            }
-        }
-        this->ticks = 0;
     }
 }
 
@@ -92,30 +89,40 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
 }
 
 void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, U32 rate_group_hz) {
-    // We want to set a command to a certain rate group.
-    // TODO: Do we want to have commands running at multiple rate groups - NO
-    
-    if (rate_group_hz != 10 && rate_group_hz != 5 && rate_group_hz != 1){
+    bool rate_group_found = false;
+    for(int i =0; i<this->k_max_rate_groups; i++){
+        if (this->rate_group_intervals[i] == rate_group_hz){
+            rate_group_found = true;
+        }
+    }
+    if (!rate_group_found){
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::INVALID_OPCODE);
-    } else { 
+    }
+    for(int i = 0; i<this->k_max_rate_groups; i++){
         if (!vms[vm_id]){ // If we don't have a vm loaded vm
             return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
-        } else {
-            // Remove this vm from all other rate groups
-            this->rg_1[vm_id] = 0;
-            this->rg_2[vm_id] = 0;
-            this->rg_3[vm_id] = 0;     
-            
-            // Set the rate group on 
-            if(rate_group_hz == 10) {
-                this->rg_3[vm_id] = 1;
-            } else if (rate_group_hz == 5){
-                this->rg_2[vm_id] = 1;
-            } else if (rate_group_hz == 1){
-                this->rg_1[vm_id] = 1;
-            }
+        } else if(this->rate_group_intervals[i] == rate_group_hz){
+            this->rate_group_map[i][vm_id] = true;
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
+        } else {
+            this->rate_group_map[i][vm_id] = false;
         }
+    }
+    
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void BpfSequencer ::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id) {
+    // We want to stop a command from running at any rate group.
+    
+    if (!vms[vm_id]){ // If we don't have a vm loaded vm
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
+    } else {
+        // Remove this vm from all rate groups
+        for(int i = 0; i<this->k_max_rate_groups; i++){
+            this->rate_group_map[i][vm_id] = false;
+        }
+        this->log_ACTIVITY_LO_RateGroupStopped(vm_id);
     }
     
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

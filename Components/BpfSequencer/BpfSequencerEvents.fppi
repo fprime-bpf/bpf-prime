@@ -1,5 +1,5 @@
 event CommandLoaded(filePath: string) \ 
-    severity diagnostic \
+    severity activity high \
     format "{} load success" 
 
 event CommandLoadFailed(
@@ -8,8 +8,8 @@ event CommandLoadFailed(
                        ) \
     severity activity high \
     format "{} load failed: {}"
-event CommandRunSuccessfully() \
-    severity activity low format "Command Run Successfully"
+event CommandRunSuccessfully(filePath: string) \
+    severity activity low format "{} run successfully"
 
 event CommandRunFailed(
                          filePath: string

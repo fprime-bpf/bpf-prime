@@ -30,6 +30,8 @@ enum TopologyConstants {
     COMM_PRIORITY = 100,
 };
 
+U32 bpfSequencerRateGroups[5] = {1, 2, 5, 10, 20}; // 1Hz, 0.5Hz, 0.2Hz, 0.1Hz, 0.05Hz
+
 /**
  * \brief configure/setup components in project-specific way
  *
@@ -48,6 +50,8 @@ void configureTopology() {
 
     // Command sequencer needs to allocate memory to hold contents of command sequences
     cmdSeq.allocateBuffer(0, mallocator, 5 * 1024);
+
+    bpfSequencer.configure(bpfSequencerRateGroups); // Configure rate groups to 1Hz, 0.5Hz, 0.2Hz, 0.1Hz, 0.05Hz
 }
 
 // Public functions for use in main program are namespaced with deployment name BPFPrimeTest
