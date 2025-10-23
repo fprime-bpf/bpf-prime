@@ -21,13 +21,14 @@ bpf_mem_size(0) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
-void BpfSequencer ::configure(U32 rate_groups[5]) {
+void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     for (int i = 0; i < this->k_max_rate_groups; i++) {
         this->rate_group_intervals[i] = rate_groups[i];
         if (rate_groups[i] != 0) {
             this->num_rate_groups++;
         }
     }
+    this->timer_freq_hz = timer_freq_hz;
     this->configured = true;
 }
 
@@ -38,7 +39,6 @@ void BpfSequencer ::configure(U32 rate_groups[5]) {
 // Port for handling rate groups
 void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
-    // this->log_ACTIVITY_LO_SchedInTick();
     this->tlmWrite_ticks(this->ticks);
 
     for(int i = 0; i<this->num_rate_groups; i++){
@@ -51,7 +51,6 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
         }
     }
 }
-
 
 // Ping in and out
 void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
@@ -89,24 +88,39 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
 }
 
 void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, U32 rate_group_hz) {
-    bool rate_group_found = false;
-    for(int i =0; i<this->k_max_rate_groups; i++){
-        if (this->rate_group_intervals[i] == rate_group_hz){
-            rate_group_found = true;
-        }
+
+    if (!vms[vm_id]){ // If we don't have a vm loaded vm
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     }
-    if (!rate_group_found){
-        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::INVALID_OPCODE);
+    
+    if (rate_group_hz == 0) {
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
     }
+
+    U32 expected_interval = this->timer_freq_hz / rate_group_hz;
+
+    bool found = false;
+
     for(int i = 0; i<this->k_max_rate_groups; i++){
-        if (!vms[vm_id]){ // If we don't have a vm loaded vm
-            return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
-        } else if(this->rate_group_intervals[i] == rate_group_hz){
+        if(this->rate_group_intervals[i] == expected_interval){
+            found = true; 
+            
+            for (int j = 0; j < this->k_max_rate_groups; j++) {
+                this->rate_group_map[j][vm_id] = false;
+            }
+
+            // Assign to this rate group
             this->rate_group_map[i][vm_id] = true;
+
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
-        } else {
-            this->rate_group_map[i][vm_id] = false;
-        }
+            break;
+        } 
+    }
+
+    if (!found) {
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
     }
     
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);

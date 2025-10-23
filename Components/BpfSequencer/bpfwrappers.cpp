@@ -126,7 +126,7 @@ namespace Components {
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
-       this->log_ACTIVITY_LO_CommandRunSuccessfully(loggerFilePath, vmId);
+       //this->log_ACTIVITY_LO_CommandRunSuccessfully(loggerFilePath, vmId);
        return Fw::Success::SUCCESS;
    }
 

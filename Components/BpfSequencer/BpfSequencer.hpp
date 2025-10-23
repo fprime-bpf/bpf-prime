@@ -31,7 +31,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     ~BpfSequencer();
 
     // User will set up rate groups via this function
-    void configure(U32 rate_groups[5]);
+    void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
   private:
     bpftime::llvmbpf_vm *vms[64] = {};  
@@ -45,6 +45,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U32 k_max_rate_groups = 5;
     U32 num_rate_groups = 0;
     U32 rate_group_intervals[5] = {};
+    U32 timer_freq_hz = 1000; // Default to 1kHz
 
     // boolean arrays for different rate groups
     bool rate_group_map[5][64] = {};

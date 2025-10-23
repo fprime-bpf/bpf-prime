@@ -17,8 +17,8 @@ using namespace BPFPrimeTest;
 // Instantiate a malloc allocator for cmdSeq buffer allocation
 Fw::MallocAllocator mallocator;
 
-// The reference topology divides the incoming clock signal (1Hz) into sub-signals: 1Hz, 1/2Hz, and 1/4Hz with 0 offset
-Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1, 0}, {2, 0}, {4, 0}}};
+// The reference topology divides the incoming clock signal (1kHz) into sub-signals: 1kHz, 1/2Hz, and 1/4Hz with 0 offset
+Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1, 0}, {1000, 0}, {4000, 0}}};
 
 // Rate groups may supply a context token to each of the attached children whose purpose is set by the project. The
 // reference topology sets each token to zero as these contexts are unused in this project.
@@ -30,7 +30,7 @@ enum TopologyConstants {
     COMM_PRIORITY = 100,
 };
 
-U32 bpfSequencerRateGroups[5] = {1, 2, 5, 10, 20}; // 1Hz, 0.5Hz, 0.2Hz, 0.1Hz, 0.05Hz
+U32 bpfSequencerRateGroups[5] = {1, 10, 100, 1000, 10000}; // 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz
 
 /**
  * \brief configure/setup components in project-specific way
@@ -51,7 +51,7 @@ void configureTopology() {
     // Command sequencer needs to allocate memory to hold contents of command sequences
     cmdSeq.allocateBuffer(0, mallocator, 5 * 1024);
 
-    bpfSequencer.configure(bpfSequencerRateGroups); // Configure rate groups to 1Hz, 0.5Hz, 0.2Hz, 0.1Hz, 0.05Hz
+    bpfSequencer.configure(bpfSequencerRateGroups, 1000); // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
 }
 
 // Public functions for use in main program are namespaced with deployment name BPFPrimeTest
