@@ -30,6 +30,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Destroy BpfSequencer object
     ~BpfSequencer();
 
+    // User will set up rate groups via this function
+    void configure(U32 rate_groups[5], U32 timer_freq_hz);
+
   private:
     bpftime::llvmbpf_vm *vms[64] = {};  
     uint64_t res;
@@ -37,25 +40,22 @@ class BpfSequencer : public BpfSequencerComponentBase {
     size_t bpf_mem_size;
     std::string sequenceFilePath;
     U8* buffer = nullptr;
+    U64 ticks = 0;
+    bool configured = false;
+    U32 k_max_rate_groups = 5;
+    U32 num_rate_groups = 0;
+    U32 rate_group_intervals[5] = {};
+    U32 timer_freq_hz = 1000; // Default to 1kHz
+
+    // boolean arrays for different rate groups
+    bool rate_group_map[5][64] = {};
+    
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
-    //! Handler implementation for checkTimers
-    //!
-    //! Port to check the timers
-    void checkTimers_handler(FwIndexType portNum,  //!< The port number
-                             U32 context           //!< The call order
-                             ) override;
 
-    //! Handler implementation for cmdResponseIn
-    //!
-    //! responses back from commands from the sequencer
-    void cmdResponseIn_handler(FwIndexType portNum,             //!< The port number
-                               FwOpcodeType opCode,             //!< Command Op Code
-                               U32 cmdSeq,                      //!< Command Sequence
-                               const Fw::CmdResponse& response  //!< The command response argument
-                               ) override;
+    void schedIn_handler(FwIndexType portNum, U32 context);
 
     //! Handler implementation for pingIn
     //!
@@ -63,13 +63,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void pingIn_handler(FwIndexType portNum,  //!< The port number
                         U32 key               //!< Value to return to pinger
                         ) override;
-
-    //! Handler implementation for writeTlm
-    //!
-    //! Port to write all telemetry
-    void writeTlm_handler(FwIndexType portNum,  //!< The port number
-                          U32 context           //!< The call order
-                          ) override;
 
   private:
     // ----------------------------------------------------------------------
@@ -79,6 +72,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Handler implementation for command LOAD_SEQUENCE
     //!
     //! Load and compile a sequence
+
+
+    
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vmId,             //!< The index of the selected BPF VM (0-63)
@@ -91,6 +87,15 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 cmdSeq,           //!< The command sequence number
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
+    
+    void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id,
+                                  U32 rate_group_hz);            
+                                  
+    void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id);
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -104,6 +109,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                    U32 max_entries,                              //!< Maximum amount of entries
                                    U32 map_flags                                 //!< Map flags
                                    ) override;
+                                   
 
     //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
     //!

@@ -21,31 +21,40 @@ bpf_mem_size(0) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
+void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
+    for (int i = 0; i < this->k_max_rate_groups; i++) {
+        this->rate_group_intervals[i] = rate_groups[i];
+        if (rate_groups[i] != 0) {
+            this->num_rate_groups++;
+        }
+    }
+    this->timer_freq_hz = timer_freq_hz;
+    this->configured = true;
+}
+
 // ----------------------------------------------------------------------
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-void BpfSequencer ::checkTimers_handler(FwIndexType portNum, U32 context) {
-    // Not yet needed 
+// Port for handling rate groups
+void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
+    this->ticks++;
+    this->tlmWrite_ticks(this->ticks);
+
+    for(int i = 0; i<this->num_rate_groups; i++){
+        if (this->ticks % this->rate_group_intervals[i] == 0){
+            for(int j = 0; j<64; j++){
+                if(this->rate_group_map[i][j]){ // 1 indicates on 
+                    Fw::Success result = this->run(j);
+                }
+            }
+        }
+    }
 }
 
-void BpfSequencer ::cmdResponseIn_handler(FwIndexType portNum,
-                                           FwOpcodeType opCode,
-                                           U32 cmdSeq,
-                                           const Fw::CmdResponse& response) {
-    // Not going to worry about his for now 
-    // Port handles the command response - mainly for error checking
-    // Will implement when the statemachine is implemented. 
-}
-
-//Just ping in and out
+// Ping in and out
 void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
     this->pingOut_out(0, key);
-}
-
-void BpfSequencer ::writeTlm_handler(FwIndexType portNum, U32 context) {
-    // Telemetry currently not implemented, but this will just write telemetry
-    // to the port
 }
 
 // ----------------------------------------------------------------------
@@ -76,6 +85,61 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     // The sequence is compiled, so we can run it
     Fw::Success result = this->run(vmId); //Now we run the sequence!
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
+}
+
+void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, U32 rate_group_hz) {
+
+    if (!vms[vm_id]){ // If we don't have a vm loaded vm
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+    
+    if (rate_group_hz == 0) {
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+
+    U32 expected_interval = this->timer_freq_hz / rate_group_hz;
+
+    bool found = false;
+
+    for(int i = 0; i<this->k_max_rate_groups; i++){
+        if(this->rate_group_intervals[i] == expected_interval){
+            found = true; 
+            
+            for (int j = 0; j < this->k_max_rate_groups; j++) {
+                this->rate_group_map[j][vm_id] = false;
+            }
+
+            // Assign to this rate group
+            this->rate_group_map[i][vm_id] = true;
+
+            this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
+            break;
+        } 
+    }
+
+    if (!found) {
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return;
+    }
+    
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void BpfSequencer ::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id) {
+    // We want to stop a command from running at any rate group.
+    
+    if (!vms[vm_id]){ // If we don't have a vm loaded vm
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
+    } else {
+        // Remove this vm from all rate groups
+        for(int i = 0; i<this->k_max_rate_groups; i++){
+            this->rate_group_map[i][vm_id] = false;
+        }
+        this->log_ACTIVITY_LO_RateGroupStopped(vm_id);
+    }
+    
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
 void BpfSequencer ::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,
