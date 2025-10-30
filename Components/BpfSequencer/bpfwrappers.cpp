@@ -110,7 +110,7 @@ namespace Components {
        return Fw::Success::SUCCESS; 
    }
 
-   Fw::Success BpfSequencer::run(U32 vmId) {
+   Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
        uint64_t res = 0, err = 0;
        timer::time_point start, end;
        Fw::LogStringArg loggerFilePath(sequenceFilePath.c_str());
@@ -125,10 +125,10 @@ namespace Components {
        }
        auto& vm = *this->vms[vmId];
 
-       // Run the compiled sequence
-       start = timer::now();
+       if (log_time) start = timer::now();
+        // Run the compiled sequence
        err = vm.exec(&bpf_mem, bpf_mem_size, res);
-       end = timer::now();
+       if (log_time) end = timer::now();
 
        if (err) {
            Fw::LogStringArg errMsg(vm.get_error_message().c_str());
@@ -136,7 +136,8 @@ namespace Components {
            return Fw::Success::FAILURE;
        }
        
-       this->log_ACTIVITY_LO_CommandRunSuccess(loggerFilePath, vmId, std::chrono::duration<F64, ms::period>(end - start).count());
+        if (log_time) 
+           this->log_ACTIVITY_LO_CommandRunSuccess(vmId, std::chrono::duration<F64, ms::period>(end - start).count());
        return Fw::Success::SUCCESS;
    }
 

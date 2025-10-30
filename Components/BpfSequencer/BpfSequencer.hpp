@@ -160,10 +160,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // ----------------------------------------------------------------------
     
     Fw::Success load(U32 vmId, const char* sequenceFilePath);
-    
-    Fw::Success compile();
-    
-    Fw::Success run(U32 vmId);
+
+    Fw::Success run(U32 vmId, bool log_time = false);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
     

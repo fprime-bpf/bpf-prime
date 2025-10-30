@@ -10,9 +10,9 @@ event CommandLoadFailed(
     format "{} load failed: {}"
 
 event CommandRunSuccess(
-                               vmId: F64
-                               runtime: string
-                            ) \
+                          vmId: U32
+                          runtime: F64
+                       ) \
     severity activity low \
     format "VM {} run successfully in {} ms"
 

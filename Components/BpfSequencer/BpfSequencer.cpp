@@ -45,8 +45,9 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
         if (this->ticks % this->rate_group_intervals[i] == 0){
             for(int j = 0; j<64; j++){
                 if(this->rate_group_map[i][j]){ // 1 indicates on 
-                    auto& vm = *this->vms[vmId];
-                    err = vm.exec(&bpf_mem, bpf_mem_size, j);
+                    uint64_t res = 0, err = 0;
+                    auto& vm = *this->vms[j];
+                    err = vm.exec(&bpf_mem, bpf_mem_size, res);
                 }
             }
         }
@@ -86,7 +87,7 @@ void BpfSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
 
 void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
     // The sequence is compiled, so we can run it
-    Fw::Success result = this->run(vmId); //Now we run the sequence!
+    Fw::Success result = this->run(vmId, true); //Now we run the sequence!
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
