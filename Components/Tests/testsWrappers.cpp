@@ -71,16 +71,16 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
             return -1;
         }
 
-        auto load_result = this->load(0, bytecode_path);
+        auto load_result = this->load(test, bytecode_path);
 
         if (load_result != Fw::Success::SUCCESS)
             return -1;
     }
 
-    auto& vm = *this->vms[0];
+    auto vm = this->vms[test];
     
     auto start = timer::now();
-    volatile auto run_result = vm.exec(&bpf_mem, bpf_mem_size, res);
+    volatile auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
     auto end = timer::now();
 
     if (run_result)

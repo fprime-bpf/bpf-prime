@@ -5,19 +5,22 @@
 // ======================================================================
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <cstring>
 
 namespace Components {
+
+BpfSequencerVM::~BpfSequencerVM() {
+    bpf_mem = nullptr;
+}
 
 // ----------------------------------------------------------------------
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
 BpfSequencer ::BpfSequencer(const char* const compName) : 
-BpfSequencerComponentBase(compName),
-bpf_mem(nullptr),
-bpf_mem_size(0) { }
+BpfSequencerComponentBase(compName) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
@@ -45,7 +48,9 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
         if (this->ticks % this->rate_group_intervals[i] == 0){
             for(int j = 0; j<64; j++){
                 if(this->rate_group_map[i][j]){ // 1 indicates on 
-                    Fw::Success result = this->run(j);
+                    uint64_t err = 0;
+                    auto vm = this->vms[j];
+                    err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
                 }
             }
         }
@@ -78,14 +83,13 @@ void BpfSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
 
     // Load the sequence
     Fw::Success result = this->load(vmId, sequenceFilePath.toChar());
-    this->sequenceFilePath = sequenceFilePath.toChar();
 
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
 void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vmId) {
     // The sequence is compiled, so we can run it
-    Fw::Success result = this->run(vmId); //Now we run the sequence!
+    Fw::Success result = this->run(vmId, true); //Now we run the sequence!
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
