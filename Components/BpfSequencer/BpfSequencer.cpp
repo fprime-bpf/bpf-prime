@@ -45,7 +45,8 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
         if (this->ticks % this->rate_group_intervals[i] == 0){
             for(int j = 0; j<64; j++){
                 if(this->rate_group_map[i][j]){ // 1 indicates on 
-                    Fw::Success result = this->run(j);
+                    auto& vm = *this->vms[vmId];
+                    err = vm.exec(&bpf_mem, bpf_mem_size, j);
                 }
             }
         }

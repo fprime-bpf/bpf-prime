@@ -3,10 +3,15 @@
 #include "maps/maps.hpp"
 #include "bpf.hpp"
 
+#include <chrono>
 #include <cstring>
 #include <new>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
+
+
+using timer = std::chrono::high_resolution_clock;
+using ms = std::chrono::milliseconds;
 
 namespace Components {
 
@@ -107,6 +112,7 @@ namespace Components {
 
    Fw::Success BpfSequencer::run(U32 vmId) {
        uint64_t res = 0, err = 0;
+       timer::time_point start, end;
        Fw::LogStringArg loggerFilePath(sequenceFilePath.c_str());
 
        // Get VM instance
@@ -120,13 +126,17 @@ namespace Components {
        auto& vm = *this->vms[vmId];
 
        // Run the compiled sequence
+       start = timer::now();
        err = vm.exec(&bpf_mem, bpf_mem_size, res);
+       end = timer::now();
+
        if (err) {
            Fw::LogStringArg errMsg(vm.get_error_message().c_str());
            this->log_ACTIVITY_HI_CommandRunFailed(loggerFilePath, errMsg);
            return Fw::Success::FAILURE;
        }
-       //this->log_ACTIVITY_LO_CommandRunSuccessfully(loggerFilePath, vmId);
+       
+       this->log_ACTIVITY_LO_CommandRunSuccess(loggerFilePath, vmId, std::chrono::duration<F64, ms::period>(end - start).count());
        return Fw::Success::SUCCESS;
    }
 

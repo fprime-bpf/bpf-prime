@@ -8,8 +8,13 @@ event CommandLoadFailed(
                        ) \
     severity activity high \
     format "{} load failed: {}"
-event CommandRunSuccessfully(filePath: string, vmId: U32   ) \
-    severity activity low format "{} run successfully in VM {}"
+
+event CommandRunSuccess(
+                               vmId: F64
+                               runtime: string
+                            ) \
+    severity activity low \
+    format "VM {} run successfully in {} ms"
 
 event CommandRunFailed(
                          filePath: string
