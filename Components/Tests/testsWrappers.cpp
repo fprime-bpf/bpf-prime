@@ -49,8 +49,7 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
 }
 
 F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
-    // TODO: Why does recompilation affect benchmark data? Fix.
-    if (true){//compile) {
+    if (compile) {
         const char *bytecode_path;
 
         switch (test)
@@ -75,7 +74,7 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     }
 
     auto& vm = *this->vms[0];
-
+    
     auto start = timer::now();
     volatile auto run_result = vm.exec(&bpf_mem, bpf_mem_size, res);
     auto end = timer::now();
@@ -86,9 +85,23 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     return std::chrono::duration<F64, ms::period>(end - start).count();
 }
 
+namespace {
+    const char * const OUTPUT_FILE_NAME = "benchmark_results.yml";
+
+    void create_output_file() {
+        std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
+    }
+    void output_new_test(const char *test_name) {
+        std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
+    }
+    void output_pass_times(float native_time, float vm_time) {
+        std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << "  - [" << native_time << ", " << vm_time << "]\n";
+    }
+}
+
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char *test_name, void (*fill_maps)(Tests*)) {
 
-    std::ofstream("BENCHMARK_RESULTS.txt", std::ios::app) << test_name << std::endl;
+    output_new_test(test_name);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -108,14 +121,14 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char *t
             this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, vm_time);
             return Fw::Success::FAILURE;
         }
-        // TODO: Output benchmark results via file or properly downlink?
-        std::ofstream("BENCHMARK_RESULTS.txt", std::ios::app) << "(" << native_time  << ", " << vm_time << ")" << std::endl;
+
+        output_pass_times(native_time, vm_time);
     }
 
     return Fw::Success::SUCCESS;
 }
 
-// Note: Compile the FPrime project with release build when benchmarking
+// Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
     const U32 passes = 150;
 
@@ -166,7 +179,7 @@ Fw::Success Tests::benchmark() {
         }
     };
 
-    std::ofstream("BENCHMARK_RESULTS.txt", std::ios::trunc);
+    create_output_file();
 
     for (const auto& test : tests) {
 
