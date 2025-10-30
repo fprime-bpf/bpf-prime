@@ -15,9 +15,7 @@ namespace Components {
 // ----------------------------------------------------------------------
 
 BpfSequencer ::BpfSequencer(const char* const compName) : 
-BpfSequencerComponentBase(compName),
-bpf_mem(nullptr),
-bpf_mem_size(0) { }
+BpfSequencerComponentBase(compName) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
@@ -46,8 +44,8 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
             for(int j = 0; j<64; j++){
                 if(this->rate_group_map[i][j]){ // 1 indicates on 
                     uint64_t res = 0, err = 0;
-                    auto& vm = *this->vms[j];
-                    err = vm.exec(&bpf_mem, bpf_mem_size, res);
+                    auto vm = this->vms[j];
+                    err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
                 }
             }
         }
@@ -80,7 +78,6 @@ void BpfSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,
 
     // Load the sequence
     Fw::Success result = this->load(vmId, sequenceFilePath.toChar());
-    this->sequenceFilePath = sequenceFilePath.toChar();
 
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }

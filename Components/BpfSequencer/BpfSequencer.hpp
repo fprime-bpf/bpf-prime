@@ -16,6 +16,14 @@
 
 namespace Components {
 
+struct BpfSequencerVM {
+    bpftime::llvmbpf_vm bpf_vm;
+    uint64_t res = 0;
+    std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
+    size_t bpf_mem_size = 0;
+    std::string sequenceFilePath;
+};
+
 class BpfSequencer : public BpfSequencerComponentBase {
   public:
     inline static Components::maps maps;
@@ -34,11 +42,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
   private:
-    bpftime::llvmbpf_vm *vms[64] = {};  
-    uint64_t res;
-    std::unique_ptr<uint8_t[]> bpf_mem;
-    size_t bpf_mem_size;
-    std::string sequenceFilePath;
+    BpfSequencerVM *vms[64];
     U8* buffer = nullptr;
     U64 ticks = 0;
     bool configured = false;
@@ -55,7 +59,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // ----------------------------------------------------------------------
 
 
-    void schedIn_handler(FwIndexType portNum, U32 context);
+    void schedIn_handler(FwIndexType portNum, U32 context) override;
 
     //! Handler implementation for getVmBenchmark
     //!
@@ -98,11 +102,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
-                                  U32 rate_group_hz);            
+                                  U32 rate_group_hz) override; 
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  U32 vm_id);
+                                  U32 vm_id) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -177,7 +181,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static Fw::CmdResponse result_to_response(Fw::Success result);
     
   private:
-    bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
+    bool validate_vm_id(U32 vmId);
 
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 

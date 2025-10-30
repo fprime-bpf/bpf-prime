@@ -9,6 +9,13 @@ event CommandLoadFailed(
     severity activity high \
     format "{} load failed: {}"
 
+event VmValidateFailed(
+                         vmId: U32
+                         errMsg: string
+                      ) \
+    severity activity high \
+    format "VM {} validation failed: {}"
+
 event CommandRunSuccess(
                           vmId: U32
                           runtime: F64
@@ -17,7 +24,7 @@ event CommandRunSuccess(
     format "VM {} run successfully in {} ms"
 
 event CommandRunFailed(
-                         filePath: string
+                         vmId: U32
                          errMsg: string
                       ) \
     severity activity high \
