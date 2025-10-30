@@ -52,7 +52,11 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     }
 }
 
-// Ping in and out
+F64 BpfSequencer ::getVmBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test, bool compile) {
+    return get_benchmark_vm(test, compile);
+}
+
+//Just ping in and out
 void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
     this->pingOut_out(0, key);
 }
@@ -61,12 +65,10 @@ void BpfSequencer ::pingIn_handler(FwIndexType portNum, U32 key) {
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-namespace { 
-    Fw::CmdResponse result_to_response(Fw::Success result) {
-        return  (result == Fw::Success::SUCCESS) ? 
-            Fw::CmdResponse::OK : 
-            Fw::CmdResponse::EXECUTION_ERROR;
-    }
+Fw::CmdResponse BpfSequencer::result_to_response(Fw::Success result) {
+    return  (result == Fw::Success::SUCCESS) ? 
+        Fw::CmdResponse::OK : 
+        Fw::CmdResponse::EXECUTION_ERROR;
 }
 
 void BpfSequencer ::LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,

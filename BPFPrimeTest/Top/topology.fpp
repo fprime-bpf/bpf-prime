@@ -131,6 +131,7 @@ module BPFPrimeTest {
     }
   
     connections BPFPrimeTest {
+      tests.getVmBenchmark -> bpfSequencer.getVmBenchmark
       rateGroup1.RateGroupMemberOut[0] -> bpfSequencer.schedIn # RUn this is 1 Hz
     }
 
