@@ -14,6 +14,8 @@
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
 
+#define BPF_PRIME_VM_COUNT 64
+
 namespace Components {
 
 struct BpfSequencerVM {
@@ -22,6 +24,7 @@ struct BpfSequencerVM {
     std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
     size_t bpf_mem_size = 0;
     std::string sequenceFilePath;
+    ~BpfSequencerVM();
 };
 
 class BpfSequencer : public BpfSequencerComponentBase {
@@ -42,7 +45,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
   private:
-    BpfSequencerVM *vms[64];
+    std::shared_ptr<BpfSequencerVM> vms[BPF_PRIME_VM_COUNT];
     U8* buffer = nullptr;
     U64 ticks = 0;
     bool configured = false;

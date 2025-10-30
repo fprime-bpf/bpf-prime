@@ -21,9 +21,9 @@ namespace Components {
 
        // Create the VM
        if (!validate_vm_id(vmId)) return Fw::Success::FAILURE;
-       
-       delete vms[vmId];
-       this->vms[vmId] = new(std::nothrow) BpfSequencerVM();
+
+       this->vms[vmId].reset();
+       this->vms[vmId] = std::make_shared<BpfSequencerVM>();
 
        if (!vms[vmId]) {
            Fw::LogStringArg errMsg("Failed to allocate VM");
@@ -142,7 +142,7 @@ namespace Components {
    }
 
     bool BpfSequencer::validate_vm_id(U32 vmId) {
-       if (vmId >= (sizeof(vms) / sizeof(BpfSequencerVM *))) {
+       if (vmId >= BPF_PRIME_VM_COUNT) {
            Fw::LogStringArg errMsg("VM ID Invalid");
            this->log_ACTIVITY_HI_VmValidateFailed(vmId, errMsg);
            return false;

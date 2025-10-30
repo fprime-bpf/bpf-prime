@@ -5,10 +5,15 @@
 // ======================================================================
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <cstring>
 
 namespace Components {
+
+BpfSequencerVM::~BpfSequencerVM() {
+    bpf_mem = nullptr;
+}
 
 // ----------------------------------------------------------------------
 // Component construction and destruction
@@ -43,7 +48,7 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
         if (this->ticks % this->rate_group_intervals[i] == 0){
             for(int j = 0; j<64; j++){
                 if(this->rate_group_map[i][j]){ // 1 indicates on 
-                    uint64_t res = 0, err = 0;
+                    uint64_t err = 0;
                     auto vm = this->vms[j];
                     err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
                 }
