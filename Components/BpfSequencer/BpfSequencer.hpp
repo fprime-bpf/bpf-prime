@@ -34,22 +34,28 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
   private:
-    bpftime::llvmbpf_vm *vms[64] = {};  
+
+    // CONSTANTS
+    static constexpr U8 k_num_vms = 64;
+    static const U8 k_max_rate_groups = 5;
+
+    // Setup needed arrays
+    bpftime::llvmbpf_vm *vms[k_num_vms] = {};  
+    U32 rate_group_intervals[k_max_rate_groups] = {};
+    U32 vm_to_rgId[k_num_vms] = {};
+    U32 last_run_vm[k_max_rate_groups];
+
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
     size_t bpf_mem_size;
     std::string sequenceFilePath;
+    U32 timer_freq_hz; 
+
     U8* buffer = nullptr;
     U64 ticks = 0;
-    bool configured = false;
-    U32 k_max_rate_groups = 5;
     U32 num_rate_groups = 0;
-    U32 rate_group_intervals[5] = {};
-    U32 timer_freq_hz = 1000; // Default to 1kHz
+    bool configured = false;
 
-    // boolean arrays for different rate groups
-    bool rate_group_map[5][64] = {};
-    
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
@@ -91,7 +97,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
-                                  U32 rate_group_hz);            
+                                  F32 rate_group_hz);            
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number

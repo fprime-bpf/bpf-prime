@@ -7,6 +7,9 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <cstring>
+#include <thread>
+#include <chrono>
+#include <stdio.h>
 
 namespace Components {
 
@@ -27,7 +30,13 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
         if (rate_groups[i] != 0) {
             this->num_rate_groups++;
         }
+        this->last_run_vm[i] = -1;
     }
+
+    for (int i = 0; i < this->k_num_vms; i++){ // Initially set vm_to_rgId to -1, indicating that the vm is not a part of a rg
+        vm_to_rgId[i] = -1;
+    }
+
     this->timer_freq_hz = timer_freq_hz;
     this->configured = true;
 }
@@ -41,13 +50,28 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     this->tlmWrite_ticks(this->ticks);
 
-    for(int i = 0; i<this->num_rate_groups; i++){
-        if (this->ticks % this->rate_group_intervals[i] == 0){
-            for(int j = 0; j<64; j++){
-                if(this->rate_group_map[i][j]){ // 1 indicates on 
-                    Fw::Success result = this->run(j);
-                }
-            }
+    // First Check For Slips
+    
+    for(int i = 0; i<this->k_max_rate_groups; i++){
+        if(last_run_vm[i] != -1){
+            this->log_ACTIVITY_HI_RateGroupSlip(i, last_run_vm[i]);
+            return;
+        }
+    }
+
+    // If No Slips - Execute the Command
+
+    // Iterate over all of the vms (implicit priority)
+    for(int i = 0; i<this->k_num_vms; i++){ 
+        // Get rgId from vm
+        int rgId = this->vm_to_rgId[i]; 
+        // Short circuit evaluation + check if rg runs
+        if (rgId != -1 && this->ticks % this->rate_group_intervals[rgId] == 0) { 
+            // Set the last run vm for this rate group to the current vm
+            last_run_vm[this->rate_group_intervals[rgId]] = i; 
+            Fw::Success result = this->run(i); 
+            // Once the command has been executed set the last run vm to sentinel value
+            last_run_vm[this->rate_group_intervals[rgId]] = -1; 
         }
     }
 }
@@ -87,45 +111,44 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, U32 rate_group_hz) {
+// Set VM Rate Groups
+void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz) {
 
     if (!vms[vm_id]){ // If we don't have a vm loaded vm
-        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
     }
-    
     if (rate_group_hz == 0) {
-        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+        this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::INVALID_OPCODE);
         return;
     }
 
-    U32 expected_interval = this->timer_freq_hz / rate_group_hz;
+    U32 expected_interval = U32 (this->timer_freq_hz / rate_group_hz);
 
     bool found = false;
 
+    FILE *fp = fopen("debug.txt", "w");
     for(int i = 0; i<this->k_max_rate_groups; i++){
+        
+        fprintf(fp, "Input Rate Group: %f, Expected Interval: %d, Actual Interval: %d\n", rate_group_hz, expected_interval, rate_group_intervals[i]);
+        
         if(this->rate_group_intervals[i] == expected_interval){
             found = true; 
             
-            for (int j = 0; j < this->k_max_rate_groups; j++) {
-                this->rate_group_map[j][vm_id] = false;
-            }
-
-            // Assign to this rate group
-            this->rate_group_map[i][vm_id] = true;
+            this->vm_to_rgId[vm_id] = i; // Set the vm rgId to id
 
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
             break;
         } 
     }
-
+    fclose(fp);
     if (!found) {
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
-    }
-    
+    } 
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
+// Stop VM Rate Group
 void BpfSequencer ::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id) {
     // We want to stop a command from running at any rate group.
     
@@ -133,12 +156,10 @@ void BpfSequencer ::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
     } else {
         // Remove this vm from all rate groups
-        for(int i = 0; i<this->k_max_rate_groups; i++){
-            this->rate_group_map[i][vm_id] = false;
-        }
+        this->vm_to_rgId[vm_id] = -1;
+
         this->log_ACTIVITY_LO_RateGroupStopped(vm_id);
     }
-    
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 

@@ -2,7 +2,6 @@ module Components {
     @ Sequencer Module using llvmbpf runtime
     active component BpfSequencer {
 
-        #Typedef SUCCESS
         enum SUCCESS {
             SUCCESS
             FAILURE 
@@ -24,17 +23,26 @@ module Components {
         @ Ping out port
         output port pingOut: Svc.Ping 
 
-        @ Port to handle rate groups
-        sync input port schedIn: Svc.Sched 
+        @ Port to handle Fast Rate Group 
+        sync input port schedInFast: Svc.Sched 
+
+        @Port to handle medium rate group
+        sync input port schedInMedium: Svc.Sched
+
+        @Port to handle slow rate group
+        sync input port schedInSlow: Svc.Sched
 
         telemetry ticks: U32
 
-        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: U32)
-        event RateGroupSet(vm_id: U32, rate_group_hz: U32) severity activity low format "VM {} set to rate group {} hz"
+        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32)
+        event RateGroupSet(vm_id: U32, rate_group_hz: F32) severity activity low format "VM {} set to rate group {} hz"
         event SchedInTick() severity activity low format "Tick Received"
 
         sync command StopRateGroup(vm_id: U32)
         event RateGroupStopped(vm_id: U32) severity activity low format "VM {} rate group stopped"
+
+        @ Port to handle fast rate group
+
 
         
 

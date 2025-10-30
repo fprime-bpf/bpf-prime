@@ -17,3 +17,12 @@ event CommandRunFailed(
                       ) \
     severity activity high \
     format "{} run failed: {}"
+
+
+
+event RateGroupSlip(
+                         rgId: U32
+                         vmId: U32
+                      ) \
+    severity activity high \
+    format "Rate group {} slipped running vm {}"
