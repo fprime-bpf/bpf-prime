@@ -13,6 +13,9 @@
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
+#include <vector>
+#include <atomic>
+#include <pthread.h>
 
 namespace Components {
 
@@ -49,6 +52,25 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     // boolean arrays for different rate groups
     bool rate_group_map[5][64] = {};
+    
+    // Multi-threaded executor infrastructure
+    U32 k_max_vms = 64;
+    U32 k_num_workers = 2;  // Fixed to 2 workers for simplicity
+    std::vector<pthread_t> worker_threads;
+    
+    // Job buffers: each worker has a buffer of VM IDs to execute
+    std::vector<std::vector<U32>> job_buffers;
+    
+    // Synchronization: one mutex and condition variable per worker
+    std::vector<pthread_mutex_t> buffer_mutexes;
+    std::vector<pthread_cond_t> buffer_condition_vars;
+    std::atomic<bool> shutdown_flag{false};
+    
+    // Worker thread function (called by pthread)
+    void worker_thread_function(U32 worker_id);
+    
+    // Static wrapper for pthread_create (needs C-style function pointer)
+    static void* worker_thread_wrapper(void* arg);
     
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
