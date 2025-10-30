@@ -5,7 +5,7 @@ namespace Components {
 
 namespace Matmul {
 
-const int MAT_DIM = 10, MAT_SIZE = 100;
+const int MAT_DIM = 16, MAT_SIZE = 256, BLOCK = 4;
 
 int main() {
     void *mat_map_1 = (void*)maps::map_by_fd(0), *mat_map_2 = (void*)maps::map_by_fd(1), *mat_map_res = (void*)maps::map_by_fd(2), *result;
@@ -21,11 +21,30 @@ int main() {
     }
 
     // Do multiplication
-    for (int i = 0; i < MAT_DIM; i++) {
-        for (int j = 0; j < MAT_DIM; j++) {
-            mat_res[i * MAT_DIM + j] = 0.0f;
-            for (int k = 0; k < MAT_DIM; k++) {
-                mat_res[i * MAT_DIM + j] += mat_1[i * MAT_DIM + k] * mat_2[k * MAT_DIM + j];
+    for (int ii = 0; ii < MAT_DIM; ii += BLOCK) {
+        for (int kk = 0; kk < MAT_DIM; kk += BLOCK) {
+            for (int j = 0; j < MAT_DIM; j += 2) {
+                for (int i = ii; i < ii + BLOCK; i += 2) {
+                    float acc00 = 0, acc01 = 0, acc10 = 0, acc11 = 0;
+                    if (kk != 0) {
+                        acc00 = mat_res[i * MAT_DIM + j];
+                        acc01 = mat_res[i * MAT_DIM + j + 1];
+                        acc10 = mat_res[(i + 1) * MAT_DIM + j];
+                        acc11 = mat_res[(i + 1) * MAT_DIM + j + 1];
+                    }
+
+                    for (int k = kk; k < MAT_DIM; k++) {
+                        acc00 += mat_1[i * MAT_DIM + k] * mat_2[k * MAT_DIM + j];
+                        acc01 += mat_1[i * MAT_DIM + k] * mat_2[k * MAT_DIM + j + 1];
+                        acc10 += mat_1[(i + 1) * MAT_DIM + k] * mat_2[k * MAT_DIM + j];
+                        acc11 += mat_1[(i + 1) * MAT_DIM + k] * mat_2[k * MAT_DIM + j + 1];
+                    }
+
+                    mat_res[i * MAT_DIM + j] = acc00;
+                    mat_res[i * MAT_DIM + j + 1] = acc01;
+                    mat_res[(i + 1) * MAT_DIM + j] = acc10;
+                    mat_res[(i + 1) * MAT_DIM + j + 1] = acc11;
+                }
             }
         }
     }

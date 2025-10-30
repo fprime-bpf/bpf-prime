@@ -50,7 +50,7 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
 
 F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     // TODO: Why does recompilation affect benchmark data? Fix.
-    if (true){//compile) {
+    if (compile) {
         const char *bytecode_path;
 
         switch (test)
@@ -117,13 +117,13 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char *t
 
 // Note: Compile the FPrime project with release build when benchmarking
 Fw::Success Tests::benchmark() {
-    const U32 passes = 150;
+    const U32 passes = 10000;
 
     bpf_map_def map_def {
         .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
         .key_size = 4,
         .value_size = 4,
-        .max_entries = 100,
+        .max_entries = 256,
         .map_flags = 0
     };
     
