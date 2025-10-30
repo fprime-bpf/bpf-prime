@@ -1,13 +1,17 @@
 #include "Components/Tests/Tests.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <chrono>
-#include <random>
-#include <climits>
-#include <algorithm>
 #include "Kalman.hpp"
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
+
+#include <algorithm>
+#include <chrono>
+#include <climits>
 #include <fstream>
+#include <random>
+#include <sched.h>
+#include <unistd.h>
+
 
 using timer = std::chrono::high_resolution_clock;
 using ms = std::chrono::milliseconds;
@@ -130,7 +134,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char *t
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 150;
+    const U32 passes = 10000;
 
     bpf_map_def map_def {
         .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
@@ -143,6 +147,10 @@ Fw::Success Tests::benchmark() {
     for (U32 fd : {0, 1, 2, 4}) {
         BpfSequencer::maps.create_map(map_def, fd);
     }
+
+    struct sched_param p;
+    p.sched_priority = 20;
+    sched_setscheduler(getpid(), SCHED_RR, &p);
 
     struct TestInfo {
         U32 passes;
