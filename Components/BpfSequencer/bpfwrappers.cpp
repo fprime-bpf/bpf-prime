@@ -32,7 +32,8 @@ namespace Components {
        }
        auto vm = this->vms[vmId];
        
-       I32 res = maps.register_functions(vm->bpf_vm);
+       // TODO:
+       // I32 res = maps.register_functions(vm->bpf_vm);
        if (res) {
            this->log_WARNING_HI_RegisterFunctionsFailed(
                Fw::LogStringArg(std::strerror(-res))

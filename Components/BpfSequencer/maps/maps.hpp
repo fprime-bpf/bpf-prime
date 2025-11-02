@@ -66,12 +66,6 @@ class map {
  */
 class maps {
     private:
-        struct bpf_external_function {
-            size_t index;
-            const char *name;
-            void *fn;
-        };
-
         const U32 Max_Map_Instances = 1024;
         std::unordered_map<U32, map*> map_instances;
 
@@ -87,15 +81,6 @@ class maps {
          * @return Negative errno status on failure (0 on success)
          */
         I32 create_map(const bpf_map_def& map_def, U32 fd) noexcept;
-        /**
-         * @brief Set the LDDW helpers and register the BPF helpers in the vm
-         * 
-         * This function should not be called by the user. It will be called automatically after the llvmbpf vm's initialization
-         * 
-         * @param vm llvmbpf vm instance
-         * @return Errno status from vm
-         */
-        I32 register_functions(bpftime::llvmbpf_vm& vm) noexcept;
         /**
          * @brief Close and free all maps
          * 
