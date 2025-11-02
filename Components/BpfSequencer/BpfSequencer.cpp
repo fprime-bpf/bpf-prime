@@ -15,12 +15,21 @@ BpfSequencerVM::~BpfSequencerVM() {
     bpf_mem = nullptr;
 }
 
+VmExternalFunction::VmExternalFunction(const char *name, void *fn) : name(name), fn(fn) {
+}
+
+I32 VmExternalFunction::register_func(bpftime::llvmbpf_vm& vm, U32 index) const {
+    return vm.register_external_function(index, name, fn);
+}
+
 // ----------------------------------------------------------------------
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
 BpfSequencer ::BpfSequencer(const char* const compName) : 
-BpfSequencerComponentBase(compName) { }
+BpfSequencerComponentBase(compName) { 
+    std::fill(helper_indices, helper_indices + BpfHelper::HelperFuncCount, -1);
+}
 
 BpfSequencer ::~BpfSequencer() {}
 
@@ -33,6 +42,42 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     }
     this->timer_freq_hz = timer_freq_hz;
     this->configured = true;
+}
+
+I32 BpfSequencer::register_bpf_helper(BpfHelper helper) {
+    auto helper_num = static_cast<U32>(helper.helper_func);
+
+    if (helper_num < BpfHelper::HelperFuncCount) {
+        this->helper_indices[helper_num] = helper.index;
+        return 0;
+    }
+    return -1;
+}
+
+void BpfSequencer::register_bpf_helpers(const std::vector<BpfHelper>& helpers) {
+    for (const auto& helper : helpers) {
+        register_bpf_helper(helper);
+    }
+}
+
+U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
+
+    // Register lddw helpers
+    vm.set_lddw_helpers(maps::map_by_fd, maps::map_by_idx, maps::map_val, nullptr, nullptr);
+
+    // Register external functions
+    for (int i = 0; i < BpfHelper::HelperFuncCount; ++i) {
+        if (this->helper_indices[i] == -1) {
+            continue;
+        }
+
+        U32 result = BpfHelper::helper_func_info[i].register_func(vm, this->helper_indices[i]);
+
+        if (result)
+            return result;
+    }
+
+    return 0;
 }
 
 // ----------------------------------------------------------------------
