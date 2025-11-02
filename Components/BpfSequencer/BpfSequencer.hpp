@@ -36,16 +36,18 @@ struct VmExternalFunction {
   I32 register_func(bpftime::llvmbpf_vm& vm, U32 index) const;
 };
 
-static void noop(){}
-
 struct BpfHelper {
   enum class HelperFunction {
-    TEST_HELPER,
+    BPF_MAP_LOOKUP_ELEM,
+    BPF_MAP_UPDATE_ELEM,
+    BPF_MAP_DELETE_ELEM,
     __HELPER_FUNCTION_COUNT
   };
 
   inline static const VmExternalFunction helper_func_info[] = {
-    { "Test Helper", reinterpret_cast<void*>(noop) }
+    { "bpf_map_lookup_elem", reinterpret_cast<void*>(maps::bpf_map_lookup_elem) }, // HelperFunction::BPF_MAP_LOOKUP_ELEM
+    { "bpf_map_update_elem", reinterpret_cast<void*>(maps::bpf_map_update_elem) }, // HelperFunction::BPF_MAP_UPDATE_ELEM
+    { "bpf_map_delete_elem", reinterpret_cast<void*>(maps::bpf_map_delete_elem) }, // HelperFunction::BPF_MAP_DELETE_ELEM
   };
   inline static const U32 HelperFuncCount = sizeof(helper_func_info) / sizeof(VmExternalFunction);
 
