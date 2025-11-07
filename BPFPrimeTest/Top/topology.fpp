@@ -104,14 +104,16 @@ module BPFPrimeTest {
 
       # Rate group 1
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> rateGroup1.CycleIn
-      rateGroup1.RateGroupMemberOut[0] -> CdhCore.tlmSend.Run
-      rateGroup1.RateGroupMemberOut[1] -> FileHandling.fileDownlink.Run
-      rateGroup1.RateGroupMemberOut[2] -> systemResources.run
-      rateGroup1.RateGroupMemberOut[3] -> ComCcsds.comQueue.run
+      
+
 
       # Rate group 2
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> rateGroup2.CycleIn
-      rateGroup2.RateGroupMemberOut[0] -> cmdSeq.schedIn
+      rateGroup2.RateGroupMemberOut[0] -> CdhCore.tlmSend.Run
+      rateGroup2.RateGroupMemberOut[1] -> FileHandling.fileDownlink.Run
+      rateGroup2.RateGroupMemberOut[2] -> systemResources.run
+      rateGroup2.RateGroupMemberOut[3] -> ComCcsds.comQueue.run
+      rateGroup2.RateGroupMemberOut[4] -> cmdSeq.schedIn
 
       # Rate group 3
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup3] -> rateGroup3.CycleIn
@@ -127,9 +129,10 @@ module BPFPrimeTest {
       cmdSeq.comCmdOut -> CdhCore.cmdDisp.seqCmdBuff
       CdhCore.cmdDisp.seqCmdStatus -> cmdSeq.cmdResponseIn
     }
-
+  
     connections BPFPrimeTest {
-
+      tests.getVmBenchmark -> bpfSequencer.getVmBenchmark
+      rateGroup1.RateGroupMemberOut[0] -> bpfSequencer.schedIn # RUn this is 1 Hz
     }
 
   }

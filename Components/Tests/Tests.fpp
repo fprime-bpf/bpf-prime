@@ -31,6 +31,19 @@ module Components {
             severity warning low \
             format "Failed to populate map: {}"
 
+        @ Run benchmarks, comparing native and vm time for each test
+        async command BENCHMARK()
+
+        @ Run native benchmark, return runtime
+        sync input port getNativeBenchmark: RunNativeBenchmark
+
+        @ Run vm benchmark, return runtime (OUT)
+        output port getVmBenchmark: RunVmBenchmark
+
+        event FailedBenchmarkTest(testName: string, passNum: U32, returnCode: F64) \
+            severity warning low \
+            format "Could not complete benchmark: Test '{}' Pass #{} failed, exit code {}"
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

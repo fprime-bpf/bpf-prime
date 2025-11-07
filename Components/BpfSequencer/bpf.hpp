@@ -8,7 +8,6 @@ namespace Components {
 #define BPF_EXIST       2 /* update existing element */
 #define BPF_F_LOCK      4 /* spin_lock-ed map_lookup/map_update */
 
-#pragma push(pack, 1)
 struct bpf_map_def {
     unsigned int type;
     unsigned int key_size;
@@ -16,6 +15,5 @@ struct bpf_map_def {
     unsigned int max_entries;
     unsigned int map_flags;
 };
-#pragma pop(pack)
 
 }

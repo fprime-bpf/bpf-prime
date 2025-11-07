@@ -14,7 +14,18 @@
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
 
+#define BPF_PRIME_VM_COUNT 64
+
 namespace Components {
+
+struct BpfSequencerVM {
+    bpftime::llvmbpf_vm bpf_vm;
+    uint64_t res = 0;
+    std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
+    size_t bpf_mem_size = 0;
+    std::string sequenceFilePath;
+    ~BpfSequencerVM();
+};
 
 class BpfSequencer : public BpfSequencerComponentBase {
   public:
@@ -30,32 +41,35 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Destroy BpfSequencer object
     ~BpfSequencer();
 
+    // User will set up rate groups via this function
+    void configure(U32 rate_groups[5], U32 timer_freq_hz);
+
   private:
-    bpftime::llvmbpf_vm *vms[64] = {};  
-    uint64_t res;
-    std::unique_ptr<uint8_t[]> bpf_mem;
-    size_t bpf_mem_size;
-    std::string sequenceFilePath;
+    std::shared_ptr<BpfSequencerVM> vms[BPF_PRIME_VM_COUNT];
     U8* buffer = nullptr;
+    U64 ticks = 0;
+    bool configured = false;
+    U32 k_max_rate_groups = 5;
+    U32 num_rate_groups = 0;
+    U32 rate_group_intervals[5] = {};
+    U32 timer_freq_hz = 1000; // Default to 1kHz
+
+    // boolean arrays for different rate groups
+    bool rate_group_map[5][64] = {};
+    
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
-    //! Handler implementation for checkTimers
-    //!
-    //! Port to check the timers
-    void checkTimers_handler(FwIndexType portNum,  //!< The port number
-                             U32 context           //!< The call order
-                             ) override;
 
-    //! Handler implementation for cmdResponseIn
+    void schedIn_handler(FwIndexType portNum, U32 context) override;
+
+    //! Handler implementation for getVmBenchmark
     //!
-    //! responses back from commands from the sequencer
-    void cmdResponseIn_handler(FwIndexType portNum,             //!< The port number
-                               FwOpcodeType opCode,             //!< Command Op Code
-                               U32 cmdSeq,                      //!< Command Sequence
-                               const Fw::CmdResponse& response  //!< The command response argument
-                               ) override;
+    //! Run vm benchmark, return runtime (IN)
+    F64 getVmBenchmark_handler(FwIndexType portNum,  //!< The port number
+                               const Components::BENCHMARK_TEST& test,
+                               bool compile) override;
 
     //! Handler implementation for pingIn
     //!
@@ -63,13 +77,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void pingIn_handler(FwIndexType portNum,  //!< The port number
                         U32 key               //!< Value to return to pinger
                         ) override;
-
-    //! Handler implementation for writeTlm
-    //!
-    //! Port to write all telemetry
-    void writeTlm_handler(FwIndexType portNum,  //!< The port number
-                          U32 context           //!< The call order
-                          ) override;
 
   private:
     // ----------------------------------------------------------------------
@@ -79,6 +86,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Handler implementation for command LOAD_SEQUENCE
     //!
     //! Load and compile a sequence
+
+
+    
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vmId,             //!< The index of the selected BPF VM (0-63)
@@ -91,6 +101,15 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 cmdSeq,           //!< The command sequence number
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
+    
+    void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id,
+                                  U32 rate_group_hz) override; 
+                                  
+    void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  U32 vm_id) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -104,6 +123,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                    U32 max_entries,                              //!< Maximum amount of entries
                                    U32 map_flags                                 //!< Map flags
                                    ) override;
+                                   
 
     //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
     //!
@@ -147,10 +167,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // ----------------------------------------------------------------------
     
     Fw::Success load(U32 vmId, const char* sequenceFilePath);
-    
-    Fw::Success compile();
-    
-    Fw::Success run(U32 vmId);
+
+    Fw::Success run(U32 vmId, bool log_time = false);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
     
@@ -159,9 +177,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
     Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
+
+    F64 get_benchmark_vm(BENCHMARK_TEST test, bool compile);
+
+  public:
+    static Fw::CmdResponse result_to_response(Fw::Success result);
     
   private:
-    bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
+    bool validate_vm_id(U32 vmId);
 
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 
