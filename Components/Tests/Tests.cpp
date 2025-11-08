@@ -5,11 +5,11 @@
 // ======================================================================
 
 #include "Components/Tests/Tests.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/maps/maps.hpp"
 #include "Kalman.hpp"
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
-#include "Components/BpfSequencer/BpfSequencer.hpp"
 
 namespace Components {
 
@@ -33,7 +33,7 @@ F64 Tests ::getNativeBenchmark_handler(FwIndexType portNum, const Components::BE
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
-Fw::CmdResponse Tests::test_status_to_response(const char *test_name, I32 result) {
+Fw::CmdResponse Tests::test_status_to_response(const char* test_name, I32 result) {
     if (result != 0) {
         this->log_WARNING_HI_TestFailed(Fw::LogStringArg(test_name), result);
         return Fw::CmdResponse::EXECUTION_ERROR;
