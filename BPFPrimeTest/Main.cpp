@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 
     // Setup, cycle, and teardown topology
     BPFPrimeTest::setupTopology(inputs);
-    BPFPrimeTest::startRateGroups(Fw::TimeInterval(0,1000));  // Program loop cycling rate groups at 1kHz
+    BPFPrimeTest::startRateGroups(Fw::TimeInterval(0, 1000));  // Program loop cycling rate groups at 1kHz
     BPFPrimeTest::teardownTopology(inputs);
     (void)printf("Exiting...\n");
     return 0;

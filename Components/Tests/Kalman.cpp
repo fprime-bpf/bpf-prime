@@ -5,7 +5,7 @@ namespace Components {
 
 namespace Kalman {
 
-inline void predict(float *preds) {
+inline void predict(float* preds) {
     for (int i = 0; i < 7; i++) {
         if (i != 6)
             preds[i] = preds[i + 1] / 1.5f;
@@ -21,7 +21,7 @@ int main() {
     // Read in position and attitude
     for (int i = 0; i < 7; i++) {
         result = maps::bpf_map_lookup_elem(in_map, &i);
-        ins[i] = *(float *)result;
+        ins[i] = *(float*)result;
         preds[i] = ins[i];
     }
 
@@ -41,6 +41,6 @@ int main() {
     return 0;
 }
 
-} // namespace Kalman
+}  // namespace Kalman
 
-} // namespace Components
+}  // namespace Components

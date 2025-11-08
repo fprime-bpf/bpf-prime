@@ -1,6 +1,6 @@
 #include "shared_mutex.hpp"
-#include <Os/Mutex.hpp>
 #include <Os/Condition.hpp>
+#include <Os/Mutex.hpp>
 
 void shared_mutex::lock_shared() {
     mutex.lock();
@@ -37,7 +37,7 @@ void shared_mutex::lock_unique() {
 
 void shared_mutex::unlock_unique() {
     mutex.lock();
-    
+
     is_writing = false;
     condvar.notifyAll();
 
