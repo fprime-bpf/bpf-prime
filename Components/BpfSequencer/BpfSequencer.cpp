@@ -24,7 +24,7 @@ bpf_mem_size(0) { }
 
 BpfSequencer ::~BpfSequencer() {}
 
-void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
+void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers) {
     for (int i = 0; i < this->k_max_rate_groups; i++) {
         this->rate_group_intervals[i] = rate_groups[i];
         if (rate_groups[i] != 0) {
@@ -38,6 +38,25 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     }
 
     this->timer_freq_hz = timer_freq_hz;
+
+    // Initialize worker threads and job buffers
+    this->num_workers = num_workers;
+    this->job_buffers.resize(this->num_workers); // We want a job buffer per worker. Job buffer holds vmID
+
+    // We want each job buffer to be able to hold num_vms / num_workers jobs
+    U32 jobs_per_worker = (this->k_num_vms + this->num_workers - 1) / this->num_workers; // Ceiling division so that we don't overflow
+    for (U32 i = 0; i < this->num_workers; i++) {
+        this->job_buffers[i].reserve(jobs_per_worker); // Preallocates memory
+    }
+
+    // Initialize Threads
+    this->workers.reserve(this->num_workers); // This gives us num_workers theads
+    for (U32 i = 0; i< this->num_workers; i++) {
+        this->workers.emplace_back([this, i](){
+            this->run_worker(i); // The function that each worker thread runs
+        });
+    }
+
     this->configured = true;
 }
 

@@ -31,7 +31,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     ~BpfSequencer();
 
     // User will set up rate groups via this function
-    void configure(U32 rate_groups[5], U32 timer_freq_hz);
+    void configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers);
 
   private:
 
@@ -55,6 +55,17 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U64 ticks = 0;
     U32 num_rate_groups = 0;
     bool configured = false;
+
+
+    //Stuff for Multithreading
+    U32 num_workers = 2; // Default to 2 workers
+
+    // Worker threads 
+    std::vector<std::thread> workers;
+
+    // Job Buffers
+    std::vector<std::vector<U32>> job_buffers;
+
 
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
