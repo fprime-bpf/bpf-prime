@@ -53,7 +53,11 @@ void configureTopology() {
     cmdSeq.allocateBuffer(0, mallocator, 5 * 1024);
 
     bpfSequencer.configure(bpfSequencerRateGroups,
-                           1000);  // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
+                        1000);  // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
+
+    bpfSequencer.register_bpf_helpers({
+        { 4, { reinterpret_cast<void*>(Components::Tests::helper_example_noop), "Noop" } }
+    });
 }
 
 // Public functions for use in main program are namespaced with deployment name BPFPrimeTest
