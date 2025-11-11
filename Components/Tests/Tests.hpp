@@ -82,6 +82,8 @@ class Tests final : public TestsComponentBase {
     // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
+  public:
+    static void helper_example_noop() { }
   private:
     Fw::CmdResponse test_status_to_response(const char *test_name, I32 result);
     Fw::Success populate_map_random(U32 fd, U32 start, U32 length);

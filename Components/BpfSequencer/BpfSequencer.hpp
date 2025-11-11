@@ -28,33 +28,8 @@ struct BpfSequencerVM {
 };
 
 struct VmExternalFunction {
-  const char *name;
   void *fn;
-
-  VmExternalFunction(const char *name, void *fn);
-  
-  I32 register_func(bpftime::llvmbpf_vm& vm, U32 index) const;
-};
-
-struct BpfHelper {
-  enum class HelperFunction {
-    BPF_MAP_LOOKUP_ELEM,
-    BPF_MAP_UPDATE_ELEM,
-    BPF_MAP_DELETE_ELEM,
-    __HELPER_FUNCTION_COUNT
-  };
-
-  inline static const VmExternalFunction helper_func_info[] = {
-    { "bpf_map_lookup_elem", reinterpret_cast<void*>(maps::bpf_map_lookup_elem) }, // HelperFunction::BPF_MAP_LOOKUP_ELEM
-    { "bpf_map_update_elem", reinterpret_cast<void*>(maps::bpf_map_update_elem) }, // HelperFunction::BPF_MAP_UPDATE_ELEM
-    { "bpf_map_delete_elem", reinterpret_cast<void*>(maps::bpf_map_delete_elem) }, // HelperFunction::BPF_MAP_DELETE_ELEM
-  };
-  inline static const U32 HelperFuncCount = sizeof(helper_func_info) / sizeof(VmExternalFunction);
-
-  static_assert(static_cast<U32>(HelperFunction::__HELPER_FUNCTION_COUNT) == HelperFuncCount);
-
-  HelperFunction helper_func;
-  U32 index;
+  const char *name;
 };
 
 class BpfSequencer : public BpfSequencerComponentBase {
@@ -75,8 +50,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
     // Allows user to register bpf helper functions
-    I32 register_bpf_helper(BpfHelper helper);
-    void register_bpf_helpers(const std::vector<BpfHelper>& helpers);
+    // Note: Indices 1-3 are used internally for eBPF map helper functions. Start with index 4
+    void register_bpf_helper(U32 index, const VmExternalFunction& helper);
+    void register_bpf_helpers(const std::vector<std::pair<U32, VmExternalFunction>>& helpers);
     
   private:
     std::shared_ptr<BpfSequencerVM> vms[BPF_PRIME_VM_COUNT];
@@ -87,7 +63,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U32 num_rate_groups = 0;
     U32 rate_group_intervals[5] = {};
     U32 timer_freq_hz = 1000; // Default to 1kHz
-    U32 helper_indices[BpfHelper::HelperFuncCount];
+    std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
     // boolean arrays for different rate groups
     bool rate_group_map[5][64] = {};

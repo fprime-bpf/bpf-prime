@@ -54,9 +54,7 @@ void configureTopology() {
     bpfSequencer.configure(bpfSequencerRateGroups, 1000); // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
 
     bpfSequencer.register_bpf_helpers({
-        { Components::BpfHelper::HelperFunction::BPF_MAP_LOOKUP_ELEM, 1 },
-        { Components::BpfHelper::HelperFunction::BPF_MAP_UPDATE_ELEM, 2 },
-        { Components::BpfHelper::HelperFunction::BPF_MAP_DELETE_ELEM, 3 },
+        { 4, { reinterpret_cast<void*>(Components::Tests::helper_example_noop), "Noop" } }
     });
 }
 
