@@ -6,10 +6,10 @@ namespace Components {
 namespace LowPassFilter {
 
 int main() {
-    void *map = (void*)maps::map_by_fd(2);
+    void* map = (void*)maps::map_by_fd(2);
     int key = 0;
 
-    void *result = maps::bpf_map_lookup_elem(map, &key);
+    void* result = maps::bpf_map_lookup_elem(map, &key);
 
     if (result == 0) {
         return -1;
@@ -17,13 +17,13 @@ int main() {
 
     map = (void*)maps::map_by_fd(4);
     key = 0;
-    float value = (*(float *)result);
+    float value = (*(float*)result);
     if (value >= 0.05f)
         maps::bpf_map_update_elem(map, &key, &value, 0);
 
     return 0;
 }
 
-} // namespace LowPassFilter
+}  // namespace LowPassFilter
 
-} // namespace Components
+}  // namespace Components

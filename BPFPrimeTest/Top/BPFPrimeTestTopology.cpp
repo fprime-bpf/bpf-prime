@@ -6,7 +6,7 @@
 // Provides access to autocoded functions
 #include <BPFPrimeTest/Top/BPFPrimeTestTopologyAc.hpp>
 // Note: Uncomment when using Svc:TlmPacketizer
-//#include <BPFPrimeTest/Top/BPFPrimeTestPacketsAc.hpp>
+// #include <BPFPrimeTest/Top/BPFPrimeTestPacketsAc.hpp>
 
 // Necessary project-specified types
 #include <Fw/Types/MallocAllocator.hpp>
@@ -17,7 +17,8 @@ using namespace BPFPrimeTest;
 // Instantiate a malloc allocator for cmdSeq buffer allocation
 Fw::MallocAllocator mallocator;
 
-// The reference topology divides the incoming clock signal (1kHz) into sub-signals: 1kHz, 1/2Hz, and 1/4Hz with 0 offset
+// The reference topology divides the incoming clock signal (1kHz) into sub-signals: 1kHz, 1/2Hz, and 1/4Hz with 0
+// offset
 Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1, 0}, {1000, 0}, {4000, 0}}};
 
 // Rate groups may supply a context token to each of the attached children whose purpose is set by the project. The
@@ -30,7 +31,7 @@ enum TopologyConstants {
     COMM_PRIORITY = 100,
 };
 
-U32 bpfSequencerRateGroups[5] = {1, 10, 100, 1000, 10000}; // 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz
+U32 bpfSequencerRateGroups[5] = {1, 10, 100, 1000, 10000};  // 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz
 
 /**
  * \brief configure/setup components in project-specific way
@@ -51,7 +52,8 @@ void configureTopology() {
     // Command sequencer needs to allocate memory to hold contents of command sequences
     cmdSeq.allocateBuffer(0, mallocator, 5 * 1024);
 
-    bpfSequencer.configure(bpfSequencerRateGroups, 1000); // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
+    bpfSequencer.configure(bpfSequencerRateGroups,
+                        1000);  // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
 
     bpfSequencer.register_bpf_helpers({
         { 4, { reinterpret_cast<void*>(Components::Tests::helper_example_noop), "Noop" } }
@@ -93,7 +95,7 @@ void startRateGroups(Fw::TimeInterval interval) {
     // Svc::RateGroupDriver will divide this down to the slower rate groups.
     // This call will block until the stopRateGroups() call is made.
     // For this Linux demo, that call is made from a signal handler.
-    timer.startTimer(interval.getSeconds()*1000+interval.getUSeconds()/1000);
+    timer.startTimer(interval.getSeconds() * 1000 + interval.getUSeconds() / 1000);
 }
 
 void stopRateGroups() {

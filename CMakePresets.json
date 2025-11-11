@@ -1,6 +1,6 @@
 {
-    "version": 4,
-    "configurePresets": [
+  "version": 4,
+  "configurePresets": [
     {
       "name": "fprime",
       "displayName": "F´ Release Preset",
@@ -11,8 +11,8 @@
         "PATH": "$env{VIRTUAL_ENV}/bin:$penv{PATH}"
       },
       "cacheVariables": {
-          "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-          "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
@@ -21,7 +21,7 @@
       "displayName": "F´ Debug Preset",
       "description": "F´ debug build using local fprime-venv",
       "cacheVariables": {
-          "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -31,30 +31,30 @@
       "description": "F´ debug build including unit tests using local fprime-venv",
       "binaryDir": "${sourceDir}/build-fprime-automatic-native-ut",
       "cacheVariables": {
-          "BUILD_TESTING": "ON"
+        "BUILD_TESTING": "ON"
       }
     },
-      {
-        "name": "fprime-ninja",
-        "inherits": "fprime",
-        "displayName": "F´ Release (Ninja) Preset",
-        "description": "F´ release build using ninja and local fprime-venv",
-        "generator": "Ninja"
-      },
-      {
-        "name": "fprime-debug-ninja",
-        "inherits": "fprime-debug",
-        "displayName": "F´ Debug (Ninja) Preset",
-        "description": "F´ debug build using ninja and local fprime-venv",
-        "generator": "Ninja"
-      },
-      {
-        "name": "fprime-ut-ninja",
-        "inherits": "fprime-ut",
-        "displayName": "F´ Unit Test (Ninja) Preset",
-        "description": "F´ debug build including unit tests using ninja and local fprime-venv",
-        "binaryDir": "${sourceDir}/build-fprime-automatic-native-ut",
-        "generator": "Ninja"
-      }
-    ]
+    {
+      "name": "fprime-ninja",
+      "inherits": "fprime",
+      "displayName": "F´ Release (Ninja) Preset",
+      "description": "F´ release build using ninja and local fprime-venv",
+      "generator": "Ninja"
+    },
+    {
+      "name": "fprime-debug-ninja",
+      "inherits": "fprime-debug",
+      "displayName": "F´ Debug (Ninja) Preset",
+      "description": "F´ debug build using ninja and local fprime-venv",
+      "generator": "Ninja"
+    },
+    {
+      "name": "fprime-ut-ninja",
+      "inherits": "fprime-ut",
+      "displayName": "F´ Unit Test (Ninja) Preset",
+      "description": "F´ debug build including unit tests using ninja and local fprime-venv",
+      "binaryDir": "${sourceDir}/build-fprime-automatic-native-ut",
+      "generator": "Ninja"
+    }
+  ]
 }
