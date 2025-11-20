@@ -41,12 +41,6 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    I32 res = maps.register_functions(vm->bpf_vm);
-    if (res) {
-        this->log_WARNING_HI_RegisterFunctionsFailed(Fw::LogStringArg(std::strerror(-res)));
-        return Fw::Success::FAILURE;
-    }
-
     // Open the file
     Os::File file;
     Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
