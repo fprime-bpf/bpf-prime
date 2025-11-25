@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-name=$(dirname "$0")
-echo "${name}"
+# Source - https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script#59916
+SRC_DIR=$( dirname -- "$( readlink -f -- "$0"; )"; )
+echo "${SRC_DIR}"
 
 # has to be more than one argument
 if [ "$#" -lt 1 ]; then
@@ -13,17 +14,18 @@ fi
 for file in $@; do
     filename=$(basename ${file})
     filename_noextension="${file%.*}"
-    if [[ -f "$file" ]]; then
-        echo "${filename} exists"
-        echo "${filename_noextension}"
-         #./llvm-project/build/bin/clang -emit-llvm -S ${filename} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops
-         #./llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll
-         #./llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o a.o
+    filename_noextension_bpf="${filename_noextension%.*}"
 
+    if [[ -f "$file" ]]; then
+        # echo "${filename} exists"
+        echo "${filename_noextension}.o Assembly Code:"
+        # echo "${filename_noextension_bpf}"
+        ${SRC_DIR}/llvm-project/build/bin/clang -emit-llvm -S ${filename} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops
+        ${SRC_DIR}/llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll
+        ${SRC_DIR}/llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o ${filename_noextension_bpf}.o
     else
         echo "Error: $filename: No such file" >&2
     fi
 done
 
 exit 0
-
