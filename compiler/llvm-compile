@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+name=$(dirname "$0")
+echo "${name}"
+
+# has to be more than one argument
+if [ "$#" -lt 1 ]; then
+    echo "Usage: $0 <filename>"
+    exit 0
+fi
+
+# loop over every argument and get the LLVM IR, ELF binary, and .text of ELF
+for file in $@; do
+    filename=$(basename ${file})
+    filename_noextension="${file%.*}"
+    if [[ -f "$file" ]]; then
+        echo "${filename} exists"
+        echo "${filename_noextension}"
+         #./llvm-project/build/bin/clang -emit-llvm -S ${filename} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops
+         #./llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll
+         #./llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o a.o
+
+    else
+        echo "Error: $filename: No such file" >&2
+    fi
+done
+
+exit 0
+
