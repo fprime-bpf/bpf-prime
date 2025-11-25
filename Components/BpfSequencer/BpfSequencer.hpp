@@ -13,6 +13,8 @@
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
+#include <mutex>
+#include <condition_variable>
 
 namespace Components {
 
@@ -32,6 +34,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     // User will set up rate groups via this function
     void configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers);
+
+    void run_worker(U32 worker_id);
 
   private:
 
@@ -65,7 +69,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     // Job Buffers
     std::vector<std::vector<U32>> job_buffers;
-
+    U32 current_buffer = 0; 
+    std::vector<std::mutex> buffer_mutex; // Vector of mutexes (per job buffer)
+    std::vector<std::condition_variable> buffer_condition; // Synchronization between threads
 
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports

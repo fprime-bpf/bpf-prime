@@ -22,7 +22,35 @@ BpfSequencerComponentBase(compName),
 bpf_mem(nullptr),
 bpf_mem_size(0) { }
 
-BpfSequencer ::~BpfSequencer() {}
+BpfSequencer ::~BpfSequencer() {
+    // Get rid of workers at destruction
+    for (auto& thread: workers) {
+        if (thread.joinable()) {
+            thread.join();
+        }
+    }
+}
+
+void BpfSequencer ::run_worker(U32 id){
+    // Look through the job buffers for the specific worker index and then execute the jobs
+
+    // Place a lock on the the job buffer
+    std::unique_lock<std::mutex> lock(buffer_mutex[id]);
+
+    // Wait for the interrupt from the sequencer thread to tell us that we have jobs
+
+    // Steal all the jobs and then unlock the resource
+    auto jobs = std::move(job_buffers[id]);
+    job_buffers[id].clear();
+    lock.unlock();
+
+    // Now we just run all the jobs
+    for(auto& job : jobs){
+        if(job){
+            this->run(job);
+        }
+    }
+}
 
 void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers) {
     for (int i = 0; i < this->k_max_rate_groups; i++) {
@@ -53,7 +81,7 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_wor
     this->workers.reserve(this->num_workers); // This gives us num_workers theads
     for (U32 i = 0; i< this->num_workers; i++) {
         this->workers.emplace_back([this, i](){
-            this->run_worker(i); // The function that each worker thread runs
+            this->run_worker(i); 
         });
     }
 
@@ -69,30 +97,23 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     this->tlmWrite_ticks(this->ticks);
 
-    // First Check For Slips
+    // Iterate over all the vms, check if the job needs to be run
+    for (int i = 0; i < this->k_num_vms; i++){
+        int rgId = this->vm_to_rgId[i]; // -1 means we don't run
+        if (rgId != -1 && this->ticks % this->rate_group_intervals[rgId] == 0){
+            // This means we have to assign this job to a job buffer!
+            
+            // First lock the buffer mutex
+            std::lock_guard<std::mutex> lock(buffer_mutex[current_buffer]);
+
+            // Now we can add job buffers
+            job_buffers[current_buffer].push_back(i);
+            
+            // Increment the buffer index and wrap around
+            current_buffer = (current_buffer + 1) % job_buffers.size();
+        }
+    }
     
-    for(int i = 0; i<this->k_max_rate_groups; i++){
-        if(last_run_vm[i] != -1){
-            this->log_ACTIVITY_HI_RateGroupSlip(i, last_run_vm[i]);
-            return;
-        }
-    }
-
-    // If No Slips - Execute the Command
-
-    // Iterate over all of the vms (implicit priority)
-    for(int i = 0; i<this->k_num_vms; i++){ 
-        // Get rgId from vm
-        int rgId = this->vm_to_rgId[i]; 
-        // Short circuit evaluation + check if rg runs
-        if (rgId != -1 && this->ticks % this->rate_group_intervals[rgId] == 0) { 
-            // Set the last run vm for this rate group to the current vm
-            last_run_vm[this->rate_group_intervals[rgId]] = i; 
-            Fw::Success result = this->run(i); 
-            // Once the command has been executed set the last run vm to sentinel value
-            last_run_vm[this->rate_group_intervals[rgId]] = -1; 
-        }
-    }
 }
 
 // Ping in and out
@@ -145,11 +166,7 @@ void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U
 
     bool found = false;
 
-    FILE *fp = fopen("debug.txt", "w");
     for(int i = 0; i<this->k_max_rate_groups; i++){
-        
-        fprintf(fp, "Input Rate Group: %f, Expected Interval: %d, Actual Interval: %d\n", rate_group_hz, expected_interval, rate_group_intervals[i]);
-        
         if(this->rate_group_intervals[i] == expected_interval){
             found = true; 
             
@@ -159,7 +176,7 @@ void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U
             break;
         } 
     }
-    fclose(fp);
+    
     if (!found) {
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
