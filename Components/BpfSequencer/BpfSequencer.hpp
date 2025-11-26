@@ -27,6 +27,11 @@ struct BpfSequencerVM {
     ~BpfSequencerVM();
 };
 
+struct VmExternalFunction {
+  void *fn;
+  const char *name;
+};
+
 class BpfSequencer : public BpfSequencerComponentBase {
   public:
     inline static Components::maps maps;
@@ -44,6 +49,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // User will set up rate groups via this function
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
+    // Allows user to register bpf helper functions
+    // Note: Indices 1-3 are used internally for eBPF map helper functions. Start with index 4
+    void register_bpf_helper(U32 index, const VmExternalFunction& helper);
+    void register_bpf_helpers(const std::vector<std::pair<U32, VmExternalFunction>>& helpers);
+    
   private:
     std::shared_ptr<BpfSequencerVM> vms[BPF_PRIME_VM_COUNT];
     U8* buffer = nullptr;
@@ -53,10 +63,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U32 num_rate_groups = 0;
     U32 rate_group_intervals[5] = {};
     U32 timer_freq_hz = 1000; // Default to 1kHz
+    std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
     // boolean arrays for different rate groups
     bool rate_group_map[5][64] = {};
     
+    // Register all external functions for new vm instance
+    U32 register_external_functions(bpftime::llvmbpf_vm& vm);
+
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------

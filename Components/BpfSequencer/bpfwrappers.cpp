@@ -31,10 +31,13 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
     auto vm = this->vms[vmId];
-
-    I32 res = maps.register_functions(vm->bpf_vm);
+    
+    I32 res = this->register_external_functions(vm->bpf_vm);
     if (res) {
-        this->log_WARNING_HI_RegisterFunctionsFailed(Fw::LogStringArg(std::strerror(-res)));
+        this->log_WARNING_HI_RegisterFunctionsFailed(
+            vmId,
+            Fw::LogStringArg(std::strerror(-res))
+        );
         return Fw::Success::FAILURE;
     }
 
