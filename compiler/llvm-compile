@@ -1,13 +1,82 @@
 #!/usr/bin/env bash
 
+compileHelp() {
+    cat << EOF
+Usage: $0 [OPTIONS] FILE...
+
+Compile BPF programs using custom LLVM fork.
+
+ARGUMENTS:
+    FILE    Source file(s) to compile (.c, .bpf.c)
+    DIR     Directory to output binaries
+
+OPTIONS:
+    -h,   Show this help message and exit
+    -w,   Write Machine IR to a file, <filename>.txt
+    -r,   Print Machine IR to the output
+    -d,   Output files to subsequently given directory   
+
+EXAMPLES:
+    $0 program.bpf.c
+    $0 -o /tmp/output/ file1.bpf.c file2.bpf.c
+
+OUTPUT FILES:
+    Generates: <filename>.ll, <filename>.bpf.o, and <filename>.o in the same directory
+    as the input file(s) unless specified with -d.
+EOF
+}
+
 # Source - https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script#59916
 SRC_DIR=$( dirname -- "$( readlink -f -- "$0"; )"; )
 echo "${SRC_DIR}"
 
-# has to be more than one argument
-if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 <filename>"
-    exit 0
+#booleans to use for getopts
+write_machineIR=$false
+print_machineIR=$false
+OUTPUT_DIRECTORY=""
+
+if [[ $# -eq 0 ]]; then
+    compileHelp
+    exit 1
+fi
+
+#getopts with out three options - see help() for more information
+while getopts ":hwrd:" option; do
+  case $option in
+    h)
+        compileHelp
+        exit 0
+        ;;
+    w)
+        write_file=$true 
+        ;;
+    r)
+        print_machineIR=$true
+        ;;
+    d)
+        OUTPUT_DIRECTORY=${OPTARG}
+        
+        if [[ ! -d "$OUTPUT_DIRECTORY" ]]; then 
+            echo "${OUTPUT_DIRECTORY}: does not exist" >&2
+            exit 1
+        fi
+        ;;
+    :)
+        ;;
+    ?)
+        compileHelp
+        exit 1
+        ;;
+  esac
+done
+
+# Shift off the options and -- 
+shift $((OPTIND - 1))
+
+# Check if any files remain after processing options
+if [[ $# -eq 0 ]]; then
+    echo "Error: No input files specified" >&2
+    exit 1
 fi
 
 # loop over every argument and get the LLVM IR, ELF binary, and .text of ELF
@@ -17,14 +86,12 @@ for file in $@; do
     filename_noextension_bpf="${filename_noextension%.*}"
 
     if [[ -f "$file" ]]; then
-        # echo "${filename} exists"
-        echo "${filename_noextension}.o Assembly Code:"
-        # echo "${filename_noextension_bpf}"
-        ${SRC_DIR}/llvm-project/build/bin/clang -emit-llvm -S ${filename} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops
-        ${SRC_DIR}/llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll
-        ${SRC_DIR}/llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o ${filename_noextension_bpf}.o
+        echo "${filename_noextension}.o Machine IR:"
+        # ${SRC_DIR}/llvm-project/build/bin/clang -emit-llvm -S ${filename} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops
+        # ${SRC_DIR}/llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll
+        # ${SRC_DIR}/llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o ${filename_noextension_bpf}.o
     else
-        echo "Error: $filename: No such file" >&2
+        echo "$filename: No such file" >&2
     fi
 done
 
