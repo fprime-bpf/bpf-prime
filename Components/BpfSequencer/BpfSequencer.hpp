@@ -16,6 +16,7 @@
 #include <mutex>
 #include <condition_variable>
 #include "Utils/Types/CircularBuffer.hpp"
+#include <thread>
 
 namespace Components {
 
@@ -33,9 +34,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Destroy BpfSequencer object
     ~BpfSequencer();
     
-    static const U32 num_rate_groups = 5;
     // User will set up rate groups via this function
-    void configure(U32 rate_groups[num_rate_groups], U32 timer_freq_hz);
+    void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
     void run_worker(U32 worker_id);
 
@@ -67,8 +67,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     U8* buffer = nullptr;
     U64 ticks = 0;
-    U32 num_rate_groups = 0;
     bool configured = false;
+    U32 num_rate_groups = 0;
 
 
     //Stuff for Multithreading

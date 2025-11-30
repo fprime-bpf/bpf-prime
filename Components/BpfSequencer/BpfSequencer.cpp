@@ -78,7 +78,13 @@ void BpfSequencer ::generate_rate_group_schedule(U32 rg_id) {
 
 }
 
-void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
+/*
+Configure the sequencer. Call in Topology.cpp during topology setup.
+Arguments:
+    rate_groups[] - An array of frequencies used to configure the components internal rate groups
+    timer_freq_hz - The frequency of the base input clock frequency
+*/
+void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) { // TODO: Make this not hardcoded
     for (int i = 0; i < this->k_max_rate_groups; i++) {
         this->rate_group_intervals[i] = rate_groups[i];
         if (rate_groups[i] != 0) {
@@ -92,6 +98,7 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     }
 
     this->timer_freq_hz = timer_freq_hz;
+    this->num_workers = this->num_rate_groups;
 
     // Initialize Threads
     this->workers.reserve(this->num_workers); // This gives us num_workers theads
@@ -113,7 +120,7 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     this->tlmWrite_ticks(this->ticks);
 
-    for (int rg_id = 0; rg_id<this->num_rate_groups; rg_id++){
+    for (int rg_id = 0; rg_id < this->num_rate_groups; rg_id++){
         if (this->ticks % this->rate_group_intervals[rg_id] == 0){
             for (int i = 0; i < rate_group_member_count[rg_id]; i++) {
                 U32 vm_id = rate_group_schedule[rg_id][i];

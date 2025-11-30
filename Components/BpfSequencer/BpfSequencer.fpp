@@ -24,13 +24,7 @@ module Components {
         output port pingOut: Svc.Ping 
 
         @ Port to handle Fast Rate Group 
-        sync input port schedInFast: Svc.Sched 
-
-        @Port to handle medium rate group
-        sync input port schedInMedium: Svc.Sched
-
-        @Port to handle slow rate group
-        sync input port schedInSlow: Svc.Sched
+        sync input port schedIn: Svc.Sched 
 
         telemetry ticks: U32
 
