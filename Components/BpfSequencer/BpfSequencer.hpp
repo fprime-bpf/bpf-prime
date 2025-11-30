@@ -15,6 +15,7 @@
 #include "maps/maps.hpp"
 #include <mutex>
 #include <condition_variable>
+#include "Utils/Types/CircularBuffer.hpp"
 
 namespace Components {
 
@@ -31,23 +32,32 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     //! Destroy BpfSequencer object
     ~BpfSequencer();
-
+    
+    static const U32 num_rate_groups = 5;
     // User will set up rate groups via this function
-    void configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers);
+    void configure(U32 rate_groups[num_rate_groups], U32 timer_freq_hz);
 
     void run_worker(U32 worker_id);
 
-  private:
+    void generate_rate_group_schedule(U32 rg_id);
 
+  private:
+    
     // CONSTANTS
     static constexpr U8 k_num_vms = 64;
     static const U8 k_max_rate_groups = 5;
+    bool running = false;
+
+    Types::CircularBuffer buffers[k_num_vms];
 
     // Setup needed arrays
     bpftime::llvmbpf_vm *vms[k_num_vms] = {};  
     U32 rate_group_intervals[k_max_rate_groups] = {};
     U32 vm_to_rgId[k_num_vms] = {};
     U32 last_run_vm[k_max_rate_groups];
+    F32 vm_next_deadline[k_num_vms] = {};
+    U32 rate_group_schedule[k_max_rate_groups][k_num_vms] = {};
+    U32 rate_group_member_count[k_max_rate_groups] = {};
 
     uint64_t res;
     std::unique_ptr<uint8_t[]> bpf_mem;
@@ -114,7 +124,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
-                                  F32 rate_group_hz);            
+                                  F32 rate_group_hz,
+                                  F32 deadline);            
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number

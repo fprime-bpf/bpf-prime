@@ -20,7 +20,9 @@ namespace Components {
 BpfSequencer ::BpfSequencer(const char* const compName) : 
 BpfSequencerComponentBase(compName),
 bpf_mem(nullptr),
-bpf_mem_size(0) { }
+bpf_mem_size(0) { 
+    running = true; // Set running to true in the constructor
+}
 
 BpfSequencer ::~BpfSequencer() {
     // Get rid of workers at destruction
@@ -31,28 +33,52 @@ BpfSequencer ::~BpfSequencer() {
     }
 }
 
-void BpfSequencer ::run_worker(U32 id){
-    // Look through the job buffers for the specific worker index and then execute the jobs
-
-    // Place a lock on the the job buffer
-    std::unique_lock<std::mutex> lock(buffer_mutex[id]);
-
-    // Wait for the interrupt from the sequencer thread to tell us that we have jobs
-
-    // Steal all the jobs and then unlock the resource
-    auto jobs = std::move(job_buffers[id]);
-    job_buffers[id].clear();
-    lock.unlock();
-
-    // Now we just run all the jobs
-    for(auto& job : jobs){
-        if(job){
-            this->run(job);
-        }
+void BpfSequencer ::run_worker(U32 rg_id){
+    // If there is something in the circular buffer, execute and delete it, else wait
+    U8 task;
+    while (running){
+        if (buffers[rg_id].peek(task) == Fw::FW_SERIALIZE_OK) {
+            buffers[rg_id].rotate(1); // Remove the task
+            run(task);                // Execute VM
+        } else {
+            std::this_thread::yield(); 
+        }  
     }
 }
 
-void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_workers) {
+// Given a rate_group_index generate a new schedule based on earliest deadline first
+void BpfSequencer ::generate_rate_group_schedule(U32 rg_id) {
+    // First, go through all the vms, see if they belong to this rate group, if so add it to a temporary list
+    U32 temp_list[k_num_vms]; 
+    int count = 0;
+
+    for (int i = 0; i< k_num_vms; i++){
+        if(vm_to_rgId[i] == rg_id){
+            temp_list[count++] = i; // Put the vm into the temp list (it is in the rate group)
+        }
+    }
+    // Then, sort them by deadline (insertion sort)
+    for (int i = 0; i < count; i++){ 
+        U32 vm_id = temp_list[i]; // 
+        U32 vm_deadline = vm_next_deadline[vm_id];
+
+        U32 j = i-1;
+        while (j >= 0 && vm_next_deadline[temp_list[j]] > vm_deadline){ 
+            // Start at top of array, shift items up by one until vm_deadline > what's in there
+            temp_list[j+1] = temp_list[j];
+            j--;
+        }
+        temp_list[j+1] = vm_id;
+    }
+    // Finally, update the schedule
+    rate_group_member_count[rg_id] = count;
+    for (int i = 0; i < count; i++) {
+        rate_group_schedule[rg_id][i] = temp_list[i]; // Setting the rate group schedule
+    }
+
+}
+
+void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     for (int i = 0; i < this->k_max_rate_groups; i++) {
         this->rate_group_intervals[i] = rate_groups[i];
         if (rate_groups[i] != 0) {
@@ -66,16 +92,6 @@ void BpfSequencer ::configure(U32 rate_groups[5], U32 timer_freq_hz, U32 num_wor
     }
 
     this->timer_freq_hz = timer_freq_hz;
-
-    // Initialize worker threads and job buffers
-    this->num_workers = num_workers;
-    this->job_buffers.resize(this->num_workers); // We want a job buffer per worker. Job buffer holds vmID
-
-    // We want each job buffer to be able to hold num_vms / num_workers jobs
-    U32 jobs_per_worker = (this->k_num_vms + this->num_workers - 1) / this->num_workers; // Ceiling division so that we don't overflow
-    for (U32 i = 0; i < this->num_workers; i++) {
-        this->job_buffers[i].reserve(jobs_per_worker); // Preallocates memory
-    }
 
     // Initialize Threads
     this->workers.reserve(this->num_workers); // This gives us num_workers theads
@@ -97,23 +113,14 @@ void BpfSequencer ::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     this->tlmWrite_ticks(this->ticks);
 
-    // Iterate over all the vms, check if the job needs to be run
-    for (int i = 0; i < this->k_num_vms; i++){
-        int rgId = this->vm_to_rgId[i]; // -1 means we don't run
-        if (rgId != -1 && this->ticks % this->rate_group_intervals[rgId] == 0){
-            // This means we have to assign this job to a job buffer!
-            
-            // First lock the buffer mutex
-            std::lock_guard<std::mutex> lock(buffer_mutex[current_buffer]);
-
-            // Now we can add job buffers
-            job_buffers[current_buffer].push_back(i);
-            
-            // Increment the buffer index and wrap around
-            current_buffer = (current_buffer + 1) % job_buffers.size();
-        }
+    for (int rg_id = 0; rg_id<this->num_rate_groups; rg_id++){
+        if (this->ticks % this->rate_group_intervals[rg_id] == 0){
+            for (int i = 0; i < rate_group_member_count[rg_id]; i++) {
+                U32 vm_id = rate_group_schedule[rg_id][i];
+                buffers[rg_id].serialize(reinterpret_cast<U8*>(&vm_id), vm_id);
+            }
+        } 
     }
-    
 }
 
 // Ping in and out
@@ -152,7 +159,7 @@ void BpfSequencer ::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
 }
 
 // Set VM Rate Groups
-void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz) {
+void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz, F32 deadline) {
 
     if (!vms[vm_id]){ // If we don't have a vm loaded vm
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
@@ -167,11 +174,13 @@ void BpfSequencer ::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U
     bool found = false;
 
     for(int i = 0; i<this->k_max_rate_groups; i++){
-        if(this->rate_group_intervals[i] == expected_interval){
+        if(this->rate_group_intervals[i] == expected_interval){ // If the inputted interval aligns with a trate group
             found = true; 
             
             this->vm_to_rgId[vm_id] = i; // Set the vm rgId to id
-
+            this->vm_next_deadline[vm_id] = deadline; 
+            
+            this->generate_rate_group_schedule(i); // Pass in i to get the specific rate group schedule
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
             break;
         } 
@@ -192,7 +201,9 @@ void BpfSequencer ::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
     } else {
         // Remove this vm from all rate groups
+        U32 temp = this->vm_to_rgId[vm_id];
         this->vm_to_rgId[vm_id] = -1;
+        this->generate_rate_group_schedule(temp);
 
         this->log_ACTIVITY_LO_RateGroupStopped(vm_id);
     }

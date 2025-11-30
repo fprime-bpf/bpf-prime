@@ -34,21 +34,17 @@ module Components {
 
         telemetry ticks: U32
 
-        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32)
+        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32, deadline: F32)
         event RateGroupSet(vm_id: U32, rate_group_hz: F32) severity activity low format "VM {} set to rate group {} hz"
         event SchedInTick() severity activity low format "Tick Received"
 
         sync command StopRateGroup(vm_id: U32)
         event RateGroupStopped(vm_id: U32) severity activity low format "VM {} rate group stopped"
 
-        @ Port to handle fast rate group
-
-
-        
-
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################
+
         @ Port for requesting the current time
         time get port timeCaller
 
