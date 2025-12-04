@@ -1,7 +1,7 @@
 #include "../bpf_shim.h"
 
 #define MAT_DIM  10
-#define MAT_SIZE 100
+#define MAT_SIZE (MAT_DIM * MAT_DIM)
 
 int main() {
     void *mat_map_1 = MAP_BY_FD(0), *mat_map_2 = MAP_BY_FD(1), *mat_map_res = MAP_BY_FD(2), *result;

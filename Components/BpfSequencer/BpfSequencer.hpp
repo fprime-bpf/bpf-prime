@@ -18,7 +18,23 @@
 #include "Utils/Types/CircularBuffer.hpp"
 #include <thread>
 
+#define BPF_PRIME_VM_COUNT 64
+
 namespace Components {
+
+struct BpfSequencerVM {
+    bpftime::llvmbpf_vm bpf_vm;
+    uint64_t res = 0;
+    std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
+    size_t bpf_mem_size = 0;
+    std::string sequenceFilePath;
+    ~BpfSequencerVM();
+};
+
+struct VmExternalFunction {
+  void *fn;
+  const char *name;
+};
 
 class BpfSequencer : public BpfSequencerComponentBase {
   public:
@@ -41,14 +57,21 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     void generate_rate_group_schedule(U32 rg_id);
 
-  private:
+    // User will set up rate groups via this function
+    void configure(U32 rate_groups[5], U32 timer_freq_hz);
+
+    // Allows user to register bpf helper functions
+    // Note: Indices 1-3 are used internally for eBPF map helper functions. Start with index 4
+    void register_bpf_helper(U32 index, const VmExternalFunction& helper);
+    void register_bpf_helpers(const std::vector<std::pair<U32, VmExternalFunction>>& helpers);
     
+  private:
     // CONSTANTS
     static constexpr U8 k_num_vms = 64;
     static const U8 k_max_rate_groups = 5;
     bool running = false;
 
-    Types::CircularBuffer buffers[k_num_vms];
+    Types::CircularBuffer buffers[k_max_rate_groups];
 
     // Setup needed arrays
     bpftime::llvmbpf_vm *vms[k_num_vms] = {};  
@@ -70,8 +93,10 @@ class BpfSequencer : public BpfSequencerComponentBase {
     bool configured = false;
     U32 num_rate_groups = 0;
 
+    // BPF helper functions
+    std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
-    //Stuff for Multithreading
+    // Stuff for Multithreading
     U32 num_workers = 2; // Default to 2 workers
 
     // Worker threads 
@@ -83,12 +108,21 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<std::mutex> buffer_mutex; // Vector of mutexes (per job buffer)
     std::vector<std::condition_variable> buffer_condition; // Synchronization between threads
 
+    // Register all external functions for new vm instance
+    U32 register_external_functions(bpftime::llvmbpf_vm& vm);
+
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
 
+    void schedIn_handler(FwIndexType portNum, U32 context) override;
 
-    void schedIn_handler(FwIndexType portNum, U32 context);
+    //! Handler implementation for getVmBenchmark
+    //!
+    //! Run vm benchmark, return runtime (IN)
+    F64 getVmBenchmark_handler(FwIndexType portNum,  //!< The port number
+                               const Components::BENCHMARK_TEST& test,
+                               bool compile) override;
 
     //! Handler implementation for pingIn
     //!
@@ -125,11 +159,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
                                   F32 rate_group_hz,
-                                  F32 deadline);            
+                                  F32 deadline) override;            
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
-                                  U32 vm_id);
+                                  U32 vm_id) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -187,10 +221,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // ----------------------------------------------------------------------
     
     Fw::Success load(U32 vmId, const char* sequenceFilePath);
-    
-    Fw::Success compile();
-    
-    Fw::Success run(U32 vmId);
+
+    Fw::Success run(U32 vmId, bool log_time = false);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
     
@@ -199,9 +231,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
     Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
+
+    F64 get_benchmark_vm(BENCHMARK_TEST test, bool compile);
+
+  public:
+    static Fw::CmdResponse result_to_response(Fw::Success result);
     
   private:
-    bool validate_vm_id(U32 vmId, const Fw::LogStringArg& loggerFilePath);
+    bool validate_vm_id(U32 vmId);
 
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 

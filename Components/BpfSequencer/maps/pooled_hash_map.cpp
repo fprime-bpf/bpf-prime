@@ -1,22 +1,21 @@
 #include "pooled_hash_map.hpp"
-#include <cmath>
-#include <cstring>
 #include <cerrno>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <new>
 #include "hash/murmurhash2/MurmurHash2.h"
-#include <cstdint>
 
 namespace Components {
 
 pooled_hash_map::pooled_hash_map(U32 key_size, U32 value_size, U32 max_entries, I32& res) noexcept {
-
     float load_factor = 1.0f;
     this->bucket_count = next_power_of_two((U32)std::ceil(max_entries / load_factor));
 
-    this->buckets = new(std::nothrow) node*[bucket_count]();
-    this->node_pool = new(std::nothrow) node[max_entries];
-    this->keys = new(std::nothrow) U8[key_size * max_entries];
-    this->values = new(std::nothrow) U8[value_size * max_entries];
+    this->buckets = new (std::nothrow) node*[bucket_count]();
+    this->node_pool = new (std::nothrow) node[max_entries];
+    this->keys = new (std::nothrow) U8[key_size * max_entries];
+    this->values = new (std::nothrow) U8[value_size * max_entries];
 
     if (!buckets || !node_pool || !keys || !values) {
         res = -ENOMEM;
@@ -25,7 +24,7 @@ pooled_hash_map::pooled_hash_map(U32 key_size, U32 value_size, U32 max_entries, 
     }
 
     for (int i = 0; i < max_entries; i++) {
-        node *node = &node_pool[i];
+        node* node = &node_pool[i];
 
         node->key = &keys[i * key_size];
         node->value = &values[i * value_size];
@@ -42,7 +41,7 @@ void pooled_hash_map::cleanup() noexcept {
     delete[] buckets;
 }
 
-pooled_hash_map::~pooled_hash_map() {    
+pooled_hash_map::~pooled_hash_map() {
     cleanup();
 }
 
@@ -50,35 +49,35 @@ size_t pooled_hash_map::next_power_of_two(U32 n) noexcept {
     return (n == 0) ? 1 : 1UL << (32 - __builtin_clz(n - 1));
 }
 
-U8 *pooled_hash_map::first_element_value() noexcept {
+U8* pooled_hash_map::first_element_value() noexcept {
     const auto node = buckets[0];
     return node ? node->value : nullptr;
 }
 
-bool pooled_hash_map::key_equal(const U8 *key_a, const U8 *key_b, U32 key_size) noexcept {
+bool pooled_hash_map::key_equal(const U8* key_a, const U8* key_b, U32 key_size) noexcept {
     if (key_a == nullptr || key_b == nullptr) {
         return key_a == key_b;
     }
     return std::memcmp(key_a, key_b, key_size) == 0;
 }
 
-size_t pooled_hash_map::hash(const U8 *key, U32 key_size, size_t seed) noexcept {
-    #if SIZE_MAX == UINT64_MAX
-        return MurmurHash64A(key, key_size, seed);
-    #elif SIZE_MAX == UINT32_MAX
-        return MurmurHash2(key, key_size, seed);
-    #else
-        static_assert(false, "Unsupported size_t size for hash");
-    #endif
+size_t pooled_hash_map::hash(const U8* key, U32 key_size, size_t seed) noexcept {
+#if SIZE_MAX == UINT64_MAX
+    return MurmurHash64A(key, key_size, seed);
+#elif SIZE_MAX == UINT32_MAX
+    return MurmurHash2(key, key_size, seed);
+#else
+    static_assert(false, "Unsupported size_t size for hash");
+#endif
 }
 
-size_t pooled_hash_map::hash(const U8 *key, U32 key_size) noexcept {
+size_t pooled_hash_map::hash(const U8* key, U32 key_size) noexcept {
     size_t seed = static_cast<size_t>(0xc70f6907UL);
     return hash(key, key_size, seed) & (bucket_count - 1);
-} 
+}
 
-U8 *pooled_hash_map::lookup(const U8 *key, U32 key_size) noexcept {
-    node *node = buckets[hash(key, key_size)];
+U8* pooled_hash_map::lookup(const U8* key, U32 key_size) noexcept {
+    node* node = buckets[hash(key, key_size)];
     while (node) {
         if (key_equal(node->key, key, key_size)) {
             return node->value;
@@ -88,10 +87,10 @@ U8 *pooled_hash_map::lookup(const U8 *key, U32 key_size) noexcept {
     return nullptr;
 }
 
-I32 pooled_hash_map::insert(const U8 *key, U32 key_size, const U8 *value, U32 value_size) noexcept {
-    node **bucket = &buckets[hash(key, key_size)];
+I32 pooled_hash_map::insert(const U8* key, U32 key_size, const U8* value, U32 value_size) noexcept {
+    node** bucket = &buckets[hash(key, key_size)];
 
-    node *current = *bucket;
+    node* current = *bucket;
     while (current) {
         if (key_equal(current->key, key, key_size)) {
             std::memcpy(current->value, value, value_size);
@@ -100,25 +99,26 @@ I32 pooled_hash_map::insert(const U8 *key, U32 key_size, const U8 *value, U32 va
         current = current->next;
     }
 
-    if (!free_list) return -E2BIG;
+    if (!free_list)
+        return -E2BIG;
 
-    node *new_node = free_list;
+    node* new_node = free_list;
     free_list = free_list->next;
     new_node->next = *bucket;
     (*bucket) = new_node;
-    
+
     std::memcpy(new_node->key, key, key_size);
     std::memcpy(new_node->value, value, value_size);
 
     return 0;
 }
 
-I32 pooled_hash_map::remove(const U8 *key, U32 key_size) noexcept {
-    node **ptr = &buckets[hash(key, key_size)];
+I32 pooled_hash_map::remove(const U8* key, U32 key_size) noexcept {
+    node** ptr = &buckets[hash(key, key_size)];
 
     while (*ptr) {
         if (key_equal((*ptr)->key, key, key_size)) {
-            node *to_remove = *ptr;
+            node* to_remove = *ptr;
             *ptr = to_remove->next;
             to_remove->next = free_list;
             free_list = to_remove;
@@ -129,8 +129,8 @@ I32 pooled_hash_map::remove(const U8 *key, U32 key_size) noexcept {
     return -ENOENT;
 }
 
-bool pooled_hash_map::exists(const U8 *key, U32 key_size) noexcept {
+bool pooled_hash_map::exists(const U8* key, U32 key_size) noexcept {
     return lookup(key, key_size) != nullptr;
 }
 
-}
+}  // namespace Components

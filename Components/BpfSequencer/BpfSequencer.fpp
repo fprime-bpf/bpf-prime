@@ -7,6 +7,9 @@ module Components {
             FAILURE 
         }
 
+        @ Run vm benchmark, return runtime (IN)
+        sync input port getVmBenchmark: RunVmBenchmark
+
         ############ Commands ############
         include "BpfSequencerCommands.fppi"
         include "BpfSequencerEvents.fppi"
@@ -23,7 +26,7 @@ module Components {
         @ Ping out port
         output port pingOut: Svc.Ping 
 
-        @ Port to handle Fast Rate Group 
+        @ Port to handle rate groups
         sync input port schedIn: Svc.Sched 
 
         telemetry ticks: U32

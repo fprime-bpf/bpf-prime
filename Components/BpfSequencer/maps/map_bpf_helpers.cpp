@@ -1,12 +1,12 @@
-#include "maps.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "maps.hpp"
 #include "shared_mutex.hpp"
 
 namespace Components {
 
-void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept {
-    auto map = static_cast<Components::map *>(map_ptr);
-    
+void* maps::bpf_map_lookup_elem(void* map_ptr, const void* key) noexcept {
+    auto map = static_cast<Components::map*>(map_ptr);
+
     if (map) {
         shared_lock lock(map->mutex);
         return map->lookup_elem(key);
@@ -14,10 +14,9 @@ void *maps::bpf_map_lookup_elem(void *map_ptr, const void *key) noexcept {
     return nullptr;
 }
 
-long maps::bpf_map_update_elem(void *map_ptr, const void *key, const void *value, U64 flags) noexcept {
+long maps::bpf_map_update_elem(void* map_ptr, const void* key, const void* value, U64 flags) noexcept {
+    auto map = static_cast<Components::map*>(map_ptr);
 
-    auto map = static_cast<Components::map *>(map_ptr);
-    
     if (map) {
         unique_lock lock(map->mutex);
         return map->update_elem(key, value, flags);
@@ -25,10 +24,9 @@ long maps::bpf_map_update_elem(void *map_ptr, const void *key, const void *value
     return -EBADF;
 }
 
-long maps::bpf_map_delete_elem(void *map_ptr, const void *key) noexcept {
+long maps::bpf_map_delete_elem(void* map_ptr, const void* key) noexcept {
+    auto map = static_cast<Components::map*>(map_ptr);
 
-    auto map = static_cast<Components::map *>(map_ptr);
-    
     if (map) {
         unique_lock lock(map->mutex);
         return map->delete_elem(key);
@@ -36,4 +34,4 @@ long maps::bpf_map_delete_elem(void *map_ptr, const void *key) noexcept {
     return -EBADF;
 }
 
-}
+}  // namespace Components

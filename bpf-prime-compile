@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+
+compileHelp() {
+    cat << EOF
+Usage: $0 [OPTIONS] FILE...
+
+Compile BPF programs using custom LLVM fork.
+
+ARGUMENTS:
+    FILE    Source file(s) to compile (.c, .bpf.c)
+    DIR     Directory to output binaries
+
+OPTIONS:
+    -h,   Show this help message and exit
+    -w,   Write Machine IR to a file, <filename>.txt
+    -p,   Print Machine IR to the output
+    -d,   Output files to subsequently given directory   
+
+EXAMPLES:
+    $0 program.bpf.c
+    $0 -o /tmp/output/ file1.bpf.c file2.bpf.c
+
+OUTPUT FILES:
+    Generates: <filename>.ll, <filename>.bpf.o, and <filename>.o in the same directory
+    as the input file(s) unless specified with -d.
+EOF
+}
+#change colors of output to make it easier to debug/see errors
+RED='\033[0;31m'
+NC='\033[0m'
+
+# Source - https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script#59916
+SRC_DIR=$( dirname -- "$( readlink -f -- "$0"; )"; ) # where the script is located
+
+#booleans to use for getopts
+write_machineIR=false
+print_machineIR=false
+OUTPUT_DIRECTORY=""
+
+if [[ $# -eq 0 ]]; then
+    compileHelp
+    exit 1
+fi
+
+# getopts with 4 options - see help() for more information
+while getopts ":hwpd:" option; do
+  case $option in
+    h)
+        compileHelp
+        exit 0
+        ;;
+    w)
+        write_machineIR=true 
+        ;;
+    p)
+        print_machineIR=true
+        ;;
+    d)
+        OUTPUT_DIRECTORY=${OPTARG}
+        
+        if [[ ! -d "$OUTPUT_DIRECTORY" ]]; then 
+            echo -e "${RED}${OUTPUT_DIRECTORY}: No such directory${NC}" >&2
+            exit 1
+        fi
+        ;;
+    :)
+        ;;
+    ?)
+        compileHelp
+        exit 1
+        ;;
+  esac
+done
+
+# Shift off the options and -- 
+shift $((OPTIND - 1))
+
+# Check if any files remain after processing options
+if [[ $# -eq 0 ]]; then
+    echo -e "${RED}Error: No input files specified${NC}" >&2
+    exit 1
+fi
+
+# loop over every argument and get the LLVM IR, ELF binary, and .text of ELF
+for file in $@; do
+    filename=$(basename ${file})
+    filename_noextension="${file%.*}"
+    filename_noextension_bpf="${filename_noextension%.*}"
+    if [[ -f "$file" ]]; then
+        ${SRC_DIR}/cmake/toolchain/llvm-project/build/bin/clang -emit-llvm -S ${file} -O3 -target bpf -mcpu=duotronic -fno-unroll-loops -o  ${filename_noextension}.ll
+        OUTPUT=$(${SRC_DIR}/cmake/toolchain/llvm-project/build/bin/llc -march=bpf -mcpu=duotronic -filetype=obj -o ${filename_noextension}.o -O0 --print-after-isel -bpf-stack-size=10000 ${filename_noextension}.ll 2>&1)
+        ${SRC_DIR}/cmake/toolchain/llvm-project/build/bin/llvm-objcopy -O binary --only-section=.text ${filename_noextension}.o ${filename_noextension_bpf}.o
+
+        if [[ "$write_machineIR" = true ]]; then 
+            echo "${OUTPUT}" > ${filename_noextension_bpf}.txt
+        fi
+        if [[ "$print_machineIR" = true ]]; then 
+            echo "${filename_noextension}.o Machine IR:"
+            echo "${OUTPUT}"
+        fi
+
+        if [[ -d "$OUTPUT_DIRECTORY" ]]; then 
+            mv ${filename_noextension}.ll ${filename_noextension}.o ${filename_noextension_bpf}.o ${OUTPUT_DIRECTORY}
+            if [[ "$write_machineIR" = true ]]; then 
+                mv ${filename_noextension_bpf}.txt ${OUTPUT_DIRECTORY}
+            fi
+        fi
+        
+    else
+        echo -e "${RED}${filename}: No such file${NC}" >&2
+    fi
+done
+
+exit 0

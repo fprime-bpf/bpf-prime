@@ -8,6 +8,7 @@
 #define Components_Tests_HPP
 
 #include "Components/Tests/TestsComponentAc.hpp"
+#include "Fw/Types/SuccessEnumAc.hpp"
 
 namespace Components {
 
@@ -24,6 +25,17 @@ class Tests final : public TestsComponentBase {
     //! Destroy Tests object
     ~Tests();
 
+  private:
+    // ----------------------------------------------------------------------
+    // Handler implementations for typed input ports
+    // ----------------------------------------------------------------------
+
+    //! Handler implementation for getNativeBenchmark
+    //!
+    //! Run native benchmark, return runtime
+    F64 getNativeBenchmark_handler(FwIndexType portNum,  //!< The port number
+                                   const Components::BENCHMARK_TEST& test) override;
+                                   
   private:
     // ----------------------------------------------------------------------
     // Handler implementations for commands
@@ -60,11 +72,24 @@ class Tests final : public TestsComponentBase {
                                         U32 length            //!< Number of entries to write
                                         ) override;
 
+    //! Handler implementation for command BENCHMARK
+    //!
+    //! Run benchmarks, comparing native and vm time for each test
+    void BENCHMARK_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                              U32 cmdSeq            //!< The command sequence number
+                              ) override;
+
     // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
+  public:
+    static void helper_example_noop() { }
   private:
     Fw::CmdResponse test_status_to_response(const char *test_name, I32 result);
+    Fw::Success populate_map_random(U32 fd, U32 start, U32 length);
+    Fw::Success benchmark();
+    Fw::Success benchmark_test(U32 passes, BENCHMARK_TEST test, const char *test_name, void (*fill_maps)(Tests*));
+    F64 get_benchmark_native(BENCHMARK_TEST test);
 };
 
 }  // namespace Components

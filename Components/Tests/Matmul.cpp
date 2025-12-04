@@ -8,16 +8,17 @@ namespace Matmul {
 const int MAT_DIM = 10, MAT_SIZE = 100;
 
 int main() {
-    void *mat_map_1 = (void*)maps::map_by_fd(0), *mat_map_2 = (void*)maps::map_by_fd(1), *mat_map_res = (void*)maps::map_by_fd(2), *result;
+    void *mat_map_1 = (void*)maps::map_by_fd(0), *mat_map_2 = (void*)maps::map_by_fd(1),
+         *mat_map_res = (void*)maps::map_by_fd(2), *result;
     float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
 
     // Read in 2 matrices
     for (int i = 0; i < MAT_SIZE; i++) {
         result = maps::bpf_map_lookup_elem(mat_map_1, &i);
-        mat_1[i] = *(float *)result;
+        mat_1[i] = *(float*)result;
 
         result = maps::bpf_map_lookup_elem(mat_map_1, &i);
-        mat_2[i] = *(float *)result;
+        mat_2[i] = *(float*)result;
     }
 
     // Do multiplication
@@ -38,6 +39,6 @@ int main() {
     return 0;
 }
 
-} // namespace Matmul
+}  // namespace Matmul
 
-} // namespace Components
+}  // namespace Components
