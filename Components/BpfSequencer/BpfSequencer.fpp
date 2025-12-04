@@ -31,7 +31,11 @@ module Components {
 
         telemetry ticks: U32
 
-        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32, deadline: F32)
+        @ Set a VM to run at a specific rate group frequency
+        @ @param vm_id The VM ID (0-63)
+        @ @param rate_group_hz The rate group frequency in Hz
+        @ @param runtime_ms Expected runtime of the VM in milliseconds (used to calculate deadline)
+        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32, runtime_ms: F32)
         event RateGroupSet(vm_id: U32, rate_group_hz: F32) severity activity low format "VM {} set to rate group {} hz"
         event SchedInTick() severity activity low format "Tick Received"
 
