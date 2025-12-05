@@ -3,15 +3,8 @@
 #define PI    3.14159265359f
 #define TERMS 10
 
-inline float round_off(float f) {
-    float delta = (f > 0.0f) ? 0.5f : -0.5f, ret = f * 1000.0f;
-    ret = (float)((int)(ret + delta));
-    return ret / 1000.0f;
-}
-
 inline float sqroot(float s) { 
-    double r = s/3;
-    long i;
+    float r = s / 3;
     if (s <= 0)
         return 0;
 
@@ -61,33 +54,15 @@ inline float cosine(float rad) {
 
 int main() {
     void *star_coords_x = MAP_BY_FD(0), *star_coords_y = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
-    float star_x[4], star_y[4], distances[6], max_distance, hash_val;
-    long i, max_dist_idx;
+    float star_x[4], star_y[4], distances[6], hash_val; 
 
     // Fetch star infos from BPF maps
-    i = 0;
-    result = bpf_map_lookup_elem(star_coords_x, &i);
-    star_x[i] = *(float *)result;
-    result = bpf_map_lookup_elem(star_coords_y, &i);
-    star_y[i] = *(float *)result;
-
-    i = 1;
-    result = bpf_map_lookup_elem(star_coords_x, &i);
-    star_x[i] = *(float *)result;
-    result = bpf_map_lookup_elem(star_coords_y, &i);
-    star_y[i] = *(float *)result;
-
-    i = 2;
-    result = bpf_map_lookup_elem(star_coords_x, &i);
-    star_x[i] = *(float *)result;
-    result = bpf_map_lookup_elem(star_coords_y, &i);
-    star_y[i] = *(float *)result;
-
-    i = 3;
-    result = bpf_map_lookup_elem(star_coords_x, &i);
-    star_x[i] = *(float *)result;
-    result = bpf_map_lookup_elem(star_coords_y, &i);
-    star_y[i] = *(float *)result;
+    for (long i = 0; i < 4; i++) {
+        result = bpf_map_lookup_elem(star_coords_x, &i);
+        star_x[i] = *(float *)result;
+        result = bpf_map_lookup_elem(star_coords_y, &i);
+        star_y[i] = *(float *)result;
+    }
 
     // Get star distances
     distances[0] = sqroot(((star_x[0] - star_x[1]) * (star_x[0] - star_x[1])) + ((star_y[0] - star_y[1]) * (star_y[0] - star_y[1])));
@@ -98,36 +73,17 @@ int main() {
     distances[5] = sqroot(((star_x[0] - star_x[3]) * (star_x[0] - star_x[3])) + ((star_y[0] - star_y[3]) * (star_y[0] - star_y[3])));
 
     // Find largest star distance
-    max_distance = distances[0];
-    max_dist_idx = 0;
-    if (max_distance < distances[1]) {
-        max_distance = distances[1];
-        max_dist_idx = 1;
-    }
-    if (max_distance < distances[2]) {
-        max_distance = distances[2];
-        max_dist_idx = 2;
-    }
-    if (max_distance < distances[3]) {
-        max_distance = distances[3];
-        max_dist_idx = 3;
-    }
-    if (max_distance < distances[4]) {
-        max_distance = distances[4];
-        max_dist_idx = 4;
-    }
-    if (max_distance < distances[5]) {
-        max_distance = distances[5];
-        max_dist_idx = 5;
+    long max_dist_idx = 0;
+    for (long i = 0; i < 6; i++) {
+        float tmp_dis = distances[i] * 10000;
+        float tmp_max = distances[max_dist_idx] * 10000;
+        if (*(long *)(&tmp_dis) > *(long *)(&tmp_max))
+            max_dist_idx = i;
     }
 
     // Normalize star distances to max distance
-    distances[0] = distances[0] / max_distance;
-    distances[1] = distances[1] / max_distance;
-    distances[2] = distances[2] / max_distance;
-    distances[3] = distances[3] / max_distance;
-    distances[4] = distances[4] / max_distance;
-    distances[5] = distances[5] / max_distance;
+    for (long i = 0; i < 6; i++) 
+        distances[i] = distances[i] / distances[max_dist_idx];
 
     // Drop element that contains 1.0f
     switch (max_dist_idx) {
@@ -147,13 +103,8 @@ int main() {
     }
 
     // Hash star distances
-    distances[0] = cosine(distances[0]);
-    distances[1] = sine(distances[1]);
-    distances[2] = cosine(distances[2]);
-    distances[3] = sine(distances[3]);
-    distances[4] = cosine(distances[4]);
     hash_val = distances[0] / distances[1] * distances[2] / distances[3] * distances[4];
     
-    i = 0;
+    long i = 0;
     bpf_map_update_elem(out_map, &i, &hash_val, 0);
 }
