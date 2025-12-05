@@ -4,17 +4,16 @@
 #define TERMS 10
 
 inline float sqroot(float s) { 
-    float r = s / 3;
+    float r = s / 2;
     if (s <= 0)
         return 0;
 
-    r = (r + s / r) / 2;
-    r = (r + s / r) / 2;
-    r = (r + s / r) / 2;
-    r = (r + s / r) / 2;
-    r = (r + s / r) / 2;
+    long i = * (long *) &s;
+    i = 0x5f3759df - ( i >> 1 );
+    s = * (float *) &i;
+    r = s * (1.5f - r * s * s);
 
-    return r;
+    return 1.0f / r;
 }
 
 inline float power(float base, long exp) {
