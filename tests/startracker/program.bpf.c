@@ -54,7 +54,8 @@ inline float cosine(float rad) {
 
 int main() {
     void *star_coords_x = MAP_BY_FD(0), *star_coords_y = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
-    float star_x[4], star_y[4], distances[6], hash_val; 
+    float star_x[4], star_y[4], distances[6], hash_val;
+    long locs[5];
 
     // Fetch star infos from BPF maps
     for (long i = 0; i < 4; i++) {
@@ -77,6 +78,7 @@ int main() {
     for (long i = 0; i < 6; i++) {
         float tmp_dis = distances[i] * 10000;
         float tmp_max = distances[max_dist_idx] * 10000;
+        // Dirty hack to get around LLVM complaining
         if (*(long *)(&tmp_dis) > *(long *)(&tmp_max))
             max_dist_idx = i;
     }
@@ -102,9 +104,13 @@ int main() {
         break;
     }
 
-    // Hash star distances
-    hash_val = distances[0] / distances[1] * distances[2] / distances[3] * distances[4];
-    
-    long i = 0;
+    // Hash star distances with XOR
+    for (long i = 0; i < 5; i++)
+        locs[i] = *(long *)(&distances[i]);
+    locs[0] = (locs[0] & locs[1]) | (~locs[0] & locs[2]);
+    locs[1] = (locs[1] & locs[3]) | (locs[2] & ~locs[3]);
+    locs[2] = locs[3] ^ (locs[2] & ~locs[4]);
+
+    long i = locs[0] ^ locs[1] ^ locs[2];
     bpf_map_update_elem(out_map, &i, &hash_val, 0);
 }
