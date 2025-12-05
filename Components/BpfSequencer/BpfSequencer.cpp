@@ -51,7 +51,6 @@ BpfSequencer ::~BpfSequencer() {
 }
 
 // Worker function - pops jobs from shared queue and executes them
-// Uses condition_variable::wait instead of busy-waiting (per h313's feedback)
 void BpfSequencer::run_worker() {
     while (running) {
         ScheduledJob job;
@@ -84,8 +83,6 @@ void BpfSequencer::run_worker() {
 }
 
 // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
-// Per h313's design: For each rate group, insert jobs into deadline multimap
-// based on the runtime of each VM
 void BpfSequencer::rebuild_deadline_schedule() {
     deadline_to_jobs.clear();
     
@@ -106,7 +103,6 @@ void BpfSequencer::rebuild_deadline_schedule() {
         U32 runs_per_cycle = k_cycle_period_ms / (static_cast<F32>(interval) * (1000.0f / timer_freq_hz));
         
         // For each run, calculate the deadline = scheduled_time - runtime
-        // This implements h313's formula: deadline = (float) i - vm.runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
             F32 scheduled_time = (static_cast<F32>(i) * k_cycle_period_ms) / runs_per_cycle;
             F32 deadline = scheduled_time - vm->runtime_ms;
@@ -212,7 +208,7 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-// Port for handling rate groups - implements EDF scheduling per h313's design
+// Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     this->tlmWrite_ticks(this->ticks);
@@ -263,8 +259,7 @@ void BpfSequencer::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
-// Set VM Rate Groups - changed to accept runtime instead of deadline per h313's feedback
-// Deadline is calculated as: interval - runtime
+// Set VM Rate Groups - deadline is calculated as: interval - runtime
 void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz, F32 runtime_ms) {
     if (!vms[vm_id]) {  // If we don't have a VM loaded
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
@@ -282,11 +277,11 @@ void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
         if (this->rate_group_intervals[i] == expected_interval) {
             found = true;
 
-            // Store scheduling info in the VM struct (per h313's feedback)
+            // Store scheduling info in the VM struct
             vms[vm_id]->rate_group_id = i;
             vms[vm_id]->runtime_ms = runtime_ms;
             
-            // Calculate deadline as interval - runtime (per h313's feedback)
+            // Calculate deadline as interval - runtime
             F32 interval_ms = (k_cycle_period_ms / timer_freq_hz) * expected_interval;
             vms[vm_id]->next_deadline = interval_ms - runtime_ms;
 

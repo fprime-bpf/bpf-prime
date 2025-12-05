@@ -34,7 +34,7 @@ struct ScheduledJob {
     }
 };
 
-// VM-specific data structure (per h313's feedback)
+// VM-specific data structure
 struct BpfSequencerVM {
     bpftime::llvmbpf_vm bpf_vm;
     uint64_t res = 0;
@@ -42,7 +42,7 @@ struct BpfSequencerVM {
     size_t bpf_mem_size = 0;
     std::string sequenceFilePath;
     
-    // VM scheduling info (moved here per h313's feedback)
+    // VM scheduling info
     U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
     F32 runtime_ms = 0.0f;  // Estimated runtime in ms
     F32 next_deadline = 0.0f;  // Next deadline for this VM
@@ -106,7 +106,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // BPF helper functions
     std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
-    // ========== Multithreading with EDF Scheduling (per h313's design) ==========
+    // ========== Multithreading with EDF Scheduling ==========
     
     // Shared priority queue for earliest-deadline-first scheduling
     // All executors pop from this shared queue
@@ -184,7 +184,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
                                   F32 rate_group_hz,
-                                  F32 runtime_ms) override;  // Changed from deadline to runtime per h313's feedback
+                                  F32 runtime_ms) override;
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number

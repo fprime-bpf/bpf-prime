@@ -84,7 +84,7 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     file.flush();
     file.close();
 
-    // Store bpf_mem in VM struct (per h313's feedback - VM-specific data in VM struct)
+    // Store bpf_mem in VM struct
     vm->bpf_mem_size = size_result;
     vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
     std::memcpy(vm->bpf_mem.get(), buffer, vm->bpf_mem_size);
