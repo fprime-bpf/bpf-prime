@@ -19,6 +19,7 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Kalman.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/LowPassFilter.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/Matmul.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/StarTracker.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/testsWrappers.cpp"
 )
 
