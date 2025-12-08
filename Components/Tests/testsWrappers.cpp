@@ -3,6 +3,7 @@
 #include "Kalman.hpp"
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
+#include "StarTracker.hpp"
 
 #include <sched.h>
 #include <unistd.h>
@@ -38,6 +39,9 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
         case BENCHMARK_TEST::MATMUL:
             TIME_NATIVE_TEST(Matmul);
             break;
+        case BENCHMARK_TEST::STAR_TRACKER:
+            TIME_NATIVE_TEST(StarTracker);
+            break;
         default:
             return -1;
     }
@@ -63,6 +67,9 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
                 break;
             case BENCHMARK_TEST::MATMUL:
                 bytecode_path = "tests/matmul/a.o";
+                break;
+            case BENCHMARK_TEST::STAR_TRACKER:
+                bytecode_path = "tests/startracker/a.o";
                 break;
             default:
                 return -1;
@@ -160,6 +167,10 @@ Fw::Success Tests::benchmark() {
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
              tests->populate_map_random(0, 0, 100);
              tests->populate_map_random(1, 0, 100);
+         }},
+        {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
+             tests->populate_map_random(0, 0, 4);
+             tests->populate_map_random(1, 0, 4);
          }}};
 
     create_output_file();
