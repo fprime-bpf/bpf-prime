@@ -45,7 +45,6 @@ struct BpfSequencerVM {
     // VM scheduling info
     U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
     F32 runtime_ms = 0.0f;  // Estimated runtime in ms
-    F32 next_deadline = 0.0f;  // Next deadline for this VM
     
     ~BpfSequencerVM();
 };

@@ -104,7 +104,8 @@ void BpfSequencer::rebuild_deadline_schedule() {
         
         // For each run, calculate the deadline = scheduled_time - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
-            F32 scheduled_time = (static_cast<F32>(i) * k_cycle_period_ms) / runs_per_cycle;
+            U32 scheduled_time_int = (i * static_cast<U32>(k_cycle_period_ms)) / runs_per_cycle;
+            F32 scheduled_time = static_cast<F32>(scheduled_time_int);
             F32 deadline = scheduled_time - vm->runtime_ms;
             
             // Clamp deadline to valid range [0, 1000]
@@ -217,11 +218,6 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     U32 cycle_length = timer_freq_hz;  // Ticks per 1-second cycle
     cycle_tick = (ticks - 1) % cycle_length;
     
-    // At the start of each cycle, rebuild the deadline schedule
-    if (cycle_tick == 0) {
-        rebuild_deadline_schedule();
-    }
-    
     // Push jobs for this tick into the shared queue
     schedule_jobs_for_tick(cycle_tick);
 }
@@ -280,10 +276,6 @@ void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
             // Store scheduling info in the VM struct
             vms[vm_id]->rate_group_id = i;
             vms[vm_id]->runtime_ms = runtime_ms;
-            
-            // Calculate deadline as interval - runtime
-            F32 interval_ms = (k_cycle_period_ms / timer_freq_hz) * expected_interval;
-            vms[vm_id]->next_deadline = interval_ms - runtime_ms;
 
             // Rebuild the schedule with the new VM
             rebuild_deadline_schedule();
@@ -309,7 +301,6 @@ void BpfSequencer::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     // Remove VM from its rate group
     vms[vm_id]->rate_group_id = static_cast<U32>(-1);
     vms[vm_id]->runtime_ms = 0.0f;
-    vms[vm_id]->next_deadline = 0.0f;
     
     // Rebuild schedule without this VM
     rebuild_deadline_schedule();
