@@ -11,6 +11,9 @@ module Components {
         @ Run matmul test natively
         async command MATMUL()
 
+        @ Run star tracker test natively
+        async command STAR_TRACKER()
+
         @ Report failed test
         event TestFailed(
                 testName: string,

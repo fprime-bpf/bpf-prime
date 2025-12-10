@@ -10,6 +10,7 @@
 #include "Kalman.hpp"
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
+#include "StarTracker.hpp"
 
 namespace Components {
 
@@ -55,6 +56,12 @@ void Tests ::LOW_PASS_FILTER_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
 
 void Tests ::MATMUL_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
     I32 exit_status = Matmul::main();
+    auto response = test_status_to_response("Matmul", exit_status);
+    this->cmdResponse_out(opCode, cmdSeq, response);
+}
+
+void Tests ::STAR_TRACKER_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
+    I32 exit_status = StarTracker::main();
     auto response = test_status_to_response("Matmul", exit_status);
     this->cmdResponse_out(opCode, cmdSeq, response);
 }
