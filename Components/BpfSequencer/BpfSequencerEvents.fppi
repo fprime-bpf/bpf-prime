@@ -38,3 +38,7 @@ event CommandRunFailed(
 event SchedulerQueueFull(vm_id: U32) \ 
     severity warning high \
     format "Scheduler job queue full, dropping job for VM {}"
+
+event SchedulerSlip(tick: U32) \ 
+    severity warning low \
+    format "Scheduler slip detected at tick {}"

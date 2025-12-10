@@ -219,6 +219,11 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
+    if (job_queue.getMessagesAvailable() > 0){
+        // Slip - log error
+        this->log_WARNING_LO_SchedulerSlip(this->ticks);
+    }
+
     this->ticks++;
     
     // Calculate position in scheduling cycle
