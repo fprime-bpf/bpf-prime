@@ -28,6 +28,14 @@ BpfSequencerComponentBase(compName),
 bpf_mem(nullptr),
 bpf_mem_size(0) { 
     running = true;
+
+    // Initialize the job queue
+    const FwSizeType queue_depth = MAX_JOBS;
+    const FwSizeType message_size = sizeof(ScheduledJob);
+    const Fw::String queue_name("BPFSequencerJobQueue");
+    const auto status = job_queue.create(queue_name, queue_depth, message_size);
+    FW_ASSERT(status == Os::QueueInterface::Status::OP_OK);
+
     this->register_bpf_helpers({
         { 1, { reinterpret_cast<void*>(maps::bpf_map_lookup_elem), "bpf_map_lookup_elem" } },
         { 2, { reinterpret_cast<void*>(maps::bpf_map_update_elem), "bpf_map_update_elem" } },
@@ -38,9 +46,6 @@ bpf_mem_size(0) {
 BpfSequencer ::~BpfSequencer() {
     // Signal workers to stop
     running = false;
-    
-    // Wake up all workers so they can exit
-    queue_cv.notify_all();
     
     // Join all worker threads
     for (auto& thread : workers) {
@@ -54,27 +59,23 @@ BpfSequencer ::~BpfSequencer() {
 void BpfSequencer::run_worker() {
     while (running) {
         ScheduledJob job;
-        
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            
-            // Wait until there's a job in the queue or we're shutting down
-            queue_cv.wait(lock, [this]() {
-                return !job_queue.empty() || !running;
-            });
-            
-            // Check if we're shutting down
-            if (!running && job_queue.empty()) {
-                return;
-            }
-            
-            // Pop the highest priority job (earliest deadline)
-            if (!job_queue.empty()) {
-                job = job_queue.top();
-                job_queue.pop();
-            } else {
-                continue;
-            }
+        FwSizeType size = 0;
+        FwQueuePriorityType priority = 0;
+
+        auto status = job_queue.receive(
+            reinterpret_cast<U8*>(&job),
+            sizeof(ScheduledJob),
+            Os::QueueInterface::BlockingType::NONBLOCKING,
+            size,
+            priority
+        );
+
+        if (status != Os::QueueInterface::Status::OP_OK) {
+            continue;  // Queue empty or error
+        }
+
+        if (!running) {
+            return;
         }
         
         // Execute the VM outside the lock
@@ -84,7 +85,9 @@ void BpfSequencer::run_worker() {
 
 // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
 void BpfSequencer::rebuild_deadline_schedule() {
-    deadline_to_jobs.clear();
+    for (auto& tick_jobs : schedule) {
+        tick_jobs.clear();
+    }
     
     // For each VM, if it's assigned to a rate group, calculate its deadlines
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
@@ -95,56 +98,61 @@ void BpfSequencer::rebuild_deadline_schedule() {
         
         if (rg_id >= k_max_rate_groups) continue;  // Not assigned to a rate group
         
-        U32 interval = rate_group_intervals[rg_id];
+        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each run
         if (interval == 0) continue;
         
-        // Calculate how many times this VM runs per cycle
-        // E.g., for 1000Hz rate group with 1kHz timer, it runs 1000 times per cycle
-        U32 runs_per_cycle = k_cycle_period_ms / (static_cast<F32>(interval) * (1000.0f / timer_freq_hz));
+        // Calculate the period in ms
+        // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
+        // Period is 1 tick
+        F32 period_ms = interval * (1000.0f / timer_freq_hz);
+        if (period_ms <= 0.0f) continue; 
+
+        // Calculate how many times we run this per cycle
+        U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms); 
         
-        // For each run, calculate the deadline = scheduled_time - runtime
+        // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
-            U32 scheduled_time_int = (i * static_cast<U32>(k_cycle_period_ms)) / runs_per_cycle;
-            F32 scheduled_time = static_cast<F32>(scheduled_time_int);
-            F32 deadline = scheduled_time - vm->runtime_ms;
+            F32 deadline = i * period_ms; // When this task needs to be done
+            F32 scheduled_time = deadline - vm->runtime_ms;
             
-            // Clamp deadline to valid range [0, 1000]
-            if (deadline < 0.0f) deadline = 0.0f;
-            if (deadline > k_cycle_period_ms) deadline = k_cycle_period_ms;
+            // Clamp schedule_time to valid range [0, 1000]
+            if (scheduled_time < 0.0f) scheduled_time = 0.0f;
+            if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
+
+            U32 schedule_time_tick = static_cast<U32>(scheduled_time);
             
-            deadline_to_jobs.emplace(deadline, vm_id);
+            schedule[schedule_time_tick].push_back(vm_id);
         }
     }
 }
 
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
-    // Calculate the current time in ms within the cycle
-    F32 tick_time_ms = (static_cast<F32>(tick) * k_cycle_period_ms) / timer_freq_hz;
-    
-    // Find all jobs whose deadline falls within this tick's time window
-    F32 tick_duration_ms = k_cycle_period_ms / timer_freq_hz;
-    F32 tick_start = tick_time_ms;
-    F32 tick_end = tick_time_ms + tick_duration_ms;
-    
-    // Get all jobs that should start by this tick
-    auto it_start = deadline_to_jobs.lower_bound(tick_start);
-    auto it_end = deadline_to_jobs.upper_bound(tick_end);
-    
-    {
-        std::lock_guard<std::mutex> lock(queue_mutex);
-        
-        for (auto it = it_start; it != it_end; ++it) {
-            ScheduledJob job;
-            job.deadline = it->first;
-            job.vm_id = it->second;
-            job_queue.push(job);
-        }
+    auto& jobs = schedule[tick];
+    if (jobs.empty()){
+        return;
     }
-    
-    // Wake up workers if we added jobs
-    if (it_start != it_end) {
-        queue_cv.notify_all();
+
+    {        
+        for (auto vm_id : jobs) {
+            ScheduledJob job;
+            job.deadline = tick;
+            job.vm_id = vm_id;;
+            
+            FwSizeType size = sizeof(ScheduledJob);
+            FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
+            auto status = job_queue.send(
+                reinterpret_cast<const U8*>(&job),
+                size,
+                priority,
+                Os::QueueInterface::BlockingType::NONBLOCKING
+            );
+            
+            if (status == Os::QueueInterface::Status::FULL) {
+                // Queue full - log warning and drop job
+                this->log_WARNING_HI_SchedulerQueueFull(vm_id);
+            }
+        }
     }
 }
 
@@ -212,11 +220,10 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
-    this->tlmWrite_ticks(this->ticks);
     
     // Calculate position in scheduling cycle
-    U32 cycle_length = timer_freq_hz;  // Ticks per 1-second cycle
-    cycle_tick = (ticks - 1) % cycle_length;
+    U32 cycle_length_ticks = timer_freq_hz;  // Ticks per 1-second cycle
+    cycle_tick = (ticks - 1) % cycle_length_ticks;
     
     // Push jobs for this tick into the shared queue
     schedule_jobs_for_tick(cycle_tick);
@@ -289,6 +296,7 @@ void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
         this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
         return;
     }
+
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 

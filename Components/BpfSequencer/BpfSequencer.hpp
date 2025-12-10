@@ -10,6 +10,7 @@
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
+#include "Os/Generic/PriorityQueue.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
@@ -18,6 +19,7 @@
 #include <thread>
 #include <map>
 #include <queue>
+#include <array>
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -27,11 +29,6 @@ namespace Components {
 struct ScheduledJob {
     F32 deadline;  // Deadline in ms (0.0 to 1000.0)
     U32 vm_id;
-    
-    // For priority queue ordering (earliest deadline first)
-    bool operator>(const ScheduledJob& other) const {
-        return deadline > other.deadline;
-    }
 };
 
 // VM-specific data structure
@@ -109,17 +106,16 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     // Shared priority queue for earliest-deadline-first scheduling
     // All executors pop from this shared queue
-    std::priority_queue<ScheduledJob, std::vector<ScheduledJob>, std::greater<ScheduledJob>> job_queue;
-    std::mutex queue_mutex;
-    std::condition_variable queue_cv;  // Notifies workers when jobs are available
+    static const FwSizeType MAX_JOBS = 64;
+
+    Os::Generic::PriorityQueue job_queue;
     
     // Worker threads
     std::vector<std::thread> workers;
     U32 num_workers = 2;
     
-    // Deadline-to-jobs multimap for scheduling (range 0.0 to 1000.0 ms)
-    // Rebuilt each cycle based on rate groups and runtimes
-    std::multimap<F32, U32> deadline_to_jobs;
+    // Use an array for the schedule (faster access than a map)
+    std::array<std::vector<U32>, 1000> schedule;
     
     // Current position in the scheduling cycle (in ticks)
     U32 cycle_tick = 0;

@@ -33,3 +33,8 @@ event CommandRunFailed(
                       ) \
     severity activity high \
     format "VM {} run failed: {}"
+
+
+event SchedulerQueueFull(vm_id: U32) \ 
+    severity warning high \
+    format "Scheduler job queue full, dropping job for VM {}"
