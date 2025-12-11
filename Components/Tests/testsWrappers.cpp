@@ -137,12 +137,12 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 10000;
+    const U32 passes = 10;
 
     bpf_map_def map_def{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
                         .key_size = 4,
                         .value_size = 4,
-                        .max_entries = 100,
+                        .max_entries = 4096,
                         .map_flags = 0};
 
     for (U32 fd : {0, 1, 2, 4}) {
@@ -165,8 +165,8 @@ Fw::Success Tests::benchmark() {
          [](Tests* tests) { tests->populate_map_random(2, 0, 1); }},
         {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) { tests->populate_map_random(0, 0, 7); }},
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-             tests->populate_map_random(0, 0, 100);
-             tests->populate_map_random(1, 0, 100);
+             tests->populate_map_random(0, 0, 4096);
+             tests->populate_map_random(1, 0, 4096);
          }},
         {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
              tests->populate_map_random(0, 0, 4);
