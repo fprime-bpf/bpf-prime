@@ -5,6 +5,7 @@
 #include "Matmul.hpp"
 #include "StarTracker.hpp"
 
+#include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
 #include <algorithm>
@@ -151,7 +152,9 @@ Fw::Success Tests::benchmark() {
 
     struct sched_param p;
     p.sched_priority = 20;
-    sched_setscheduler(getpid(), SCHED_RR, &p);
+    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
+        return Fw::Success::FAILURE;
+    }
 
     struct TestInfo {
         U32 passes;
