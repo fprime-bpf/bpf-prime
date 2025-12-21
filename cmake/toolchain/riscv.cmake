@@ -2,8 +2,8 @@ set(CMAKE_SYSTEM_PROCESSOR riscv64)
 
 set(CMAKE_LINKER_TYPE LLD)
 
-set(CMAKE_C_COMPILER clang)
-set(CMAKE_CXX_COMPILER clang++)
+set(CMAKE_C_COMPILER clang-18)
+set(CMAKE_CXX_COMPILER clang++-18)
 
 set(CMAKE_AR llvm-ar)
 set(CMAKE_NM llvm-nm)
