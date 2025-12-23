@@ -20,3 +20,7 @@ build-fprime-*
 /.vscode/
 .DS_Store
 *.gcov
+
+# lsp
+compile_commands.json
+.cache/

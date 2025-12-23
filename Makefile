@@ -11,4 +11,10 @@ riscv:
 	fprime-util build riscv && \
 	llvm-strip --strip-unneeded ./build-artifacts/riscv/BPFPrimeTest/bin/BPFPrimeTest
 
+native:
+	. venv/bin/activate && \
+	rm -rf build-fprime-automatic-native && \
+	CC=clang CXX=clang++ fprime-util generate -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_DIR="$(PWD)/../llvm-project/build/lib/cmake/llvm" -DUSE_SYSTEM_SPDLOG=ON && \
+	fprime-util build
+
 .PHONY: riscv

@@ -62,13 +62,13 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
                 bytecode_path = "tests/kristo/rolled_20x20_opt.o";
                 break;
             case BENCHMARK_TEST::KALMAN:
-                bytecode_path = "tests/kristo/rolled_64x64_unopt.o";
+                bytecode_path = "tests/kristo/rolled_20x20_unopt.o";
                 break;
             case BENCHMARK_TEST::MATMUL:
-                bytecode_path = "tests/kristo/rolled_64x64_opt.o";
+                bytecode_path = "tests/kristo/rolled_44x44_opt.o";
                 break;
             case BENCHMARK_TEST::STAR_TRACKER:
-                bytecode_path = "tests/startracker/a.o";
+                bytecode_path = "tests/kristo/rolled_44x44_unopt.o";
                 break;
             default:
                 return -1;
@@ -136,7 +136,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 1;
+    const U32 passes = 10000;
 
     bpf_map_def map_def{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
                         .key_size = 4,
@@ -160,24 +160,24 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-   //      {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "20x20_opt",
-   //       [](Tests* tests) { 
-   //           tests->populate_map_random(0, 0, 88*88);
-   //           tests->populate_map_random(1, 0, 88*88);
-		 // }},
-        {passes, BENCHMARK_TEST::KALMAN, "kalman_64x64_opt", [](Tests* tests) 
+        {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "20x20_opt",
+         [](Tests* tests) { 
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
+		 }},
+        {passes, BENCHMARK_TEST::KALMAN, "20x20_unopt", [](Tests* tests) 
 			{
              tests->populate_map_random(0, 0, 88*88);
              tests->populate_map_random(1, 0, 88*88);
          }},
-        {passes, BENCHMARK_TEST::MATMUL, "matmul_64x64_opt", [](Tests* tests) { 
+        {passes, BENCHMARK_TEST::MATMUL, "44x44_opt", [](Tests* tests) { 
              tests->populate_map_random(0, 0, 88*88);
              tests->populate_map_random(1, 0, 88*88);
 		}},
-        // {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
-        //      tests->populate_map_random(0, 0, 4);
-        //      tests->populate_map_random(1, 0, 4);
-        //  }}
+        {passes, BENCHMARK_TEST::STAR_TRACKER, "44x44_unopt", [](Tests* tests) {
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
+         }}
 	};
 
     create_output_file();
