@@ -40,5 +40,5 @@ event SchedulerQueueFull(vm_id: U32) \
     format "Scheduler job queue full, dropping job for VM {}"
 
 event SchedulerSlip(tick: U32) \ 
-    severity warning low \
+    severity warning high \
     format "Scheduler slip detected at tick {}"

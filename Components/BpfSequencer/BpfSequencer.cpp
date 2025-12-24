@@ -57,6 +57,17 @@ BpfSequencer ::~BpfSequencer() {
 
 // Worker function - pops jobs from shared queue and executes them
 void BpfSequencer::run_worker() {
+
+    #ifdef __linux__
+    // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
+    // are meant to run on non-looping routines
+    struct sched_param p; 
+    p.sched_priority = 20; 
+    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) { 
+        return; 
+    } 
+    #endif
+
     while (running) {
         ScheduledJob job;
         FwSizeType size = 0;
@@ -65,7 +76,7 @@ void BpfSequencer::run_worker() {
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),
-            Os::QueueInterface::BlockingType::NONBLOCKING,
+            Os::QueueInterface::BlockingType::BLOCKING,
             size,
             priority
         );
@@ -145,7 +156,7 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
                 reinterpret_cast<const U8*>(&job),
                 size,
                 priority,
-                Os::QueueInterface::BlockingType::NONBLOCKING
+                Os::QueueInterface::BlockingType::BLOCKING
             );
             
             if (status == Os::QueueInterface::Status::FULL) {
@@ -221,7 +232,8 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     if (job_queue.getMessagesAvailable() > 0){
         // Slip - log error
-        this->log_WARNING_LO_SchedulerSlip(this->ticks);
+        this->log_WARNING_HI_SchedulerSlip(this->ticks);
+        return;
     }
 
     this->ticks++;
