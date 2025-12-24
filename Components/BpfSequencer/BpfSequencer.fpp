@@ -2,7 +2,6 @@ module Components {
     @ Sequencer Module using llvmbpf runtime
     active component BpfSequencer {
 
-        #Typedef SUCCESS
         enum SUCCESS {
             SUCCESS
             FAILURE 
@@ -32,18 +31,21 @@ module Components {
 
         telemetry ticks: U32
 
-        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: U32)
-        event RateGroupSet(vm_id: U32, rate_group_hz: U32) severity activity low format "VM {} set to rate group {} hz"
+        @ Set a VM to run at a specific rate group frequency
+        @ @param vm_id The VM ID (0-63)
+        @ @param rate_group_hz The rate group frequency in Hz
+        @ @param runtime_ms Expected runtime of the VM in milliseconds (used to calculate deadline)
+        sync command SetVMRateGroup(vm_id: U32, rate_group_hz: F32, runtime_ms: F32)
+        event RateGroupSet(vm_id: U32, rate_group_hz: F32) severity activity low format "VM {} set to rate group {} hz"
         event SchedInTick() severity activity low format "Tick Received"
 
         sync command StopRateGroup(vm_id: U32)
         event RateGroupStopped(vm_id: U32) severity activity low format "VM {} rate group stopped"
 
-        
-
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################
+
         @ Port for requesting the current time
         time get port timeCaller
 

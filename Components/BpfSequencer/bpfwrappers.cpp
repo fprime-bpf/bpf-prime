@@ -18,20 +18,22 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     delete[] this->buffer;
     Fw::LogStringArg loggerFilePath(sequenceFilePath);
 
-    // Create the VM
+    // Validate VM ID
     if (!validate_vm_id(vmId))
         return Fw::Success::FAILURE;
 
-    this->vms[vmId].reset();
-    this->vms[vmId] = std::make_shared<BpfSequencerVM>();
-
+    // Create VM struct if it doesn't exist
     if (!vms[vmId]) {
-        Fw::LogStringArg errMsg("Failed to allocate VM");
-        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-        return Fw::Success::FAILURE;
+        vms[vmId] = std::make_shared<BpfSequencerVM>();
+        if (!vms[vmId]) {
+            Fw::LogStringArg errMsg("Failed to allocate VM");
+            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+            return Fw::Success::FAILURE;
+        }
     }
-    auto vm = this->vms[vmId];
-    
+    auto vm = vms[vmId];
+
+    // Register external functions
     I32 res = this->register_external_functions(vm->bpf_vm);
     if (res) {
         this->log_WARNING_HI_RegisterFunctionsFailed(
@@ -45,7 +47,6 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     Os::File file;
     Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
     if (openStatus != Os::File::OP_OK) {
-        // File open failed, return error
         Fw::LogStringArg errMsg("Failed to open file");
         this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
         return Fw::Success::FAILURE;
@@ -55,7 +56,6 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     FwSizeType size_result = 0;
     Os::File::Status sizeStatus = file.size(size_result);
     if (sizeStatus != Os::File::OP_OK) {
-        // File size retrieval failed, return error
         file.close();
         Fw::LogStringArg errMsg("Failed to retrieve file size");
         this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
@@ -65,7 +65,6 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     // Allocate memory for the buffer
     this->buffer = new (std::nothrow) U8[size_result];
     if (this->buffer == nullptr) {
-        // Memory allocation failed, return error
         file.close();
         Fw::LogStringArg errMsg("Failed to allocate file buffer");
         this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
@@ -75,7 +74,6 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     // Read the sequence file into memory
     Os::File::Status readStatus = file.read(this->buffer, size_result, Os::File::WAIT);
     if (readStatus != Os::File::OP_OK) {
-        // File read failed, return error
         delete[] this->buffer;
         file.close();
         Fw::LogStringArg errMsg("Failed to read file into buffer");
@@ -86,6 +84,7 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     file.flush();
     file.close();
 
+    // Store bpf_mem in VM struct
     vm->bpf_mem_size = size_result;
     vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
     std::memcpy(vm->bpf_mem.get(), buffer, vm->bpf_mem_size);
@@ -109,7 +108,10 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    // Close the file and return successful command response
+    delete[] this->buffer;
+    this->buffer = nullptr;
+
+    // Success
     this->log_ACTIVITY_HI_CommandLoaded(loggerFilePath, vmId);
     return Fw::Success::SUCCESS;
 }
@@ -118,21 +120,23 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     uint64_t err = 0;
     timer::time_point start, end;
 
-    // Get VM instance
+    // Validate VM ID
     if (!validate_vm_id(vmId))
         return Fw::Success::FAILURE;
 
     if (!vms[vmId]) {
-        Fw::LogStringArg errMsg("VM ID Invalid");
+        Fw::LogStringArg errMsg("VM not loaded");
         this->log_ACTIVITY_HI_CommandRunFailed(vmId, errMsg);
         return Fw::Success::FAILURE;
     }
-    auto vm = this->vms[vmId];
+    auto vm = vms[vmId];
 
     if (log_time)
         start = timer::now();
-    // Run the compiled sequence
+    
+    // Run the compiled sequence using VM's own bpf_mem
     err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
+    
     if (log_time)
         end = timer::now();
 
@@ -148,9 +152,7 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
 }
 
 bool BpfSequencer::validate_vm_id(U32 vmId) {
-    if (vmId >= BPF_PRIME_VM_COUNT) {
-        Fw::LogStringArg errMsg("VM ID Invalid");
-        this->log_ACTIVITY_HI_VmValidateFailed(vmId, errMsg);
+    if (vmId >= k_num_vms) {
         return false;
     }
     return true;
