@@ -12,6 +12,8 @@
 #include <chrono>
 #include <stdio.h>
 #include <stdexcept>
+#include <pthread.h>
+#include <sched.h>
 
 namespace Components {
 
@@ -33,7 +35,7 @@ bpf_mem_size(0) {
     const FwSizeType queue_depth = MAX_JOBS;
     const FwSizeType message_size = sizeof(ScheduledJob);
     const Fw::String queue_name("BPFSequencerJobQueue");
-    const auto status = job_queue.create(queue_name, queue_depth, message_size);
+    const auto status = job_queue.create(QUEUE_MAGIC_NUMBER, queue_name, queue_depth, message_size);
     FW_ASSERT(status == Os::QueueInterface::Status::OP_OK);
 
     this->register_bpf_helpers({

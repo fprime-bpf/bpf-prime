@@ -99,6 +99,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U64 ticks = 0;
     bool configured = false;
 
+    I32 QUEUE_MAGIC_NUMBER = 116;
+
     // BPF helper functions
     std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
