@@ -64,7 +64,7 @@ void BpfSequencer::run_worker() {
     struct sched_param p; 
     p.sched_priority = 20; 
     if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) { 
-        return; 
+        this->log_WARNING_HI_WorkerPrioritySetFailed();
     } 
     #endif
 
