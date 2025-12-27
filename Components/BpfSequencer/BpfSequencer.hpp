@@ -89,12 +89,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U32 num_rate_groups = 0;
     U32 timer_freq_hz = 1000;
 
-    // Legacy member variables for bpf_mem (kept for backward compatibility with single-VM execution)
-    uint64_t res;
-    std::unique_ptr<uint8_t[]> bpf_mem;
-    size_t bpf_mem_size;
-    std::string sequenceFilePath;
-
     U8* buffer = nullptr;
     U64 ticks = 0;
     bool configured = false;

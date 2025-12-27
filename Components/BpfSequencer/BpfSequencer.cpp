@@ -26,9 +26,7 @@ BpfSequencerVM::~BpfSequencerVM() {
 // ----------------------------------------------------------------------
 
 BpfSequencer ::BpfSequencer(const char* const compName) : 
-BpfSequencerComponentBase(compName),
-bpf_mem(nullptr),
-bpf_mem_size(0) { 
+BpfSequencerComponentBase(compName) { 
     running = true;
 
     // Initialize the job queue
