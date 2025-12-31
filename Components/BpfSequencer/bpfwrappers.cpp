@@ -86,9 +86,8 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     file.flush();
     file.close();
 
-    vm->bpf_mem_size = size_result;
+    vm->bpf_mem_size = 40000;
     vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
-    std::memcpy(vm->bpf_mem.get(), buffer, vm->bpf_mem_size);
     vm->sequenceFilePath = sequenceFilePath;
 
     // Load the binary into the VM

@@ -1,9 +1,9 @@
 #include "../bpf_shim.h"
 
-#define MATCH_DIM  10
+#define MATCH_DIM  5
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
-#define IMG_DIM 100
+#define IMG_DIM 50
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
 
 int main() {
