@@ -10,20 +10,39 @@
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
+#include "Os/Generic/PriorityQueue.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
+#include <mutex>
+#include <condition_variable>
+#include <thread>
+#include <map>
+#include <queue>
+#include <array>
 
 #define BPF_PRIME_VM_COUNT 64
 
 namespace Components {
 
+// Job entry for the shared priority queue
+struct ScheduledJob {
+    F32 deadline;  // Deadline in ms (0.0 to 1000.0)
+    U32 vm_id;
+};
+
+// VM-specific data structure
 struct BpfSequencerVM {
     bpftime::llvmbpf_vm bpf_vm;
     uint64_t res = 0;
     std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
     size_t bpf_mem_size = 0;
     std::string sequenceFilePath;
+    
+    // VM scheduling info
+    U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
+    F32 runtime_ms = 0.0f;  // Estimated runtime in ms
+    
     ~BpfSequencerVM();
 };
 
@@ -45,7 +64,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     //! Destroy BpfSequencer object
     ~BpfSequencer();
-
+    
     // User will set up rate groups via this function
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
@@ -55,26 +74,69 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void register_bpf_helpers(const std::vector<std::pair<U32, VmExternalFunction>>& helpers);
     
   private:
-    std::shared_ptr<BpfSequencerVM> vms[BPF_PRIME_VM_COUNT];
+    // CONSTANTS
+    static constexpr U8 k_num_vms = 64;
+    static constexpr U8 k_max_rate_groups = 5;
+    static constexpr F32 k_cycle_period_ms = 1000.0f;  // One full scheduling cycle in ms
+    
+    bool running = false;
+
+    // VM array - each VM has its own scheduling data now
+    std::shared_ptr<BpfSequencerVM> vms[k_num_vms];
+    
+    // Rate group configuration
+    U32 rate_group_intervals[k_max_rate_groups] = {};
+    U32 num_rate_groups = 0;
+    U32 timer_freq_hz = 1000;
+
+    // Legacy member variables for bpf_mem (kept for backward compatibility with single-VM execution)
+    uint64_t res;
+    std::unique_ptr<uint8_t[]> bpf_mem;
+    size_t bpf_mem_size;
+    std::string sequenceFilePath;
+
     U8* buffer = nullptr;
     U64 ticks = 0;
     bool configured = false;
-    U32 k_max_rate_groups = 5;
-    U32 num_rate_groups = 0;
-    U32 rate_group_intervals[5] = {};
-    U32 timer_freq_hz = 1000; // Default to 1kHz
+
+    I32 QUEUE_MAGIC_NUMBER = 116;
+
+    // BPF helper functions
     std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
-    // boolean arrays for different rate groups
-    bool rate_group_map[5][64] = {};
+    // ========== Multithreading with EDF Scheduling ==========
     
+    // Shared priority queue for earliest-deadline-first scheduling
+    // All executors pop from this shared queue
+    static const FwSizeType MAX_JOBS = 64;
+
+    Os::Generic::PriorityQueue job_queue;
+    
+    // Worker threads
+    std::vector<std::thread> workers;
+    U32 num_workers = 2;
+    
+    // Use an array for the schedule (faster access than a map)
+    std::array<std::vector<U32>, 1000> schedule;
+    
+    // Current position in the scheduling cycle (in ticks)
+    U32 cycle_tick = 0;
+    
+    // Worker function that pops jobs from shared queue and executes
+    void run_worker();
+    
+    // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
+    void rebuild_deadline_schedule();
+    
+    // Push jobs for the current tick into the shared queue
+    void schedule_jobs_for_tick(U32 tick);
+
     // Register all external functions for new vm instance
     U32 register_external_functions(bpftime::llvmbpf_vm& vm);
 
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
-
 
     void schedIn_handler(FwIndexType portNum, U32 context) override;
 
@@ -100,9 +162,6 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Handler implementation for command LOAD_SEQUENCE
     //!
     //! Load and compile a sequence
-
-
-    
     void LOAD_SEQUENCE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vmId,             //!< The index of the selected BPF VM (0-63)
@@ -116,10 +175,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
     
+    //! Handler for SetVMRateGroup command
+    //! @param runtime_ms Expected runtime of the VM in milliseconds
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id,
-                                  U32 rate_group_hz) override; 
+                                  F32 rate_group_hz,
+                                  F32 runtime_ms) override;
                                   
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
