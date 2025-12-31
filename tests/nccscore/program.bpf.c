@@ -1,15 +1,15 @@
 #include "../bpf_shim.h"
 
-#define MATCH_DIM  10
+#define MATCH_DIM  5
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
-#define IMG_DIM 100
+#define IMG_DIM 50
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
 
 int main() {
     void *map_image_input = MAP_BY_FD(0), *map_match_image = MAP_BY_FD(1), *result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
-    long best_match, best_score = 0xffffffff;
+    int best_match, best_score = 0xffffffff;
 
     // Read in input and match images
     for (int i = 0; i < IMG_SIZE; i++) {
@@ -22,13 +22,13 @@ int main() {
         match_image[i] = *(int *)result;
     }
 
-    for (long i = 0; i < IMG_DIM - MATCH_DIM; i++) {
-        for (long j = 0; j < IMG_DIM - MATCH_DIM; i++) {
-            long score = 0;
+    for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
+        for (int j = 0; j < IMG_DIM - MATCH_DIM; i++) {
+            int score = 0;
             int temp;
 
-            for (long ii = 0; ii < MATCH_DIM; ii++) {
-                for (long jj = 0; jj < MATCH_DIM; jj++) {
+            for (int ii = 0; ii < MATCH_DIM; ii++) {
+                for (int jj = 0; jj < MATCH_DIM; jj++) {
                     temp = ((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x000f) - (match_image[ii + jj] & 0x000f);
                     if (temp > 0)
                       score += temp;
@@ -55,6 +55,9 @@ int main() {
             }
         }
     }
+
+    int i = 0;
+    bpf_map_update_elem(map_match_image, &i, &best_match, 0);
 
     return 0;
 }
