@@ -1,12 +1,11 @@
 #include "../bpf_shim.h"
 
-#define C_LIGHT 299792458.0
-#define AU_M 1.495978707e11
+#define C_LIGHT 299792458.0f
 #define MAX_ITER 10
 #define PI    3.14159265359f
 #define TERMS 10
 
-inline float sqroot(float s) { 
+static __attribute__((always_inline)) float sqroot(float s) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -19,24 +18,36 @@ inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-inline float power(float base, long exp) {
-    if(exp < 0) {
-        if(base == 0)
-            return -0; // Error!!
-        return 1 / (base * power(base, (-exp) - 1));
+static __attribute__((always_inline)) float power(float base, long exp) {
+    if (exp == 0) return 1.0f;
+    if (exp == 1) return base;
+    
+    float result = 1.0f;
+    long abs_exp = (exp < 0) ? -exp : exp;
+    
+    for (long i = 0; i < abs_exp; i++) {
+        result *= base;
     }
-    if(exp == 0)
-        return 1;
-    if(exp == 1)
-        return base;
-    return base * power(base, exp - 1);
+    
+    if (exp < 0) {
+        if (base == 0.0f) return 0.0f;
+        return 1.0f / result;
+    }
+    
+    return result;
 }
 
-inline long fact(long n) {
-    return n <= 0 ? 1 : n * fact(n-1);
+static __attribute__((always_inline)) long fact(long n) {
+    if (n <= 0) return 1;
+    
+    long result = 1;
+    for (long i = 1; i <= n; i++) {
+        result *= i;
+    }
+    return result;
 }
 
-inline float sine(float rad) {
+static __attribute__((always_inline)) float sine(float rad) {
     float sin = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -45,7 +56,7 @@ inline float sine(float rad) {
     return sin;
 }
 
-inline float cosine(float rad) {
+static __attribute__((always_inline)) float cosine(float rad) {
     float cos = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -54,7 +65,7 @@ inline float cosine(float rad) {
     return cos;
 }
 
-inline float _atan2(float y, float x) {
+static __attribute__((always_inline)) float _atan2(float y, float x) {
     float abs_y = (y < 0.0f) ? -y : y;
     float abs_x = (x < 0.0f) ? -x : x;
     float angle, z, z2, term;
@@ -88,96 +99,99 @@ inline float _atan2(float y, float x) {
 
 int main() {
     void *input_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(2), *res;
-    float obs_pos[3], obs_vel[3], result[3], t, a, e, omega;
-    float targ_pos[3], targ_vel[3], diff[3], u_corrected[3], s_obs[3], tau = 0.0, dist, tau_old;
-
-    // Fetch star infos from BPF maps
+    float v[3], s_obs[3], u_corrected[3];  // Only 3 arrays
+    float t, a, e, omega, tau, dist, tau_old;
+    float beta2, gamma, t_emit, M, E, nu, r, h;
+    float s_dot_u, denom, factor, u_corr_mag;
+    
+    tau = 0.0;
+    
+    // Load observer position into v
     for (long i = 0; i < 3; i++) {
         res = bpf_map_lookup_elem(input_map, &i);
-        obs_pos[i] = *(float *)res;
+        v[i] = *(float *)res;
     }
-
+    
+    // Load and compute s_obs
     for (long i = 0; i < 3; i++) {
         long j = i + 3;
         res = bpf_map_lookup_elem(input_map, &j);
-        obs_vel[i] = *(float *)res;
+        s_obs[i] = (*(float *)res) / C_LIGHT;
     }
     
-    // Observer velocity normalized by c for aberration
-    s_obs[0] = obs_vel[0] / C_LIGHT;
-    s_obs[1] = obs_vel[1] / C_LIGHT;
-    s_obs[2] = obs_vel[2] / C_LIGHT;
+    beta2 = s_obs[0]*s_obs[0] + s_obs[1]*s_obs[1] + s_obs[2]*s_obs[2];
+    gamma = 1.0 / sqroot(1.0 - beta2);
     
-    float beta2 = s_obs[0]*s_obs[0] + s_obs[1]*s_obs[1] + s_obs[2]*s_obs[2];
-    float gamma = 1.0 / sqroot(1.0 - beta2);
+    // Load orbital params (add these to your map indices 6-9)
+    long idx = 6;
+    res = bpf_map_lookup_elem(input_map, &idx);
+    t = *(float *)res;
+    idx = 7;
+    res = bpf_map_lookup_elem(input_map, &idx);
+    a = *(float *)res;
+    idx = 8;
+    res = bpf_map_lookup_elem(input_map, &idx);
+    e = *(float *)res;
+    idx = 9;
+    res = bpf_map_lookup_elem(input_map, &idx);
+    omega = *(float *)res;
     
     for (long iter = 0; iter < MAX_ITER; iter++) {
-        // Target state at emission time - Keplerian orbit calculation
-        float t_emit = t - tau;
-        float M = omega * t_emit;
-        float E = M;
+        t_emit = t - tau;
+        M = omega * t_emit;
+        E = M;
         
-        // Solve Kepler's equation
         for (long i = 0; i < 5; i++) {
             E = M + e * sine(E);
         }
         
-        float nu = 2.0 * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
-        float r = a * (1 - e * cosine(E));
+        nu = 2.0 * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
+        r = a * (1 - e * cosine(E));
         
-        targ_pos[0] = r * cosine(nu);
-        targ_pos[1] = r * sine(nu);
-        targ_pos[2] = 0.0;
+        // Reuse v for target position, then compute diff inline
+        // diff = target - obs_pos (but obs_pos is in v, so reload it)
+        dist = 0.0;
+        for (long i = 0; i < 3; i++) {
+            res = bpf_map_lookup_elem(input_map, &i);
+            float obs = *(float *)res;
+            float targ = (i == 0) ? r * cosine(nu) : ((i == 1) ? r * sine(nu) : 0.0);
+            float d = targ - obs;
+            dist += d * d;
+            v[i] = d;  // Store diff in v
+        }
         
-        // Velocity (simplified)
-        float h = sqroot(a * (1 - e*e) * 3.986004418e14);  // GM_sun approximation
-        targ_vel[0] = -h/r * sine(nu);
-        targ_vel[1] = h/r * (e + cosine(nu));
-        targ_vel[2] = 0.0;
+        dist = sqroot(dist);
         
-        // Geometric difference vector
-        diff[0] = targ_pos[0] - obs_pos[0];
-        diff[1] = targ_pos[1] - obs_pos[1];
-        diff[2] = targ_pos[2] - obs_pos[2];
+        // Normalize v (which is diff) to get unit vector
+        v[0] /= dist;
+        v[1] /= dist;
+        v[2] /= dist;
         
-        dist = sqroot(diff[0]*diff[0] + diff[1]*diff[1] + diff[2]*diff[2]);
+        // Aberration correction
+        s_dot_u = s_obs[0]*v[0] + s_obs[1]*v[1] + s_obs[2]*v[2];
+        denom = gamma * (1.0 + s_dot_u);
+        factor = gamma / (1.0 + gamma) * s_dot_u;
         
-        // Unit direction vector
-        float u[3];
-        u[0] = diff[0] / dist;
-        u[1] = diff[1] / dist;
-        u[2] = diff[2] / dist;
+        u_corrected[0] = (v[0] + factor*s_obs[0] + s_obs[0]) / denom;
+        u_corrected[1] = (v[1] + factor*s_obs[1] + s_obs[1]) / denom;
+        u_corrected[2] = (v[2] + factor*s_obs[2] + s_obs[2]) / denom;
         
-        // Apply relativistic aberration correction
-        // Formula: u' = (u + (gamma/(1+gamma))(s·u)s + s) / (gamma(1 + s·u))
-        float s_dot_u = s_obs[0]*u[0] + s_obs[1]*u[1] + s_obs[2]*u[2];
-        float denom = gamma * (1.0 + s_dot_u);
-        float factor = gamma / (1.0 + gamma) * s_dot_u;
-
-        u_corrected[0] = (u[0] + factor*s_obs[0] + s_obs[0]) / denom;
-        u_corrected[1] = (u[1] + factor*s_obs[1] + s_obs[1]) / denom;
-        u_corrected[2] = (u[2] + factor*s_obs[2] + s_obs[2]) / denom;
-        
-        // Normalize corrected direction
-        float u_corr_mag = sqroot(u_corrected[0] * u_corrected[0] + 
-                                  u_corrected[1] * u_corrected[1] + 
-                                  u_corrected[2] * u_corrected[2]);
+        u_corr_mag = sqroot(u_corrected[0]*u_corrected[0] + 
+                           u_corrected[1]*u_corrected[1] + 
+                           u_corrected[2]*u_corrected[2]);
         u_corrected[0] /= u_corr_mag;
         u_corrected[1] /= u_corr_mag;
         u_corrected[2] /= u_corr_mag;
         
-        // Update light-time with corrected direction
-        tau_old = tau;
         tau = dist / C_LIGHT;
     }
     
-    // Return last iteration result if didn't converge
-    result[0] = obs_pos[0] + dist * u_corrected[0];
-    result[1] = obs_pos[1] + dist * u_corrected[1];
-    result[2] = obs_pos[2] + dist * u_corrected[2];
-
-    for (long i = 0; i < 3; i++)
-      bpf_map_update_elem(out_map, &i, &result[i], 0);
-
+    // Write results
+    for (long i = 0; i < 3; i++) {
+        res = bpf_map_lookup_elem(input_map, &i);
+        float result = (*(float *)res) + dist * u_corrected[i];
+        bpf_map_update_elem(out_map, &i, &result, 0);
+    }
+    
     return 0;
 }
