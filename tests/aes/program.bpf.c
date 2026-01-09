@@ -2,11 +2,10 @@
 
 #define NUM_ROUND_KEYS_128 (11)
 
-typedef char AES_Column_t[4];
-typedef AES_Column_t AES_Block_t[4];
-typedef char AES_Key128_t[16];
+typedef char AES_Block_t[16];
+typedef char AES_Key128_t[256];
 
-inline char GF_Mult(char a, char b) {
+inline char GF_Mult(char a, char b) __attribute__((always_inline)) {
   char result = 0;
   char shiftEscapesField = 0;
 
@@ -39,75 +38,71 @@ inline char GF_Mult(char a, char b) {
 }
 
 
-inline void AES_ShiftRows(AES_Block_t block) {
+inline void AES_ShiftRows(AES_Block_t block) __attribute__((always_inline)) {
+  // Shift row 1
+  char temp0 = block[1];
+  block[1] = block[5];
+  block[5] = block[9];
+  block[9] = block[13];
+  block[13] = temp0;
+
+  // Shift row 2
+  temp0 = block[2];
+  char temp1 = block[6];
+  block[2] = block[10];
+  block[6] = block[14];
+  block[10] = temp0;
+  block[14] = temp1;
+
+  // Shift row 3
+  temp0 = block[15];
+  block[15] = block[11];
+  block[11] = block[7];
+  block[7] = block[3];
+  block[3] = temp0;
 }
 
-inline void AES_MixColumns(AES_Block_t block) {
-  AES_Column_t temp = { 0 };
+inline void AES_MixColumns(AES_Block_t block) __attribute__((always_inline)) {
+  char temp[4] = {0};
 
   for (int i = 0; i < 4; i++) {
-    temp[0] = GF_Mult(0x02, block[i][0]) ^ GF_Mult(0x03, block[i][1]) ^ block[i][2] ^ block[i][3];
-    temp[1] = block[i][0] ^ GF_Mult(0x02, block[i][1]) ^ GF_Mult(0x03, block[i][2]) ^ block[i][3];
-    temp[2] = block[i][0] ^ block[i][1] ^ GF_Mult(0x02, block[i][2]) ^ GF_Mult(0x03, block[i][3]);
-    temp[3] = GF_Mult(0x03, block[i][0]) ^ block[i][1] ^ block[i][2] ^ GF_Mult(0x02, block[i][3]);
+    int base = i * 4;
+    temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+    temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
+    temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
+    temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
 
-    block[i][0] = temp[0]; block[i][1] = temp[1]; block[i][2] = temp[2]; block[i][3] = temp[3];
+    block[base] = temp[0];
+    block[base + 1] = temp[1];
+    block[base + 2] = temp[2];
+    block[base + 3] = temp[3];
   }
 }
 
 int main() {
-  AES_Block_t block = {20};
-  AES_Key128_t key = {134};
+  AES_Block_t block = {12};
+  AES_Key128_t key = {13};
   AES_Block_t zero = {0};
 
   // 1000 blocks
   for (int i = 0; i < 1000; i++) {
     // AddRoundKey
     for (int col = 0; col < 4; col++) {
-      for  (int row = 0; row < 4; row++) {
-        block[col][row] ^= zero[col][row];
+      for (int row = 0; row < 4; row++) {
+        block[col * 4 + row] ^= zero[col * 4 + row];
       }
     }
 
     //SubBytes
-    char index;
     for (int col = 0; col < 4; col++) {
-      for  (int row = 0; row < 4; row++) {
-        index = block[col][row];
-        block[col][row] = key[index];
+      for (int row = 0; row < 4; row++) {
+        int index = col * 4 + row;
+        if (block[index] >= 0 && block[index] < 16)
+          block[index] = key[block[index]];
       }
     }
-    // ShiftRows
-    char temp0;
-    char temp1;
 
-    // This implementation is a little awkward because of storing columns
-    // in each array of the block instead of rows
-
-    // Shift row 1
-    // [0] [1] [2] [3] -> [1] [2] [3] [0]
-    temp0 = block[0][1];
-    block[0][1] = block[1][1];
-    block[1][1] = block[2][1];
-    block[2][1] = block[3][1];
-    block[3][1] = temp0;
-
-    // Shift row 2
-    // [0] [1] [2] [3] -> [2] [3] [0] [1]
-    temp0 = block[0][2];
-    temp1 = block[1][2];
-    block[0][2] = block[2][2];
-    block[1][2] = block[3][2];
-    block[2][2] = temp0;
-    block[3][2] = temp1;
-
-    // Shift row 3
-    // [0] [1] [2] [3] -> [3] [0] [1] [2]
-    temp0 = block[3][3];
-    block[3][3] = block[2][3];
-    block[2][3] = block[1][3];
-    block[1][3] = block[0][3];
-    block[0][3] = temp0;
+    AES_ShiftRows(block);
 
     AES_MixColumns(block);
   }
