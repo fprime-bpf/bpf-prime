@@ -62,7 +62,6 @@ int main() {
 
   // 1000 blocks
   for (int i = 0; i < 1000; i++) {
-    
     // AddRoundKey
     for (int col = 0; col < 4; col++) {
       for  (int row = 0; row < 4; row++) {
@@ -110,7 +109,7 @@ int main() {
     block[1][3] = block[0][3];
     block[0][3] = temp0;
 
-//    AES_MixColumns(block);
+    AES_MixColumns(block);
   }
 
   return 0;
