@@ -5,7 +5,7 @@
 #define PI    3.14159265359f
 #define TERMS 10
 
-static __attribute__((always_inline)) float sqroot(float s) { 
+static float sqroot(float s) __attribute__((always_inline)) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -18,28 +18,28 @@ static __attribute__((always_inline)) float sqroot(float s) {
     return 1.0f / r;
 }
 
-static __attribute__((always_inline)) float power(float base, long exp) {
+static float power(float base, long exp) __attribute__((always_inline)) {
     if (exp == 0) return 1.0f;
     if (exp == 1) return base;
-    
+
     float result = 1.0f;
     long abs_exp = (exp < 0) ? -exp : exp;
-    
+
     for (long i = 0; i < abs_exp; i++) {
         result *= base;
     }
-    
+
     if (exp < 0) {
         if (base == 0.0f) return 0.0f;
         return 1.0f / result;
     }
-    
+
     return result;
 }
 
-static __attribute__((always_inline)) long fact(long n) {
+static long fact(long n) __attribute__((always_inline)) {
     if (n <= 0) return 1;
-    
+
     long result = 1;
     for (long i = 1; i <= n; i++) {
         result *= i;
@@ -47,7 +47,7 @@ static __attribute__((always_inline)) long fact(long n) {
     return result;
 }
 
-static __attribute__((always_inline)) float sine(float rad) {
+static float sine(float rad) __attribute__((always_inline)) {
     float sin = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -56,7 +56,7 @@ static __attribute__((always_inline)) float sine(float rad) {
     return sin;
 }
 
-static __attribute__((always_inline)) float cosine(float rad) {
+static float cosine(float rad) __attribute__((always_inline)) {
     float cos = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -65,35 +65,24 @@ static __attribute__((always_inline)) float cosine(float rad) {
     return cos;
 }
 
-static __attribute__((always_inline)) float _atan2(float y, float x) {
+static float _atan2(float y, float x) __attribute__((always_inline)) {
+    if (x == 0.0f && y == 0.0f) return 0.0f;
+
     float abs_y = (y < 0.0f) ? -y : y;
     float abs_x = (x < 0.0f) ? -x : x;
-    float angle, z, z2, term;
-    
-    if (x == 0.0f && y == 0.0f) return 0.0f;
-    
+    float z = (abs_x > abs_y) ? y / x : x / y, angle, z2, term;
+
+    for (long n = 1; n < 5; n++) {
+        term *= -z2;
+        angle += term / (2 * n + 1);
+    }
+
     if (abs_x > abs_y) {
-        z = y / x;
-        z2 = z * z;
-        angle = z;
-        term = z;
-        for (long n = 1; n < 20; n++) {
-            term *= -z2;
-            angle += term / (2*n + 1);
-        }
         if (x < 0.0f) angle += (y >= 0.0f) ? PI : -PI;
     } else {
-        z = x / y;
-        z2 = z * z;
-        angle = z;
-        term = z;
-        for (long n = 1; n < 20; n++) {
-            term *= -z2;
-            angle += term / (2*n + 1);
-        }
-        angle = (y >= 0.0f) ? PI/2.0f - angle : -PI/2.0f - angle;
+        angle = (y >= 0.0f) ? PI / 2.0f - angle : -PI / 2.0f - angle;
     }
-    
+
     return angle;
 }
 
@@ -135,7 +124,7 @@ int main() {
     idx = 9;
     res = bpf_map_lookup_elem(input_map, &idx);
     omega = *(float *)res;
-    
+
     for (long iter = 0; iter < MAX_ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;
@@ -144,8 +133,10 @@ int main() {
         for (long i = 0; i < 5; i++) {
             E = M + e * sine(E);
         }
-        
-        nu = 2.0 * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
+
+        float tmp1 = sqroot(1+e) * sine(E/2);
+        float tmp2 = sqroot(1-e) * cosine(E/2);
+        nu = 2.0 * _atan2(tmp1, tmp2);
         r = a * (1 - e * cosine(E));
         
         // Reuse v for target position, then compute diff inline
