@@ -5,7 +5,7 @@
 #define PI    3.14159265359f
 #define TERMS 10
 
-static float sqroot(float s) __attribute__((always_inline)) { 
+inline float sqroot(float s) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -18,7 +18,7 @@ static float sqroot(float s) __attribute__((always_inline)) {
     return 1.0f / r;
 }
 
-static float power(float base, long exp) __attribute__((always_inline)) {
+inline float power(float base, long exp) {
     if (exp == 0) return 1.0f;
     if (exp == 1) return base;
 
@@ -37,7 +37,7 @@ static float power(float base, long exp) __attribute__((always_inline)) {
     return result;
 }
 
-static long fact(long n) __attribute__((always_inline)) {
+inline long fact(long n) {
     if (n <= 0) return 1;
 
     long result = 1;
@@ -47,7 +47,7 @@ static long fact(long n) __attribute__((always_inline)) {
     return result;
 }
 
-static float sine(float rad) __attribute__((always_inline)) {
+inline float sine(float rad) {
     float sin = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -56,7 +56,7 @@ static float sine(float rad) __attribute__((always_inline)) {
     return sin;
 }
 
-static float cosine(float rad) __attribute__((always_inline)) {
+inline float cosine(float rad) {
     float cos = 0;
 
     for(long i = 0; i < TERMS; i++) {
@@ -65,25 +65,55 @@ static float cosine(float rad) __attribute__((always_inline)) {
     return cos;
 }
 
-static float _atan2(float y, float x) __attribute__((always_inline)) {
-    if (x == 0.0f && y == 0.0f) return 0.0f;
-
-    float abs_y = (y < 0.0f) ? -y : y;
-    float abs_x = (x < 0.0f) ? -x : x;
-    float z = (abs_x > abs_y) ? y / x : x / y, angle, z2, term;
-
-    for (long n = 1; n < 5; n++) {
-        term *= -z2;
-        angle += term / (2 * n + 1);
+inline float _atan2(float y, float x) __attribute__((always_inline)) {
+    long y_bits = *(long *)&y;
+    long x_bits = *(long *)&x;
+    
+    if (x_bits == 0 && y_bits == 0) {
+        return 0.0f;
     }
 
-    if (abs_x > abs_y) {
-        if (x < 0.0f) angle += (y >= 0.0f) ? PI : -PI;
+    long abs_y_bits = y_bits & 0x7FFFFFFF;
+    long abs_x_bits = x_bits & 0x7FFFFFFF;
+    
+    float div_result;
+    long use_x = (abs_x_bits > abs_y_bits) ? 1 : 0;  // Integer comparison only
+    
+    if (use_x) {
+        div_result = y / x;
     } else {
-        angle = (y >= 0.0f) ? PI / 2.0f - angle : -PI / 2.0f - angle;
+        div_result = x / y;
     }
-
-    return angle;
+    
+    float z_squared = div_result * div_result;
+    float neg_z_squared = -z_squared;
+    
+    float term1 = div_result;
+    float term2 = term1 * neg_z_squared / 3.0f;
+    float term3 = term2 * neg_z_squared / 5.0f;
+    float term4 = term3 * neg_z_squared / 7.0f;
+    float term5 = term4 * neg_z_squared / 9.0f;
+    
+    float sum = term1 + term2 + term3 + term4 + term5;
+    
+    if (use_x == 0) {
+        if (y_bits >= 0) {
+            sum = 1.5707963f - sum;
+        } else {
+            sum = -1.5707963f - sum;
+        }
+        return sum;
+    }
+    
+    if (x_bits < 0) {
+        if (y_bits >= 0) {
+            sum = sum + PI;
+        } else {
+            sum = sum - PI;
+        }
+    }
+    
+    return sum;
 }
 
 int main() {
@@ -134,25 +164,32 @@ int main() {
             E = M + e * sine(E);
         }
 
-        float tmp1 = sqroot(1+e) * sine(E/2);
-        float tmp2 = sqroot(1-e) * cosine(E/2);
-        nu = 2.0 * _atan2(tmp1, tmp2);
+        nu = 2.0 * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
         r = a * (1 - e * cosine(E));
-        
-        // Reuse v for target position, then compute diff inline
-        // diff = target - obs_pos (but obs_pos is in v, so reload it)
-        dist = 0.0;
-        for (long i = 0; i < 3; i++) {
-            res = bpf_map_lookup_elem(input_map, &i);
-            float obs = *(float *)res;
-            float targ = (i == 0) ? r * cosine(nu) : ((i == 1) ? r * sine(nu) : 0.0);
-            float d = targ - obs;
-            dist += d * d;
-            v[i] = d;  // Store diff in v
-        }
-        
-        dist = sqroot(dist);
-        
+
+        float cos_nu = cosine(nu);
+        float sin_nu = sine(nu);
+
+        idx = 0;
+        res = bpf_map_lookup_elem(input_map, &idx);
+        float obs0 = *(float *)res;
+        float d0 = r * cos_nu - obs0;
+        v[0] = d0;
+
+        idx = 1;
+        res = bpf_map_lookup_elem(input_map, &idx);
+        float obs1 = *(float *)res;
+        float d1 = r * sin_nu - obs1;
+        v[1] = d1;
+
+        idx = 2;
+        res = bpf_map_lookup_elem(input_map, &idx);
+        float obs2 = *(float *)res;
+        float d2 = 0.0f - obs2;
+        v[2] = d2;
+
+        dist = sqroot(d0*d0 + d1*d1 + d2*d2);
+
         // Normalize v (which is diff) to get unit vector
         v[0] /= dist;
         v[1] /= dist;
