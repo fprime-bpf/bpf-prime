@@ -4,7 +4,6 @@
 #include "LowPassFilter.hpp"
 #include "Matmul.hpp"
 #include "StarTracker.hpp"
-
 #include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
@@ -61,16 +60,16 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
 
         switch (test) {
             case BENCHMARK_TEST::LOW_PASS_FILTER:
-                bytecode_path = "tests/low_pass_filter/a.o";
+                bytecode_path = "tests/kristo/rolled_20x20_opt.o";
                 break;
             case BENCHMARK_TEST::KALMAN:
-                bytecode_path = "tests/kalman/a.o";
+                bytecode_path = "tests/kristo/rolled_20x20_unopt.o";
                 break;
             case BENCHMARK_TEST::MATMUL:
-                bytecode_path = "tests/matmul/a.o";
+                bytecode_path = "tests/kristo/rolled_44x44_opt.o";
                 break;
             case BENCHMARK_TEST::STAR_TRACKER:
-                bytecode_path = "tests/startracker/a.o";
+                bytecode_path = "tests/kristo/rolled_44x44_unopt.o";
                 break;
             default:
                 return -1;
@@ -112,14 +111,14 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
     output_new_test(test_name);
 
     for (U32 i = 0; i < passes; ++i) {
-        fill_maps(this);
-        auto native_time = this->getNativeBenchmark_handler(0, test);
-
-        if (native_time < 0) {
-            Fw::LogStringArg test_name_arg(test_name);
-            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
-            return Fw::Success::FAILURE;
-        }
+        // fill_maps(this);
+        // auto native_time = this->getNativeBenchmark_handler(0, test);
+        //
+        // if (native_time < 0) {
+        //     Fw::LogStringArg test_name_arg(test_name);
+        //     this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
+        //     return Fw::Success::FAILURE;
+        // }
 
         fill_maps(this);
         auto vm_time = this->getVmBenchmark_out(0, test, i == 0);
@@ -130,7 +129,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        output_pass_times(native_time, vm_time);
+        output_pass_times(-1, vm_time);
     }
 
     return Fw::Success::SUCCESS;
@@ -143,10 +142,10 @@ Fw::Success Tests::benchmark() {
     bpf_map_def map_def{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
                         .key_size = 4,
                         .value_size = 4,
-                        .max_entries = 100,
+                        .max_entries = 88*88,
                         .map_flags = 0};
 
-    for (U32 fd : {0, 1, 2, 4}) {
+    for (U32 fd : {0, 1, 2}) {
         BpfSequencer::maps.create_map(map_def, fd);
     }
 
@@ -164,17 +163,25 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter",
-         [](Tests* tests) { tests->populate_map_random(2, 0, 1); }},
-        {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) { tests->populate_map_random(0, 0, 7); }},
-        {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-             tests->populate_map_random(0, 0, 100);
-             tests->populate_map_random(1, 0, 100);
+        {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "20x20_opt",
+         [](Tests* tests) { 
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
+		 }},
+        {passes, BENCHMARK_TEST::KALMAN, "20x20_unopt", [](Tests* tests) 
+			{
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
          }},
-        {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
-             tests->populate_map_random(0, 0, 4);
-             tests->populate_map_random(1, 0, 4);
-         }}};
+        {passes, BENCHMARK_TEST::MATMUL, "44x44_opt", [](Tests* tests) { 
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
+		}},
+        {passes, BENCHMARK_TEST::STAR_TRACKER, "44x44_unopt", [](Tests* tests) {
+             tests->populate_map_random(0, 0, 88*88);
+             tests->populate_map_random(1, 0, 88*88);
+         }}
+	};
 
     create_output_file();
 
