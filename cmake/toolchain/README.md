@@ -25,7 +25,7 @@ Our last dependency is the custom fork of LLVM we use to compile BPF programs. W
 ```bash
 cd llvm-project
 mkdir build && cd build
-CC=clang CXX=clang++ cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_TARGETS_TO_BUILD=BPF\;RISCV -DLLVM_USE_LINKER=lld -DCMAKE_TOOLCHAIN_FILE=../../riscv.cmake -DHAVE_POSIX_REGEX=0 -DHAVE_STEADY_CLOCK=0 -DLLVM_HOST_TRIPLE=riscv64-linux-gnu -DLLVM_TARGET_ARCH=riscv64 -DLLVM_USE_HOST_TOOLS=ON ../llvm
+CC=clang CXX=clang++ cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD=BPF\;RISCV -DLLVM_USE_LINKER=lld -DCMAKE_TOOLCHAIN_FILE=../../riscv.cmake -DHAVE_POSIX_REGEX=0 -DHAVE_STEADY_CLOCK=0 -DLLVM_HOST_TRIPLE=riscv64-linux-gnu -DLLVM_TARGET_ARCH=riscv64 -DLLVM_USE_HOST_TOOLS=ON ../llvm
 ninja
 ```
 To generate code for RISC-V, we need to set `LLVM_TARGETS_TO_BUILD`. We also need to set `LLVM_HOST_TRIPLE` and `LLVM_TARGET_ARCH` to tell the JIT that we're compiling for RISC-V. `LLVM_USE_LINKER=lld` uses the LLVM `lld` instead of the GCC `ld` to link, which speeds up cross-compile builds. We also turn off `HAVE_POSIX_REGEX` and `HAVE_STEADY_CLOCK` as the toolchain doesn't include these libs. Since we're cross compiling, we need to generate native versions of `llvm-tblgen` to compile the `.td` files that LLVM uses for code generation info.
