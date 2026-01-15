@@ -24,7 +24,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %8 = load i32, ptr %1, align 4, !tbaa !5
   %9 = add nsw i32 %8, 1
   store i32 %9, ptr %1, align 4, !tbaa !5
-  %10 = icmp slt i32 %8, 9999
+  %10 = icmp slt i32 %8, 2499
   br i1 %10, label %6, label %5, !llvm.loop !9
 
 11:                                               ; preds = %11, %5
@@ -32,7 +32,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %13 = load i32, ptr %2, align 4, !tbaa !5
   %14 = add nsw i32 %13, 1
   store i32 %14, ptr %2, align 4, !tbaa !5
-  %15 = icmp slt i32 %13, 99
+  %15 = icmp slt i32 %13, 24
   call void @llvm.assume(i1 %15)
   br label %11
 }
@@ -57,8 +57,8 @@ attributes #3 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
-!3 = !{i64 2147503013}
-!4 = !{i64 2147503525}
+!3 = !{i64 2147503083}
+!4 = !{i64 2147503595}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
