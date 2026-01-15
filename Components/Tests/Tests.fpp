@@ -14,6 +14,9 @@ module Components {
         @ Run star tracker test natively
         async command STAR_TRACKER()
 
+        @ Run NCCScore test natively
+        async command NCCScore()
+
         @ Report failed test
         event TestFailed(
                 testName: string,
@@ -21,6 +24,13 @@ module Components {
             ) \
             severity warning high \
             format "Test '{}' failed! Exit code: {}"
+
+        event BenchMarkFailed(msg: string) severity warning high format "Benchmark failed: {}"
+
+        @ Report successful test
+        event NCCScoreTestPassed() \
+            severity activity low \
+            format "NCCScore test passed."
 
         @ Populate a BPF map with random values. Indended for arraymaps
         async command POPULATE_MAP_RANDOM(

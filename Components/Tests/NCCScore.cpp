@@ -1,24 +1,50 @@
-#include "../bpf_shim.h"
+#include "NCCScore.hpp"
+#include "Components/BpfSequencer/maps/maps.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
+#include <cmath>
 
-#define MATCH_DIM  10 
+#define MATCH_DIM  10
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
 #define IMG_DIM 100
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
 
+
+namespace Components {
+
+namespace NCCScore {
+
 int main() {
-    void *map_image_input = MAP_BY_FD(0), *map_match_image = MAP_BY_FD(1), *result;
+    bpf_map_def map_def_0{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
+                        .key_size = 4,
+                        .value_size = 4,
+                        .max_entries = 10000,
+                        .map_flags = 0};
+
+
+    BpfSequencer::maps.create_map(map_def_0, 0);
+    
+    bpf_map_def map_def_1{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
+                        .key_size = 4,
+                        .value_size = 4,
+                        .max_entries = 100,
+                        .map_flags = 0};
+    
+    BpfSequencer::maps.create_map(map_def_1, 1);
+
+    void *map_image_input = (void*)maps::map_by_fd(0), *map_match_image = (void*)maps::map_by_fd(1), *result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
+
     long best_match, best_score = 0xffffffff;
 
     // Read in input and match images
-    for (int i = 0; i < IMG_SIZE; i++) {
-        result = bpf_map_lookup_elem(map_image_input, &i);
+    for (int i = 0; i < IMG_SIZE; i++){
+        result = maps::bpf_map_lookup_elem(map_image_input, &i);
         image_input[i] = *(int *)result;
     }
 
-    for (int i = 0; i < MATCH_SIZE; i++) {
-        result = bpf_map_lookup_elem(map_match_image, &i);
+    for (int i = 0; i < MATCH_SIZE; i++){
+        result = maps::bpf_map_lookup_elem(map_match_image, &i);
         match_image[i] = *(int *)result;
     }
 
@@ -55,6 +81,9 @@ int main() {
             }
         }
     }
-
+    
     return 0;
 }
+
+}  // namespace NCCScore
+} // namespace Components

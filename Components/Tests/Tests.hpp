@@ -55,6 +55,14 @@ class Tests final : public TestsComponentBase {
                                     U32 cmdSeq            //!< The command sequence number
                                     ) override;
 
+    //! Handler implementation for command LOW_PASS_FILTER
+    //!
+    //! Run low pass filter test natively, without an eBPF runtime
+    void NCCScore_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                    U32 cmdSeq            //!< The command sequence number
+                                    ) override;
+
+
     //! Handler implementation for command MATMUL
     //!
     //! Run matmul test natively, without an eBPF runtime
