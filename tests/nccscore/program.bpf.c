@@ -1,6 +1,6 @@
 #include "../bpf_shim.h"
 
-#define MATCH_DIM  5
+#define MATCH_DIM 5
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
 #define IMG_DIM 50
@@ -23,7 +23,7 @@ int main() {
     }
 
     for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
-        for (int j = 0; j < IMG_DIM - MATCH_DIM; i++) {
+        for (int j = 0; j < IMG_DIM - MATCH_DIM; j++) {
             int score = 0;
             int temp;
 

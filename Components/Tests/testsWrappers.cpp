@@ -152,8 +152,12 @@ Fw::Success Tests::benchmark() {
 
     struct sched_param p;
     p.sched_priority = 20;
-    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
-        return Fw::Success::FAILURE;
+    int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
+    if (rc != 0) {
+        this->log_WARNING_HI_BenchMarkFailed(
+            Fw::LogStringArg(strerror(rc))
+        );
+        // return Fw::Success::FAILURE;
     }
 
     struct TestInfo {
@@ -182,6 +186,7 @@ Fw::Success Tests::benchmark() {
         auto result = benchmark_test(test.passes, test.test, test.test_name, tests->fill_maps);
 
         if (result != Fw::Success::SUCCESS) {
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
             return Fw::Success::FAILURE;
         }
     }
