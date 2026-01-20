@@ -1,16 +1,15 @@
 #include "../bpf_shim.h"
 
 #define C_LIGHT 299792458.0f
-#define MAX_ITER 10
+#define MAX_ITER 5
 #define PI    3.14159265359f
-#define TERMS 10
 
 inline float sqroot(float s) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
 
-    long i = * (long *) &s;
+    int i = * (int *) &s;
     i = 0x5f3759df - ( i >> 1 );
     s = * (float *) &i;
     r = s * (1.5f - r * s * s);
@@ -18,54 +17,151 @@ inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-inline float power(float base, long exp) {
-    if (exp == 0) return 1.0f;
-    if (exp == 1) return base;
-
-    float result = 1.0f;
-    long abs_exp = (exp < 0) ? -exp : exp;
-
-    for (long i = 0; i < abs_exp; i++) {
-        result *= base;
-    }
-
-    if (exp < 0) {
-        if (base == 0.0f) return 0.0f;
-        return 1.0f / result;
-    }
-
-    return result;
-}
-
-inline long fact(long n) {
-    if (n <= 0) return 1;
-
-    long result = 1;
-    for (long i = 1; i <= n; i++) {
-        result *= i;
-    }
-    return result;
-}
-
 inline float sine(float rad) {
-    float sin = 0;
+    float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
-    for(long i = 0; i < TERMS; i++) {
-        sin += power(-1, i) * power(rad, 2 * i + 1) / fact(2 * i + 1);
-    }
-    return sin;
+    if (rad < 0.0f)
+        rad = rad + 2.0f * PI;
+    if (rad >= 2.0f * PI)
+        rad = rad - 2.0f * PI;
+
+    offset = (rad >= step) ? (rad - step) : offset;
+    v1 = (rad >= step) ? 0.38268343f : v1;
+    v2 = (rad >= step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
+    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 2.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
+    v1 = (rad >= 3.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 3.0f * step) ? 1.0f : v2;
+    
+    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
+    v1 = (rad >= 4.0f * step) ? 1.0f : v1;
+    v2 = (rad >= 4.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
+    v1 = (rad >= 5.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 5.0f * step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
+    v1 = (rad >= 6.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 6.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
+    v1 = (rad >= 7.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 7.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
+    v1 = (rad >= 8.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 8.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
+    v1 = (rad >= 9.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
+    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 10.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
+    v1 = (rad >= 11.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 11.0f * step) ? -1.0f : v2;
+    
+    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
+    v1 = (rad >= 12.0f * step) ? -1.0f : v1;
+    v2 = (rad >= 12.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
+    v1 = (rad >= 13.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 13.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
+    v1 = (rad >= 14.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 14.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
+    v1 = (rad >= 15.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 15.0f * step) ? 0.0f : v2;
+
+    frac = offset / step;
+    return v1 + frac * (v2 - v1);
 }
 
 inline float cosine(float rad) {
-    float cos = 0;
+    float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
-    for(long i = 0; i < TERMS; i++) {
-        cos += power(-1, i) * power(rad, 2 * i) / fact(2 * i);
-    }
-    return cos;
+    if (rad < 0.0f)
+        rad = rad + 2.0f * PI;
+    if (rad >= 2.0f * PI)
+        rad = rad - 2.0f * PI;
+
+   offset = (rad >= step) ? (rad - step) : offset;
+    v1 = (rad >= step) ? 0.92387953f : v1;
+    v2 = (rad >= step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
+    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 2.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
+    v1 = (rad >= 3.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 3.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
+    v1 = (rad >= 4.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 4.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
+    v1 = (rad >= 5.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 5.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
+    v1 = (rad >= 6.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 6.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
+    v1 = (rad >= 7.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 7.0f * step) ? -1.0f : v2;
+    
+    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
+    v1 = (rad >= 8.0f * step) ? -1.0f : v1;
+    v2 = (rad >= 8.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
+    v1 = (rad >= 9.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
+    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 10.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
+    v1 = (rad >= 11.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 11.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
+    v1 = (rad >= 12.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 12.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
+    v1 = (rad >= 13.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 13.0f * step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
+    v1 = (rad >= 14.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 14.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
+    v1 = (rad >= 15.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 15.0f * step) ? 1.0f : v2;
+    
+    frac = offset / step; 
+    return v1 + frac * (v2 - v1);
 }
 
-inline float _atan2(float y, float x) __attribute__((always_inline)) {
+inline float _atan2(float y, float x) {
     long y_bits = *(long *)&y;
     long x_bits = *(long *)&x;
     
@@ -118,12 +214,12 @@ inline float _atan2(float y, float x) __attribute__((always_inline)) {
 
 int main() {
     void *input_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(2), *res;
-    float v[3], s_obs[3], u_corrected[3];  // Only 3 arrays
+    volatile float v[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;
     float beta2, gamma, t_emit, M, E, nu, r, h;
     float s_dot_u, denom, factor, u_corr_mag;
     
-    tau = 0.0;
+    tau = 0.0f;
     
     // Load observer position into v
     for (long i = 0; i < 3; i++) {
@@ -138,8 +234,8 @@ int main() {
         s_obs[i] = (*(float *)res) / C_LIGHT;
     }
     
-    beta2 = s_obs[0]*s_obs[0] + s_obs[1]*s_obs[1] + s_obs[2]*s_obs[2];
-    gamma = 1.0 / sqroot(1.0 - beta2);
+    beta2 = s_obs[0] * s_obs[0] + s_obs[1] * s_obs[1] + s_obs[2] * s_obs[2];
+    gamma = 1.0f / sqroot(1.0f - beta2);
     
     // Load orbital params (add these to your map indices 6-9)
     long idx = 6;
@@ -160,11 +256,13 @@ int main() {
         M = omega * t_emit;
         E = M;
         
-        for (long i = 0; i < 5; i++) {
-            E = M + e * sine(E);
-        }
+        E = M + e * sine(E);
+        E = M + e * sine(E);
+        E = M + e * sine(E);
+        E = M + e * sine(E);
+        E = M + e * sine(E);
 
-        nu = 2.0 * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
+        nu = 2.0f * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
         r = a * (1 - e * cosine(E));
 
         float cos_nu = cosine(nu);
@@ -188,7 +286,7 @@ int main() {
         float d2 = 0.0f - obs2;
         v[2] = d2;
 
-        dist = sqroot(d0*d0 + d1*d1 + d2*d2);
+        dist = sqroot(d0 * d0 + d1 * d1 + d2 * d2);
 
         // Normalize v (which is diff) to get unit vector
         v[0] /= dist;
@@ -197,8 +295,8 @@ int main() {
         
         // Aberration correction
         s_dot_u = s_obs[0]*v[0] + s_obs[1]*v[1] + s_obs[2]*v[2];
-        denom = gamma * (1.0 + s_dot_u);
-        factor = gamma / (1.0 + gamma) * s_dot_u;
+        denom = gamma * (1.0f + s_dot_u);
+        factor = gamma / (1.0f + gamma) * s_dot_u;
         
         u_corrected[0] = (v[0] + factor*s_obs[0] + s_obs[0]) / denom;
         u_corrected[1] = (v[1] + factor*s_obs[1] + s_obs[1]) / denom;

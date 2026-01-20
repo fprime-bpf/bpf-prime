@@ -1,7 +1,6 @@
 #include "../bpf_shim.h"
 
 #define PI    3.14159265359f
-#define TERMS 10
 
 inline float sqroot(float s) { 
     float r = s / 2;
@@ -16,39 +15,148 @@ inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-inline float power(float base, long exp) {
-    if(exp < 0) {
-        if(base == 0)
-            return -0; // Error!!
-        return 1 / (base * power(base, (-exp) - 1));
-    }
-    if(exp == 0)
-        return 1;
-    if(exp == 1)
-        return base;
-    return base * power(base, exp - 1);
-}
-
-inline long fact(long n) {
-    return n <= 0 ? 1 : n * fact(n-1);
-}
-
 inline float sine(float rad) {
-    float sin = 0;
+    float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
-    for(long i = 0; i < TERMS; i++) {
-        sin += power(-1, i) * power(rad, 2 * i + 1) / fact(2 * i + 1);
-    }
-    return sin;
+    if (rad < 0.0f)
+        rad = rad + 2.0f * PI;
+    if (rad >= 2.0f * PI)
+        rad = rad - 2.0f * PI;
+
+    offset = (rad >= step) ? (rad - step) : offset;
+    v1 = (rad >= step) ? 0.38268343f : v1;
+    v2 = (rad >= step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
+    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 2.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
+    v1 = (rad >= 3.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 3.0f * step) ? 1.0f : v2;
+    
+    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
+    v1 = (rad >= 4.0f * step) ? 1.0f : v1;
+    v2 = (rad >= 4.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
+    v1 = (rad >= 5.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 5.0f * step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
+    v1 = (rad >= 6.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 6.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
+    v1 = (rad >= 7.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 7.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
+    v1 = (rad >= 8.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 8.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
+    v1 = (rad >= 9.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
+    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 10.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
+    v1 = (rad >= 11.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 11.0f * step) ? -1.0f : v2;
+    
+    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
+    v1 = (rad >= 12.0f * step) ? -1.0f : v1;
+    v2 = (rad >= 12.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
+    v1 = (rad >= 13.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 13.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
+    v1 = (rad >= 14.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 14.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
+    v1 = (rad >= 15.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 15.0f * step) ? 0.0f : v2;
+
+    frac = offset / step;
+    return v1 + frac * (v2 - v1);
 }
 
 inline float cosine(float rad) {
-    float cos = 0;
+    float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
-    for(long i = 0; i < TERMS; i++) {
-        cos += power(-1, i) * power(rad, 2 * i) / fact(2 * i);
-    }
-    return cos;
+    if (rad < 0.0f)
+        rad = rad + 2.0f * PI;
+    if (rad >= 2.0f * PI)
+        rad = rad - 2.0f * PI;
+
+   offset = (rad >= step) ? (rad - step) : offset;
+    v1 = (rad >= step) ? 0.92387953f : v1;
+    v2 = (rad >= step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
+    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 2.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
+    v1 = (rad >= 3.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 3.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
+    v1 = (rad >= 4.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 4.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
+    v1 = (rad >= 5.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 5.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
+    v1 = (rad >= 6.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 6.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
+    v1 = (rad >= 7.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 7.0f * step) ? -1.0f : v2;
+    
+    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
+    v1 = (rad >= 8.0f * step) ? -1.0f : v1;
+    v2 = (rad >= 8.0f * step) ? -0.92387953f : v2;
+    
+    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
+    v1 = (rad >= 9.0f * step) ? -0.92387953f : v1;
+    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
+    
+    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
+    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
+    v2 = (rad >= 10.0f * step) ? -0.38268343f : v2;
+    
+    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
+    v1 = (rad >= 11.0f * step) ? -0.38268343f : v1;
+    v2 = (rad >= 11.0f * step) ? 0.0f : v2;
+    
+    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
+    v1 = (rad >= 12.0f * step) ? 0.0f : v1;
+    v2 = (rad >= 12.0f * step) ? 0.38268343f : v2;
+    
+    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
+    v1 = (rad >= 13.0f * step) ? 0.38268343f : v1;
+    v2 = (rad >= 13.0f * step) ? 0.70710678f : v2;
+    
+    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
+    v1 = (rad >= 14.0f * step) ? 0.70710678f : v1;
+    v2 = (rad >= 14.0f * step) ? 0.92387953f : v2;
+    
+    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
+    v1 = (rad >= 15.0f * step) ? 0.92387953f : v1;
+    v2 = (rad >= 15.0f * step) ? 1.0f : v2;
+    
+    frac = offset / step; 
+    return v1 + frac * (v2 - v1);
 }
 
 int main() {
@@ -112,4 +220,6 @@ int main() {
 
     long i = locs[0] ^ locs[1] ^ locs[2];
     bpf_map_update_elem(out_map, &i, &hash_val, 0);
+
+    return 0;
 }
