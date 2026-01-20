@@ -5,7 +5,8 @@
 typedef char AES_Block_t[16];
 typedef char AES_Key128_t[256];
 
-inline char GF_Mult(char a, char b) __attribute__((always_inline)) {
+__attribute__((always_inline))
+inline char GF_Mult(char a, char b) {
   char result = 0;
   char shiftEscapesField = 0;
 
@@ -37,8 +38,8 @@ inline char GF_Mult(char a, char b) __attribute__((always_inline)) {
   return result;
 }
 
-
-inline void AES_ShiftRows(AES_Block_t block) __attribute__((always_inline)) {
+__attribute__((always_inline))
+inline void AES_ShiftRows(AES_Block_t block) {
   // Shift row 1
   char temp0 = block[1];
   block[1] = block[5];
@@ -62,7 +63,8 @@ inline void AES_ShiftRows(AES_Block_t block) __attribute__((always_inline)) {
   block[3] = temp0;
 }
 
-inline void AES_MixColumns(AES_Block_t block) __attribute__((always_inline)) {
+__attribute__((always_inline))
+inline void AES_MixColumns(AES_Block_t block) {
   char temp[4] = {0};
 
   for (int i = 0; i < 4; i++) {
