@@ -161,7 +161,7 @@ inline float cosine(float rad) {
 
 int main() {
     void *star_coords_x = MAP_BY_FD(0), *star_coords_y = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
-    float star_x[4], star_y[4], distances[6], hash_val;
+    volatile float star_x[4], star_y[4], distances[6], hash_val;
     long locs[5];
 
     // Fetch star infos from BPF maps

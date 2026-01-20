@@ -1130,9 +1130,9 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
-!3 = !{i64 2147511707}
-!4 = !{i64 2147512219}
+!2 = !{!"clang version 20.1.0 (git@github.com:h313/llvm-duotronic.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147511699}
+!4 = !{i64 2147512211}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"long", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
