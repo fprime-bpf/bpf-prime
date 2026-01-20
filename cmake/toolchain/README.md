@@ -15,7 +15,7 @@ Next, let's do the same thing for the elfutils dependency, which LLVM also relie
 ```bash
 cd elfutils-0.193
 export PATH="$(pwd)/../riscv/bin:$PATH"
-./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=$(pwd)/../riscv/sysroot --enable-maintainer-mode
+./configure --build=x86_64-linux-gnu --host=riscv64-unknown-linux-gnu --prefix=$(pwd)/../riscv/sysroot
 make && make install
 ```
 
@@ -36,6 +36,6 @@ virtualenv venv
 source venv/bin/activate
 pip install -r lib/fprime/requirements.txt
 
-CC=clang CXX=clang++ fprime-util generate riscv -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DLLVM_DIR=$(pwd)/cmake/toolchain/llvm-project/build/lib/cmake/llvm
+CC=clang CXX=clang++ fprime-util generate riscv -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_USE_LINKER=LLD -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_DIR=$(pwd)/cmake/toolchain/llvm-project/build/lib/cmake/llvm
 fprime-util build riscv
 ```
