@@ -91,8 +91,31 @@ void BpfSequencer::run_worker() {
             return;
         }
         
-        // Execute the VM outside the lock
+        // Get the VM for this job
+        std::shared_ptr<BpfSequencerVM>& vm = vms[job.vm_id];
+        
+        // Atomically try to raise the running flag using compare_exchange
+        // If the flag is already set, this indicates a slip 
+        bool expected = false;
+        if (!vm->is_running.compare_exchange_strong(expected, true, 
+                                                     std::memory_order_acq_rel,
+                                                     std::memory_order_acquire)) {
+
+            // Slip! Notify the scheduler by setting the slip_detected_vm_id
+            I32 no_slip = -1;
+            slip_detected_vm_id.compare_exchange_strong(no_slip, 
+                                                        static_cast<I32>(job.vm_id),
+                                                        std::memory_order_release,
+                                                        std::memory_order_relaxed);
+            // Continue to next job - don't execute this one since the previous is still running
+            continue;
+        }
+        
+        // Finally Execute the VM
         run(job.vm_id);
+        
+        // Clear the running flag
+        vm->is_running.store(false, std::memory_order_release);
     }
 }
 
@@ -111,7 +134,7 @@ void BpfSequencer::rebuild_deadline_schedule() {
         
         if (rg_id >= k_max_rate_groups) continue;  // Not assigned to a rate group
         
-        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each run
+        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each runjk/`
         if (interval == 0) continue;
         
         // Calculate the period in ms
@@ -232,6 +255,13 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
+    // Check if a worker reported a slip (VM was still running when new job arrived)
+    // Use exchange to keep it atomic
+    I32 slipped_vm = slip_detected_vm_id.exchange(-1, std::memory_order_acquire);
+    if (slipped_vm >= 0) {
+        this->log_WARNING_HI_VmSlip(static_cast<U32>(slipped_vm));
+    }
+
     if (job_queue.getMessagesAvailable() > 0){
         // Slip - log error
         this->log_WARNING_HI_SchedulerSlip(this->ticks);
