@@ -58,7 +58,8 @@ BpfSequencer ::~BpfSequencer() {
 }
 
 // Worker function - pops jobs from shared queue and executes them
-void BpfSequencer::run_worker() {
+void BpfSequencer::run_worker(U32 worker_id) {
+    using namespace std::chrono_literals;
 
     #ifdef __linux__
     // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
@@ -75,6 +76,9 @@ void BpfSequencer::run_worker() {
         FwSizeType size = 0;
         FwQueuePriorityType priority = 0;
 
+        if (!worker_enabled[worker_id])
+            std::this_thread::sleep_for(500us);
+
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),
@@ -83,9 +87,8 @@ void BpfSequencer::run_worker() {
             priority
         );
 
-        if (status != Os::QueueInterface::Status::OP_OK) {
+        if (status != Os::QueueInterface::Status::OP_OK)
             continue;  // Queue empty or error
-        }
 
         if (!running) {
             return;
@@ -101,19 +104,19 @@ void BpfSequencer::rebuild_deadline_schedule() {
     for (auto& tick_jobs : schedule) {
         tick_jobs.clear();
     }
-    
+
     // For each VM, if it's assigned to a rate group, calculate its deadlines
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
         if (!vms[vm_id]) continue;
-        
+
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
-        
+
         if (rg_id >= k_max_rate_groups) continue;  // Not assigned to a rate group
-        
+
         U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each run
         if (interval == 0) continue;
-        
+
         // Calculate the period in ms
         // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
         // Period is 1 tick
@@ -184,14 +187,19 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     }
 
     this->timer_freq_hz = timer_freq_hz;
-    this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
+    // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
         workers.emplace_back([this]() {
-            this->run_worker();
+            this->run_worker(i);
         });
+    }
+
+    worker_enabled.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++) {
+        worker_enabled.emplace_back(false);
     }
 
     this->configured = true;

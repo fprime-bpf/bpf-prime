@@ -20,6 +20,7 @@
 #include <map>
 #include <queue>
 #include <array>
+#include <vector>
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -114,8 +115,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     // Worker threads
     std::vector<std::thread> workers;
+    std::vector<bool> worker_enabled;
     U32 num_workers = 2;
-    
+
     // Use an array for the schedule (faster access than a map)
     std::array<std::vector<U32>, 1000> schedule;
     
@@ -123,7 +125,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     U32 cycle_tick = 0;
     
     // Worker function that pops jobs from shared queue and executes
-    void run_worker();
+    void run_worker(U32 worker_id);
     
     // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
     void rebuild_deadline_schedule();
