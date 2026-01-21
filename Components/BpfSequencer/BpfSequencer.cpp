@@ -145,29 +145,41 @@ void BpfSequencer::rebuild_deadline_schedule() {
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
     auto& jobs = schedule[tick];
-    if (jobs.empty()){
+    if (jobs.empty())
         return;
+
+    // Calculate number of processors required to run jobs
+    F32 total_runtime_ms = 0.0;
+    for (auto vm_id : jobs) {
+        total_runtime_ms += this->vms[vm_id]->runtime_ms;
+    }
+    U32 executors_needed = static_cast<U32>(total_runtime_ms);
+
+    if (executors_needed > this->num_workers) {
+        // TODO: add overflow to next cycle
+        std::fill(worker_enabled.begin(), worker_enabled.end(), true);
+    } else {
+        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
+        std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
 
-    {        
-        for (auto vm_id : jobs) {
-            ScheduledJob job;
-            job.deadline = tick;
-            job.vm_id = vm_id;;
-            
-            FwSizeType size = sizeof(ScheduledJob);
-            FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
-            auto status = job_queue.send(
-                reinterpret_cast<const U8*>(&job),
-                size,
-                priority,
-                Os::QueueInterface::BlockingType::BLOCKING
-            );
-            
-            if (status == Os::QueueInterface::Status::FULL) {
-                // Queue full - log warning and drop job
-                this->log_WARNING_HI_SchedulerQueueFull(vm_id);
-            }
+    for (auto vm_id : jobs) {
+        ScheduledJob job;
+        job.deadline = tick;
+        job.vm_id = vm_id;;
+        
+        FwSizeType size = sizeof(ScheduledJob);
+        FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
+        auto status = job_queue.send(
+            reinterpret_cast<const U8*>(&job),
+            size,
+            priority,
+            Os::QueueInterface::BlockingType::BLOCKING
+        );
+        
+        if (status == Os::QueueInterface::Status::FULL) {
+            // Queue full - log warning and drop job
+            this->log_WARNING_HI_SchedulerQueueFull(vm_id);
         }
     }
 }
@@ -192,15 +204,14 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
-        workers.emplace_back([this]() {
+        workers.emplace_back([this, i]() {
             this->run_worker(i);
         });
     }
 
     worker_enabled.reserve(num_workers);
-    for (U32 i = 0; i < num_workers; i++) {
-        worker_enabled.emplace_back(false);
-    }
+    for (U32 i = 0; i < num_workers; i++)
+        worker_enabled.emplace_back(true);
 
     this->configured = true;
 }
