@@ -2,3 +2,4 @@ elfutils*/
 llvm-project/
 riscv/
 zlib*/
+spdlog/
