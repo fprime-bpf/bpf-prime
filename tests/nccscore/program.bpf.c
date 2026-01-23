@@ -1,17 +1,18 @@
 #include "../bpf_shim.h"
 
-#define MATCH_DIM 5
+#define MATCH_DIM 50
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
-#define IMG_DIM 50
+#define IMG_DIM 500
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
+
+#define ITER 10
 
 int main() {
     void *map_image_input = MAP_BY_FD(0), *map_match_image = MAP_BY_FD(1), *result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
-    int best_match, best_score = 0xffffffff;
 
-    // Read in input and match images
+    // Read input and match images
     for (int i = 0; i < IMG_SIZE; i++) {
         result = bpf_map_lookup_elem(map_image_input, &i);
         image_input[i] = *(int *)result;
@@ -22,42 +23,38 @@ int main() {
         match_image[i] = *(int *)result;
     }
 
-    for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
-        for (int j = 0; j < IMG_DIM - MATCH_DIM; j++) {
-            int score = 0;
-            int temp;
+    for (int iter = 0; iter < ITER; iter++) {
+        int best_match = 0;
+        int best_score = 0xffffffff;
 
-            for (int ii = 0; ii < MATCH_DIM; ii++) {
-                for (int jj = 0; jj < MATCH_DIM; jj++) {
-                    temp = ((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x000f) - (match_image[ii + jj] & 0x000f);
-                    if (temp > 0)
-                      score += temp;
-                    else
-                      score -= temp;
+        for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
+            for (int j = 0; j < IMG_DIM - MATCH_DIM; j++) {
+                int score = 0;
+                int temp;
 
-                    temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x00f0) >> 8) - ((match_image[ii + jj] & 0x00f0) >> 8);
-                    if (temp > 0)
-                      score += temp;
-                    else
-                      score -= temp;
+                for (int ii = 0; ii < MATCH_DIM; ii++) {
+                    for (int jj = 0; jj < MATCH_DIM; jj++) {
+                        temp = ((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x000f) - (match_image[ii + jj] & 0x000f);
+                        score += (temp > 0) ? temp : -temp;
 
-                    temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x0f00) >> 16) - ((match_image[ii + jj] & 0x0f00) >> 16);
-                    if (temp > 0)
-                      score += temp;
-                    else
-                      score -= temp;
+                        temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x00f0) >> 8) - ((match_image[ii + jj] & 0x00f0) >> 8);
+                        score += (temp > 0) ? temp : -temp;
+
+                        temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x0f00) >> 16) - ((match_image[ii + jj] & 0x0f00) >> 16);
+                        score += (temp > 0) ? temp : -temp;
+                    }
+                }
+
+                if (score < best_score) {
+                    best_match = i;
+                    best_score = score;
                 }
             }
-
-            if (score < best_score) {
-                best_match = i;
-                best_score = score;
-            }
         }
-    }
 
-    int i = 0;
-    bpf_map_update_elem(map_match_image, &i, &best_match, 0);
+        int i = 0;
+        bpf_map_update_elem(map_match_image, &i, &best_match, 0);
+    }
 
     return 0;
 }

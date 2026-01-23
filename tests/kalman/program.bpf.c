@@ -1,5 +1,7 @@
 #include "../bpf_shim.h"
 
+#define ITER 100000000
+
 int main() {
     void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1), *result;
     float ins[7], preds[7];
@@ -11,19 +13,23 @@ int main() {
         preds[i] = ins[i];
     }
 
-    // Get predictions
-    for (int i = 0; i < 7; i++) {
-        if (i != 6)
-            preds[i] = preds[i + 1] / 1.5f;
-        else
-            preds[i] = preds[0] / 1.5f;
+    for (int iter = 0; iter < ITER; iter++) {
+        // Get predictions
+        for (int i = 0; i < 7; i++) {
+            if (i != 6)
+                preds[i] = preds[i + 1] / 1.5f;
+            else
+                preds[i] = preds[0] / 1.5f;
+        }
+
+        for (int i = 0; i < 7; i++) {
+            // Diff with actual and multiply with factor
+            ins[i] = ins[i] - preds[i];
+            ins[i] *= 0.05f;
+        }
     }
 
     for (int i = 0; i < 7; i++) {
-        // Diff with actual and multiply with factor
-        ins[i] = ins[i] - preds[i];
-        ins[i] *= 0.05f;
-
         // Write out estimate to BPF map
         preds[i] = preds[i] - ins[i];
         bpf_map_update_elem(out_map, &i, &preds[i], 0);

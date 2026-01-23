@@ -1,5 +1,7 @@
 #include "../bpf_shim.h"
 
+#define ITER 10000000
+
 #define NUM_ROUND_KEYS_128 (11)
 
 typedef char AES_Block_t[16];
@@ -82,12 +84,24 @@ inline void AES_MixColumns(AES_Block_t block) {
 }
 
 int main() {
-  AES_Block_t block = {12};
-  AES_Key128_t key = {13};
+  void *block_map = MAP_BY_FD(0), *key_map = MAP_BY_FD(1), *result;
+
+  AES_Block_t block;
+  AES_Key128_t key;
   AES_Block_t zero = {0};
 
+  for (int i = 0; i < 16; i++) {
+    void *result = bpf_map_lookup_elem(block_map, &i);
+    block[i] = *(char *)result;
+  }
+
+  for (int i = 0; i < 256; i++) {
+    result = bpf_map_lookup_elem(key_map, &i);
+    key[i] = *(char *)result;
+  }
+
   // 1000 blocks
-  for (int i = 0; i < 1000; i++) {
+  for (int iter = 0; iter < ITER; iter++) {
     // AddRoundKey
     for (int col = 0; col < 4; col++) {
       for (int row = 0; row < 4; row++) {

@@ -1,7 +1,7 @@
 #include "../bpf_shim.h"
 
 #define C_LIGHT 299792458.0f
-#define MAX_ITER 5
+#define ITER 1000000
 #define PI    3.14159265359f
 
 inline float sqroot(float s) { 
@@ -243,7 +243,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
-    for (long iter = 0; iter < MAX_ITER; iter++) {
+    for (long iter = 0; iter < ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;
         E = M;
