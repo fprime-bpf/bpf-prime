@@ -42,6 +42,7 @@ struct BpfSequencerVM {
     // VM scheduling info
     U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
     F32 runtime_ms = 0.0f;  // Estimated runtime in ms
+    F32 latest_run_time = 0.0f;  // Latest time this VM can run in the current cycle
     
     ~BpfSequencerVM();
 };
