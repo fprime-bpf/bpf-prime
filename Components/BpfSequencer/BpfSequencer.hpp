@@ -20,6 +20,7 @@
 #include <map>
 #include <queue>
 #include <array>
+#include <atomic>
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -43,6 +44,9 @@ struct BpfSequencerVM {
     U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
     F32 runtime_ms = 0.0f;  // Estimated runtime in ms
     F32 latest_run_time = 0.0f;  // Latest time this VM can run in the current cycle
+    
+    // Per-job running flag, true if this VM's job is currently executing, used to detect slips
+    std::atomic<bool> is_running{false};
     
     ~BpfSequencerVM();
 };
@@ -112,6 +116,10 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static const FwSizeType MAX_JOBS = 64;
 
     Os::Generic::PriorityQueue job_queue;
+    
+    // Slip detection: atomic integer that stores the VM ID that slipped
+    // Value of -1 means no slip detected
+    std::array<std::atomic<bool>, k_num_vms> slip_detected{};
     
     // Worker threads
     std::vector<std::thread> workers;

@@ -39,9 +39,9 @@ event SchedulerQueueFull(vm_id: U32) \
     severity warning high \
     format "Scheduler job queue full, dropping job for VM {}"
 
-event SchedulerSlip(tick: U32) \ 
+event SchedulerSlip(vm_id: U32) \ 
     severity warning high \
-    format "Scheduler slip detected at tick {}"
+    format "VM {} slip detected, previous execution still running when new job scheduled"
 
 event WorkerPrioritySetFailed() \
     severity warning high \ 
