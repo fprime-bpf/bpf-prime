@@ -118,7 +118,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     // Slip detection: atomic integer that stores the VM ID that slipped
     // Value of -1 means no slip detected
-    std::atomic<I32> slip_detected_vm_id{-1};
+    std::array<std::atomic<bool>, k_num_vms> slip_detected{};
     
     // Worker threads
     std::vector<std::thread> workers;

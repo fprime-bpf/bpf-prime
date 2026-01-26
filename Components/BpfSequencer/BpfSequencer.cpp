@@ -101,12 +101,8 @@ void BpfSequencer::run_worker() {
                                                      std::memory_order_acq_rel,
                                                      std::memory_order_acquire)) {
 
-            // Slip! Notify the scheduler by setting the slip_detected_vm_id
-            I32 no_slip = -1;
-            slip_detected_vm_id.compare_exchange_strong(no_slip, 
-                                                        static_cast<I32>(job.vm_id),
-                                                        std::memory_order_release,
-                                                        std::memory_order_relaxed);
+            // Slip! Set the slip_detected flag for this VM
+            slip_detected[job.vm_id].store(true, std::memory_order_release);
             // Continue to next job - don't execute this one since the previous is still running
             continue;
         }
@@ -255,17 +251,12 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
-    // Check if a worker reported a slip (VM was still running when new job arrived)
-    // Use exchange to keep it atomic
-    I32 slipped_vm = slip_detected_vm_id.exchange(-1, std::memory_order_acquire);
-    if (slipped_vm >= 0) {
-        this->log_WARNING_HI_VmSlip(static_cast<U32>(slipped_vm));
-    }
-
-    if (job_queue.getMessagesAvailable() > 0){
-        // Slip - log error
-        this->log_WARNING_HI_SchedulerSlip(this->ticks);
-        return;
+    // Check if any workers reported a slip (VM was still running when new job arrived)
+    for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
+        // Use exchange to atomically check and clear the slip flag
+        if (slip_detected[vm_id].exchange(false, std::memory_order_acquire)) {
+            this->log_WARNING_HI_SchedulerSlip(vm_id);
+        }
     }
 
     this->ticks++;
