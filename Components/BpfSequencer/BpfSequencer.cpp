@@ -109,7 +109,7 @@ void BpfSequencer::rebuild_deadline_schedule() {
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
         
-        if (rg_id >= k_max_rate_groups) continue;  // Not assigned to a rate group
+        if (rg_id >= k_max_rate_groups || rg_id < 0) continue;  // Not assigned to a rate group
         
         U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each run
         if (interval == 0) continue;
@@ -126,7 +126,9 @@ void BpfSequencer::rebuild_deadline_schedule() {
         // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
             F32 deadline = i * period_ms; // When this task needs to be done
-            F32 scheduled_time = deadline - vm->runtime_ms;
+            F32 scheduled_time = deadline - period_ms; // EDF task scheduling
+            F32 latest_run_time = deadline - vm->runtime_ms; // Latest time we can run this task
+            vms[vm_id]->latest_run_time = latest_run_time;
             
             // Clamp schedule_time to valid range [0, 1000]
             if (scheduled_time < 0.0f) scheduled_time = 0.0f;
@@ -149,7 +151,7 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
     {        
         for (auto vm_id : jobs) {
             ScheduledJob job;
-            job.deadline = tick;
+            job.deadline = vms[vm_id]->latest_run_time;
             job.vm_id = vm_id;;
             
             FwSizeType size = sizeof(ScheduledJob);
