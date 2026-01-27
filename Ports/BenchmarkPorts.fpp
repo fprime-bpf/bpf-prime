@@ -1,9 +1,12 @@
 module Components {
 
     enum BENCHMARK_TEST {
-        LOW_PASS_FILTER,
+        ABERR,
+        AES,
         KALMAN,
+        LOW_PASS_FILTER,
         MATMUL,
+        NCC_SCORE,
         STAR_TRACKER
     }
 

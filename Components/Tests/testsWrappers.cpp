@@ -20,18 +20,13 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
         const char* bytecode_path;
 
         switch (test) {
-            case BENCHMARK_TEST::LOW_PASS_FILTER:
-                bytecode_path = "tests/low_pass_filter/a.o";
-                break;
-            case BENCHMARK_TEST::KALMAN:
-                bytecode_path = "tests/kalman/a.o";
-                break;
-            case BENCHMARK_TEST::MATMUL:
-                bytecode_path = "tests/matmul/a.o";
-                break;
-            case BENCHMARK_TEST::STAR_TRACKER:
-                bytecode_path = "tests/startracker/a.o";
-                break;
+            case BENCHMARK_TEST::ABERR: bytecode_path = "tests/aberr/a.o"; break;
+            case BENCHMARK_TEST::AES: bytecode_path = "tests/aes/a.o"; break;
+            case BENCHMARK_TEST::KALMAN: bytecode_path = "tests/kalman/a.o"; break;
+            case BENCHMARK_TEST::LOW_PASS_FILTER: bytecode_path = "tests/low_pass_filter/a.o"; break;
+            case BENCHMARK_TEST::MATMUL: bytecode_path = "tests/matmul/a.o"; break;
+            case BENCHMARK_TEST::NCC_SCORE: bytecode_path = "tests/nccscore/a.o"; break;
+            case BENCHMARK_TEST::STAR_TRACKER: bytecode_path = "tests/startracker/a.o"; break;
             default:
                 return -1;
         }
@@ -91,15 +86,23 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 Fw::Success Tests::benchmark() {
     const U32 passes = 1000;
 
-    bpf_map_def map_def{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
-                        .key_size = 4,
-                        .value_size = 4,
-                        .max_entries = 100,
-                        .map_flags = 0};
+    bpf_map_def map_def = {
+        .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
+        .key_size = 4,
+        .value_size = 4,
+        .max_entries = 2500,
+        .map_flags = 0
+    };
+    BpfSequencer::maps.create_map(map_def, 0);
 
-    for (U32 fd : {0, 1, 2, 4}) {
-        BpfSequencer::maps.create_map(map_def, fd);
-    }
+    map_def.max_entries = 256;
+    BpfSequencer::maps.create_map(map_def, 1);
+
+    map_def.max_entries = 100;
+    BpfSequencer::maps.create_map(map_def, 2);
+
+    map_def.max_entries = 1;
+    BpfSequencer::maps.create_map(map_def, 4);
 
     struct sched_param p;
     p.sched_priority = 20;
@@ -119,17 +122,39 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter",
-         [](Tests* tests) { tests->populate_map_random(2, 0, 1); }},
-        {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) { tests->populate_map_random(0, 0, 7); }},
+        {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
+            tests->populate_map_random(0, 0, 6);
+        }},
+
+        {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
+            tests->populate_map_random(0, 0, 16);
+            tests->populate_map_random(1, 0, 256);
+        }},
+
+        {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) {
+            tests->populate_map_random(0, 0, 7);
+        }},
+
+        {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter", [](Tests* tests) {
+            tests->populate_map_random(2, 0, 2);
+        }},
+
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-             tests->populate_map_random(0, 0, 100);
-             tests->populate_map_random(1, 0, 100);
-         }},
+            tests->populate_map_random(0, 0, 100);
+            tests->populate_map_random(1, 0, 100);
+        }},
+
+        {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
+            tests->populate_map_random(0, 0, 2500);
+            tests->populate_map_random(1, 0, 25);
+        }},
+
         {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
-             tests->populate_map_random(0, 0, 4);
-             tests->populate_map_random(1, 0, 4);
-         }}};
+            tests->populate_map_random(0, 0, 4);
+            tests->populate_map_random(1, 0, 4);
+        }}
+    };
+
 
     create_output_file();
 
