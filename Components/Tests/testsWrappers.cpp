@@ -11,7 +11,7 @@
 #include <random>
 
 using timer = std::chrono::high_resolution_clock;
-using ms = std::chrono::milliseconds;
+using ns = std::chrono::nanoseconds;
 
 namespace Components {
 
@@ -51,11 +51,11 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     if (run_result)
         return -1;
 
-    return std::chrono::duration<F64, ms::period>(end - start).count();
+    return std::chrono::duration<F64, ns::period>(end - start).count();
 }
 
 namespace {
-const char* const OUTPUT_FILE_NAME = "benchmark_results.yml";
+const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS_EBPF.yml";
 
 void create_output_file() {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
@@ -89,7 +89,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 10000;
+    const U32 passes = 1000;
 
     bpf_map_def map_def{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
                         .key_size = 4,
