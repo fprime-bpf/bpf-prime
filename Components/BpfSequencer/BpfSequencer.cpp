@@ -94,8 +94,27 @@ void BpfSequencer::run_worker(U32 worker_id) {
             return;
         }
         
-        // Execute the VM outside the lock
+        // Get the VM for this job
+        std::shared_ptr<BpfSequencerVM>& vm = vms[job.vm_id];
+        
+        // Atomically try to raise the running flag using compare_exchange
+        // If the flag is already set, this indicates a slip 
+        bool expected = false;
+        if (!vm->is_running.compare_exchange_strong(expected, true, 
+                                                     std::memory_order_acq_rel,
+                                                     std::memory_order_acquire)) {
+
+            // Slip! Set the slip_detected flag for this VM
+            slip_detected[job.vm_id].store(true, std::memory_order_release);
+            // Continue to next job - don't execute this one since the previous is still running
+            continue;
+        }
+        
+        // Finally Execute the VM
         run(job.vm_id);
+        
+        // Clear the running flag
+        vm->is_running.store(false, std::memory_order_release);
     }
 }
 
@@ -111,12 +130,12 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
-
-        if (rg_id >= k_max_rate_groups) continue;  // Not assigned to a rate group
-
-        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each run
+        
+        if (rg_id >= k_max_rate_groups || rg_id < 0) continue;  // Not assigned to a rate group
+        
+        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each runjk/`
         if (interval == 0) continue;
-
+        
         // Calculate the period in ms
         // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
         // Period is 1 tick
@@ -129,7 +148,9 @@ void BpfSequencer::rebuild_deadline_schedule() {
         // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
             F32 deadline = i * period_ms; // When this task needs to be done
-            F32 scheduled_time = deadline - vm->runtime_ms;
+            F32 scheduled_time = deadline - period_ms; // EDF task scheduling
+            F32 latest_run_time = deadline - vm->runtime_ms; // Latest time we can run this task
+            vms[vm_id]->latest_run_time = latest_run_time;
             
             // Clamp schedule_time to valid range [0, 1000]
             if (scheduled_time < 0.0f) scheduled_time = 0.0f;
@@ -162,10 +183,9 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
         std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
-
     for (auto vm_id : jobs) {
         ScheduledJob job;
-        job.deadline = tick;
+            job.deadline = vms[vm_id]->latest_run_time;
         job.vm_id = vm_id;;
         
         FwSizeType size = sizeof(ScheduledJob);
@@ -251,10 +271,12 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
-    if (job_queue.getMessagesAvailable() > 0){
-        // Slip - log error
-        this->log_WARNING_HI_SchedulerSlip(this->ticks);
-        return;
+    // Check if any workers reported a slip (VM was still running when new job arrived)
+    for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
+        // Use exchange to atomically check and clear the slip flag
+        if (slip_detected[vm_id].exchange(false, std::memory_order_acquire)) {
+            this->log_WARNING_HI_SchedulerSlip(vm_id);
+        }
     }
 
     this->ticks++;
