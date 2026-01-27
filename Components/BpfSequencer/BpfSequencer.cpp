@@ -58,7 +58,8 @@ BpfSequencer ::~BpfSequencer() {
 }
 
 // Worker function - pops jobs from shared queue and executes them
-void BpfSequencer::run_worker() {
+void BpfSequencer::run_worker(U32 worker_id) {
+    using namespace std::chrono_literals;
 
     #ifdef __linux__
     // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
@@ -75,6 +76,10 @@ void BpfSequencer::run_worker() {
         FwSizeType size = 0;
         FwQueuePriorityType priority = 0;
 
+        // Sleep for 1/2 a tick if the worker is not enabled
+        if (!worker_enabled[worker_id])
+            std::this_thread::sleep_for(500us);
+
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),
@@ -83,9 +88,8 @@ void BpfSequencer::run_worker() {
             priority
         );
 
-        if (status != Os::QueueInterface::Status::OP_OK) {
+        if (status != Os::QueueInterface::Status::OP_OK)
             continue;  // Queue empty or error
-        }
 
         if (!running) {
             return;
@@ -120,11 +124,11 @@ void BpfSequencer::rebuild_deadline_schedule() {
     for (auto& tick_jobs : schedule) {
         tick_jobs.clear();
     }
-    
+
     // For each VM, if it's assigned to a rate group, calculate its deadlines
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
         if (!vms[vm_id]) continue;
-        
+
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
         
@@ -163,29 +167,48 @@ void BpfSequencer::rebuild_deadline_schedule() {
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
     auto& jobs = schedule[tick];
-    if (jobs.empty()){
+    if (jobs.empty())
         return;
+
+    // Calculate number of processors required to run jobs
+    F32 total_runtime_ms = this->runtime_overflow;
+    for (auto vm_id : jobs) {
+        total_runtime_ms += this->vms[vm_id]->runtime_ms;
+    }
+    U32 executors_needed = static_cast<U32>(total_runtime_ms);
+
+    // Update runtime overflow
+    F32 max_runtime_in_tick = this->k_cycle_period_ms / this->timer_freq_hz * executors_needed;
+    if (total_runtime_ms > max_runtime_in_tick)
+        this->runtime_overflow = total_runtime_ms - max_runtime_in_tick;
+    else
+        this->runtime_overflow = 0.0f;
+
+    // Only enable the executors needed to get this thread working
+    if (executors_needed >= this->num_workers) {
+        std::fill(worker_enabled.begin(), worker_enabled.end(), true);
+    } else {
+        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
+        std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
 
-    {        
-        for (auto vm_id : jobs) {
-            ScheduledJob job;
+    for (auto vm_id : jobs) {
+        ScheduledJob job;
             job.deadline = vms[vm_id]->latest_run_time;
-            job.vm_id = vm_id;;
-            
-            FwSizeType size = sizeof(ScheduledJob);
-            FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
-            auto status = job_queue.send(
-                reinterpret_cast<const U8*>(&job),
-                size,
-                priority,
-                Os::QueueInterface::BlockingType::BLOCKING
-            );
-            
-            if (status == Os::QueueInterface::Status::FULL) {
-                // Queue full - log warning and drop job
-                this->log_WARNING_HI_SchedulerQueueFull(vm_id);
-            }
+        job.vm_id = vm_id;;
+        
+        FwSizeType size = sizeof(ScheduledJob);
+        FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
+        auto status = job_queue.send(
+            reinterpret_cast<const U8*>(&job),
+            size,
+            priority,
+            Os::QueueInterface::BlockingType::BLOCKING
+        );
+        
+        if (status == Os::QueueInterface::Status::FULL) {
+            // Queue full - log warning and drop job
+            this->log_WARNING_HI_SchedulerQueueFull(vm_id);
         }
     }
 }
@@ -205,15 +228,19 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     }
 
     this->timer_freq_hz = timer_freq_hz;
-    this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
+    // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
-        workers.emplace_back([this]() {
-            this->run_worker();
+        workers.emplace_back([this, i]() {
+            this->run_worker(i);
         });
     }
+
+    worker_enabled.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++)
+        worker_enabled.emplace_back(true);
 
     this->configured = true;
 }
