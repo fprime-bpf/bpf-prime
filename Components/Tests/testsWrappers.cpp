@@ -1,9 +1,5 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/Tests/Tests.hpp"
-#include "Kalman.hpp"
-#include "LowPassFilter.hpp"
-#include "Matmul.hpp"
-#include "StarTracker.hpp"
 
 #include <pthread.h>
 #include <sched.h>
@@ -17,43 +13,7 @@
 using timer = std::chrono::high_resolution_clock;
 using ms = std::chrono::milliseconds;
 
-#define TIME_NATIVE_TEST(test)  \
-    test_name = #test;          \
-    start = timer::now();       \
-    exit_status = test::main(); \
-    end = timer::now();
-
 namespace Components {
-
-F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
-    timer::time_point start, end;
-    const char* test_name;
-    volatile I32 exit_status;
-
-    switch (test) {
-        case BENCHMARK_TEST::LOW_PASS_FILTER:
-            TIME_NATIVE_TEST(LowPassFilter);
-            break;
-        case BENCHMARK_TEST::KALMAN:
-            TIME_NATIVE_TEST(Kalman);
-            break;
-        case BENCHMARK_TEST::MATMUL:
-            TIME_NATIVE_TEST(Matmul);
-            break;
-        case BENCHMARK_TEST::STAR_TRACKER:
-            TIME_NATIVE_TEST(StarTracker);
-            break;
-        default:
-            return -1;
-    }
-
-    if (exit_status) {
-        this->log_WARNING_HI_TestFailed(Fw::LogStringArg(test_name), exit_status);
-        return -1;
-    }
-
-    return std::chrono::duration<F64, ms::period>(end - start).count();
-}
 
 F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     if (compile) {
@@ -103,8 +63,8 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_times(float native_time, float vm_time) {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << "  - [" << native_time << ", " << vm_time << "]\n";
+void output_pass_time(float vm_time) {
+    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << "  - " << vm_time << "\n";
 }
 }  // namespace
 
@@ -112,15 +72,6 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
     output_new_test(test_name);
 
     for (U32 i = 0; i < passes; ++i) {
-        fill_maps(this);
-        auto native_time = this->getNativeBenchmark_handler(0, test);
-
-        if (native_time < 0) {
-            Fw::LogStringArg test_name_arg(test_name);
-            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
-            return Fw::Success::FAILURE;
-        }
-
         fill_maps(this);
         auto vm_time = this->getVmBenchmark_out(0, test, i == 0);
 
@@ -130,7 +81,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        output_pass_times(native_time, vm_time);
+        output_pass_time(vm_time);
     }
 
     return Fw::Success::SUCCESS;

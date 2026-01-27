@@ -7,11 +7,6 @@
 #include "Components/Tests/Tests.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/maps/maps.hpp"
-#include "Kalman.hpp"
-#include "LowPassFilter.hpp"
-#include "Matmul.hpp"
-#include "StarTracker.hpp"
-#include "NCCScore.hpp"
 
 namespace Components {
 
@@ -27,10 +22,6 @@ Tests ::~Tests() {}
 // Handler implementations for typed input ports
 // ----------------------------------------------------------------------
 
-F64 Tests ::getNativeBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test) {
-    return get_benchmark_native(test);
-}
-
 // ----------------------------------------------------------------------
 // Handler implementations for commands
 // ----------------------------------------------------------------------
@@ -41,37 +32,6 @@ Fw::CmdResponse Tests::test_status_to_response(const char* test_name, I32 result
         return Fw::CmdResponse::EXECUTION_ERROR;
     }
     return Fw::CmdResponse::OK;
-}
-
-void Tests ::KALMAN_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    I32 exit_status = Kalman::main();
-    auto response = test_status_to_response("Kalman", exit_status);
-    this->cmdResponse_out(opCode, cmdSeq, response);
-}
-
-void Tests ::LOW_PASS_FILTER_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    I32 exit_status = LowPassFilter::main();
-    auto response = test_status_to_response("Low Pass Filter", exit_status);
-    this->cmdResponse_out(opCode, cmdSeq, response);
-}
-
-void Tests ::MATMUL_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    I32 exit_status = Matmul::main();
-    auto response = test_status_to_response("Matmul", exit_status);
-    this->cmdResponse_out(opCode, cmdSeq, response);
-}
-
-void Tests ::STAR_TRACKER_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    I32 exit_status = StarTracker::main();
-    auto response = test_status_to_response("Matmul", exit_status);
-    this->cmdResponse_out(opCode, cmdSeq, response);
-}
-
-void Tests ::NCCScore_cmdHandler(FwOpcodeType opCode, U32 cmdSeq) {
-    I32 exit_status = NCCScore::main();
-    auto response = test_status_to_response("NCCScore", exit_status);
-    this->cmdResponse_out(opCode, cmdSeq, response);
-    this->log_ACTIVITY_LO_NCCScoreTestPassed();
 }
 
 void Tests ::POPULATE_MAP_RANDOM_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 fd, U32 start, U32 length) {
