@@ -76,6 +76,7 @@ void BpfSequencer::run_worker(U32 worker_id) {
         FwSizeType size = 0;
         FwQueuePriorityType priority = 0;
 
+        // Sleep for 1/2 a tick if the worker is not enabled
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
 
@@ -170,19 +171,27 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         return;
 
     // Calculate number of processors required to run jobs
-    F32 total_runtime_ms = 0.0;
+    F32 total_runtime_ms = this->runtime_overflow;
     for (auto vm_id : jobs) {
         total_runtime_ms += this->vms[vm_id]->runtime_ms;
     }
     U32 executors_needed = static_cast<U32>(total_runtime_ms);
 
-    if (executors_needed > this->num_workers) {
-        // TODO: add overflow to next cycle
+    // Update runtime overflow
+    F32 max_runtime_in_tick = this->k_cycle_period_ms / this->timer_freq_hz * executors_needed;
+    if (total_runtime_ms > max_runtime_in_tick)
+        this->runtime_overflow = total_runtime_ms - max_runtime_in_tick;
+    else
+        this->runtime_overflow = 0.0f;
+
+    // Only enable the executors needed to get this thread working
+    if (executors_needed >= this->num_workers) {
         std::fill(worker_enabled.begin(), worker_enabled.end(), true);
     } else {
         std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
         std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
+
     for (auto vm_id : jobs) {
         ScheduledJob job;
             job.deadline = vms[vm_id]->latest_run_time;

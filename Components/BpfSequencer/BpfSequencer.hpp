@@ -123,6 +123,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // Worker threads
     std::vector<std::thread> workers;
     std::vector<bool> worker_enabled;
+    F32 runtime_overflow = 0.0f;
     U32 num_workers = 2;
 
     // Use an array for the schedule (faster access than a map)
