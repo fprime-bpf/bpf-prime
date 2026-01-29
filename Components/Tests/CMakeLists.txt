@@ -17,6 +17,7 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Tests.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/Tests.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/testsWrappers.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/NCCScore.cpp"
 )
 
 # Uncomment and add any modules that this component depends on, else

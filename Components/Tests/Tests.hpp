@@ -35,6 +35,13 @@ class Tests final : public TestsComponentBase {
     // Handler implementations for commands
     // ----------------------------------------------------------------------
 
+    //! Handler implementation for command LOW_PASS_FILTER
+    //!
+    //! Run low pass filter test natively, without an eBPF runtime
+    void NCCScore_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                    U32 cmdSeq            //!< The command sequence number
+                                    ) override;
+                                    
     //! Handler implementation for command POPULATE_MAP_RANDOM
     //!
     //! Populate a BPF map with random values. Intended for arraymaps
