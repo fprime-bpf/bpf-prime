@@ -2,18 +2,6 @@ module Components {
     @ Component for testing the BpfSequencer
     active component Tests {
 
-        @ Run kalman filter test natively (without an eBPF runtime)
-        async command KALMAN()
-
-        @ Run low pass filter test natively
-        async command LOW_PASS_FILTER()
-
-        @ Run matmul test natively
-        async command MATMUL()
-
-        @ Run star tracker test natively
-        async command STAR_TRACKER()
-
         @ Run NCCScore test natively
         async command NCCScore()
 
@@ -46,9 +34,6 @@ module Components {
 
         @ Run benchmarks, comparing native and vm time for each test
         async command BENCHMARK()
-
-        @ Run native benchmark, return runtime
-        sync input port getNativeBenchmark: RunNativeBenchmark
 
         @ Run vm benchmark, return runtime (OUT)
         output port getVmBenchmark: RunVmBenchmark
