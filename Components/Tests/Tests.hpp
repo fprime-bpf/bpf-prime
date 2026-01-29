@@ -29,31 +29,11 @@ class Tests final : public TestsComponentBase {
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
-
-    //! Handler implementation for getNativeBenchmark
-    //!
-    //! Run native benchmark, return runtime
-    F64 getNativeBenchmark_handler(FwIndexType portNum,  //!< The port number
-                                   const Components::BENCHMARK_TEST& test) override;
                                    
   private:
     // ----------------------------------------------------------------------
     // Handler implementations for commands
     // ----------------------------------------------------------------------
-
-    //! Handler implementation for command KALMAN
-    //!
-    //! Run kalman filter test natively, without an eBPF runtime
-    void KALMAN_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                           U32 cmdSeq            //!< The command sequence number
-                           ) override;
-
-    //! Handler implementation for command LOW_PASS_FILTER
-    //!
-    //! Run low pass filter test natively, without an eBPF runtime
-    void LOW_PASS_FILTER_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                    U32 cmdSeq            //!< The command sequence number
-                                    ) override;
 
     //! Handler implementation for command LOW_PASS_FILTER
     //!
@@ -61,22 +41,7 @@ class Tests final : public TestsComponentBase {
     void NCCScore_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                     U32 cmdSeq            //!< The command sequence number
                                     ) override;
-
-
-    //! Handler implementation for command MATMUL
-    //!
-    //! Run matmul test natively, without an eBPF runtime
-    void MATMUL_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                           U32 cmdSeq            //!< The command sequence number
-                           ) override;
-
-    //! Handler implementation for command STAR_TRACKER
-    //!
-    //! Run star tracking test natively, without an eBPF runtime
-    void STAR_TRACKER_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                 U32 cmdSeq            //!< The command sequence number
-                                 ) override;
-
+                                    
     //! Handler implementation for command POPULATE_MAP_RANDOM
     //!
     //! Populate a BPF map with random values. Intended for arraymaps
