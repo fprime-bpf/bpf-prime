@@ -233,6 +233,10 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     this->timer_freq_hz = timer_freq_hz;
     // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
+    worker_enabled.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++)
+        worker_enabled.emplace_back(true);
+
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
@@ -240,10 +244,6 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
             this->run_worker(i);
         });
     }
-
-    worker_enabled.reserve(num_workers);
-    for (U32 i = 0; i < num_workers; i++)
-        worker_enabled.emplace_back(true);
 
     this->configured = true;
 }
