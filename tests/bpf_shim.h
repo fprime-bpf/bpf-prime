@@ -5,15 +5,18 @@
 #define BPF_EXIST       2
 
 struct bpf_iter_num {
-    unsigned long long fd;
+    unsigned long fd;
+    long start;
+    long end;
+    long curr;
 };
 
 static void *(* const bpf_map_lookup_elem)(void *map, const void *key) = (void *) 1;
 static long (* const bpf_map_update_elem)(void *map, const void *key, const void *value, unsigned long long flags) = (void *) 2;
 static long (* const bpf_map_delete_elem)(void *map, const void *key) = (void *) 3;
-static long *(* const bpf_iter_num_new)(struct bpf_iter_num *it, unsigned long long start, unsigned long long end) = (void *) 4;
-static long (* const bpf_iter_num_next)(struct bpf_iter_num *it) = (void *) 5;
-static void *(* const bpf_iter_num_destroy)(struct bpf_iter_num *it) = (void *) 6;
+static int *(* const bpf_iter_num_new)(struct bpf_iter_num *it, int start, int end) = (void *) 5;
+static int (* const bpf_iter_num_next)(struct bpf_iter_num *it) = (void *) 6;
+static void *(* const bpf_iter_num_destroy)(struct bpf_iter_num *it) = (void *) 7;
 
 #define MAP_BY_FD(MAP_FD) ({ \
     register void *map_ptr_reg asm("r1");                                \

@@ -17,6 +17,7 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/BpfSequencer.fpp"
   "${CMAKE_CURRENT_LIST_DIR}/bpfwrappers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/BpfSequencer.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/iter_bpf_helpers.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/array_map.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/hash_map.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/maps/pooled_hash_map.cpp"
