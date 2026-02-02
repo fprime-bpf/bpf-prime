@@ -2,32 +2,40 @@
 
 int main() {
     void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1), *result;
+    struct bpf_iter_num it;
     float ins[7], preds[7];
+    int *i;
 
     // Read in position and attitude
-    for (int i = 0; i < 7; i++) {
-        result = bpf_map_lookup_elem(in_map, &i);
-        ins[i] = *(float *)result;
-        preds[i] = ins[i];
+    bpf_iter_num_new(&it, 0, 7);
+    while ((i = bpf_iter_num_next(&it))) {
+        result = bpf_map_lookup_elem(in_map, i);
+        ins[*i] = *(float *)result;
+        preds[*i] = ins[*i];
     }
+    bpf_iter_num_destroy(&it);
 
     // Get predictions
-    for (int i = 0; i < 7; i++) {
-        if (i != 6)
-            preds[i] = preds[i + 1] / 1.5f;
+    bpf_iter_num_new(&it, 0, 7);
+    while ((i = bpf_iter_num_next(&it))) {
+        if (*i != 6)
+            preds[*i] = preds[*i + 1] / 1.5f;
         else
-            preds[i] = preds[0] / 1.5f;
+            preds[*i] = preds[0] / 1.5f;
     }
+    bpf_iter_num_destroy(&it);
 
-    for (int i = 0; i < 7; i++) {
+    bpf_iter_num_new(&it, 0, 7);
+    while ((i = bpf_iter_num_next(&it))) {
         // Diff with actual and multiply with factor
-        ins[i] = ins[i] - preds[i];
-        ins[i] *= 0.05f;
+        ins[*i] = ins[*i] - preds[*i];
+        ins[*i] *= 0.05f;
 
         // Write out estimate to BPF map
-        preds[i] = preds[i] - ins[i];
-        bpf_map_update_elem(out_map, &i, &preds[i], 0);
+        preds[*i] = preds[*i] - ins[*i];
+        bpf_map_update_elem(out_map, i, &preds[*i], 0);
     }
+    bpf_iter_num_destroy(&it);
 
     return 0;
 }

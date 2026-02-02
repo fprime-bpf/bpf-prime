@@ -10,16 +10,16 @@
 namespace Components {
 
 struct bpf_iter_num {
-    U32 fd;
-    U32 start;
-    U32 end;
-    U32 curr;
+    I32 fd;
+    I32 start;
+    I32 end;
+    I32 curr;
 };
 
-U32 BpfSequencer::bpf_iter_num_new(struct bpf_iter_num *it, U32 start, U32 end) noexcept {
-    if (start < end) {
+U32 BpfSequencer::bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept {
+    if (start > end) {
         it->fd = 0;
-        return NULL;
+        return -1;
     }
 
     it->start = start;
@@ -27,10 +27,10 @@ U32 BpfSequencer::bpf_iter_num_new(struct bpf_iter_num *it, U32 start, U32 end) 
     it->curr = start - 1;
     it->fd = 1;
 
-    return it->fd;
+    return 0;
 }
 
-U32 BpfSequencer::bpf_iter_num_next(struct bpf_iter_num *it) noexcept {
+I32 *BpfSequencer::bpf_iter_num_next(struct bpf_iter_num *it) noexcept {
     if (it->fd != 1)
         return NULL;
 
@@ -38,7 +38,7 @@ U32 BpfSequencer::bpf_iter_num_next(struct bpf_iter_num *it) noexcept {
         return NULL;
 
     it->curr += 1;
-    return it->curr;
+    return &it->curr;
 }
 
 void BpfSequencer::bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept {

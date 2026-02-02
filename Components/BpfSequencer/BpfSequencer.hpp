@@ -264,9 +264,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
-    static U32 bpf_iter_num_new(struct bpf_iter_num *it, U32 start, U32 end) noexcept;
+    static U32 bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept;
 
-    static U32 bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
+    static I32 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
     
     static void bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept;
 
