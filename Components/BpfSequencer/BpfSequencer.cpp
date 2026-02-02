@@ -42,6 +42,9 @@ bpf_mem_size(0) {
         { 1, { reinterpret_cast<void*>(maps::bpf_map_lookup_elem), "bpf_map_lookup_elem" } },
         { 2, { reinterpret_cast<void*>(maps::bpf_map_update_elem), "bpf_map_update_elem" } },
         { 3, { reinterpret_cast<void*>(maps::bpf_map_delete_elem), "bpf_map_delete_elem" } },
+        { 5, { reinterpret_cast<void*>(bpf_iter_num_new), "bpf_iter_num_new" } },
+        { 6, { reinterpret_cast<void*>(bpf_iter_num_next), "bpf_iter_num_destroy" } },
+        { 7, { reinterpret_cast<void*>(bpf_iter_num_destroy), "bpf_iter_num_destroy" } },
     });
 }
 
@@ -230,6 +233,10 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     this->timer_freq_hz = timer_freq_hz;
     // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
+    worker_enabled.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++)
+        worker_enabled.emplace_back(true);
+
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
@@ -237,10 +244,6 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
             this->run_worker(i);
         });
     }
-
-    worker_enabled.reserve(num_workers);
-    for (U32 i = 0; i < num_workers; i++)
-        worker_enabled.emplace_back(true);
 
     this->configured = true;
 }
