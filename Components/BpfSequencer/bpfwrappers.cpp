@@ -12,6 +12,10 @@
 using timer = std::chrono::high_resolution_clock;
 using ms = std::chrono::milliseconds;
 
+struct bpf_iter_num {
+    unsigned long long fd;
+};
+
 namespace Components {
 
 Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {

@@ -413,10 +413,10 @@ attributes #4 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 755f040f24df9a74f4e5f7f7bdd64e3acd4e61b9)"}
-!3 = !{i64 2147504610}
-!4 = !{i64 2147505122}
-!5 = !{i64 2147505634}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147504946}
+!4 = !{i64 2147505458}
+!5 = !{i64 2147505970}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"int", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}
