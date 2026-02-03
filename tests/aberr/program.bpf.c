@@ -213,7 +213,7 @@ inline float _atan2(float y, float x) {
 }
 
 int main() {
-    void *input_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(2), *res;
+    void *input_map = MAP_BY_FD(8), *out_map = MAP_BY_FD(9), *res;
     volatile float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;
     float beta2, gamma, t_emit, M, E, nu, r, h;

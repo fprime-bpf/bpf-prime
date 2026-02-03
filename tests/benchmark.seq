@@ -1,0 +1,13 @@
+; TODO once we recompile tests
+
+; Load all VMS
+R00:00:00 cmdDisp.CMD_NO_OP
+R00:00:02 cmdDisp.CMD_NO_OP
+R00:00:04 cmdDisp.CMD_NO_OP
+
+; Populate all maps
+R00:00:06 cmdDisp.CMD_NO_OP
+R00:00:08 cmdDisp.CMD_NO_OP
+R00:00:10 cmdDisp.CMD_NO_OP
+
+; Attach VMs to rate groups

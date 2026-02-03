@@ -82,7 +82,7 @@ inline void AES_MixColumns(AES_Block_t block) {
 }
 
 int main() {
-  void *block_map = MAP_BY_FD(0), *key_map = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
+  void *block_map = MAP_BY_FD(10), *key_map = MAP_BY_FD(11), *out_map = MAP_BY_FD(12), *result;
 
   AES_Block_t block;
   AES_Key128_t key;
