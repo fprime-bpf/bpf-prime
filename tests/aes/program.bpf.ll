@@ -279,7 +279,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %200 = or i8 %196, -128
   %201 = select i1 %199, i8 %197, i8 %200
   %202 = icmp sgt i8 %33, -1
-  %203 = xor i8 %201, 45
+  %203 = xor i8 %201, 27
   %204 = select i1 %202, i8 %201, i8 %203
   %205 = and i8 %83, 1
   %206 = icmp eq i8 %205, 0
@@ -309,7 +309,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %230 = xor i8 %227, -64
   %231 = select i1 %229, i8 %227, i8 %230
   %232 = icmp sgt i8 %83, -1
-  %233 = xor i8 %231, -74
+  %233 = xor i8 %231, -101
   %234 = select i1 %232, i8 %231, i8 %233
   %235 = xor i8 %234, %204
   %236 = xor i8 %235, %133
@@ -318,7 +318,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %239 = and i8 %238, 126
   %240 = or i8 %238, -128
   %241 = select i1 %229, i8 %239, i8 %240
-  %242 = xor i8 %241, 45
+  %242 = xor i8 %241, 27
   %243 = select i1 %232, i8 %241, i8 %242
   %244 = and i8 %133, 1
   %245 = icmp eq i8 %244, 0
@@ -348,7 +348,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %269 = xor i8 %266, -64
   %270 = select i1 %268, i8 %266, i8 %269
   %271 = icmp sgt i8 %133, -1
-  %272 = xor i8 %270, -74
+  %272 = xor i8 %270, -101
   %273 = select i1 %271, i8 %270, i8 %272
   %274 = xor i8 %243, %273
   %275 = xor i8 %274, %33
@@ -357,7 +357,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %278 = and i8 %277, 126
   %279 = or i8 %277, -128
   %280 = select i1 %268, i8 %278, i8 %279
-  %281 = xor i8 %280, 45
+  %281 = xor i8 %280, 27
   %282 = select i1 %271, i8 %280, i8 %281
   %283 = and i8 %183, 1
   %284 = icmp eq i8 %283, 0
@@ -387,7 +387,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %308 = xor i8 %305, -64
   %309 = select i1 %307, i8 %305, i8 %308
   %310 = icmp sgt i8 %183, -1
-  %311 = xor i8 %309, -74
+  %311 = xor i8 %309, -101
   %312 = select i1 %310, i8 %309, i8 %311
   %313 = xor i8 %282, %312
   %314 = xor i8 %313, %33
@@ -405,13 +405,13 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %326 = select i1 %195, i8 %324, i8 %325
   %327 = xor i8 %326, -64
   %328 = select i1 %199, i8 %326, i8 %327
-  %329 = xor i8 %328, -74
+  %329 = xor i8 %328, -101
   %330 = select i1 %202, i8 %328, i8 %329
   %331 = shl i8 %183, 1
   %332 = and i8 %331, 126
   %333 = or i8 %331, -128
   %334 = select i1 %307, i8 %332, i8 %333
-  %335 = xor i8 %334, 45
+  %335 = xor i8 %334, 27
   %336 = select i1 %310, i8 %334, i8 %335
   %337 = xor i8 %330, %336
   %338 = xor i8 %337, %83
@@ -435,7 +435,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %356 = or i8 %352, -128
   %357 = select i1 %355, i8 %353, i8 %356
   %358 = icmp sgt i8 %73, -1
-  %359 = xor i8 %357, 45
+  %359 = xor i8 %357, 27
   %360 = select i1 %358, i8 %357, i8 %359
   %361 = and i8 %123, 1
   %362 = icmp eq i8 %361, 0
@@ -465,7 +465,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %386 = xor i8 %383, -64
   %387 = select i1 %385, i8 %383, i8 %386
   %388 = icmp sgt i8 %123, -1
-  %389 = xor i8 %387, -74
+  %389 = xor i8 %387, -101
   %390 = select i1 %388, i8 %387, i8 %389
   %391 = xor i8 %360, %390
   %392 = xor i8 %391, %63
@@ -474,7 +474,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %395 = and i8 %394, 126
   %396 = or i8 %394, -128
   %397 = select i1 %385, i8 %395, i8 %396
-  %398 = xor i8 %397, 45
+  %398 = xor i8 %397, 27
   %399 = select i1 %388, i8 %397, i8 %398
   %400 = and i8 %173, 1
   %401 = icmp eq i8 %400, 0
@@ -504,7 +504,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %425 = xor i8 %422, -64
   %426 = select i1 %424, i8 %422, i8 %425
   %427 = icmp sgt i8 %173, -1
-  %428 = xor i8 %426, -74
+  %428 = xor i8 %426, -101
   %429 = select i1 %427, i8 %426, i8 %428
   %430 = xor i8 %399, %429
   %431 = xor i8 %430, %63
@@ -513,7 +513,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %434 = and i8 %433, 126
   %435 = or i8 %433, -128
   %436 = select i1 %424, i8 %434, i8 %435
-  %437 = xor i8 %436, 45
+  %437 = xor i8 %436, 27
   %438 = select i1 %427, i8 %436, i8 %437
   %439 = and i8 %63, 1
   %440 = icmp eq i8 %439, 0
@@ -543,7 +543,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %464 = xor i8 %461, -64
   %465 = select i1 %463, i8 %461, i8 %464
   %466 = icmp sgt i8 %63, -1
-  %467 = xor i8 %465, -74
+  %467 = xor i8 %465, -101
   %468 = select i1 %466, i8 %465, i8 %467
   %469 = xor i8 %468, %438
   %470 = xor i8 %469, %73
@@ -561,13 +561,13 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %482 = select i1 %351, i8 %480, i8 %481
   %483 = xor i8 %482, -64
   %484 = select i1 %355, i8 %482, i8 %483
-  %485 = xor i8 %484, -74
+  %485 = xor i8 %484, -101
   %486 = select i1 %358, i8 %484, i8 %485
   %487 = shl i8 %63, 1
   %488 = and i8 %487, 126
   %489 = or i8 %487, -128
   %490 = select i1 %463, i8 %488, i8 %489
-  %491 = xor i8 %490, 45
+  %491 = xor i8 %490, 27
   %492 = select i1 %466, i8 %490, i8 %491
   %493 = xor i8 %486, %492
   %494 = xor i8 %493, %123
@@ -591,7 +591,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %512 = or i8 %508, -128
   %513 = select i1 %511, i8 %509, i8 %512
   %514 = icmp sgt i8 %113, -1
-  %515 = xor i8 %513, 45
+  %515 = xor i8 %513, 27
   %516 = select i1 %514, i8 %513, i8 %515
   %517 = and i8 %163, 1
   %518 = icmp eq i8 %517, 0
@@ -621,7 +621,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %542 = xor i8 %539, -64
   %543 = select i1 %541, i8 %539, i8 %542
   %544 = icmp sgt i8 %163, -1
-  %545 = xor i8 %543, -74
+  %545 = xor i8 %543, -101
   %546 = select i1 %544, i8 %543, i8 %545
   %547 = xor i8 %516, %546
   %548 = xor i8 %547, %53
@@ -630,7 +630,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %551 = and i8 %550, 126
   %552 = or i8 %550, -128
   %553 = select i1 %541, i8 %551, i8 %552
-  %554 = xor i8 %553, 45
+  %554 = xor i8 %553, 27
   %555 = select i1 %544, i8 %553, i8 %554
   %556 = and i8 %53, 1
   %557 = icmp eq i8 %556, 0
@@ -660,7 +660,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %581 = xor i8 %578, -64
   %582 = select i1 %580, i8 %578, i8 %581
   %583 = icmp sgt i8 %53, -1
-  %584 = xor i8 %582, -74
+  %584 = xor i8 %582, -101
   %585 = select i1 %583, i8 %582, i8 %584
   %586 = xor i8 %585, %555
   %587 = xor i8 %586, %103
@@ -669,7 +669,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %590 = and i8 %589, 126
   %591 = or i8 %589, -128
   %592 = select i1 %580, i8 %590, i8 %591
-  %593 = xor i8 %592, 45
+  %593 = xor i8 %592, 27
   %594 = select i1 %583, i8 %592, i8 %593
   %595 = and i8 %103, 1
   %596 = icmp eq i8 %595, 0
@@ -699,7 +699,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %620 = xor i8 %617, -64
   %621 = select i1 %619, i8 %617, i8 %620
   %622 = icmp sgt i8 %103, -1
-  %623 = xor i8 %621, -74
+  %623 = xor i8 %621, -101
   %624 = select i1 %622, i8 %621, i8 %623
   %625 = xor i8 %624, %594
   %626 = xor i8 %625, %113
@@ -717,13 +717,13 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %638 = select i1 %507, i8 %636, i8 %637
   %639 = xor i8 %638, -64
   %640 = select i1 %511, i8 %638, i8 %639
-  %641 = xor i8 %640, -74
+  %641 = xor i8 %640, -101
   %642 = select i1 %514, i8 %640, i8 %641
   %643 = shl i8 %103, 1
   %644 = and i8 %643, 126
   %645 = or i8 %643, -128
   %646 = select i1 %619, i8 %644, i8 %645
-  %647 = xor i8 %646, 45
+  %647 = xor i8 %646, 27
   %648 = select i1 %622, i8 %646, i8 %647
   %649 = xor i8 %648, %642
   %650 = xor i8 %649, %53
@@ -747,7 +747,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %668 = or i8 %664, -128
   %669 = select i1 %667, i8 %665, i8 %668
   %670 = icmp sgt i8 %153, -1
-  %671 = xor i8 %669, 45
+  %671 = xor i8 %669, 27
   %672 = select i1 %670, i8 %669, i8 %671
   %673 = and i8 %43, 1
   %674 = icmp eq i8 %673, 0
@@ -777,7 +777,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %698 = xor i8 %695, -64
   %699 = select i1 %697, i8 %695, i8 %698
   %700 = icmp sgt i8 %43, -1
-  %701 = xor i8 %699, -74
+  %701 = xor i8 %699, -101
   %702 = select i1 %700, i8 %699, i8 %701
   %703 = xor i8 %702, %672
   %704 = xor i8 %703, %93
@@ -786,7 +786,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %707 = and i8 %706, 126
   %708 = or i8 %706, -128
   %709 = select i1 %697, i8 %707, i8 %708
-  %710 = xor i8 %709, 45
+  %710 = xor i8 %709, 27
   %711 = select i1 %700, i8 %709, i8 %710
   %712 = and i8 %93, 1
   %713 = icmp eq i8 %712, 0
@@ -816,7 +816,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %737 = xor i8 %734, -64
   %738 = select i1 %736, i8 %734, i8 %737
   %739 = icmp sgt i8 %93, -1
-  %740 = xor i8 %738, -74
+  %740 = xor i8 %738, -101
   %741 = select i1 %739, i8 %738, i8 %740
   %742 = xor i8 %741, %711
   %743 = xor i8 %742, %143
@@ -825,7 +825,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %746 = and i8 %745, 126
   %747 = or i8 %745, -128
   %748 = select i1 %736, i8 %746, i8 %747
-  %749 = xor i8 %748, 45
+  %749 = xor i8 %748, 27
   %750 = select i1 %739, i8 %748, i8 %749
   %751 = and i8 %143, 1
   %752 = icmp eq i8 %751, 0
@@ -855,7 +855,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %776 = xor i8 %773, -64
   %777 = select i1 %775, i8 %773, i8 %776
   %778 = icmp sgt i8 %143, -1
-  %779 = xor i8 %777, -74
+  %779 = xor i8 %777, -101
   %780 = select i1 %778, i8 %777, i8 %779
   %781 = xor i8 %750, %780
   %782 = xor i8 %781, %43
@@ -873,13 +873,13 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %794 = select i1 %663, i8 %792, i8 %793
   %795 = xor i8 %794, -64
   %796 = select i1 %667, i8 %794, i8 %795
-  %797 = xor i8 %796, -74
+  %797 = xor i8 %796, -101
   %798 = select i1 %670, i8 %796, i8 %797
   %799 = shl i8 %143, 1
   %800 = and i8 %799, 126
   %801 = or i8 %799, -128
   %802 = select i1 %775, i8 %800, i8 %801
-  %803 = xor i8 %802, 45
+  %803 = xor i8 %802, 27
   %804 = select i1 %778, i8 %802, i8 %803
   %805 = xor i8 %804, %798
   %806 = xor i8 %805, %43

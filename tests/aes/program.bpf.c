@@ -105,15 +105,6 @@ inline char GF_Mult(char a, char b) {
 	a ^= 0x1b;
   b >>= 1;
 
-  // i = 8
-  if (b & 1)
-    result ^= a;
-  shiftEscapesField = a & 0x80;
-  a <<= 1;
-  if (shiftEscapesField)
-	a ^= 0x1b;
-  b >>= 1;
-
   return result;
 }
 
