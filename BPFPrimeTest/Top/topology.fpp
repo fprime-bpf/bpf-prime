@@ -34,6 +34,7 @@ module BPFPrimeTest {
     instance cmdSeq
     instance bpfSequencer
     instance tests
+    instance wasmSequencer
 
   # ----------------------------------------------------------------------
   # Pattern graph specifiers

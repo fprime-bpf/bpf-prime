@@ -3,3 +3,4 @@
 # add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/MyComponent")
 add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/BpfSequencer/")
 add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/Tests/")
+add_fprime_subdirectory("${CMAKE_CURRENT_LIST_DIR}/WasmSequencer/")

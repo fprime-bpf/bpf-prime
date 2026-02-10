@@ -55,6 +55,11 @@ module BPFPrimeTest {
     queue size Default.QUEUE_SIZE \
     stack size Default.STACK_SIZE \
     priority 118
+
+  instance wasmSequencer: Components.WasmSequencer base id 0x10007000 \
+    queue size Default.QUEUE_SIZE \
+    stack size Default.STACK_SIZE \
+    priority 118
   
   # ----------------------------------------------------------------------
   # Queued component instances
