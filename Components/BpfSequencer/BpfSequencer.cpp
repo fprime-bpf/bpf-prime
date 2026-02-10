@@ -1,6 +1,6 @@
 // ======================================================================
 // \title  BpfSequencer.cpp
-// \author ezrak, pendergrast
+// \author ezrak, pendergrast, moisesmata
 // \brief  cpp file for BpfSequencer component implementation class
 // ======================================================================
 
@@ -89,9 +89,9 @@ void BpfSequencer::run_worker(U32 worker_id) {
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
 
-        // Check if queue is empty before blocking receive
-        // This indicates we're in an interval between rate groups
+        // Check if queue is empty
         if (job_queue.getMessagesAvailable() == 0) {
+            // Queue is empty 
             // Report the duration of the previous tick if we were processing
             if (!timing.next_tick_pending.load(std::memory_order_acquire)) {
                 auto now = Clock::now();
@@ -101,7 +101,6 @@ void BpfSequencer::run_worker(U32 worker_id) {
                 timing.next_tick_pending.store(true, std::memory_order_release);
             }
         }
-        // Note: We record tick start time AFTER receiving a job, not before
 
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
@@ -118,8 +117,8 @@ void BpfSequencer::run_worker(U32 worker_id) {
             return;
         }
 
-        // Record tick start time when we receive the first job after being idle
-        // This marks the beginning of a new rate group tick's work
+        // Record tick start time after receiving a job 
+        // Avoids race conditions where another worker grabs the job we saw
         if (timing.next_tick_pending.load(std::memory_order_acquire)) {
             timing.tick_start = Clock::now();
             timing.next_tick_pending.store(false, std::memory_order_release);
@@ -127,11 +126,6 @@ void BpfSequencer::run_worker(U32 worker_id) {
         
         // Get the VM for this job
         std::shared_ptr<BpfSequencerVM>& vm = vms[job.vm_id];
-        
-        // Safety check - skip if VM not loaded
-        if (!vm) {
-            continue;
-        }
         
         // Atomically try to raise the running flag using compare_exchange
         // If the flag is already set, this indicates a slip 
@@ -146,7 +140,7 @@ void BpfSequencer::run_worker(U32 worker_id) {
             continue;
         }
         
-        // Execute the VM
+        // Finally Execute the VM
         run(job.vm_id);
         
         // Clear the running flag
