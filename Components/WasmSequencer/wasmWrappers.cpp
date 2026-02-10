@@ -1,4 +1,6 @@
 #include "Components/WasmSequencer/WasmSequencer.hpp"
+#include <wasm.h>
+#include <wasmtime.h>
 
 namespace Components {
 

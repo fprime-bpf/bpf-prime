@@ -14,6 +14,9 @@
 # root when not specifically overridden by the developer, i.e. the module defined by
 # `MyProj/Some/Path/CMakeLists.txt` will be named `MyProj_Some_Path`.
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wasmtime/crates/c-api
+${CMAKE_CURRENT_BINARY_DIR}/wasmtime)
+
 register_fprime_library(
     AUTOCODER_INPUTS
         "${CMAKE_CURRENT_LIST_DIR}/WasmSequencer.fpp"
@@ -23,6 +26,9 @@ register_fprime_library(
 #   DEPENDS
 #       MyPackage_MyOtherModule
 )
+
+target_include_directories("${MODULE_NAME}" PUBLIC wasmtime)
+target_link_libraries("${MODULE_NAME}" PUBLIC wasmtime)
 
 ### Unit Tests ###
 # register_fprime_ut(
