@@ -74,6 +74,9 @@ void BpfSequencer::run_worker(U32 worker_id) {
     } 
     #endif
 
+    auto start = std::chrono::high_resolution_clock::now();
+    bool next_tick = false;
+    
     while (running) {
         ScheduledJob job;
         FwSizeType size = 0;
@@ -82,7 +85,9 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // Sleep for 1/2 a tick if the worker is not enabled
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
+	
 
+	job_queue.getMessagesAvailable();
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),

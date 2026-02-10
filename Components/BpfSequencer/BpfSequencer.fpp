@@ -31,6 +31,12 @@ module Components {
 
         telemetry ticks: U32
 
+        telemetry worker1_rt: F32
+        telemetry worker2_rt: F32
+        telemetry worker3_rt: F32
+        telemetry worker4_rt: F32
+        telemetry worker5_rt: F32
+
         @ Set a VM to run at a specific rate group frequency
         @ @param vm_id The VM ID (0-63)
         @ @param rate_group_hz The rate group frequency in Hz
