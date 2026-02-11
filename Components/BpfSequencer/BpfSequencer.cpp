@@ -124,9 +124,40 @@ void BpfSequencer::run_worker(U32 worker_id) {
 
 // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
 void BpfSequencer::rebuild_deadline_schedule() {
+    bool is_overloaded = false;
+    F32 total_runtime = 0;
+
     for (auto& tick_jobs : schedule) {
         tick_jobs.clear();
     }
+
+    // Calculate total density of all VM jobs
+    for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
+        if (!vms[vm_id]) continue;
+
+        auto& vm = vms[vm_id];
+        U32 rg_id = vm->rate_group_id;
+        
+        if (rg_id >= k_max_rate_groups || rg_id < 0) continue;  // Not assigned to a rate group
+        
+        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each runjk/`
+        if (interval == 0) continue;
+        
+        // Calculate the period in ms
+        // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
+        // Period is 1 tick
+        F32 period_ms = interval * (1000.0f / timer_freq_hz);
+        if (period_ms <= 0.0f) continue; 
+
+        // Calculate how many times we run this per cycle
+        U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms);
+
+        total_runtime += vm->runtime_ms * runs_per_cycle;
+    }
+
+    // Check if overload condition is met
+    if (total_runtime / 1000.0f >= this->num_workers)
+        is_overloaded = true;
 
     // For each VM, if it's assigned to a rate group, calculate its deadlines
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
@@ -152,7 +183,7 @@ void BpfSequencer::rebuild_deadline_schedule() {
         // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
             F32 deadline = i * period_ms; // When this task needs to be done
-            F32 scheduled_time = deadline - period_ms; // EDF task scheduling
+            F32 scheduled_time = is_overloaded ? deadline - vm->runtime_ms : deadline - period_ms; // EDF task scheduling
             F32 latest_run_time = deadline - vm->runtime_ms; // Latest time we can run this task
             vms[vm_id]->latest_run_time = latest_run_time;
             
