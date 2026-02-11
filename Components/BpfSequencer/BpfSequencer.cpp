@@ -78,7 +78,7 @@ void BpfSequencer::run_worker(U32 worker_id) {
     // Initialize tick timing state for this worker
     auto& timing = worker_tick_timing[worker_id];
     timing.tick_start = Clock::now();
-    timing.next_tick_pending.store(true, std::memory_order_relaxed);
+    timing.next_tick_pending = true;
 
     while (running) {
         ScheduledJob job;
@@ -93,12 +93,12 @@ void BpfSequencer::run_worker(U32 worker_id) {
         if (job_queue.getMessagesAvailable() == 0) {
             // Queue is empty 
             // Report the duration of the previous tick if we were processing
-            if (!timing.next_tick_pending.load(std::memory_order_acquire)) {
+            if (!timing.next_tick_pending) {
                 auto now = Clock::now();
                 auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
                     now - timing.tick_start).count();
-                timing.tick_duration_us.store(static_cast<U32>(duration_us), std::memory_order_release);
-                timing.next_tick_pending.store(true, std::memory_order_release);
+                timing.tick_duration_us = static_cast<U32>(duration_us);
+                timing.next_tick_pending = true;
             }
         }
 
@@ -119,9 +119,9 @@ void BpfSequencer::run_worker(U32 worker_id) {
 
         // Record tick start time after receiving a job 
         // Avoids race conditions where another worker grabs the job we saw
-        if (timing.next_tick_pending.load(std::memory_order_acquire)) {
+        if (timing.next_tick_pending) {
             timing.tick_start = Clock::now();
-            timing.next_tick_pending.store(false, std::memory_order_release);
+            timing.next_tick_pending = false;
         }
         
         // Get the VM for this job
@@ -261,8 +261,8 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
 
     // Explicitly initialize worker tick timing state
     for (U32 i = 0; i < k_max_workers; i++) {
-        worker_tick_timing[i].tick_duration_us.store(0, std::memory_order_relaxed);
-        worker_tick_timing[i].next_tick_pending.store(true, std::memory_order_relaxed);
+        worker_tick_timing[i].tick_duration_us = 0;
+        worker_tick_timing[i].next_tick_pending = true;
     }
 
     worker_enabled.reserve(num_workers);
@@ -328,7 +328,7 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     // U32 in microseconds allows up to ~71 minutes, sufficient for tick durations
     Components::BpfSequencer_ExecutorTickDurations tick_durations;
     for (U32 i = 0; i < k_max_workers; i++) {
-        tick_durations[i] = worker_tick_timing[i].tick_duration_us.load(std::memory_order_relaxed);
+        tick_durations[i] = worker_tick_timing[i].tick_duration_us;
     }
     this->tlmWrite_executorTickDurations(tick_durations);
 
