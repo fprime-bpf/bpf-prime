@@ -1,6 +1,6 @@
 // ======================================================================
 // \title  BpfSequencer.cpp
-// \author ezrak, pendergrast
+// \author ezrak, pendergrast, moisesmata
 // \brief  cpp file for BpfSequencer component implementation class
 // ======================================================================
 
@@ -63,6 +63,7 @@ BpfSequencer ::~BpfSequencer() {
 // Worker function - pops jobs from shared queue and executes them
 void BpfSequencer::run_worker(U32 worker_id) {
     using namespace std::chrono_literals;
+    using Clock = std::chrono::high_resolution_clock;
 
     #ifdef __linux__
     // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
@@ -74,6 +75,11 @@ void BpfSequencer::run_worker(U32 worker_id) {
     } 
     #endif
 
+    // Initialize tick timing state for this worker
+    auto& timing = worker_tick_timing[worker_id];
+    timing.tick_start = Clock::now();
+    timing.next_tick_pending = true;
+
     while (running) {
         ScheduledJob job;
         FwSizeType size = 0;
@@ -82,6 +88,19 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // Sleep for 1/2 a tick if the worker is not enabled
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
+
+        // Check if queue is empty
+        if (job_queue.getMessagesAvailable() == 0) {
+            // Queue is empty 
+            // Report the duration of the previous tick if we were processing
+            if (!timing.next_tick_pending) {
+                auto now = Clock::now();
+                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                    now - timing.tick_start).count();
+                timing.tick_duration_us = static_cast<U32>(duration_us);
+                timing.next_tick_pending = true;
+            }
+        }
 
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
@@ -96,6 +115,13 @@ void BpfSequencer::run_worker(U32 worker_id) {
 
         if (!running) {
             return;
+        }
+
+        // Record tick start time after receiving a job 
+        // Avoids race conditions where another worker grabs the job we saw
+        if (timing.next_tick_pending) {
+            timing.tick_start = Clock::now();
+            timing.next_tick_pending = false;
         }
         
         // Get the VM for this job
@@ -264,6 +290,12 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     this->timer_freq_hz = timer_freq_hz;
     // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
+    // Explicitly initialize worker tick timing state
+    for (U32 i = 0; i < k_max_workers; i++) {
+        worker_tick_timing[i].tick_duration_us = 0;
+        worker_tick_timing[i].next_tick_pending = true;
+    }
+
     worker_enabled.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++)
         worker_enabled.emplace_back(true);
@@ -321,6 +353,15 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
             this->log_WARNING_HI_SchedulerSlip(vm_id);
         }
     }
+
+    // Report per-executor tick durations from the previous tick as a single array
+    // These measure total time spent processing jobs during each rate group tick
+    // U32 in microseconds allows up to ~71 minutes, sufficient for tick durations
+    Components::BpfSequencer_ExecutorTickDurations tick_durations;
+    for (U32 i = 0; i < k_max_workers; i++) {
+        tick_durations[i] = worker_tick_timing[i].tick_duration_us;
+    }
+    this->tlmWrite_executorTickDurations(tick_durations);
 
     this->ticks++;
     
