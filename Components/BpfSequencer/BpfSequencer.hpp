@@ -274,6 +274,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
   public:
     static Fw::CmdResponse result_to_response(Fw::Success result);
+
+    static U8 *read_from_file(const char *fn, FwSizeType& size, const char*& err_msg);
     
   private:
     bool validate_vm_id(U32 vmId);

@@ -43,46 +43,17 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    // Open the file
-    Os::File file;
-    Os::File::Status openStatus = file.open(sequenceFilePath, Os::File::OPEN_READ);
-    if (openStatus != Os::File::OP_OK) {
-        Fw::LogStringArg errMsg("Failed to open file");
-        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+    // Read sequence file into buffer
+    FwSizeType size_result;
+    const char *err_msg;
+    this->buffer = read_from_file(sequenceFilePath, size_result, err_msg);
+    if (!this->buffer) {
+        this->log_ACTIVITY_HI_CommandLoadFailed(
+            loggerFilePath,
+            Fw::LogStringArg(err_msg)
+        );
         return Fw::Success::FAILURE;
     }
-
-    // Get the size of the file
-    FwSizeType size_result = 0;
-    Os::File::Status sizeStatus = file.size(size_result);
-    if (sizeStatus != Os::File::OP_OK) {
-        file.close();
-        Fw::LogStringArg errMsg("Failed to retrieve file size");
-        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-        return Fw::Success::FAILURE;
-    }
-
-    // Allocate memory for the buffer
-    this->buffer = new (std::nothrow) U8[size_result];
-    if (this->buffer == nullptr) {
-        file.close();
-        Fw::LogStringArg errMsg("Failed to allocate file buffer");
-        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-        return Fw::Success::FAILURE;
-    }
-
-    // Read the sequence file into memory
-    Os::File::Status readStatus = file.read(this->buffer, size_result, Os::File::WAIT);
-    if (readStatus != Os::File::OP_OK) {
-        delete[] this->buffer;
-        file.close();
-        Fw::LogStringArg errMsg("Failed to read file into buffer");
-        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-        return Fw::Success::FAILURE;
-    }
-
-    file.flush();
-    file.close();
 
     vm->bpf_mem_size = 40000;
     vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
@@ -147,6 +118,44 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     if (log_time)
         this->log_ACTIVITY_LO_CommandRunSuccess(vmId, std::chrono::duration<F64, ms::period>(end - start).count());
     return Fw::Success::SUCCESS;
+}
+
+U8 *BpfSequencer::read_from_file(const char *fn, FwSizeType& size, const char*& err_msg) {
+    // Open the file
+    Os::File file;
+    Os::File::Status openStatus = file.open(fn, Os::File::OPEN_READ);
+    if (openStatus != Os::File::OP_OK) {
+        err_msg = "Failed to open file";
+        return nullptr;
+    }
+
+    // Get the size of the file
+    Os::File::Status sizeStatus = file.size(size);
+    if (sizeStatus != Os::File::OP_OK) {
+        file.close();
+        err_msg = "Failed to retrieve file size";
+        return nullptr;
+    }
+
+    // Allocate memory for the buffer
+    U8 *buffer = new (std::nothrow) U8[size];
+    if (buffer == nullptr) {
+        file.close();
+        err_msg = "Failed to allocate file buffer";
+        return nullptr;
+    }
+
+    // Read the sequence file into memory
+    Os::File::Status readStatus = file.read(buffer, size, Os::File::WAIT);
+    if (readStatus != Os::File::OP_OK) {
+        delete[] buffer;
+        file.close();
+        err_msg = "Failed to read file into buffer";
+        return nullptr;
+    }
+
+    file.close();
+    return buffer;
 }
 
 bool BpfSequencer::validate_vm_id(U32 vmId) {
