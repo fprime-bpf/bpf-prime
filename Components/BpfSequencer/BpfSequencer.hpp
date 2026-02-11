@@ -135,8 +135,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // Each worker tracks when its current tick started and accumulated duration
     struct WorkerTickTiming {
         std::chrono::high_resolution_clock::time_point tick_start;
-        std::atomic<U32> tick_duration_us{0};
-        std::atomic<bool> next_tick_pending{true};  // Flag to detect start of next tick
+        U32 tick_duration_us{0};
+        bool next_tick_pending{true};  // Flag to detect start of next tick
     };
     std::array<WorkerTickTiming, k_max_workers> worker_tick_timing{};
 
