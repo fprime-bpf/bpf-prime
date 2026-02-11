@@ -23,8 +23,8 @@ register_fprime_library(
     SOURCES
         "${CMAKE_CURRENT_LIST_DIR}/WasmSequencer.cpp"
         "${CMAKE_CURRENT_LIST_DIR}/wasmWrappers.cpp"
-#   DEPENDS
-#       MyPackage_MyOtherModule
+  DEPENDS
+      Components_BpfSequencer
 )
 
 target_include_directories("${MODULE_NAME}" PUBLIC wasmtime)

@@ -10,6 +10,25 @@ module Components {
         @ Runs a sequence
         async command RUN_SEQUENCE()
 
+        event WasmLoadFailed(
+                            filePath: string
+                            errMsg: string
+                        ) \
+        severity activity high \
+        format "{} load failed: {}"
+
+        event WasmRunFailed(
+                            errMsg: string
+                        ) \
+        severity activity high \
+        format "VM run failed: {}"
+
+        event WasmRegisterFunctionsFailed(
+                                        errnoMsg: string
+                                    ) \
+        severity warning high \
+        format "Failed to register BPF functions in VM {} "
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

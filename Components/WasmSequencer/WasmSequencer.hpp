@@ -9,6 +9,8 @@
 
 #include "Components/WasmSequencer/WasmSequencerComponentAc.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
+#include <wasmtime.hh>
+#include <optional>
 
 namespace Components {
 
@@ -45,8 +47,18 @@ class WasmSequencer final : public WasmSequencerComponentBase {
                                  ) override;
 
   private:
+    wasmtime::Engine engine;
+    wasmtime::Store store;
+    wasmtime::Linker linker;
+    std::optional<wasmtime::Func> func;
+  private:
     Fw::Success load(const char *sequenceFilePath);
     Fw::Success run();
+
+    static uint32_t bpf_map_lookup_elem(uint64_t map_ptr, uint32_t key);
+    static uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
+    static uint32_t bpf_map_delete_elem(uint64_t map_ptr, uint32_t key);
+    static uint64_t MAP_BY_FD(uint32_t fd);
 };
 
 }  // namespace Components
