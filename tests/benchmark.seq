@@ -1,0 +1,69 @@
+; Startracker
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 0, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 0, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 1, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 0, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 2, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 10, 1.0
+
+;==================================================================================
+; Kalman
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 3, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 3, 0, 7
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 4, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/kalman/a.o"
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 100, 1.0  
+
+;==================================================================================
+; Matmul - 0.05 ms
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 5, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 5, 0, 100
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 6, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 6, 0, 100
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 7, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 7, 0, 100
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/matmul/a.o"
+
+; Set matmul to run at 1 Hz with 1ms expected runtime
+R00:00:5 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 1.0, 10.0
+
+;==================================================================================
+; ABERR
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 8, BPF_MAP_TYPE_ARRAY, 4, 4, 6, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 8, 0, 6
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 9, BPF_MAP_TYPE_ARRAY, 4, 4, 3, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/aberr/a.o"
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 10, 1.0  
+
+;==================================================================================
+; AES
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 10, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 8, 0, 6
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 11, BPF_MAP_TYPE_ARRAY, 4, 4, 256, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 12, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/aes/a.o"
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 1, 1.0  
+
+;==================================================================================
+; NCCScore
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 13, BPF_MAP_TYPE_ARRAY, 4, 4, 2500, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 13, 0, 2500
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 14, BPF_MAP_TYPE_ARRAY, 4, 4, 25, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 14, 0, 25
+
