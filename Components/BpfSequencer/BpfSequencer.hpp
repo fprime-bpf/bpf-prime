@@ -20,6 +20,7 @@
 #include <map>
 #include <queue>
 #include <array>
+#include <chrono>
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -125,6 +126,19 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
     U32 num_workers = 2;
+    
+    // Per-worker timing for telemetry (max 6 workers to match ExecutorTickDurations array)
+    // Tracks tick durations in microseconds for each worker
+    static constexpr U32 k_max_workers = 6;
+
+    // Per-worker tick timing state for tracking rate group execution durations
+    // Each worker tracks when its current tick started and accumulated duration
+    struct WorkerTickTiming {
+        std::chrono::high_resolution_clock::time_point tick_start;
+        U32 tick_duration_us{0};
+        bool next_tick_pending{true};  // Flag to detect start of next tick
+    };
+    std::array<WorkerTickTiming, k_max_workers> worker_tick_timing{};
 
     // Use an array for the schedule (faster access than a map)
     std::array<std::vector<U32>, 1000> schedule;
