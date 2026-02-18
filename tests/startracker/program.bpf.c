@@ -95,7 +95,7 @@ inline float cosine(float rad) {
     if (rad >= 2.0f * PI)
         rad = rad - 2.0f * PI;
 
-	offset = (rad >= step) ? (rad - step) : offset;
+   offset = (rad >= step) ? (rad - step) : offset;
     v1 = (rad >= step) ? 0.92387953f : v1;
     v2 = (rad >= step) ? 0.70710678f : v2;
     
@@ -162,20 +162,15 @@ inline float cosine(float rad) {
 int main() {
     void *star_coords_x = MAP_BY_FD(0), *star_coords_y = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
     volatile float star_x[4], star_y[4], distances[6], hash_val;
-    long locs[5], ii;
-	struct bpf_iter_num it;
-	int *i;
-
+    long locs[5];
 
     // Fetch star infos from BPF maps
-	bpf_iter_num_new(&it, 0, 4);
-	while ((i = bpf_iter_num_next(&it))) {
-        result = bpf_map_lookup_elem(star_coords_x, i);
-        star_x[*i] = *(float *)result;
-        result = bpf_map_lookup_elem(star_coords_y, i);
-        star_y[*i] = *(float *)result;
+    for (long i = 0; i < 4; i++) {
+        result = bpf_map_lookup_elem(star_coords_x, &i);
+        star_x[i] = *(float *)result;
+        result = bpf_map_lookup_elem(star_coords_y, &i);
+        star_y[i] = *(float *)result;
     }
-	bpf_iter_num_destroy(&it);
 
     // Get star distances
     distances[0] = sqroot(((star_x[0] - star_x[1]) * (star_x[0] - star_x[1])) + ((star_y[0] - star_y[1]) * (star_y[0] - star_y[1])));
@@ -187,22 +182,17 @@ int main() {
 
     // Find largest star distance
     long max_dist_idx = 0;
-	bpf_iter_num_new(&it, 0, 6);
-	while ((i = bpf_iter_num_next(&it))) {
-        float tmp_dis = distances[*i] * 10000;
+    for (long i = 0; i < 6; i++) {
+        float tmp_dis = distances[i] * 10000;
         float tmp_max = distances[max_dist_idx] * 10000;
         // Dirty hack to get around LLVM complaining
         if (*(long *)(&tmp_dis) > *(long *)(&tmp_max))
-            max_dist_idx = *i;
+            max_dist_idx = i;
     }
-	bpf_iter_num_destroy(&it);
 
     // Normalize star distances to max distance
-	bpf_iter_num_new(&it, 0, 6);
-	while ((i = bpf_iter_num_next(&it))) {
-        distances[*i] = distances[*i] / distances[max_dist_idx];
-	}
-	bpf_iter_num_destroy(&it);
+    for (long i = 0; i < 6; i++) 
+        distances[i] = distances[i] / distances[max_dist_idx];
 
     // Drop element that contains 1.0f
     switch (max_dist_idx) {
@@ -222,17 +212,14 @@ int main() {
     }
 
     // Hash star distances with XOR
-	bpf_iter_num_new(&it, 0, 5);
-	while ((i = bpf_iter_num_next(&it)))
-        locs[*i] = *(long *)(&distances[*i]);
-	bpf_iter_num_destroy(&it);
-
+    for (long i = 0; i < 5; i++)
+        locs[i] = *(long *)(&distances[i]);
     locs[0] = (locs[0] & locs[1]) | (~locs[0] & locs[2]);
     locs[1] = (locs[1] & locs[3]) | (locs[2] & ~locs[3]);
     locs[2] = locs[3] ^ (locs[2] & ~locs[4]);
 
-    ii = locs[0] ^ locs[1] ^ locs[2];
-    bpf_map_update_elem(out_map, &ii, &hash_val, 0);
+    long i = locs[0] ^ locs[1] ^ locs[2];
+    bpf_map_update_elem(out_map, &i, &hash_val, 0);
 
     return 0;
 }

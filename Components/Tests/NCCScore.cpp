@@ -22,7 +22,7 @@ int main() {
                         .map_flags = 0};
 
 
-    BpfSequencer::maps.create_map(map_def_0, 0);
+    BpfSequencer::maps.create_map(map_def_0, 13);
     
     bpf_map_def map_def_1{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
                         .key_size = 4,
@@ -30,9 +30,9 @@ int main() {
                         .max_entries = 100,
                         .map_flags = 0};
     
-    BpfSequencer::maps.create_map(map_def_1, 1);
+    BpfSequencer::maps.create_map(map_def_1, 14);
 
-    void *map_image_input = (void*)maps::map_by_fd(0), *map_match_image = (void*)maps::map_by_fd(1), *result;
+    void *map_image_input = (void*)maps::map_by_fd(13), *map_match_image = (void*)maps::map_by_fd(14), *result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
 
     long best_match, best_score = 0xffffffff;

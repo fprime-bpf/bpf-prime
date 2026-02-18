@@ -10,8 +10,8 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca %struct.bpf_iter_num, align 8
   %2 = alloca [7 x float], align 4
   %3 = alloca [7 x float], align 4
-  %4 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
-  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #2, !srcloc !4
+  %4 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 3, i32 0, i32 0, i32 0) #2, !srcloc !3
+  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 4, i32 0, i32 0, i32 0) #2, !srcloc !4
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %1) #2
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %2) #2
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %3) #2

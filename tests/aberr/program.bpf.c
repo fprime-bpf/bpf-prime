@@ -213,33 +213,27 @@ inline float _atan2(float y, float x) {
 }
 
 int main() {
-    void *input_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(2), *res;
+    void *input_map = MAP_BY_FD(8), *out_map = MAP_BY_FD(9), *res;
     volatile float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;
     float beta2, gamma, t_emit, M, E, nu, r, h;
     float s_dot_u, denom, factor, u_corr_mag;
-	struct bpf_iter_num it;
-	int *i;
     
     tau = 0.0f;
     
     // Load observer position into v
-	bpf_iter_num_new(&it, 0, 3);
-	while ((i = bpf_iter_num_next(&it))) {
-        res = bpf_map_lookup_elem(input_map, i);
-        v[*i] = *(float *)res;
-        v_orig[*i] = v[*i];
+    for (long i = 0; i < 3; i++) {
+        res = bpf_map_lookup_elem(input_map, &i);
+        v[i] = *(float *)res;
+        v_orig[i] = v[i];
     }
-	bpf_iter_num_destroy(&it);
     
     // Load and compute s_obs
-	bpf_iter_num_new(&it, 0, 3);
-	while ((i = bpf_iter_num_next(&it))) {
-        long j = *i + 3;
+    for (long i = 0; i < 3; i++) {
+        long j = i + 3;
         res = bpf_map_lookup_elem(input_map, &j);
-        s_obs[*i] = (*(float *)res) / C_LIGHT;
+        s_obs[i] = (*(float *)res) / C_LIGHT;
     }
-	bpf_iter_num_destroy(&it);
     
     beta2 = s_obs[0] * s_obs[0] + s_obs[1] * s_obs[1] + s_obs[2] * s_obs[2];
     gamma = 1.0f / sqroot(1.0f - beta2);
@@ -249,8 +243,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
-	bpf_iter_num_new(&it, 0, MAX_ITER);
-	while ((i = bpf_iter_num_next(&it))) {
+    for (long iter = 0; iter < MAX_ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;
         E = M;
@@ -299,15 +292,12 @@ int main() {
         
         tau = dist / C_LIGHT;
     }
-	bpf_iter_num_destroy(&it);
     
     // Write results
-	bpf_iter_num_new(&it, 0, 3);
-	while ((i = bpf_iter_num_next(&it))) {
-        float result = v_orig[*i] + dist * u_corrected[*i];
-        bpf_map_update_elem(out_map, i, &result, 0);
+    for (long i = 0; i < 3; i++) {
+        float result = v_orig[i] + dist * u_corrected[i];
+        bpf_map_update_elem(out_map, &i, &result, 0);
     }
-	bpf_iter_num_destroy(&it);
     
     return 0;
 }
