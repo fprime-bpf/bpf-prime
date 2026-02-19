@@ -89,19 +89,6 @@ void BpfSequencer::run_worker(U32 worker_id) {
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
 
-        // Check if queue is empty
-        if (job_queue.getMessagesAvailable() == 0) {
-            // Queue is empty 
-            // Report the duration of the previous tick if we were processing
-            if (!timing.next_tick_pending) {
-                auto now = Clock::now();
-                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
-                    now - timing.tick_start).count();
-                timing.tick_duration_us = static_cast<U32>(duration_us);
-                timing.next_tick_pending = true;
-            }
-        }
-
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),
@@ -131,9 +118,8 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // If the flag is already set, this indicates a slip 
         bool expected = false;
         if (!vm->is_running.compare_exchange_strong(expected, true, 
-                                                     std::memory_order_acq_rel,
-                                                     std::memory_order_acquire)) {
-
+                                                    std::memory_order_acq_rel,
+                                                    std::memory_order_acquire)) {
             // Slip! Set the slip_detected flag for this VM
             slip_detected[job.vm_id].store(true, std::memory_order_release);
             // Continue to next job - don't execute this one since the previous is still running
@@ -145,6 +131,19 @@ void BpfSequencer::run_worker(U32 worker_id) {
         
         // Clear the running flag
         vm->is_running.store(false, std::memory_order_release);
+
+        // Check if queue is empty
+        if (job_queue.getMessagesAvailable() == 0) {
+            // Queue is empty 
+            // Report the duration of the previous tick if we were processing
+            if (!timing.next_tick_pending) {
+                auto now = Clock::now();
+                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                    now - timing.tick_start).count();
+                timing.tick_duration_us = static_cast<U32>(duration_us);
+                timing.next_tick_pending = true;
+            }
+        }
     }
 }
 
