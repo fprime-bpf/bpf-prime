@@ -10,16 +10,15 @@
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
+#include "Os/Mutex.hpp"
 #include "Os/Generic/PriorityQueue.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
-#include <mutex>
-#include <condition_variable>
+#include <array>
 #include <thread>
 #include <map>
 #include <queue>
-#include <array>
 #include <chrono>
 
 #define BPF_PRIME_VM_COUNT 64
@@ -116,6 +115,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static const FwSizeType MAX_JOBS = 64;
 
     Os::Generic::PriorityQueue job_queue;
+    Os::Mutex scheduler_mutex;
     
     // Slip detection: atomic integer that stores the VM ID that slipped
     // Value of -1 means no slip detected

@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <cstring>
+#include <cmath>
 #include "BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <thread>
@@ -153,6 +153,8 @@ void BpfSequencer::rebuild_deadline_schedule() {
     bool is_overloaded = false;
     F32 total_runtime = 0;
 
+    Os::ScopeLock lock(scheduler_mutex);
+
     for (auto& tick_jobs : schedule) {
         tick_jobs.clear();
     }
@@ -217,7 +219,7 @@ void BpfSequencer::rebuild_deadline_schedule() {
             if (scheduled_time < 0.0f) scheduled_time = 0.0f;
             if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
 
-            U32 schedule_time_tick = static_cast<U32>(scheduled_time);
+            U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time));
             
             schedule[schedule_time_tick].push_back(vm_id);
         }
@@ -226,6 +228,8 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
+    Os::ScopeLock lock(scheduler_mutex);
+
     auto& jobs = schedule[tick];
     if (jobs.empty())
         return;
@@ -245,10 +249,12 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         this->runtime_overflow = 0.0f;
 
     // Only enable the executors needed to get this thread working
-    if (executors_needed >= this->num_workers) {
+    if (executors_needed == 0) {
+        std::fill(worker_enabled.begin(), worker_enabled.end(), false);
+    } else if (executors_needed >= this->num_workers) {
         std::fill(worker_enabled.begin(), worker_enabled.end(), true);
     } else {
-        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
+        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed, true);
         std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
 
