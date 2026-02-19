@@ -4,17 +4,17 @@ R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/matmul/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/aberr/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/aes/a.o"
 
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/startracker/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/kalman/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/matmul/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/aberr/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/aes/a.o"
+;R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/startracker/a.o"
+;R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/kalman/a.o"
+;R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/matmul/a.o"
+;R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/aberr/a.o"
+;R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/aes/a.o"
 
-R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 100, 3.0
-R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 100, 3.0
-R00:00:5 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 10, 47.0
-R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 100, 2.6
-R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 1, 396.0
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 100, 0.03
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 100, 0.03
+R00:00:5 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 10, 0.4
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 100, 0.03
+R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 1, 3.96
 
 ;R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 5, 100, 3.0
 ;R00:00:05 BPFPrimeTest.bpfSequencer.SetVMRateGroup 6, 100, 3.0

@@ -107,7 +107,7 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // Record tick start time after receiving a job 
         // Avoids race conditions where another worker grabs the job we saw
         if (timing.next_tick_pending) {
-            timing.tick_start = Clock::now();
+            timing.tick_start = this->current_tick_dispatch_time.load(std::memory_order_acquire);
             timing.next_tick_pending = false;
         }
         
@@ -227,6 +227,8 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
+    using Clock = std::chrono::high_resolution_clock;
+
     Os::ScopeLock lock(scheduler_mutex);
 
     auto& jobs = schedule[tick];
@@ -276,6 +278,12 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
             this->log_WARNING_HI_SchedulerQueueFull(vm_id);
         }
     }
+
+    // Start doing timing stuff for executorTickDurations
+    for (U32 i = 0; i < num_workers; i++)
+        worker_tick_timing[i].next_tick_pending = true;
+
+    this->current_tick_dispatch_time.store(Clock::now(), std::memory_order_release);
 }
 
 /*
@@ -373,7 +381,7 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     // Calculate position in scheduling cycle
     U32 cycle_length_ticks = timer_freq_hz;  // Ticks per 1-second cycle
     cycle_tick = (ticks - 1) % cycle_length_ticks;
-    
+
     // Push jobs for this tick into the shared queue
     schedule_jobs_for_tick(cycle_tick);
 }

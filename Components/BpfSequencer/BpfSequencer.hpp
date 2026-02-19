@@ -139,6 +139,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
         bool next_tick_pending{true};  // Flag to detect start of next tick
     };
     std::array<WorkerTickTiming, k_max_workers> worker_tick_timing{};
+    std::atomic<std::chrono::high_resolution_clock::time_point> current_tick_dispatch_time;
 
     // Use an array for the schedule (faster access than a map)
     std::array<std::vector<U32>, 1000> schedule;
