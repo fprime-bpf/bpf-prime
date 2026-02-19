@@ -10,16 +10,15 @@
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
+#include "Os/Mutex.hpp"
 #include "Os/Generic/PriorityQueue.hpp"
 #include "Fw/Types/StringBase.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
-#include <mutex>
-#include <condition_variable>
+#include <array>
 #include <thread>
 #include <map>
 #include <queue>
-#include <array>
 #include <chrono>
 
 #define BPF_PRIME_VM_COUNT 64
@@ -116,6 +115,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static const FwSizeType MAX_JOBS = 64;
 
     Os::Generic::PriorityQueue job_queue;
+    Os::Mutex scheduler_mutex;
     
     // Slip detection: atomic integer that stores the VM ID that slipped
     // Value of -1 means no slip detected
@@ -139,6 +139,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
         bool next_tick_pending{true};  // Flag to detect start of next tick
     };
     std::array<WorkerTickTiming, k_max_workers> worker_tick_timing{};
+    std::atomic<std::chrono::high_resolution_clock::time_point> current_tick_dispatch_time;
 
     // Use an array for the schedule (faster access than a map)
     std::array<std::vector<U32>, 1000> schedule;

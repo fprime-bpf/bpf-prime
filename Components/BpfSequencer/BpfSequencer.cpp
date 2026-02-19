@@ -5,7 +5,7 @@
 // ======================================================================
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <cstring>
+#include <cmath>
 #include "BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <thread>
@@ -89,19 +89,6 @@ void BpfSequencer::run_worker(U32 worker_id) {
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
 
-        // Check if queue is empty
-        if (job_queue.getMessagesAvailable() == 0) {
-            // Queue is empty 
-            // Report the duration of the previous tick if we were processing
-            if (!timing.next_tick_pending) {
-                auto now = Clock::now();
-                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
-                    now - timing.tick_start).count();
-                timing.tick_duration_us = static_cast<U32>(duration_us);
-                timing.next_tick_pending = true;
-            }
-        }
-
         auto status = job_queue.receive(
             reinterpret_cast<U8*>(&job),
             sizeof(ScheduledJob),
@@ -120,7 +107,7 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // Record tick start time after receiving a job 
         // Avoids race conditions where another worker grabs the job we saw
         if (timing.next_tick_pending) {
-            timing.tick_start = Clock::now();
+            timing.tick_start = this->current_tick_dispatch_time.load(std::memory_order_acquire);
             timing.next_tick_pending = false;
         }
         
@@ -131,9 +118,8 @@ void BpfSequencer::run_worker(U32 worker_id) {
         // If the flag is already set, this indicates a slip 
         bool expected = false;
         if (!vm->is_running.compare_exchange_strong(expected, true, 
-                                                     std::memory_order_acq_rel,
-                                                     std::memory_order_acquire)) {
-
+                                                    std::memory_order_acq_rel,
+                                                    std::memory_order_acquire)) {
             // Slip! Set the slip_detected flag for this VM
             slip_detected[job.vm_id].store(true, std::memory_order_release);
             // Continue to next job - don't execute this one since the previous is still running
@@ -145,6 +131,19 @@ void BpfSequencer::run_worker(U32 worker_id) {
         
         // Clear the running flag
         vm->is_running.store(false, std::memory_order_release);
+
+        // Check if queue is empty
+        if (job_queue.getMessagesAvailable() == 0) {
+            // Queue is empty 
+            // Report the duration of the previous tick if we were processing
+            if (!timing.next_tick_pending) {
+                auto now = Clock::now();
+                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
+                    now - timing.tick_start).count();
+                timing.tick_duration_us = static_cast<U32>(duration_us);
+                timing.next_tick_pending = true;
+            }
+        }
     }
 }
 
@@ -152,6 +151,8 @@ void BpfSequencer::run_worker(U32 worker_id) {
 void BpfSequencer::rebuild_deadline_schedule() {
     bool is_overloaded = false;
     F32 total_runtime = 0;
+
+    Os::ScopeLock lock(scheduler_mutex);
 
     for (auto& tick_jobs : schedule) {
         tick_jobs.clear();
@@ -217,7 +218,7 @@ void BpfSequencer::rebuild_deadline_schedule() {
             if (scheduled_time < 0.0f) scheduled_time = 0.0f;
             if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
 
-            U32 schedule_time_tick = static_cast<U32>(scheduled_time);
+            U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time));
             
             schedule[schedule_time_tick].push_back(vm_id);
         }
@@ -226,6 +227,10 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
 // Push jobs for the current tick into the shared queue
 void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
+    using Clock = std::chrono::high_resolution_clock;
+
+    Os::ScopeLock lock(scheduler_mutex);
+
     auto& jobs = schedule[tick];
     if (jobs.empty())
         return;
@@ -245,10 +250,12 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         this->runtime_overflow = 0.0f;
 
     // Only enable the executors needed to get this thread working
-    if (executors_needed >= this->num_workers) {
+    if (executors_needed == 0) {
+        std::fill(worker_enabled.begin(), worker_enabled.end(), false);
+    } else if (executors_needed >= this->num_workers) {
         std::fill(worker_enabled.begin(), worker_enabled.end(), true);
     } else {
-        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed - 1, true);
+        std::fill(worker_enabled.begin(), worker_enabled.begin() + executors_needed, true);
         std::fill(worker_enabled.begin() + executors_needed, worker_enabled.end(), false);
     }
 
@@ -271,6 +278,12 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
             this->log_WARNING_HI_SchedulerQueueFull(vm_id);
         }
     }
+
+    // Start doing timing stuff for executorTickDurations
+    for (U32 i = 0; i < num_workers; i++)
+        worker_tick_timing[i].next_tick_pending = true;
+
+    this->current_tick_dispatch_time.store(Clock::now(), std::memory_order_release);
 }
 
 /*
@@ -368,7 +381,7 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     // Calculate position in scheduling cycle
     U32 cycle_length_ticks = timer_freq_hz;  // Ticks per 1-second cycle
     cycle_tick = (ticks - 1) % cycle_length_ticks;
-    
+
     // Push jobs for this tick into the shared queue
     schedule_jobs_for_tick(cycle_tick);
 }
