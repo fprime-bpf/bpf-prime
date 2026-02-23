@@ -1,7 +1,11 @@
-#include "../bpf_shim.h"
+#if __wasm__
+    #include "../wasm_shim.h"
+#else
+    #include "../bpf_shim.h"
+#endif
 
 int main() {
-    void *in_map = MAP_BY_FD(2), *out_map = MAP_BY_FD(4);
+    BpfMapType in_map = MAP_BY_FD(2), out_map = MAP_BY_FD(4);
     int key = 0;
 
     void *input_result = bpf_map_lookup_elem(in_map, &key);

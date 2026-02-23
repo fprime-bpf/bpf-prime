@@ -1,4 +1,8 @@
-#include "../bpf_shim.h"
+#if __wasm__
+    #include "../wasm_shim.h"
+#else
+    #include "../bpf_shim.h"
+#endif
 
 #define NUM_ROUND_KEYS_128 (11)
 
@@ -82,9 +86,22 @@ inline void AES_MixColumns(AES_Block_t block) {
 }
 
 int main() {
-  AES_Block_t block = {12};
-  AES_Key128_t key = {13};
+  BpfMapType block_map = MAP_BY_FD(0), key_map = MAP_BY_FD(1);
+  void *result;
+
+  AES_Block_t block;
+  AES_Key128_t key;
   AES_Block_t zero = {0};
+
+  for (int i = 0; i < 16; i++) {
+    void *result = bpf_map_lookup_elem(block_map, &i);
+    block[i] = *(char *)result;
+  }
+
+  for (int i = 0; i < 256; i++) {
+    result = bpf_map_lookup_elem(key_map, &i);
+    key[i] = *(char *)result;
+  }
 
   // 1000 blocks
   for (int i = 0; i < 1000; i++) {
@@ -109,6 +126,9 @@ int main() {
     AES_MixColumns(block);
   }
 
+  for (int i = 0; i < 16; i++) {
+    bpf_map_update_elem(key_map, &i, &block[i], 0);
+  }
+
   return 0;
 }
-

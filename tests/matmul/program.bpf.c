@@ -1,10 +1,15 @@
-#include "../bpf_shim.h"
+#if __wasm__
+    #include "../wasm_shim.h"
+#else
+    #include "../bpf_shim.h"
+#endif
 
 #define MAT_DIM  10
 #define MAT_SIZE (MAT_DIM * MAT_DIM)
 
 int main() {
-    void *mat_map_1 = MAP_BY_FD(0), *mat_map_2 = MAP_BY_FD(1), *mat_map_res = MAP_BY_FD(2), *result;
+    BpfMapType mat_map_1 = MAP_BY_FD(0), mat_map_2 = MAP_BY_FD(1), mat_map_res = MAP_BY_FD(2);
+    void *result;
     float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
 
     // Read in 2 matrices
