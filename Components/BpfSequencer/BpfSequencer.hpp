@@ -264,6 +264,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
+  public:
+    struct bpf_iter_num;
+    
     static U32 bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept;
 
     static I32 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
@@ -283,6 +286,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
     bool get_map_by_fd(U32 fd, map*& map, Fw::LogStringArg& command_name);
 
     bool validate_data_size(U32 size, bool key, map* map, Fw::LogStringArg& command_name);
+};
+
+struct BpfSequencer::bpf_iter_num {
+    I32 fd;
+    I32 start;
+    I32 end;
+    I32 curr;
 };
 
 }  // namespace Components

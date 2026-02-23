@@ -7,7 +7,7 @@
 #include "Components/Tests/Tests.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/maps/maps.hpp"
-#include "NCCScore.hpp"
+#include "NativeTests.hpp"
 
 namespace Components {
 

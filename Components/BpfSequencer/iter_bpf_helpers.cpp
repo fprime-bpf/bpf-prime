@@ -9,13 +9,6 @@
 
 namespace Components {
 
-struct bpf_iter_num {
-    I32 fd;
-    I32 start;
-    I32 end;
-    I32 curr;
-};
-
 U32 BpfSequencer::bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept {
     if (start > end) {
         it->fd = 0;

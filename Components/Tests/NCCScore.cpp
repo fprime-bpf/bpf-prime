@@ -1,37 +1,19 @@
-#include "NCCScore.hpp"
+#include "NativeTests.hpp"
 #include "Components/BpfSequencer/maps/maps.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include <cmath>
 
-#define MATCH_DIM  10
+#define MATCH_DIM  5
 #define MATCH_SIZE (MATCH_DIM * MATCH_DIM)
 
-#define IMG_DIM 100
+#define IMG_DIM 50
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
-
 
 namespace Components {
 
 namespace NCCScore {
 
 int main() {
-    bpf_map_def map_def_0{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
-                        .key_size = 4,
-                        .value_size = 4,
-                        .max_entries = 10000,
-                        .map_flags = 0};
-
-
-    BpfSequencer::maps.create_map(map_def_0, 0);
-    
-    bpf_map_def map_def_1{.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
-                        .key_size = 4,
-                        .value_size = 4,
-                        .max_entries = 100,
-                        .map_flags = 0};
-    
-    BpfSequencer::maps.create_map(map_def_1, 1);
-
     void *map_image_input = (void*)maps::map_by_fd(0), *map_match_image = (void*)maps::map_by_fd(1), *result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
 
@@ -86,4 +68,5 @@ int main() {
 }
 
 }  // namespace NCCScore
+
 } // namespace Components
