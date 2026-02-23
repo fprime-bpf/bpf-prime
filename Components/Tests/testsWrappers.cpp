@@ -167,7 +167,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 1000;
+    const U32 passes = 10000;
 
     bpf_map_def map_def = {
         .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
