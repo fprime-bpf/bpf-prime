@@ -7,228 +7,272 @@ target triple = "bpf"
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca [4 x float], align 4
   %2 = alloca [4 x float], align 4
-  %3 = alloca [6 x float], align 4
+  %3 = alloca [6 x float], align 8
   %4 = alloca float, align 4
-  %5 = alloca [5 x i64], align 8
-  %6 = alloca i64, align 8
+  %5 = alloca i64, align 8
+  %6 = alloca float, align 8
   %7 = alloca float, align 8
-  %8 = alloca float, align 8
-  %9 = alloca i64, align 8
-  %10 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
-  %11 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #2, !srcloc !4
-  %12 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 2, i32 0, i32 0, i32 0) #2, !srcloc !5
+  %8 = alloca i64, align 8
+  %9 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
+  %10 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #2, !srcloc !4
+  %11 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 2, i32 0, i32 0, i32 0) #2, !srcloc !5
   call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %1) #2
   call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %2) #2
   call void @llvm.lifetime.start.p0(i64 24, ptr nonnull %3) #2
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4) #2
-  call void @llvm.lifetime.start.p0(i64 40, ptr nonnull %5) #2
-  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %6) #2
-  store i64 0, ptr %6, align 8, !tbaa !6
-  br label %73
+  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %5) #2
+  store i64 0, ptr %5, align 8, !tbaa !6
+  br label %137
 
-13:                                               ; preds = %73
-  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %6) #2
-  %14 = load volatile float, ptr %1, align 4, !tbaa !10
-  %15 = getelementptr inbounds nuw i8, ptr %1, i64 4
-  %16 = load volatile float, ptr %15, align 4, !tbaa !10
-  %17 = load volatile float, ptr %1, align 4, !tbaa !10
-  %18 = load volatile float, ptr %15, align 4, !tbaa !10
-  %19 = load volatile float, ptr %2, align 4, !tbaa !10
-  %20 = getelementptr inbounds nuw i8, ptr %2, i64 4
-  %21 = load volatile float, ptr %20, align 4, !tbaa !10
-  %22 = load volatile float, ptr %2, align 4, !tbaa !10
-  %23 = load volatile float, ptr %20, align 4, !tbaa !10
-  store volatile float 0.000000e+00, ptr %3, align 4, !tbaa !10
-  %24 = load volatile float, ptr %15, align 4, !tbaa !10
-  %25 = getelementptr inbounds nuw i8, ptr %1, i64 8
-  %26 = load volatile float, ptr %25, align 4, !tbaa !10
-  %27 = load volatile float, ptr %15, align 4, !tbaa !10
-  %28 = load volatile float, ptr %25, align 4, !tbaa !10
-  %29 = load volatile float, ptr %20, align 4, !tbaa !10
-  %30 = getelementptr inbounds nuw i8, ptr %2, i64 8
-  %31 = load volatile float, ptr %30, align 4, !tbaa !10
-  %32 = load volatile float, ptr %20, align 4, !tbaa !10
-  %33 = load volatile float, ptr %30, align 4, !tbaa !10
-  %34 = getelementptr inbounds nuw i8, ptr %3, i64 4
-  store volatile float 0.000000e+00, ptr %34, align 4, !tbaa !10
-  %35 = load volatile float, ptr %25, align 4, !tbaa !10
-  %36 = getelementptr inbounds nuw i8, ptr %1, i64 12
-  %37 = load volatile float, ptr %36, align 4, !tbaa !10
-  %38 = load volatile float, ptr %25, align 4, !tbaa !10
-  %39 = load volatile float, ptr %36, align 4, !tbaa !10
-  %40 = load volatile float, ptr %30, align 4, !tbaa !10
-  %41 = getelementptr inbounds nuw i8, ptr %2, i64 12
-  %42 = load volatile float, ptr %41, align 4, !tbaa !10
-  %43 = load volatile float, ptr %30, align 4, !tbaa !10
-  %44 = load volatile float, ptr %41, align 4, !tbaa !10
-  %45 = getelementptr inbounds nuw i8, ptr %3, i64 8
-  store volatile float 0.000000e+00, ptr %45, align 4, !tbaa !10
-  %46 = load volatile float, ptr %15, align 4, !tbaa !10
-  %47 = load volatile float, ptr %36, align 4, !tbaa !10
-  %48 = load volatile float, ptr %15, align 4, !tbaa !10
-  %49 = load volatile float, ptr %36, align 4, !tbaa !10
-  %50 = load volatile float, ptr %20, align 4, !tbaa !10
-  %51 = load volatile float, ptr %41, align 4, !tbaa !10
-  %52 = load volatile float, ptr %20, align 4, !tbaa !10
-  %53 = load volatile float, ptr %41, align 4, !tbaa !10
-  %54 = getelementptr inbounds nuw i8, ptr %3, i64 12
-  store volatile float 0.000000e+00, ptr %54, align 4, !tbaa !10
-  %55 = load volatile float, ptr %1, align 4, !tbaa !10
-  %56 = load volatile float, ptr %25, align 4, !tbaa !10
-  %57 = load volatile float, ptr %1, align 4, !tbaa !10
-  %58 = load volatile float, ptr %25, align 4, !tbaa !10
-  %59 = load volatile float, ptr %2, align 4, !tbaa !10
-  %60 = load volatile float, ptr %30, align 4, !tbaa !10
-  %61 = load volatile float, ptr %2, align 4, !tbaa !10
-  %62 = load volatile float, ptr %30, align 4, !tbaa !10
-  %63 = getelementptr inbounds nuw i8, ptr %3, i64 16
-  store volatile float 0.000000e+00, ptr %63, align 4, !tbaa !10
-  %64 = load volatile float, ptr %1, align 4, !tbaa !10
-  %65 = load volatile float, ptr %36, align 4, !tbaa !10
-  %66 = load volatile float, ptr %1, align 4, !tbaa !10
-  %67 = load volatile float, ptr %36, align 4, !tbaa !10
-  %68 = load volatile float, ptr %2, align 4, !tbaa !10
-  %69 = load volatile float, ptr %41, align 4, !tbaa !10
-  %70 = load volatile float, ptr %2, align 4, !tbaa !10
-  %71 = load volatile float, ptr %41, align 4, !tbaa !10
-  %72 = getelementptr inbounds nuw i8, ptr %3, i64 20
-  store volatile float 0.000000e+00, ptr %72, align 4, !tbaa !10
-  br label %86
-
-73:                                               ; preds = %0, %73
-  %74 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %10, ptr noundef nonnull %6) #2
-  %75 = load float, ptr %74, align 4, !tbaa !10
-  %76 = load i64, ptr %6, align 8, !tbaa !6
-  %77 = getelementptr inbounds [4 x float], ptr %1, i64 0, i64 %76
-  store volatile float %75, ptr %77, align 4, !tbaa !10
-  %78 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %11, ptr noundef nonnull %6) #2
-  %79 = load float, ptr %78, align 4, !tbaa !10
-  %80 = load i64, ptr %6, align 8, !tbaa !6
-  %81 = getelementptr inbounds [4 x float], ptr %2, i64 0, i64 %80
-  store volatile float %79, ptr %81, align 4, !tbaa !10
-  %82 = add nsw i64 %80, 1
-  store i64 %82, ptr %6, align 8, !tbaa !6
-  %83 = icmp slt i64 %80, 3
-  br i1 %83, label %73, label %13, !llvm.loop !12
-
-84:                                               ; preds = %86
-  %85 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %98
-  br label %102
-
-86:                                               ; preds = %13, %86
-  %87 = phi i64 [ 0, %13 ], [ %99, %86 ]
-  %88 = phi i64 [ 0, %13 ], [ %98, %86 ]
+12:                                               ; preds = %137
+  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %5) #2
+  %13 = load volatile float, ptr %1, align 4, !tbaa !10
+  %14 = getelementptr inbounds nuw i8, ptr %1, i64 4
+  %15 = load volatile float, ptr %14, align 4, !tbaa !10
+  %16 = load volatile float, ptr %1, align 4, !tbaa !10
+  %17 = load volatile float, ptr %14, align 4, !tbaa !10
+  %18 = load volatile float, ptr %2, align 4, !tbaa !10
+  %19 = getelementptr inbounds nuw i8, ptr %2, i64 4
+  %20 = load volatile float, ptr %19, align 4, !tbaa !10
+  %21 = load volatile float, ptr %2, align 4, !tbaa !10
+  %22 = load volatile float, ptr %19, align 4, !tbaa !10
+  store volatile float 0.000000e+00, ptr %3, align 8, !tbaa !10
+  %23 = load volatile float, ptr %14, align 4, !tbaa !10
+  %24 = getelementptr inbounds nuw i8, ptr %1, i64 8
+  %25 = load volatile float, ptr %24, align 4, !tbaa !10
+  %26 = load volatile float, ptr %14, align 4, !tbaa !10
+  %27 = load volatile float, ptr %24, align 4, !tbaa !10
+  %28 = load volatile float, ptr %19, align 4, !tbaa !10
+  %29 = getelementptr inbounds nuw i8, ptr %2, i64 8
+  %30 = load volatile float, ptr %29, align 4, !tbaa !10
+  %31 = load volatile float, ptr %19, align 4, !tbaa !10
+  %32 = load volatile float, ptr %29, align 4, !tbaa !10
+  %33 = getelementptr inbounds nuw i8, ptr %3, i64 4
+  store volatile float 0.000000e+00, ptr %33, align 4, !tbaa !10
+  %34 = load volatile float, ptr %24, align 4, !tbaa !10
+  %35 = getelementptr inbounds nuw i8, ptr %1, i64 12
+  %36 = load volatile float, ptr %35, align 4, !tbaa !10
+  %37 = load volatile float, ptr %24, align 4, !tbaa !10
+  %38 = load volatile float, ptr %35, align 4, !tbaa !10
+  %39 = load volatile float, ptr %29, align 4, !tbaa !10
+  %40 = getelementptr inbounds nuw i8, ptr %2, i64 12
+  %41 = load volatile float, ptr %40, align 4, !tbaa !10
+  %42 = load volatile float, ptr %29, align 4, !tbaa !10
+  %43 = load volatile float, ptr %40, align 4, !tbaa !10
+  %44 = getelementptr inbounds nuw i8, ptr %3, i64 8
+  store volatile float 0.000000e+00, ptr %44, align 8, !tbaa !10
+  %45 = load volatile float, ptr %14, align 4, !tbaa !10
+  %46 = load volatile float, ptr %35, align 4, !tbaa !10
+  %47 = load volatile float, ptr %14, align 4, !tbaa !10
+  %48 = load volatile float, ptr %35, align 4, !tbaa !10
+  %49 = load volatile float, ptr %19, align 4, !tbaa !10
+  %50 = load volatile float, ptr %40, align 4, !tbaa !10
+  %51 = load volatile float, ptr %19, align 4, !tbaa !10
+  %52 = load volatile float, ptr %40, align 4, !tbaa !10
+  %53 = getelementptr inbounds nuw i8, ptr %3, i64 12
+  store volatile float 0.000000e+00, ptr %53, align 4, !tbaa !10
+  %54 = load volatile float, ptr %1, align 4, !tbaa !10
+  %55 = load volatile float, ptr %24, align 4, !tbaa !10
+  %56 = load volatile float, ptr %1, align 4, !tbaa !10
+  %57 = load volatile float, ptr %24, align 4, !tbaa !10
+  %58 = load volatile float, ptr %2, align 4, !tbaa !10
+  %59 = load volatile float, ptr %29, align 4, !tbaa !10
+  %60 = load volatile float, ptr %2, align 4, !tbaa !10
+  %61 = load volatile float, ptr %29, align 4, !tbaa !10
+  %62 = getelementptr inbounds nuw i8, ptr %3, i64 16
+  store volatile float 0.000000e+00, ptr %62, align 8, !tbaa !10
+  %63 = load volatile float, ptr %1, align 4, !tbaa !10
+  %64 = load volatile float, ptr %35, align 4, !tbaa !10
+  %65 = load volatile float, ptr %1, align 4, !tbaa !10
+  %66 = load volatile float, ptr %35, align 4, !tbaa !10
+  %67 = load volatile float, ptr %2, align 4, !tbaa !10
+  %68 = load volatile float, ptr %40, align 4, !tbaa !10
+  %69 = load volatile float, ptr %2, align 4, !tbaa !10
+  %70 = load volatile float, ptr %40, align 4, !tbaa !10
+  %71 = getelementptr inbounds nuw i8, ptr %3, i64 20
+  store volatile float 0.000000e+00, ptr %71, align 4, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %72 = load volatile float, ptr %3, align 8, !tbaa !10
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
-  %89 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %87
-  %90 = load volatile float, ptr %89, align 4, !tbaa !10
-  %91 = fmul float %90, 1.000000e+04
-  store float %91, ptr %7, align 8, !tbaa !10
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %8)
-  %92 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %88
-  %93 = load volatile float, ptr %92, align 4, !tbaa !10
-  %94 = fmul float %93, 1.000000e+04
-  store float %94, ptr %8, align 8, !tbaa !10
-  %95 = load i64, ptr %7, align 8, !tbaa !6
-  %96 = load i64, ptr %8, align 8, !tbaa !6
-  %97 = icmp sgt i64 %95, %96
-  %98 = select i1 %97, i64 %87, i64 %88
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %8)
+  %73 = load volatile float, ptr %3, align 8, !tbaa !10
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
-  %99 = add nuw nsw i64 %87, 1
-  %100 = icmp eq i64 %99, 6
-  br i1 %100, label %84, label %86, !llvm.loop !15
-
-101:                                              ; preds = %102
-  switch i64 %98, label %120 [
-    i64 0, label %110
-    i64 1, label %112
-    i64 2, label %114
-    i64 3, label %116
-    i64 4, label %118
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %74 = load volatile float, ptr %33, align 4, !tbaa !10
+  %75 = fmul float %74, 1.000000e+04
+  store float %75, ptr %6, align 8, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  %76 = load volatile float, ptr %3, align 8, !tbaa !10
+  %77 = fmul float %76, 1.000000e+04
+  store float %77, ptr %7, align 8, !tbaa !10
+  %78 = load i64, ptr %6, align 8, !tbaa !6
+  %79 = load i64, ptr %7, align 8, !tbaa !6
+  %80 = icmp sgt i64 %78, %79
+  %81 = zext i1 %80 to i64
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %82 = load volatile float, ptr %44, align 8, !tbaa !10
+  %83 = fmul float %82, 1.000000e+04
+  store float %83, ptr %6, align 8, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  %84 = select i1 %80, ptr %33, ptr %3
+  %85 = load volatile float, ptr %84, align 4, !tbaa !10
+  %86 = fmul float %85, 1.000000e+04
+  store float %86, ptr %7, align 8, !tbaa !10
+  %87 = load i64, ptr %6, align 8, !tbaa !6
+  %88 = load i64, ptr %7, align 8, !tbaa !6
+  %89 = icmp sgt i64 %87, %88
+  %90 = select i1 %89, i64 2, i64 %81
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %91 = load volatile float, ptr %53, align 4, !tbaa !10
+  %92 = fmul float %91, 1.000000e+04
+  store float %92, ptr %6, align 8, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  %93 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %90
+  %94 = load volatile float, ptr %93, align 4, !tbaa !10
+  %95 = fmul float %94, 1.000000e+04
+  store float %95, ptr %7, align 8, !tbaa !10
+  %96 = load i64, ptr %6, align 8, !tbaa !6
+  %97 = load i64, ptr %7, align 8, !tbaa !6
+  %98 = icmp sgt i64 %96, %97
+  %99 = select i1 %98, i64 3, i64 %90
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %100 = load volatile float, ptr %62, align 8, !tbaa !10
+  %101 = fmul float %100, 1.000000e+04
+  store float %101, ptr %6, align 8, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  %102 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %99
+  %103 = load volatile float, ptr %102, align 4, !tbaa !10
+  %104 = fmul float %103, 1.000000e+04
+  store float %104, ptr %7, align 8, !tbaa !10
+  %105 = load i64, ptr %6, align 8, !tbaa !6
+  %106 = load i64, ptr %7, align 8, !tbaa !6
+  %107 = icmp sgt i64 %105, %106
+  %108 = select i1 %107, i64 4, i64 %99
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  %109 = load volatile float, ptr %71, align 4, !tbaa !10
+  %110 = fmul float %109, 1.000000e+04
+  store float %110, ptr %6, align 8, !tbaa !10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  %111 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %108
+  %112 = load volatile float, ptr %111, align 4, !tbaa !10
+  %113 = fmul float %112, 1.000000e+04
+  store float %113, ptr %7, align 8, !tbaa !10
+  %114 = load i64, ptr %6, align 8, !tbaa !6
+  %115 = load i64, ptr %7, align 8, !tbaa !6
+  %116 = icmp sgt i64 %114, %115
+  %117 = select i1 %116, i64 5, i64 %108
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  %118 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %117
+  %119 = load volatile float, ptr %3, align 8, !tbaa !10
+  %120 = load volatile float, ptr %118, align 4, !tbaa !10
+  %121 = fdiv float %119, %120
+  store volatile float %121, ptr %3, align 8, !tbaa !10
+  %122 = load volatile float, ptr %33, align 4, !tbaa !10
+  %123 = load volatile float, ptr %118, align 4, !tbaa !10
+  %124 = fdiv float %122, %123
+  store volatile float %124, ptr %33, align 4, !tbaa !10
+  %125 = load volatile float, ptr %44, align 8, !tbaa !10
+  %126 = load volatile float, ptr %118, align 4, !tbaa !10
+  %127 = fdiv float %125, %126
+  store volatile float %127, ptr %44, align 8, !tbaa !10
+  %128 = load volatile float, ptr %53, align 4, !tbaa !10
+  %129 = load volatile float, ptr %118, align 4, !tbaa !10
+  %130 = fdiv float %128, %129
+  store volatile float %130, ptr %53, align 4, !tbaa !10
+  %131 = load volatile float, ptr %62, align 8, !tbaa !10
+  %132 = load volatile float, ptr %118, align 4, !tbaa !10
+  %133 = fdiv float %131, %132
+  store volatile float %133, ptr %62, align 8, !tbaa !10
+  %134 = load volatile float, ptr %71, align 4, !tbaa !10
+  %135 = load volatile float, ptr %118, align 4, !tbaa !10
+  %136 = fdiv float %134, %135
+  store volatile float %136, ptr %71, align 4, !tbaa !10
+  switch i64 %117, label %158 [
+    i64 0, label %148
+    i64 1, label %150
+    i64 2, label %152
+    i64 3, label %154
+    i64 4, label %156
   ]
 
-102:                                              ; preds = %84, %102
-  %103 = phi i64 [ 0, %84 ], [ %108, %102 ]
-  %104 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %103
-  %105 = load volatile float, ptr %104, align 4, !tbaa !10
-  %106 = load volatile float, ptr %85, align 4, !tbaa !10
-  %107 = fdiv float %105, %106
-  store volatile float %107, ptr %104, align 4, !tbaa !10
-  %108 = add nuw nsw i64 %103, 1
-  %109 = icmp eq i64 %108, 6
-  br i1 %109, label %101, label %102, !llvm.loop !16
+137:                                              ; preds = %0, %137
+  %138 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %9, ptr noundef nonnull %5) #2
+  %139 = load float, ptr %138, align 4, !tbaa !10
+  %140 = load i64, ptr %5, align 8, !tbaa !6
+  %141 = getelementptr inbounds [4 x float], ptr %1, i64 0, i64 %140
+  store volatile float %139, ptr %141, align 4, !tbaa !10
+  %142 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %10, ptr noundef nonnull %5) #2
+  %143 = load float, ptr %142, align 4, !tbaa !10
+  %144 = load i64, ptr %5, align 8, !tbaa !6
+  %145 = getelementptr inbounds [4 x float], ptr %2, i64 0, i64 %144
+  store volatile float %143, ptr %145, align 4, !tbaa !10
+  %146 = add nsw i64 %144, 1
+  store i64 %146, ptr %5, align 8, !tbaa !6
+  %147 = icmp slt i64 %144, 3
+  br i1 %147, label %137, label %12, !llvm.loop !12
 
-110:                                              ; preds = %101
-  %111 = load volatile float, ptr %34, align 4, !tbaa !10
-  store volatile float %111, ptr %3, align 4, !tbaa !10
-  br label %112
+148:                                              ; preds = %12
+  %149 = load volatile float, ptr %33, align 4, !tbaa !10
+  store volatile float %149, ptr %3, align 8, !tbaa !10
+  br label %150
 
-112:                                              ; preds = %101, %110
-  %113 = load volatile float, ptr %45, align 4, !tbaa !10
-  store volatile float %113, ptr %34, align 4, !tbaa !10
-  br label %114
+150:                                              ; preds = %12, %148
+  %151 = load volatile float, ptr %44, align 8, !tbaa !10
+  store volatile float %151, ptr %33, align 4, !tbaa !10
+  br label %152
 
-114:                                              ; preds = %101, %112
-  %115 = load volatile float, ptr %54, align 4, !tbaa !10
-  store volatile float %115, ptr %45, align 4, !tbaa !10
-  br label %116
+152:                                              ; preds = %12, %150
+  %153 = load volatile float, ptr %53, align 4, !tbaa !10
+  store volatile float %153, ptr %44, align 8, !tbaa !10
+  br label %154
 
-116:                                              ; preds = %101, %114
-  %117 = load volatile float, ptr %63, align 4, !tbaa !10
-  store volatile float %117, ptr %54, align 4, !tbaa !10
-  br label %118
+154:                                              ; preds = %12, %152
+  %155 = load volatile float, ptr %62, align 8, !tbaa !10
+  store volatile float %155, ptr %53, align 4, !tbaa !10
+  br label %156
 
-118:                                              ; preds = %101, %116
-  %119 = load volatile float, ptr %72, align 4, !tbaa !10
-  store volatile float %119, ptr %63, align 4, !tbaa !10
-  br label %120
+156:                                              ; preds = %12, %154
+  %157 = load volatile float, ptr %71, align 4, !tbaa !10
+  store volatile float %157, ptr %62, align 8, !tbaa !10
+  br label %158
 
-120:                                              ; preds = %101, %118
-  br label %145
-
-121:                                              ; preds = %145
-  %122 = load i64, ptr %5, align 8, !tbaa !6
-  %123 = getelementptr inbounds nuw i8, ptr %5, i64 8
-  %124 = load i64, ptr %123, align 8, !tbaa !6
-  %125 = and i64 %124, %122
-  %126 = xor i64 %122, -1
-  %127 = getelementptr inbounds nuw i8, ptr %5, i64 16
-  %128 = load i64, ptr %127, align 8, !tbaa !6
-  %129 = and i64 %128, %126
-  %130 = or i64 %129, %125
-  %131 = getelementptr inbounds nuw i8, ptr %5, i64 24
-  %132 = load i64, ptr %131, align 8, !tbaa !6
-  %133 = and i64 %132, %124
-  %134 = xor i64 %132, -1
-  %135 = and i64 %128, %134
-  %136 = or i64 %133, %135
-  %137 = getelementptr inbounds nuw i8, ptr %5, i64 32
-  %138 = load i64, ptr %137, align 8, !tbaa !6
-  %139 = xor i64 %138, -1
-  %140 = and i64 %128, %139
-  %141 = xor i64 %140, %132
-  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %9) #2
-  %142 = xor i64 %136, %130
-  %143 = xor i64 %142, %141
-  store i64 %143, ptr %9, align 8, !tbaa !6
-  %144 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %12, ptr noundef nonnull %9, ptr noundef nonnull %4, i64 noundef 0) #2
-  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %9) #2
-  call void @llvm.lifetime.end.p0(i64 40, ptr nonnull %5) #2
+158:                                              ; preds = %12, %156
+  %159 = load i64, ptr %3, align 8, !tbaa !6
+  %160 = load i64, ptr %33, align 4, !tbaa !6
+  %161 = load i64, ptr %44, align 8, !tbaa !6
+  %162 = load i64, ptr %53, align 4, !tbaa !6
+  %163 = load i64, ptr %62, align 8, !tbaa !6
+  %164 = and i64 %160, %159
+  %165 = xor i64 %159, -1
+  %166 = and i64 %161, %165
+  %167 = or i64 %166, %164
+  %168 = and i64 %162, %160
+  %169 = xor i64 %162, -1
+  %170 = and i64 %161, %169
+  %171 = or i64 %168, %170
+  %172 = xor i64 %163, -1
+  %173 = and i64 %161, %172
+  %174 = xor i64 %173, %162
+  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %8) #2
+  %175 = xor i64 %171, %167
+  %176 = xor i64 %175, %174
+  store i64 %176, ptr %8, align 8, !tbaa !6
+  %177 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %11, ptr noundef nonnull %8, ptr noundef nonnull %4, i64 noundef 0) #2
+  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %8) #2
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %4) #2
   call void @llvm.lifetime.end.p0(i64 24, ptr nonnull %3) #2
   call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %2) #2
   call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %1) #2
   ret i32 0
-
-145:                                              ; preds = %120, %145
-  %146 = phi i64 [ %150, %145 ], [ 0, %120 ]
-  %147 = getelementptr inbounds nuw [6 x float], ptr %3, i64 0, i64 %146
-  %148 = load i64, ptr %147, align 4, !tbaa !6
-  %149 = getelementptr inbounds nuw [5 x i64], ptr %5, i64 0, i64 %146
-  store i64 %148, ptr %149, align 8, !tbaa !6
-  %150 = add nuw nsw i64 %146, 1
-  %151 = icmp eq i64 %150, 5
-  br i1 %151, label %121, label %145, !llvm.loop !17
 }
 
 ; Function Attrs: mustprogress nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
@@ -246,19 +290,15 @@ attributes #2 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:h313/llvm-duotronic.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147509687}
-!4 = !{i64 2147510199}
-!5 = !{i64 2147510711}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147510183}
+!4 = !{i64 2147510695}
+!5 = !{i64 2147511207}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"long", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}
 !9 = !{!"Simple C/C++ TBAA"}
 !10 = !{!11, !11, i64 0}
 !11 = !{!"float", !8, i64 0}
-!12 = distinct !{!12, !13, !14}
+!12 = distinct !{!12, !13}
 !13 = !{!"llvm.loop.mustprogress"}
-!14 = !{!"llvm.loop.unroll.disable"}
-!15 = distinct !{!15, !13, !14}
-!16 = distinct !{!16, !13, !14}
-!17 = distinct !{!17, !13, !14}

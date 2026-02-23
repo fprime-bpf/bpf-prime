@@ -35,71 +35,71 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   br i1 %18, label %19, label %9, !llvm.loop !11
 
 19:                                               ; preds = %9, %0
-  %20 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
-  %21 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %1, i32 noundef 0, i32 noundef 7) #2
-  %22 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
-  %23 = icmp eq ptr %22, null
-  br i1 %23, label %44, label %24
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
+  %20 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %1, i32 noundef 0, i32 noundef 7) #2
+  %21 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
+  %22 = icmp eq ptr %21, null
+  br i1 %22, label %43, label %23
 
-24:                                               ; preds = %19
-  %25 = getelementptr inbounds nuw i8, ptr %3, i64 24
-  br label %26
+23:                                               ; preds = %19
+  %24 = getelementptr inbounds nuw i8, ptr %3, i64 24
+  br label %25
 
-26:                                               ; preds = %24, %41
-  %27 = phi ptr [ %22, %24 ], [ %42, %41 ]
-  %28 = load i32, ptr %27, align 4, !tbaa !9
-  %29 = icmp eq i32 %28, 6
-  br i1 %29, label %38, label %30
+25:                                               ; preds = %23, %40
+  %26 = phi ptr [ %21, %23 ], [ %41, %40 ]
+  %27 = load i32, ptr %26, align 4, !tbaa !9
+  %28 = icmp eq i32 %27, 6
+  br i1 %28, label %37, label %29
 
-30:                                               ; preds = %26
-  %31 = add nsw i32 %28, 1
-  %32 = sext i32 %31 to i64
-  %33 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %32
-  %34 = load float, ptr %33, align 4, !tbaa !5
-  %35 = fdiv float %34, 1.500000e+00
-  %36 = sext i32 %28 to i64
-  %37 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %36
-  store float %35, ptr %37, align 4, !tbaa !5
-  br label %41
+29:                                               ; preds = %25
+  %30 = add nsw i32 %27, 1
+  %31 = sext i32 %30 to i64
+  %32 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %31
+  %33 = load float, ptr %32, align 4, !tbaa !5
+  %34 = fdiv float %33, 1.500000e+00
+  %35 = sext i32 %27 to i64
+  %36 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %35
+  store float %34, ptr %36, align 4, !tbaa !5
+  br label %40
 
-38:                                               ; preds = %26
-  %39 = load float, ptr %3, align 4, !tbaa !5
-  %40 = fdiv float %39, 1.500000e+00
-  store float %40, ptr %25, align 4, !tbaa !5
-  br label %41
+37:                                               ; preds = %25
+  %38 = load float, ptr %3, align 4, !tbaa !5
+  %39 = fdiv float %38, 1.500000e+00
+  store float %39, ptr %24, align 4, !tbaa !5
+  br label %40
 
-41:                                               ; preds = %38, %30
-  %42 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
-  %43 = icmp eq ptr %42, null
-  br i1 %43, label %44, label %26, !llvm.loop !14
+40:                                               ; preds = %37, %29
+  %41 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
+  %42 = icmp eq ptr %41, null
+  br i1 %42, label %43, label %25, !llvm.loop !13
 
-44:                                               ; preds = %41, %19
-  %45 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
-  %46 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %1, i32 noundef 0, i32 noundef 7) #2
-  %47 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
-  %48 = icmp eq ptr %47, null
-  br i1 %48, label %63, label %49
+43:                                               ; preds = %40, %19
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
+  %44 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %1, i32 noundef 0, i32 noundef 7) #2
+  %45 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
+  %46 = icmp eq ptr %45, null
+  br i1 %46, label %61, label %47
 
-49:                                               ; preds = %44, %49
-  %50 = phi ptr [ %61, %49 ], [ %47, %44 ]
-  %51 = load i32, ptr %50, align 4, !tbaa !9
-  %52 = sext i32 %51 to i64
-  %53 = getelementptr inbounds [7 x float], ptr %2, i64 0, i64 %52
+47:                                               ; preds = %43, %47
+  %48 = phi ptr [ %59, %47 ], [ %45, %43 ]
+  %49 = load i32, ptr %48, align 4, !tbaa !9
+  %50 = sext i32 %49 to i64
+  %51 = getelementptr inbounds [7 x float], ptr %2, i64 0, i64 %50
+  %52 = load float, ptr %51, align 4, !tbaa !5
+  %53 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %50
   %54 = load float, ptr %53, align 4, !tbaa !5
-  %55 = getelementptr inbounds [7 x float], ptr %3, i64 0, i64 %52
-  %56 = load float, ptr %55, align 4, !tbaa !5
+  %55 = fsub float %52, %54
+  %56 = fmul float %55, 0x3FA99999A0000000
+  store float %56, ptr %51, align 4, !tbaa !5
   %57 = fsub float %54, %56
-  %58 = fmul float %57, 0x3FA99999A0000000
-  store float %58, ptr %53, align 4, !tbaa !5
-  %59 = fsub float %56, %58
-  store float %59, ptr %55, align 4, !tbaa !5
-  %60 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %5, ptr noundef nonnull %50, ptr noundef nonnull %55, i64 noundef 0) #2
-  %61 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
-  %62 = icmp eq ptr %61, null
-  br i1 %62, label %63, label %49, !llvm.loop !15
+  store float %57, ptr %53, align 4, !tbaa !5
+  %58 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %5, ptr noundef nonnull %48, ptr noundef nonnull %53, i64 noundef 0) #2
+  %59 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
+  %60 = icmp eq ptr %59, null
+  br i1 %60, label %61, label %47, !llvm.loop !14
 
-63:                                               ; preds = %49, %44
-  %64 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
+61:                                               ; preds = %47, %43
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
   call void @llvm.lifetime.end.p0(i64 28, ptr nonnull %3) #2
   call void @llvm.lifetime.end.p0(i64 28, ptr nonnull %2) #2
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %1) #2
@@ -121,17 +121,16 @@ attributes #2 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147502526}
-!4 = !{i64 2147503038}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147502642}
+!4 = !{i64 2147503154}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"float", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !7, i64 0}
-!11 = distinct !{!11, !12, !13}
+!11 = distinct !{!11, !12}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = !{!"llvm.loop.unroll.disable"}
-!14 = distinct !{!14, !12, !13}
-!15 = distinct !{!15, !12, !13}
+!13 = distinct !{!13, !12}
+!14 = distinct !{!14, !12}
