@@ -4,9 +4,9 @@
 // \brief  cpp file for WasmSequencer component implementation class
 // ======================================================================
 
+#include <wasmtime.hh>
 #include "Components/WasmSequencer/WasmSequencer.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <wasmtime.hh>
 
 namespace Components {
 
@@ -21,6 +21,9 @@ WasmSequencer ::WasmSequencer(const char* const compName)
         {"bpf_map_lookup_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_lookup_elem)},
         {"bpf_map_update_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_update_elem)},
         {"bpf_map_delete_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_delete_elem)},
+        {"bpf_iter_num_new", wasmtime::Func::wrap(store, WasmSequencer::bpf_iter_num_new)},
+        {"bpf_iter_num_next", wasmtime::Func::wrap(store, WasmSequencer::bpf_iter_num_next)},
+        {"bpf_iter_num_destroy", wasmtime::Func::wrap(store, WasmSequencer::bpf_iter_num_destroy)},
         {"MAP_BY_FD", wasmtime::Func::wrap(store, WasmSequencer::MAP_BY_FD)},
     };
     
