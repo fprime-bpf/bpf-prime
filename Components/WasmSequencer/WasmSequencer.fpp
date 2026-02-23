@@ -29,6 +29,9 @@ module Components {
         severity warning high \
         format "Failed to register BPF functions in VM {} "
 
+        @ Run wasm benchmark, return runtime (IN)
+        sync input port getBenchmark: RunWasmBenchmark
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

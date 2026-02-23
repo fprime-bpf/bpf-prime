@@ -132,7 +132,8 @@ module BPFPrimeTest {
     }
   
     connections BPFPrimeTest {
-      tests.getVmBenchmark -> bpfSequencer.getVmBenchmark
+      tests.getBpfBenchmark -> bpfSequencer.getBenchmark
+      tests.getWasmBenchmark -> wasmSequencer.getBenchmark
       rateGroup1.RateGroupMemberOut[0] -> bpfSequencer.schedIn # RUn this is 1 Hz
     }
 

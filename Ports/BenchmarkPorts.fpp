@@ -10,6 +10,7 @@ module Components {
         STAR_TRACKER
     }
 
-    port RunVmBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64
+    port RunBpfBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64
+    port RunWasmBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64
     
 }

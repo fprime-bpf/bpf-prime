@@ -150,10 +150,10 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     void schedIn_handler(FwIndexType portNum, U32 context) override;
 
-    //! Handler implementation for getVmBenchmark
+    //! Handler implementation for getBenchmark
     //!
-    //! Run vm benchmark, return runtime (IN)
-    F64 getVmBenchmark_handler(FwIndexType portNum,  //!< The port number
+    //! Run bpf benchmark, return runtime (IN)
+    F64 getBenchmark_handler(FwIndexType portNum,  //!< The port number
                                const Components::BENCHMARK_TEST& test,
                                bool compile) override;
 
@@ -264,21 +264,20 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
+    F64 get_benchmark_bpf(BENCHMARK_TEST test, bool compile);
+
   public:
     struct bpf_iter_num;
+
+    static Fw::CmdResponse result_to_response(Fw::Success result);
+
+    static U8 *read_from_file(const char *fn, FwSizeType& size, const char*& err_msg);
     
     static U32 bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept;
 
     static I32 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
     
     static void bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept;
-
-    F64 get_benchmark_vm(BENCHMARK_TEST test, bool compile);
-
-  public:
-    static Fw::CmdResponse result_to_response(Fw::Success result);
-
-    static U8 *read_from_file(const char *fn, FwSizeType& size, const char*& err_msg);
     
   private:
     bool validate_vm_id(U32 vmId);

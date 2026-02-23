@@ -36,6 +36,7 @@ set(SOURCE_FILES
 #
 set(MOD_DEPS
   Components_BpfSequencer
+  Components_WasmSequencer
 )
 
 register_fprime_module()

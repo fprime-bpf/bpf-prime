@@ -29,6 +29,17 @@ class WasmSequencer final : public WasmSequencerComponentBase {
 
   private:
     // ----------------------------------------------------------------------
+    // Handler implementations for typed input ports
+    // ----------------------------------------------------------------------
+
+    //! Handler implementation for getBenchmark
+    //!
+    //! Run wasm benchmark, return runtime (IN)
+    F64 getBenchmark_handler(FwIndexType portNum,  //!< The port number
+                             const Components::BENCHMARK_TEST& test,
+                             bool compile) override;
+  private:
+    // ----------------------------------------------------------------------
     // Handler implementations for commands
     // ----------------------------------------------------------------------
 
@@ -54,6 +65,7 @@ class WasmSequencer final : public WasmSequencerComponentBase {
   private:
     Fw::Success load(const char *sequenceFilePath);
     Fw::Success run();
+    F64 get_benchmark_wasm(Components::BENCHMARK_TEST test, bool compile);
 
     static uint32_t bpf_map_lookup_elem(uint64_t map_ptr, uint32_t key);
     static uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);

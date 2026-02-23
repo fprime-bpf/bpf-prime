@@ -73,7 +73,14 @@ Fw::Success WasmSequencer::run() {
         return Fw::Success::FAILURE;
     }
     
-    func.value().call(store, {}).unwrap();
+    auto run_res = func.value().call(store, {});
+
+    if (!run_res) {
+        Fw::LogStringArg errMsg(run_res.err().message().c_str());
+        this->log_ACTIVITY_HI_WasmRunFailed(errMsg);
+        return Fw::Success::FAILURE;
+    }
+
     return Fw::Success::SUCCESS;
 }
 

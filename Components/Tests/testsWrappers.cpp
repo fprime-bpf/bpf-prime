@@ -1,5 +1,7 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/WasmSequencer/WasmSequencer.hpp"
 #include "Components/Tests/Tests.hpp"
+#include "Components/Tests/NativeTests.hpp"
 
 #include <pthread.h>
 #include <sched.h>
@@ -60,7 +62,7 @@ const char *Tests::get_test_dir(BENCHMARK_TEST test) {
     }
 }
 
-F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
+F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
     timer::time_point start, end;
 
     if (compile) {
@@ -83,6 +85,28 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
     return std::chrono::duration<F64, ns::period>(end - start).count();
 }
 
+F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool compile) {
+    timer::time_point start, end;
+
+    if (compile) {
+        auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.wasm";
+        auto load_result = this->load(bytecode_path.c_str());
+
+
+        if (load_result != Fw::Success::SUCCESS)
+            return -1;
+    }
+
+    start = timer::now();
+    auto run_result = func.value().call(store, {});
+    end = timer::now();
+    
+    if (!run_result)
+        return -1;
+
+    return std::chrono::duration<F64, ns::period>(end - start).count();
+}
+
 namespace {
 const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
 
@@ -92,12 +116,14 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_times(float bpf_time, float native_time) {
+void output_pass_times(float bpf_time, float native_time, float wasm_time) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) 
         << "  - [" 
         << bpf_time
         << ", "
-        << native_time
+        << native_time 
+        << ", "
+        << wasm_time
         << "]\n";
 }
 }  // namespace
@@ -107,7 +133,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto bpf_time = this->getVmBenchmark_out(0, test, i == 0);
+        auto bpf_time = this->getBpfBenchmark_out(0, test, i == 0);
 
         if (bpf_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -123,8 +149,17 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
             return Fw::Success::FAILURE;
         }
+        
+        fill_maps(this);
+        auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
 
-        output_pass_times(bpf_time, native_time);
+        if (wasm_time < 0) {
+            Fw::LogStringArg test_name_arg(test_name);
+            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, wasm_time);
+            return Fw::Success::FAILURE;
+        }
+
+        output_pass_times(bpf_time, native_time, wasm_time);
     }
 
     return Fw::Success::SUCCESS;

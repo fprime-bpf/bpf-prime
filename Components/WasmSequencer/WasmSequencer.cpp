@@ -39,6 +39,14 @@ WasmSequencer ::WasmSequencer(const char* const compName)
 WasmSequencer ::~WasmSequencer() {}
 
 // ----------------------------------------------------------------------
+// Handler implementations for typed input ports
+// ----------------------------------------------------------------------
+
+F64 WasmSequencer ::getBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test, bool compile) {
+    return get_benchmark_wasm(test, compile);
+}
+
+// ----------------------------------------------------------------------
 // Handler implementations for commands
 // ----------------------------------------------------------------------
 
