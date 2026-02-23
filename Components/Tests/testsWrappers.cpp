@@ -13,25 +13,59 @@
 using timer = std::chrono::high_resolution_clock;
 using ns = std::chrono::nanoseconds;
 
+#define TIME_NATIVE_TEST(test)  \
+    test_name = #test;          \
+    start = timer::now();       \
+    exit_status = test::main(); \
+    end = timer::now();
+
 namespace Components {
 
+F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
+    timer::time_point start, end;
+    const char* test_name;
+    I32 exit_status;
+
+    switch (test) {
+        case BENCHMARK_TEST::ABERR: TIME_NATIVE_TEST(Aberr); break;
+        case BENCHMARK_TEST::AES: TIME_NATIVE_TEST(Aes); break;
+        case BENCHMARK_TEST::KALMAN: TIME_NATIVE_TEST(Kalman); break;
+        case BENCHMARK_TEST::LOW_PASS_FILTER: TIME_NATIVE_TEST(LowPassFilter); break;
+        case BENCHMARK_TEST::MATMUL: TIME_NATIVE_TEST(Matmul); break;
+        case BENCHMARK_TEST::NCC_SCORE: TIME_NATIVE_TEST(NCCScore); break;
+        case BENCHMARK_TEST::STAR_TRACKER: TIME_NATIVE_TEST(StarTracker); break;
+        default:
+            return -1;
+    }
+
+    if (exit_status) {
+        this->log_WARNING_HI_TestFailed(Fw::LogStringArg(test_name), exit_status);
+        return -1;
+    }
+
+    return std::chrono::duration<F64, ns::period>(end - start).count();
+}
+
+const char *Tests::get_test_dir(BENCHMARK_TEST test) {
+    switch (test) {
+        case BENCHMARK_TEST::ABERR: return "tests/aberr/";
+        case BENCHMARK_TEST::AES: return "tests/aes/";
+        case BENCHMARK_TEST::KALMAN: return "tests/kalman/";
+        case BENCHMARK_TEST::LOW_PASS_FILTER: return "tests/low_pass_filter/";
+        case BENCHMARK_TEST::MATMUL: return "tests/matmul/";
+        case BENCHMARK_TEST::NCC_SCORE: return "tests/nccscore/";
+        case BENCHMARK_TEST::STAR_TRACKER: return "tests/startracker/";
+        default:
+            return "";
+    }
+}
+
 F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
+    timer::time_point start, end;
+
     if (compile) {
-        const char* bytecode_path;
-
-        switch (test) {
-            case BENCHMARK_TEST::ABERR: bytecode_path = "tests/aberr/a.o"; break;
-            case BENCHMARK_TEST::AES: bytecode_path = "tests/aes/a.o"; break;
-            case BENCHMARK_TEST::KALMAN: bytecode_path = "tests/kalman/a.o"; break;
-            case BENCHMARK_TEST::LOW_PASS_FILTER: bytecode_path = "tests/low_pass_filter/a.o"; break;
-            case BENCHMARK_TEST::MATMUL: bytecode_path = "tests/matmul/a.o"; break;
-            case BENCHMARK_TEST::NCC_SCORE: bytecode_path = "tests/nccscore/a.o"; break;
-            case BENCHMARK_TEST::STAR_TRACKER: bytecode_path = "tests/startracker/a.o"; break;
-            default:
-                return -1;
-        }
-
-        auto load_result = this->load(test, bytecode_path);
+        auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.o";
+        auto load_result = this->load(test, bytecode_path.c_str());
 
         if (load_result != Fw::Success::SUCCESS)
             return -1;
@@ -39,9 +73,9 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
 
     auto vm = this->vms[test];
 
-    auto start = timer::now();
-    volatile auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
-    auto end = timer::now();
+    start = timer::now();
+    auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
+    end = timer::now();
 
     if (run_result)
         return -1;
@@ -50,7 +84,7 @@ F64 BpfSequencer::get_benchmark_vm(BENCHMARK_TEST test, bool compile) {
 }
 
 namespace {
-const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS_EBPF.yml";
+const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
 
 void create_output_file() {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
@@ -58,8 +92,13 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_time(float vm_time) {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << "  - " << vm_time << "\n";
+void output_pass_times(float bpf_time, float native_time) {
+    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) 
+        << "  - [" 
+        << bpf_time
+        << ", "
+        << native_time
+        << "]\n";
 }
 }  // namespace
 
@@ -68,15 +107,24 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto vm_time = this->getVmBenchmark_out(0, test, i == 0);
+        auto bpf_time = this->getVmBenchmark_out(0, test, i == 0);
 
-        if (vm_time < 0) {
+        if (bpf_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
-            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, vm_time);
+            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, bpf_time);
             return Fw::Success::FAILURE;
         }
 
-        output_pass_time(vm_time);
+        fill_maps(this);
+        auto native_time = this->get_benchmark_native(test);
+
+        if (native_time < 0) {
+            Fw::LogStringArg test_name_arg(test_name);
+            this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
+            return Fw::Success::FAILURE;
+        }
+
+        output_pass_times(bpf_time, native_time);
     }
 
     return Fw::Success::SUCCESS;
