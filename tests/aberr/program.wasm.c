@@ -6,7 +6,7 @@
 #define PI    3.14159265359f
 
 int main() {
-    uint64_t input_map = MAP_BY_FD(0), out_map = MAP_BY_FD(2);
+    uint64_t input_map = MAP_BY_FD(8), out_map = MAP_BY_FD(9);
     uint32_t res;
     float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;

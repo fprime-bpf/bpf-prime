@@ -12,7 +12,7 @@ namespace Components {
 namespace Aberr {
 
 int main() {
-    void *input_map = (void*)maps::map_by_fd(0), *out_map = (void*)maps::map_by_fd(2), *res;
+    void *input_map = (void*)maps::map_by_fd(8), *out_map = (void*)maps::map_by_fd(9), *res;
     float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;
     float beta2, gamma, t_emit, M, E, nu, r, h;

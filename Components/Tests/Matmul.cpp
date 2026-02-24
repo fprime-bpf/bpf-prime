@@ -10,7 +10,7 @@ namespace Components {
 namespace Matmul {
 
 int main() {
-    void *mat_map_1 = (void*)maps::map_by_fd(0), *mat_map_2 = (void*)maps::map_by_fd(1), *mat_map_res = (void*)maps::map_by_fd(2), *result;
+    void *mat_map_1 = (void*)maps::map_by_fd(5), *mat_map_2 = (void*)maps::map_by_fd(6), *mat_map_res = (void*)maps::map_by_fd(7), *result;
     float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
 
     // Read in 2 matrices

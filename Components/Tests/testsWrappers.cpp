@@ -169,23 +169,19 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 Fw::Success Tests::benchmark() {
     const U32 passes = 10000;
 
-    bpf_map_def map_def = {
-        .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
-        .key_size = 4,
-        .value_size = 4,
-        .max_entries = 2500,
-        .map_flags = 0
-    };
-    BpfSequencer::maps.create_map(map_def, 0);
+    const U32 max_entries[] = { 7, 7, 7, 7, 7, 100, 100, 100, 6, 3, 16, 256, 16, 2500, 25 };
 
-    map_def.max_entries = 256;
-    BpfSequencer::maps.create_map(map_def, 1);
+    for (U32 fd = 0; fd < (sizeof(max_entries) / sizeof(max_entries[0])); fd++) {
+        bpf_map_def map_def = {
+            .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
+            .key_size = 4,
+            .value_size = 4,
+            .max_entries = max_entries[fd],
+            .map_flags = 0
+        };
 
-    map_def.max_entries = 100;
-    BpfSequencer::maps.create_map(map_def, 2);
-
-    map_def.max_entries = 1;
-    BpfSequencer::maps.create_map(map_def, 4);
+        BpfSequencer::maps.create_map(map_def, fd);
+    }
 
     struct sched_param p;
     p.sched_priority = 20;

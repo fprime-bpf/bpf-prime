@@ -7,7 +7,7 @@ namespace Components {
 namespace Kalman {
 
 int main() {
-    void *in_map = (void*)maps::map_by_fd(0), *out_map = (void*)maps::map_by_fd(1), *result;
+    void *in_map = (void*)maps::map_by_fd(3), *out_map = (void*)maps::map_by_fd(4), *result;
     float ins[7], preds[7];
 
     // Read in position and attitude

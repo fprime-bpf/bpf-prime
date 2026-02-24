@@ -16,29 +16,99 @@ static char GF_Mult(char a, char b) {
   char shiftEscapesField = 0;
 
   // Loop through byte `b`
-  for (char i = 0; i < 8; i++) {
-    // If the LSB is set (i.e. we're not multiplying out by zero for this polynomial term)
-    // then we xor the result with `a` (i.e. adding the polynomial terms of a)
-    if (b & 1) {
-      result ^= a;
-    }
+  // // If the LSB is set (i.e. we're not multiplying out by zero for this polynomial term)
+  // // then we xor the result with `a` (i.e. adding the polynomial terms of a)
+  // if (b & 1) {
+  //   result ^= a;
+  // }
+  //
+  // // Double `a`, keeping track of whether that causes `a` to leave the field.
+  // shiftEscapesField = a & 0x80;
+  // a <<= 1;
+  //
+  // // Since the next bit we look at in `b` will represent multiplying the terms in `a`
+  // // by the next power of 2, we can achieve the same result by shifting `a` left.
+  // // If `a` left the field, we need to modulo with irreduciable polynomial term.
+  // if (shiftEscapesField) {
+  //   // Note that we use 0x1b instead of 0x11b. If we weren't taking advantage of
+  //   // u8 overflow (i.e. by using u16, we would use the "real" term)
+  //   a ^= 0x1b;
+  // }
+  //
+  // // Shift `b` down in order to look at the next LSB (worth twice as much in the multiplication)
+  // b >>= 1;
 
-    // Double `a`, keeping track of whether that causes `a` to leave the field.
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
+  // i = 0
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
 
-    // Since the next bit we look at in `b` will represent multiplying the terms in `a`
-    // by the next power of 2, we can achieve the same result by shifting `a` left.
-    // If `a` left the field, we need to modulo with irreduciable polynomial term.
-    if (shiftEscapesField) {
-      // Note that we use 0x1b instead of 0x11b. If we weren't taking advantage of
-      // u8 overflow (i.e. by using u16, we would use the "real" term)
-      a ^= 0x1b;
-    }
+  // i = 1
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
 
-    // Shift `b` down in order to look at the next LSB (worth twice as much in the multiplication)
-    b >>= 1;
-  }
+  // i = 2
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
+
+  // i = 3
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
+
+  // i = 4
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
+
+  // i = 5
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
+
+  // i = 6
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
+
+  // i = 7
+  if (b & 1)
+    result ^= a;
+  shiftEscapesField = a & 0x80;
+  a <<= 1;
+  if (shiftEscapesField)
+	a ^= 0x1b;
+  b >>= 1;
 
   return result;
 }
@@ -69,55 +139,147 @@ static void AES_ShiftRows(AES_Block_t block) {
 
 static void AES_MixColumns(AES_Block_t block) {
   char temp[4] = {0};
+  int base;
 
-  for (int i = 0; i < 4; i++) {
-    int base = i * 4;
-    temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
-    temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
-    temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
-    temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+  base = 0 * 4;
+  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
+  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
 
-    block[base] = temp[0];
-    block[base + 1] = temp[1];
-    block[base + 2] = temp[2];
-    block[base + 3] = temp[3];
-  }
+  block[base] = temp[0];
+  block[base + 1] = temp[1];
+  block[base + 2] = temp[2];
+  block[base + 3] = temp[3];
+
+  base = 1 * 4;
+  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
+  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+
+  block[base] = temp[0];
+  block[base + 1] = temp[1];
+  block[base + 2] = temp[2];
+  block[base + 3] = temp[3];
+
+  base = 2 * 4;
+  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
+  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+
+  block[base] = temp[0];
+  block[base + 1] = temp[1];
+  block[base + 2] = temp[2];
+  block[base + 3] = temp[3];
+
+  base = 3 * 4;
+  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
+  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+
+  block[base] = temp[0];
+  block[base + 1] = temp[1];
+  block[base + 2] = temp[2];
+  block[base + 3] = temp[3];
 }
 
 int main() {
-  void *block_map = (void*)maps::map_by_fd(0), *key_map = (void*)maps::map_by_fd(1), *result;
+  void *block_map = (void*)maps::map_by_fd(10), *key_map = (void*)maps::map_by_fd(11), *out_map = (void*)maps::map_by_fd(12), *result;
 
-  AES_Block_t block;
-  AES_Key128_t key;
+  AES_Block_t block = {12};
+  AES_Key128_t key = {13};
   AES_Block_t zero = {0};
-
+  
   for (int i = 0; i < 16; i++) {
     void *result = maps::bpf_map_lookup_elem(block_map, &i);
     block[i] = *(char *)result;
   }
 
   for (int i = 0; i < 256; i++) {
-    result = maps::bpf_map_lookup_elem(key_map, &i);
+    void *result = maps::bpf_map_lookup_elem(key_map, &i);
     key[i] = *(char *)result;
   }
 
-  // 1000 blocks
-  for (int i = 0; i < 1000; i++) {
-    // AddRoundKey
-    for (int col = 0; col < 4; col++) {
-      for (int row = 0; row < 4; row++) {
-        block[col * 4 + row] ^= zero[col * 4 + row];
-      }
-    }
+  // 128 blocks
+  for (int i = 0; i < 128; i++) {
 
-    //SubBytes
-    for (int col = 0; col < 4; col++) {
-      for (int row = 0; row < 4; row++) {
-        int index = col * 4 + row;
-        if (block[index] >= 0 && block[index] < 16)
-          block[index] = key[block[index]];
-      }
-    }
+    // AddRoundKey
+    block[0 * 4 + 0] ^= zero[0 * 4 + 0];
+    block[0 * 4 + 1] ^= zero[0 * 4 + 1];
+    block[0 * 4 + 2] ^= zero[0 * 4 + 2];
+    block[0 * 4 + 3] ^= zero[0 * 4 + 3];
+
+    block[1 * 4 + 0] ^= zero[1 * 4 + 0];
+    block[1 * 4 + 1] ^= zero[1 * 4 + 1];
+    block[1 * 4 + 2] ^= zero[1 * 4 + 2];
+    block[1 * 4 + 3] ^= zero[1 * 4 + 3];
+
+    block[2 * 4 + 0] ^= zero[2 * 4 + 0];
+    block[2 * 4 + 1] ^= zero[2 * 4 + 1];
+    block[2 * 4 + 2] ^= zero[2 * 4 + 2];
+    block[2 * 4 + 3] ^= zero[2 * 4 + 3];
+
+    block[3 * 4 + 0] ^= zero[3 * 4 + 0];
+    block[3 * 4 + 1] ^= zero[3 * 4 + 1];
+    block[3 * 4 + 2] ^= zero[3 * 4 + 2];
+    block[3 * 4 + 3] ^= zero[3 * 4 + 3];
+
+      //SubBytes
+    int index;
+    index = 0 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 0 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 0 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 0 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+
+    index = 1 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 1 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 1 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 1 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+
+    index = 2 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 2 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 2 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 2 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+
+    index = 3 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 3 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 3 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
+    index = 3 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+      block[index] = key[block[index]];
 
     AES_ShiftRows(block);
 

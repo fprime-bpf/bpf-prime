@@ -1,7 +1,7 @@
 #include "../wasm_shim.h"
 
 int main() {
-    uint64_t in_map = MAP_BY_FD(0), out_map = MAP_BY_FD(1);
+    uint64_t in_map = MAP_BY_FD(3), out_map = MAP_BY_FD(4);
     uint32_t result;
     float ins[7], preds[7];
 
