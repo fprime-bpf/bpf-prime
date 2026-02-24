@@ -71,13 +71,7 @@ class WasmSequencer final : public WasmSequencerComponentBase {
     static uint32_t bpf_map_lookup_elem(uint64_t map_ptr, uint32_t key);
     static uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
     static uint32_t bpf_map_delete_elem(uint64_t map_ptr, uint32_t key);
-    static U32 bpf_iter_num_new(wasmtime::Caller caller, int32_t it_ptr, int32_t start, int32_t end);
-    static I32 bpf_iter_num_next(wasmtime::Caller caller, int32_t it_ptr);
-    static void bpf_iter_num_destroy(wasmtime::Caller caller, int32_t it_ptr);
     static uint64_t MAP_BY_FD(uint32_t fd);
-
-    static BpfSequencer::bpf_iter_num *get_iter(wasmtime::Caller& caller, int32_t it_ptr);
-    static BpfSequencer::bpf_iter_num *get_iter(wasmtime::Caller& caller, int32_t it_ptr, uint8_t*& data_ptr);
 };
 
 }  // namespace Components
