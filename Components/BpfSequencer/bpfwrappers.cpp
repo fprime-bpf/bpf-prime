@@ -22,14 +22,19 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     if (!validate_vm_id(vmId))
         return Fw::Success::FAILURE;
 
-    // Create VM struct if it doesn't exist
+    // Reject reload if the VM is currently executing
+    if (vms[vmId] && vms[vmId]->is_running.load(std::memory_order_acquire)) {
+        Fw::LogStringArg errMsg("VM is currently running");
+        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+        return Fw::Success::FAILURE;
+    }
+
+    // Always create a fresh VM struct to reset compiled state
+    vms[vmId] = std::make_shared<BpfSequencerVM>();
     if (!vms[vmId]) {
-        vms[vmId] = std::make_shared<BpfSequencerVM>();
-        if (!vms[vmId]) {
-            Fw::LogStringArg errMsg("Failed to allocate VM");
-            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-            return Fw::Success::FAILURE;
-        }
+        Fw::LogStringArg errMsg("Failed to allocate VM");
+        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+        return Fw::Success::FAILURE;
     }
     auto vm = vms[vmId];
 

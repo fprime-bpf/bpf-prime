@@ -4,4 +4,5 @@ R00:00:00.000 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 0, 0, 7
 R00:00:00 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 1, BPF_MAP_TYPE_HASH, 4, 4, 7, 0
 
 R00:00:00 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/kalman/a.o"
-R00:00:00 BPFPrimeTest.bpfSequencer.RUN_SEQUENCE 0
+; Set kalman to run at 100 Hz with 1ms expected runtime
+R00:00:00 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 100.0, 1.0

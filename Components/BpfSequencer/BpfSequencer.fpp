@@ -16,6 +16,17 @@ module Components {
         include "BpfSequencerMapCommands.fppi"
         include "BpfSequencerMapEvents.fppi"
 
+        ############ Telemetry ############
+        @ Array type for executor tick durations (in microseconds)
+        @ Each element represents one worker/executor's tick duration
+        @ Index 0-4 are worker IDs, index 5 is reserved for future use
+        array ExecutorTickDurations = [6] U32
+
+        @ Per-executor tick durations from the most recent rate group tick (in microseconds)
+        @ Index corresponds to worker ID; unused workers report 0
+        @ U32 allows up to ~71 minutes in microseconds, sufficient for tick durations
+        telemetry executorTickDurations: ExecutorTickDurations
+
         # Ports for the Sequencer
         @ output port for commands from the sequencer
         output port cmdOut: Fw.Com

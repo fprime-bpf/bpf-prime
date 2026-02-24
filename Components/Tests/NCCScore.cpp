@@ -14,7 +14,7 @@ namespace Components {
 namespace NCCScore {
 
 int main() {
-    void *map_image_input = (void*)maps::map_by_fd(0), *map_match_image = (void*)maps::map_by_fd(1), *result;
+    void *map_image_input = (void*)maps::map_by_fd(13), *map_match_image = (void*)maps::map_by_fd(14), *result;    
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
 
     long best_match, best_score = 0xffffffff;
