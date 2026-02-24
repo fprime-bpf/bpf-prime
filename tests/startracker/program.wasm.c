@@ -1,23 +1,20 @@
-#include "NativeTests.hpp"
-#include "Components/BpfSequencer/maps/maps.hpp"
-#include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <cmath>
+#include "../wasm_shim.h"
+#include <math.h>
 
-namespace Components {
-
-namespace StarTracker {
+#define PI    3.14159265359f
 
 int main() {
-    void *star_coords_x = (void*)maps::map_by_fd(0), *star_coords_y = (void*)maps::map_by_fd(1), *out_map = (void*)maps::map_by_fd(2), *result;
+    uint64_t star_coords_x = MAP_BY_FD(0), star_coords_y = MAP_BY_FD(1), out_map = MAP_BY_FD(2);
+    uint32_t result;
     float star_x[4], star_y[4], distances[6], hash_val;
     long locs[5];
 
     // Fetch star infos from BPF maps
     for (long i = 0; i < 4; i++) {
-        result = maps::bpf_map_lookup_elem(star_coords_x, &i);
-        star_x[i] = *(float *)result;
-        result = maps::bpf_map_lookup_elem(star_coords_y, &i);
-        star_y[i] = *(float *)result;
+        result = bpf_map_lookup_elem(star_coords_x, i);
+        star_x[i] = *(float *)&result;
+        result = bpf_map_lookup_elem(star_coords_y, i);
+        star_y[i] = *(float *)&result;
     }
 
     // Get star distances
@@ -67,11 +64,7 @@ int main() {
     locs[2] = locs[3] ^ (locs[2] & ~locs[4]);
 
     long i = locs[0] ^ locs[1] ^ locs[2];
-    maps::bpf_map_update_elem(out_map, &i, (const void*)&hash_val, 0);
+    bpf_map_update_elem(out_map, i, hash_val, 0);
 
     return 0;
 }
-
-} // namespace StarTracker
-
-} // namespace Components

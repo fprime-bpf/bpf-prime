@@ -1,11 +1,7 @@
-#if __wasm__
-    #include "../wasm_shim.h"
-#else
-    #include "../bpf_shim.h"
-#endif
+#include "../bpf_shim.h"
 
 int main() {
-    BpfMapType in_map = MAP_BY_FD(0), out_map = MAP_BY_FD(1);
+    void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1);
     void *result;
     struct bpf_iter_num it;
     float ins[7], preds[7];

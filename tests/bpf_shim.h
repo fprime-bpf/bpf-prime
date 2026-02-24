@@ -4,8 +4,6 @@
 #define BPF_NOEXIST     1
 #define BPF_EXIST       2
 
-typedef void* BpfMapType;
-
 struct bpf_iter_num {
     unsigned long fd;
     long start;

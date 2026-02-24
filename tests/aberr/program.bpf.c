@@ -1,14 +1,10 @@
-#if __wasm__
-    #include "../wasm_shim.h"
-#else
-    #include "../bpf_shim.h"
-#endif
+#include "../bpf_shim.h"
 
 #define C_LIGHT 299792458.0f
 #define MAX_ITER 5
 #define PI    3.14159265359f
 
-static inline float sqroot(float s) { 
+inline float sqroot(float s) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -21,7 +17,7 @@ static inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-static inline float sine(float rad) {
+inline float sine(float rad) {
     float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -93,7 +89,7 @@ static inline float sine(float rad) {
     return v1 + frac * (v2 - v1);
 }
 
-static inline float cosine(float rad) {
+inline float cosine(float rad) {
     float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -165,7 +161,7 @@ static inline float cosine(float rad) {
     return v1 + frac * (v2 - v1);
 }
 
-static inline float _atan2(float y, float x) {
+inline float _atan2(float y, float x) {
     long y_bits = *(long *)&y;
     long x_bits = *(long *)&x;
     
@@ -217,7 +213,7 @@ static inline float _atan2(float y, float x) {
 }
 
 int main() {
-    BpfMapType input_map = MAP_BY_FD(0), out_map = MAP_BY_FD(2);
+    void *input_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(2);
     void *res;
     volatile float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;

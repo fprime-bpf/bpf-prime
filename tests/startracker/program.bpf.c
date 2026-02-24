@@ -1,12 +1,8 @@
-#if __wasm__
-    #include "../wasm_shim.h"
-#else
-    #include "../bpf_shim.h"
-#endif
+#include "../bpf_shim.h"
 
 #define PI    3.14159265359f
 
-static inline float sqroot(float s) { 
+inline float sqroot(float s) { 
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -19,7 +15,7 @@ static inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-static inline float sine(float rad) {
+inline float sine(float rad) {
     float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -91,7 +87,7 @@ static inline float sine(float rad) {
     return v1 + frac * (v2 - v1);
 }
 
-static inline float cosine(float rad) {
+inline float cosine(float rad) {
     float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -164,8 +160,7 @@ static inline float cosine(float rad) {
 }
 
 int main() {
-    BpfMapType star_coords_x = MAP_BY_FD(0), star_coords_y = MAP_BY_FD(1), out_map = MAP_BY_FD(2);
-    void *result;
+    void *star_coords_x = MAP_BY_FD(0), *star_coords_y = MAP_BY_FD(1), *out_map = MAP_BY_FD(2), *result;
     volatile float star_x[4], star_y[4], distances[6], hash_val;
     long locs[5];
 

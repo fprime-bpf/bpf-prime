@@ -1,18 +1,13 @@
-#include "NativeTests.hpp"
-#include "Components/BpfSequencer/maps/maps.hpp"
-#include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <cmath>
+#include "../wasm_shim.h"
+#include <math.h>
 
 #define C_LIGHT 299792458.0f
 #define MAX_ITER 5
 #define PI    3.14159265359f
 
-namespace Components {
-
-namespace Aberr {
-
 int main() {
-    void *input_map = (void*)maps::map_by_fd(0), *out_map = (void*)maps::map_by_fd(2), *res;
+    uint64_t input_map = MAP_BY_FD(0), out_map = MAP_BY_FD(2);
+    uint32_t res;
     float v[3], v_orig[3], s_obs[3], u_corrected[3];
     float t, a, e, omega, tau, dist, tau_old;
     float beta2, gamma, t_emit, M, E, nu, r, h;
@@ -22,7 +17,7 @@ int main() {
     
     // Load observer position into v
     for (long i = 0; i < 3; i++) {
-        res = maps::bpf_map_lookup_elem(input_map, &i);
+        res = bpf_map_lookup_elem(input_map, i);
         v[i] = *(float *)res;
         v_orig[i] = v[i];
     }
@@ -30,7 +25,7 @@ int main() {
     // Load and compute s_obs
     for (long i = 0; i < 3; i++) {
         long j = i + 3;
-        res = maps::bpf_map_lookup_elem(input_map, &j);
+        res = bpf_map_lookup_elem(input_map, j);
         s_obs[i] = (*(float *)res) / C_LIGHT;
     }
     
@@ -95,12 +90,8 @@ int main() {
     // Write results
     for (long i = 0; i < 3; i++) {
         float result = v_orig[i] + dist * u_corrected[i];
-        maps::bpf_map_update_elem(out_map, &i, &result, 0);
+        bpf_map_update_elem(out_map, i, result, 0);
     }
     
     return 0;
 }
-
-} // namespace Aberr
-
-} // namespace Components

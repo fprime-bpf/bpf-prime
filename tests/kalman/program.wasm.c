@@ -1,24 +1,19 @@
-#include "NativeTests.hpp"
-#include "Components/BpfSequencer/maps/maps.hpp"
-#include "Components/BpfSequencer/BpfSequencer.hpp"
-
-namespace Components {
-
-namespace Kalman {
+#include "../wasm_shim.h"
 
 int main() {
-    void *in_map = (void*)maps::map_by_fd(0), *out_map = (void*)maps::map_by_fd(1), *result;
+    uint64_t in_map = MAP_BY_FD(0), out_map = MAP_BY_FD(1);
+    uint32_t result;
     float ins[7], preds[7];
 
     // Read in position and attitude
     for (int i = 0; i < 7; i++) {
-        result = maps::bpf_map_lookup_elem(in_map, &i);
+        result = bpf_map_lookup_elem(in_map, i);
         ins[i] = *(float *)result;
         preds[i] = ins[i];
     }
 
     // Get predictions
-    for (int i = 0; i < 7; i++) {
+   for (int i = 0; i < 7; i++) {
         if (i != 6)
             preds[i] = preds[i + 1] / 1.5f;
         else
@@ -32,12 +27,8 @@ int main() {
 
         // Write out estimate to BPF map
         preds[i] = preds[i] - ins[i];
-        maps::bpf_map_update_elem(out_map, &i, &preds[i], 0);
+        bpf_map_update_elem(out_map, i, preds[i], 0);
     }
 
     return 0;
 }
-
-} // namespace Kalman
-
-} // namespace Components

@@ -1,17 +1,11 @@
-#include "NativeTests.hpp"
-#include "Components/BpfSequencer/maps/maps.hpp"
-#include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "../wasm_shim.h"
 
 #define NUM_ROUND_KEYS_128 (11)
-
-namespace Components {
-
-namespace Aes {
 
 typedef char AES_Block_t[16];
 typedef char AES_Key128_t[256];
 
-static char GF_Mult(char a, char b) {
+char GF_Mult(char a, char b) {
   char result = 0;
   char shiftEscapesField = 0;
 
@@ -43,7 +37,7 @@ static char GF_Mult(char a, char b) {
   return result;
 }
 
-static void AES_ShiftRows(AES_Block_t block) {
+void AES_ShiftRows(AES_Block_t block) {
   // Shift row 1
   char temp0 = block[1];
   block[1] = block[5];
@@ -67,7 +61,7 @@ static void AES_ShiftRows(AES_Block_t block) {
   block[3] = temp0;
 }
 
-static void AES_MixColumns(AES_Block_t block) {
+void AES_MixColumns(AES_Block_t block) {
   char temp[4] = {0};
 
   for (int i = 0; i < 4; i++) {
@@ -85,19 +79,20 @@ static void AES_MixColumns(AES_Block_t block) {
 }
 
 int main() {
-  void *block_map = (void*)maps::map_by_fd(0), *key_map = (void*)maps::map_by_fd(1), *result;
+  uint64_t block_map = MAP_BY_FD(0), key_map = MAP_BY_FD(1);
+  uint32_t result;
 
   AES_Block_t block;
   AES_Key128_t key;
   AES_Block_t zero = {0};
 
   for (int i = 0; i < 16; i++) {
-    void *result = maps::bpf_map_lookup_elem(block_map, &i);
-    block[i] = *(char *)result;
+    uint32_t result = bpf_map_lookup_elem(block_map, i);
+    block[i] = result;
   }
 
   for (int i = 0; i < 256; i++) {
-    result = maps::bpf_map_lookup_elem(key_map, &i);
+    result = bpf_map_lookup_elem(key_map, i);
     key[i] = *(char *)result;
   }
 
@@ -125,12 +120,8 @@ int main() {
   }
 
   for (int i = 0; i < 16; i++) {
-    maps::bpf_map_update_elem(key_map, &i, &block[i], 0);
+    bpf_map_update_elem(key_map, i, block[i], 0);
   }
 
   return 0;
 }
-
-} // namespace Aes
-
-} // namespace Components
