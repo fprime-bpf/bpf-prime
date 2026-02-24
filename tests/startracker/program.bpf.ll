@@ -9,7 +9,7 @@ target triple = "bpf"
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca [4 x float], align 4
   %2 = alloca [4 x float], align 4
-  %3 = alloca [6 x float], align 8
+  %3 = alloca [6 x float], align 4
   %4 = alloca float, align 4
   %5 = alloca [5 x i64], align 8
   %6 = alloca i64, align 8
@@ -50,214 +50,214 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   br i1 %29, label %30, label %16, !llvm.loop !12
 
 30:                                               ; preds = %16, %0
-  %31 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
-  %32 = load volatile float, ptr %1, align 4, !tbaa !6
-  %33 = getelementptr inbounds nuw i8, ptr %1, i64 4
-  %34 = load volatile float, ptr %33, align 4, !tbaa !6
-  %35 = load volatile float, ptr %1, align 4, !tbaa !6
-  %36 = load volatile float, ptr %33, align 4, !tbaa !6
-  %37 = load volatile float, ptr %2, align 4, !tbaa !6
-  %38 = getelementptr inbounds nuw i8, ptr %2, i64 4
-  %39 = load volatile float, ptr %38, align 4, !tbaa !6
-  %40 = load volatile float, ptr %2, align 4, !tbaa !6
-  %41 = load volatile float, ptr %38, align 4, !tbaa !6
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
+  %31 = load volatile float, ptr %1, align 4, !tbaa !6
+  %32 = getelementptr inbounds nuw i8, ptr %1, i64 4
+  %33 = load volatile float, ptr %32, align 4, !tbaa !6
+  %34 = load volatile float, ptr %1, align 4, !tbaa !6
+  %35 = load volatile float, ptr %32, align 4, !tbaa !6
+  %36 = load volatile float, ptr %2, align 4, !tbaa !6
+  %37 = getelementptr inbounds nuw i8, ptr %2, i64 4
+  %38 = load volatile float, ptr %37, align 4, !tbaa !6
+  %39 = load volatile float, ptr %2, align 4, !tbaa !6
+  %40 = load volatile float, ptr %37, align 4, !tbaa !6
   store volatile float 0.000000e+00, ptr %3, align 4, !tbaa !6
-  %42 = load volatile float, ptr %33, align 4, !tbaa !6
-  %43 = getelementptr inbounds nuw i8, ptr %1, i64 8
-  %44 = load volatile float, ptr %43, align 4, !tbaa !6
-  %45 = load volatile float, ptr %33, align 4, !tbaa !6
-  %46 = load volatile float, ptr %43, align 4, !tbaa !6
-  %47 = load volatile float, ptr %38, align 4, !tbaa !6
-  %48 = getelementptr inbounds nuw i8, ptr %2, i64 8
-  %49 = load volatile float, ptr %48, align 4, !tbaa !6
-  %50 = load volatile float, ptr %38, align 4, !tbaa !6
-  %51 = load volatile float, ptr %48, align 4, !tbaa !6
-  %52 = getelementptr inbounds nuw i8, ptr %3, i64 4
-  store volatile float 0.000000e+00, ptr %52, align 4, !tbaa !6
-  %53 = load volatile float, ptr %43, align 4, !tbaa !6
-  %54 = getelementptr inbounds nuw i8, ptr %1, i64 12
-  %55 = load volatile float, ptr %54, align 4, !tbaa !6
-  %56 = load volatile float, ptr %43, align 4, !tbaa !6
-  %57 = load volatile float, ptr %54, align 4, !tbaa !6
-  %58 = load volatile float, ptr %48, align 4, !tbaa !6
-  %59 = getelementptr inbounds nuw i8, ptr %2, i64 12
-  %60 = load volatile float, ptr %59, align 4, !tbaa !6
-  %61 = load volatile float, ptr %48, align 4, !tbaa !6
-  %62 = load volatile float, ptr %59, align 4, !tbaa !6
-  %63 = getelementptr inbounds nuw i8, ptr %3, i64 8
-  store volatile float 0.000000e+00, ptr %63, align 4, !tbaa !6
-  %64 = load volatile float, ptr %33, align 4, !tbaa !6
-  %65 = load volatile float, ptr %54, align 4, !tbaa !6
-  %66 = load volatile float, ptr %33, align 4, !tbaa !6
-  %67 = load volatile float, ptr %54, align 4, !tbaa !6
-  %68 = load volatile float, ptr %38, align 4, !tbaa !6
-  %69 = load volatile float, ptr %59, align 4, !tbaa !6
-  %70 = load volatile float, ptr %38, align 4, !tbaa !6
-  %71 = load volatile float, ptr %59, align 4, !tbaa !6
-  %72 = getelementptr inbounds nuw i8, ptr %3, i64 12
-  store volatile float 0.000000e+00, ptr %72, align 4, !tbaa !6
-  %73 = load volatile float, ptr %1, align 4, !tbaa !6
-  %74 = load volatile float, ptr %43, align 4, !tbaa !6
-  %75 = load volatile float, ptr %1, align 4, !tbaa !6
-  %76 = load volatile float, ptr %43, align 4, !tbaa !6
-  %77 = load volatile float, ptr %2, align 4, !tbaa !6
-  %78 = load volatile float, ptr %48, align 4, !tbaa !6
-  %79 = load volatile float, ptr %2, align 4, !tbaa !6
-  %80 = load volatile float, ptr %48, align 4, !tbaa !6
-  %81 = getelementptr inbounds nuw i8, ptr %3, i64 16
-  store volatile float 0.000000e+00, ptr %81, align 4, !tbaa !6
-  %82 = load volatile float, ptr %1, align 4, !tbaa !6
-  %83 = load volatile float, ptr %54, align 4, !tbaa !6
-  %84 = load volatile float, ptr %1, align 4, !tbaa !6
-  %85 = load volatile float, ptr %54, align 4, !tbaa !6
-  %86 = load volatile float, ptr %2, align 4, !tbaa !6
-  %87 = load volatile float, ptr %59, align 4, !tbaa !6
-  %88 = load volatile float, ptr %2, align 4, !tbaa !6
-  %89 = load volatile float, ptr %59, align 4, !tbaa !6
-  %90 = getelementptr inbounds nuw i8, ptr %3, i64 20
-  store volatile float 0.000000e+00, ptr %90, align 4, !tbaa !6
-  %91 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 6) #2
-  %92 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %93 = icmp eq ptr %92, null
-  br i1 %93, label %111, label %94
+  %41 = load volatile float, ptr %32, align 4, !tbaa !6
+  %42 = getelementptr inbounds nuw i8, ptr %1, i64 8
+  %43 = load volatile float, ptr %42, align 4, !tbaa !6
+  %44 = load volatile float, ptr %32, align 4, !tbaa !6
+  %45 = load volatile float, ptr %42, align 4, !tbaa !6
+  %46 = load volatile float, ptr %37, align 4, !tbaa !6
+  %47 = getelementptr inbounds nuw i8, ptr %2, i64 8
+  %48 = load volatile float, ptr %47, align 4, !tbaa !6
+  %49 = load volatile float, ptr %37, align 4, !tbaa !6
+  %50 = load volatile float, ptr %47, align 4, !tbaa !6
+  %51 = getelementptr inbounds nuw i8, ptr %3, i64 4
+  store volatile float 0.000000e+00, ptr %51, align 4, !tbaa !6
+  %52 = load volatile float, ptr %42, align 4, !tbaa !6
+  %53 = getelementptr inbounds nuw i8, ptr %1, i64 12
+  %54 = load volatile float, ptr %53, align 4, !tbaa !6
+  %55 = load volatile float, ptr %42, align 4, !tbaa !6
+  %56 = load volatile float, ptr %53, align 4, !tbaa !6
+  %57 = load volatile float, ptr %47, align 4, !tbaa !6
+  %58 = getelementptr inbounds nuw i8, ptr %2, i64 12
+  %59 = load volatile float, ptr %58, align 4, !tbaa !6
+  %60 = load volatile float, ptr %47, align 4, !tbaa !6
+  %61 = load volatile float, ptr %58, align 4, !tbaa !6
+  %62 = getelementptr inbounds nuw i8, ptr %3, i64 8
+  store volatile float 0.000000e+00, ptr %62, align 4, !tbaa !6
+  %63 = load volatile float, ptr %32, align 4, !tbaa !6
+  %64 = load volatile float, ptr %53, align 4, !tbaa !6
+  %65 = load volatile float, ptr %32, align 4, !tbaa !6
+  %66 = load volatile float, ptr %53, align 4, !tbaa !6
+  %67 = load volatile float, ptr %37, align 4, !tbaa !6
+  %68 = load volatile float, ptr %58, align 4, !tbaa !6
+  %69 = load volatile float, ptr %37, align 4, !tbaa !6
+  %70 = load volatile float, ptr %58, align 4, !tbaa !6
+  %71 = getelementptr inbounds nuw i8, ptr %3, i64 12
+  store volatile float 0.000000e+00, ptr %71, align 4, !tbaa !6
+  %72 = load volatile float, ptr %1, align 4, !tbaa !6
+  %73 = load volatile float, ptr %42, align 4, !tbaa !6
+  %74 = load volatile float, ptr %1, align 4, !tbaa !6
+  %75 = load volatile float, ptr %42, align 4, !tbaa !6
+  %76 = load volatile float, ptr %2, align 4, !tbaa !6
+  %77 = load volatile float, ptr %47, align 4, !tbaa !6
+  %78 = load volatile float, ptr %2, align 4, !tbaa !6
+  %79 = load volatile float, ptr %47, align 4, !tbaa !6
+  %80 = getelementptr inbounds nuw i8, ptr %3, i64 16
+  store volatile float 0.000000e+00, ptr %80, align 4, !tbaa !6
+  %81 = load volatile float, ptr %1, align 4, !tbaa !6
+  %82 = load volatile float, ptr %53, align 4, !tbaa !6
+  %83 = load volatile float, ptr %1, align 4, !tbaa !6
+  %84 = load volatile float, ptr %53, align 4, !tbaa !6
+  %85 = load volatile float, ptr %2, align 4, !tbaa !6
+  %86 = load volatile float, ptr %58, align 4, !tbaa !6
+  %87 = load volatile float, ptr %2, align 4, !tbaa !6
+  %88 = load volatile float, ptr %58, align 4, !tbaa !6
+  %89 = getelementptr inbounds nuw i8, ptr %3, i64 20
+  store volatile float 0.000000e+00, ptr %89, align 4, !tbaa !6
+  %90 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 6) #2
+  %91 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %92 = icmp eq ptr %91, null
+  br i1 %92, label %110, label %93
 
-94:                                               ; preds = %30, %94
-  %95 = phi ptr [ %109, %94 ], [ %92, %30 ]
-  %96 = phi i64 [ %108, %94 ], [ 0, %30 ]
+93:                                               ; preds = %30, %93
+  %94 = phi ptr [ %108, %93 ], [ %91, %30 ]
+  %95 = phi i64 [ %107, %93 ], [ 0, %30 ]
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %8)
-  %97 = load i32, ptr %95, align 4, !tbaa !10
-  %98 = sext i32 %97 to i64
-  %99 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %98
-  %100 = load volatile float, ptr %99, align 4, !tbaa !6
-  %101 = fmul float %100, 1.000000e+04
-  store float %101, ptr %8, align 8, !tbaa !6
+  %96 = load i32, ptr %94, align 4, !tbaa !10
+  %97 = sext i32 %96 to i64
+  %98 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %97
+  %99 = load volatile float, ptr %98, align 4, !tbaa !6
+  %100 = fmul float %99, 1.000000e+04
+  store float %100, ptr %8, align 8, !tbaa !6
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %9)
-  %102 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %96
-  %103 = load volatile float, ptr %102, align 4, !tbaa !6
-  %104 = fmul float %103, 1.000000e+04
-  store float %104, ptr %9, align 8, !tbaa !6
-  %105 = load i64, ptr %8, align 8, !tbaa !15
-  %106 = load i64, ptr %9, align 8, !tbaa !15
-  %107 = icmp sgt i64 %105, %106
-  %108 = select i1 %107, i64 %98, i64 %96
+  %101 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %95
+  %102 = load volatile float, ptr %101, align 4, !tbaa !6
+  %103 = fmul float %102, 1.000000e+04
+  store float %103, ptr %9, align 8, !tbaa !6
+  %104 = load i64, ptr %8, align 8, !tbaa !14
+  %105 = load i64, ptr %9, align 8, !tbaa !14
+  %106 = icmp sgt i64 %104, %105
+  %107 = select i1 %106, i64 %97, i64 %95
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %8)
-  %109 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %110 = icmp eq ptr %109, null
-  br i1 %110, label %111, label %94, !llvm.loop !17
+  %108 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %109 = icmp eq ptr %108, null
+  br i1 %109, label %110, label %93, !llvm.loop !16
 
-111:                                              ; preds = %94, %30
-  %112 = phi i64 [ 0, %30 ], [ %108, %94 ]
-  %113 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
-  %114 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 6) #2
-  %115 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %116 = icmp eq ptr %115, null
-  br i1 %116, label %129, label %117
+110:                                              ; preds = %93, %30
+  %111 = phi i64 [ 0, %30 ], [ %107, %93 ]
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
+  %112 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 6) #2
+  %113 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %114 = icmp eq ptr %113, null
+  br i1 %114, label %127, label %115
 
-117:                                              ; preds = %111
-  %118 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %112
-  br label %119
+115:                                              ; preds = %110
+  %116 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %111
+  br label %117
 
-119:                                              ; preds = %117, %119
-  %120 = phi ptr [ %115, %117 ], [ %127, %119 ]
-  %121 = load i32, ptr %120, align 4, !tbaa !10
-  %122 = sext i32 %121 to i64
-  %123 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %122
-  %124 = load volatile float, ptr %123, align 4, !tbaa !6
-  %125 = load volatile float, ptr %118, align 4, !tbaa !6
-  %126 = fdiv float %124, %125
-  store volatile float %126, ptr %123, align 4, !tbaa !6
-  %127 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %128 = icmp eq ptr %127, null
-  br i1 %128, label %129, label %119, !llvm.loop !18
+117:                                              ; preds = %115, %117
+  %118 = phi ptr [ %113, %115 ], [ %125, %117 ]
+  %119 = load i32, ptr %118, align 4, !tbaa !10
+  %120 = sext i32 %119 to i64
+  %121 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %120
+  %122 = load volatile float, ptr %121, align 4, !tbaa !6
+  %123 = load volatile float, ptr %116, align 4, !tbaa !6
+  %124 = fdiv float %122, %123
+  store volatile float %124, ptr %121, align 4, !tbaa !6
+  %125 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %126 = icmp eq ptr %125, null
+  br i1 %126, label %127, label %117, !llvm.loop !17
 
-129:                                              ; preds = %119, %111
-  %130 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
-  switch i64 %112, label %141 [
-    i64 0, label %131
-    i64 1, label %133
-    i64 2, label %135
-    i64 3, label %137
-    i64 4, label %139
+127:                                              ; preds = %117, %110
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
+  switch i64 %111, label %138 [
+    i64 0, label %128
+    i64 1, label %130
+    i64 2, label %132
+    i64 3, label %134
+    i64 4, label %136
   ]
 
-131:                                              ; preds = %129
-  %132 = load volatile float, ptr %52, align 4, !tbaa !6
-  store volatile float %132, ptr %3, align 4, !tbaa !6
-  br label %133
+128:                                              ; preds = %127
+  %129 = load volatile float, ptr %51, align 4, !tbaa !6
+  store volatile float %129, ptr %3, align 4, !tbaa !6
+  br label %130
 
-133:                                              ; preds = %129, %131
-  %134 = load volatile float, ptr %63, align 4, !tbaa !6
-  store volatile float %134, ptr %52, align 4, !tbaa !6
-  br label %135
+130:                                              ; preds = %127, %128
+  %131 = load volatile float, ptr %62, align 4, !tbaa !6
+  store volatile float %131, ptr %51, align 4, !tbaa !6
+  br label %132
 
-135:                                              ; preds = %129, %133
-  %136 = load volatile float, ptr %72, align 4, !tbaa !6
-  store volatile float %136, ptr %63, align 4, !tbaa !6
-  br label %137
+132:                                              ; preds = %127, %130
+  %133 = load volatile float, ptr %71, align 4, !tbaa !6
+  store volatile float %133, ptr %62, align 4, !tbaa !6
+  br label %134
 
-137:                                              ; preds = %129, %135
-  %138 = load volatile float, ptr %81, align 4, !tbaa !6
-  store volatile float %138, ptr %72, align 4, !tbaa !6
-  br label %139
+134:                                              ; preds = %127, %132
+  %135 = load volatile float, ptr %80, align 4, !tbaa !6
+  store volatile float %135, ptr %71, align 4, !tbaa !6
+  br label %136
 
-139:                                              ; preds = %129, %137
-  %140 = load volatile float, ptr %90, align 4, !tbaa !6
-  store volatile float %140, ptr %81, align 4, !tbaa !6
-  br label %141
+136:                                              ; preds = %127, %134
+  %137 = load volatile float, ptr %89, align 4, !tbaa !6
+  store volatile float %137, ptr %80, align 4, !tbaa !6
+  br label %138
 
-141:                                              ; preds = %129, %139
-  %142 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 5) #2
-  %143 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %144 = icmp eq ptr %143, null
-  br i1 %144, label %165, label %145
+138:                                              ; preds = %127, %136
+  %139 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 5) #2
+  %140 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %141 = icmp eq ptr %140, null
+  br i1 %141, label %162, label %142
 
-145:                                              ; preds = %141, %145
-  %146 = phi ptr [ %152, %145 ], [ %143, %141 ]
-  %147 = load i32, ptr %146, align 4, !tbaa !10
-  %148 = sext i32 %147 to i64
-  %149 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %148
-  %150 = load i64, ptr %149, align 4, !tbaa !15
-  %151 = getelementptr inbounds [5 x i64], ptr %5, i64 0, i64 %148
-  store i64 %150, ptr %151, align 8, !tbaa !15
-  %152 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
-  %153 = icmp eq ptr %152, null
-  br i1 %153, label %154, label %145, !llvm.loop !19
+142:                                              ; preds = %138, %142
+  %143 = phi ptr [ %149, %142 ], [ %140, %138 ]
+  %144 = load i32, ptr %143, align 4, !tbaa !10
+  %145 = sext i32 %144 to i64
+  %146 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %145
+  %147 = load i64, ptr %146, align 4, !tbaa !14
+  %148 = getelementptr inbounds [5 x i64], ptr %5, i64 0, i64 %145
+  store i64 %147, ptr %148, align 8, !tbaa !14
+  %149 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %150 = icmp eq ptr %149, null
+  br i1 %150, label %151, label %142, !llvm.loop !18
 
-154:                                              ; preds = %145
-  %155 = load i64, ptr %5, align 8, !tbaa !15
-  %156 = getelementptr inbounds nuw i8, ptr %5, i64 8
-  %157 = load i64, ptr %156, align 8, !tbaa !15
-  %158 = getelementptr inbounds nuw i8, ptr %5, i64 16
-  %159 = load i64, ptr %158, align 8, !tbaa !15
-  %160 = getelementptr inbounds nuw i8, ptr %5, i64 24
-  %161 = load i64, ptr %160, align 8, !tbaa !15
-  %162 = getelementptr inbounds nuw i8, ptr %5, i64 32
-  %163 = load i64, ptr %162, align 8, !tbaa !15
-  %164 = xor i64 %163, -1
-  br label %165
+151:                                              ; preds = %142
+  %152 = load i64, ptr %5, align 8, !tbaa !14
+  %153 = getelementptr inbounds nuw i8, ptr %5, i64 8
+  %154 = load i64, ptr %153, align 8, !tbaa !14
+  %155 = getelementptr inbounds nuw i8, ptr %5, i64 16
+  %156 = load i64, ptr %155, align 8, !tbaa !14
+  %157 = getelementptr inbounds nuw i8, ptr %5, i64 24
+  %158 = load i64, ptr %157, align 8, !tbaa !14
+  %159 = getelementptr inbounds nuw i8, ptr %5, i64 32
+  %160 = load i64, ptr %159, align 8, !tbaa !14
+  %161 = xor i64 %160, -1
+  br label %162
 
-165:                                              ; preds = %154, %141
-  %166 = phi i64 [ %164, %154 ], [ undef, %141 ]
-  %167 = phi i64 [ %161, %154 ], [ undef, %141 ]
-  %168 = phi i64 [ %159, %154 ], [ undef, %141 ]
-  %169 = phi i64 [ %157, %154 ], [ undef, %141 ]
-  %170 = phi i64 [ %155, %154 ], [ undef, %141 ]
-  %171 = call ptr inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
-  %172 = and i64 %169, %170
-  %173 = xor i64 %170, -1
-  %174 = and i64 %168, %173
-  %175 = or i64 %174, %172
-  %176 = and i64 %167, %169
-  %177 = xor i64 %167, -1
-  %178 = and i64 %168, %177
-  %179 = or i64 %176, %178
-  %180 = and i64 %168, %166
-  %181 = xor i64 %180, %167
-  %182 = xor i64 %179, %175
-  %183 = xor i64 %182, %181
-  store i64 %183, ptr %6, align 8, !tbaa !15
-  %184 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %12, ptr noundef nonnull %6, ptr noundef nonnull %4, i64 noundef 0) #2
+162:                                              ; preds = %151, %138
+  %163 = phi i64 [ %161, %151 ], [ undef, %138 ]
+  %164 = phi i64 [ %158, %151 ], [ undef, %138 ]
+  %165 = phi i64 [ %156, %151 ], [ undef, %138 ]
+  %166 = phi i64 [ %154, %151 ], [ undef, %138 ]
+  %167 = phi i64 [ %152, %151 ], [ undef, %138 ]
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
+  %168 = and i64 %166, %167
+  %169 = xor i64 %167, -1
+  %170 = and i64 %165, %169
+  %171 = or i64 %170, %168
+  %172 = and i64 %164, %166
+  %173 = xor i64 %164, -1
+  %174 = and i64 %165, %173
+  %175 = or i64 %172, %174
+  %176 = and i64 %165, %163
+  %177 = xor i64 %176, %164
+  %178 = xor i64 %175, %171
+  %179 = xor i64 %178, %177
+  store i64 %179, ptr %6, align 8, !tbaa !14
+  %180 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %12, ptr noundef nonnull %6, ptr noundef nonnull %4, i64 noundef 0) #2
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %7) #2
   call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %6) #2
   call void @llvm.lifetime.end.p0(i64 40, ptr nonnull %5) #2
@@ -283,21 +283,20 @@ attributes #2 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147510344}
-!4 = !{i64 2147510856}
-!5 = !{i64 2147511368}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147510360}
+!4 = !{i64 2147510872}
+!5 = !{i64 2147511384}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"float", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}
 !9 = !{!"Simple C/C++ TBAA"}
 !10 = !{!11, !11, i64 0}
 !11 = !{!"int", !8, i64 0}
-!12 = distinct !{!12, !13, !14}
+!12 = distinct !{!12, !13}
 !13 = !{!"llvm.loop.mustprogress"}
-!14 = !{!"llvm.loop.unroll.disable"}
-!15 = !{!16, !16, i64 0}
-!16 = !{!"long", !8, i64 0}
-!17 = distinct !{!17, !13, !14}
-!18 = distinct !{!18, !13, !14}
-!19 = distinct !{!19, !13, !14}
+!14 = !{!15, !15, i64 0}
+!15 = !{!"long", !8, i64 0}
+!16 = distinct !{!16, !13}
+!17 = distinct !{!17, !13}
+!18 = distinct !{!18, !13}
