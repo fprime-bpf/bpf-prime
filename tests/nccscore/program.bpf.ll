@@ -11,8 +11,8 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %4 = alloca i32, align 4
   %5 = alloca i32, align 4
   %6 = alloca i32, align 4
-  %7 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #3, !srcloc !3
-  %8 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #3, !srcloc !4
+  %7 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 13, i32 0, i32 0, i32 0) #3, !srcloc !3
+  %8 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 14, i32 0, i32 0, i32 0) #3, !srcloc !4
   call void @llvm.lifetime.start.p0(i64 10000, ptr nonnull %1) #3
   call void @llvm.lifetime.start.p0(i64 100, ptr nonnull %2) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %3) #3
@@ -267,8 +267,8 @@ attributes #3 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147503459}
-!4 = !{i64 2147503971}
+!3 = !{i64 2147503461}
+!4 = !{i64 2147503977}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}

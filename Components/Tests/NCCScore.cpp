@@ -63,6 +63,9 @@ int main() {
             }
         }
     }
+
+    int i = 0;
+    maps::bpf_map_update_elem(map_match_image, &i, &best_match, 0);
     
     return 0;
 }

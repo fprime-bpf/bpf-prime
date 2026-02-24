@@ -7,7 +7,7 @@
 #define IMG_SIZE (IMG_DIM * IMG_DIM)
 
 int main() {
-    uint64_t map_image_input = MAP_BY_FD(0), map_match_image = MAP_BY_FD(1);
+    uint64_t map_image_input = MAP_BY_FD(13), map_match_image = MAP_BY_FD(14);
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
     int best_match, best_score = 0xffffffff;
 

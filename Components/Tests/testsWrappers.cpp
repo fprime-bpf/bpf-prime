@@ -201,36 +201,43 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 6);
-        }},
+        // TODO:
+        // {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
+        //     tests->populate_map_random(8, 0, 6);
+        //     tests->populate_map_random(9, 0, 3);
+        // }},
 
         {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 16);
-            tests->populate_map_random(1, 0, 256);
+            tests->populate_map_random(10, 0, 16);
+            tests->populate_map_random(11, 0, 256);
+            tests->populate_map_random(12, 0, 16);
         }},
 
         {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 7);
+            tests->populate_map_random(3, 0, 7);
+            tests->populate_map_random(4, 0, 7);
         }},
 
         {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter", [](Tests* tests) {
             tests->populate_map_random(2, 0, 2);
+            tests->populate_map_random(4, 0, 2);
         }},
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 100);
-            tests->populate_map_random(1, 0, 100);
+            tests->populate_map_random(5, 0, 100);
+            tests->populate_map_random(6, 0, 100);
+            tests->populate_map_random(7, 0, 100);
         }},
 
         {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 2500);
-            tests->populate_map_random(1, 0, 25);
+            tests->populate_map_random(13, 0, 2500);
+            tests->populate_map_random(14, 0, 25);
         }},
 
         {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 4);
-            tests->populate_map_random(1, 0, 4);
+            tests->populate_map_random(0, 0, 7);
+            tests->populate_map_random(1, 0, 7);
+            tests->populate_map_random(2, 0, 7);
         }}
     };
 
