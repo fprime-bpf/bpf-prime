@@ -4,13 +4,13 @@ int main() {
     void *in_map = MAP_BY_FD(3), *out_map = MAP_BY_FD(4), *result;
     struct bpf_iter_num it;
     float ins[7], preds[7];
-    int *i;
+    int* i;
 
     // Read in position and attitude
     bpf_iter_num_new(&it, 0, 7);
     while ((i = bpf_iter_num_next(&it))) {
         result = bpf_map_lookup_elem(in_map, i);
-        ins[*i] = *(float *)result;
+        ins[*i] = *(float*)result;
         preds[*i] = ins[*i];
     }
     bpf_iter_num_destroy(&it);

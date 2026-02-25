@@ -1,35 +1,29 @@
 #include "../bpf_shim.h"
 
-#define MAT_DIM  10
+#define MAT_DIM 10
 #define MAT_SIZE (MAT_DIM * MAT_DIM)
 
 int main() {
-    void *mat_map_1 = MAP_BY_FD(5), *mat_map_2 = MAP_BY_FD(6), *mat_map_res = MAP_BY_FD(7), *result;
-    float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
+    volatile float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
+    struct bpf_iter_num it;
+    int* i;
 
-    // Read in 2 matrices
-    for (int i = 0; i < MAT_SIZE; i++) {
-        result = bpf_map_lookup_elem(mat_map_1, &i);
-        mat_1[i] = *(float *)result;
-
-        result = bpf_map_lookup_elem(mat_map_2, &i);
-        mat_2[i] = *(float *)result;
+    bpf_iter_num_new(&it, 0, MAT_SIZE);
+    while ((i = bpf_iter_num_next(&it))) {
+        mat_1[*i] = (float)bpf_rand_int(0, 100);
+        mat_2[*i] = (float)bpf_rand_int(0, 100);
+        mat_res[*i] = 0.0f;
     }
+    bpf_iter_num_destroy(&it);
 
-    // Do multiplication
-    for (int i = 0; i < MAT_DIM; i++) {
-        for (int j = 0; j < MAT_DIM; j++) {
-            mat_res[i * MAT_DIM + j] = 0.0f;
-            for (int k = 0; k < MAT_DIM; k++) {
-                mat_res[i * MAT_DIM + j] += mat_1[i * MAT_DIM + k] * mat_2[k * MAT_DIM + j];
-            }
-        }
+    bpf_iter_num_new(&it, 0, MAT_DIM * MAT_DIM * MAT_DIM);
+    while ((i = bpf_iter_num_next(&it))) {
+        int row = *i / (MAT_DIM * MAT_DIM);
+        int col = (*i / MAT_DIM) % MAT_DIM;
+        int k = *i % MAT_DIM;
+        mat_res[row * MAT_DIM + col] += mat_1[row * MAT_DIM + k] * mat_2[k * MAT_DIM + col];
     }
-
-    // Write back to map
-    for (int i = 0; i < MAT_SIZE; i++) {
-        bpf_map_update_elem(mat_map_res, &i, &mat_res[i], 0);
-    }
+    bpf_iter_num_destroy(&it);
 
     return 0;
 }
