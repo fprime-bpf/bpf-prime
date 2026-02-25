@@ -16,10 +16,10 @@
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "maps/maps.hpp"
 #include <array>
-#include <thread>
+#include <chrono>
 #include <map>
 #include <queue>
-#include <chrono>
+#include <thread>
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -293,6 +293,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static I32 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
     
     static void bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept;
+
+    static I32 bpf_rand_int(I32 min, I32 max) noexcept;
     
   private:
     bool validate_vm_id(U32 vmId);

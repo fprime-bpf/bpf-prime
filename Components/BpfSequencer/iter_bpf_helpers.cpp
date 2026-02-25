@@ -38,4 +38,8 @@ void BpfSequencer::bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept {
     it->fd = 2;
 }
 
+I32 BpfSequencer::bpf_rand_int(I32 min, I32 max) noexcept {
+    return rand() % (max - min + 1) + min;
+}
+
 }  // namespace Components
