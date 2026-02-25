@@ -13,16 +13,6 @@ R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 3, 0, 7
 R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 4, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
 R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 4, 0, 7
 
-; Matmul - 0.05 ms
-R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 5, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
-R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 5, 0, 100
-
-R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 6, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
-R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 6, 0, 100
-
-R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 7, BPF_MAP_TYPE_ARRAY, 4, 4, 100, 0
-R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 7, 0, 100
-
 ; ABERR
 R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 8, BPF_MAP_TYPE_ARRAY, 4, 4, 6, 0
 R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 8, 0, 6
@@ -51,13 +41,13 @@ R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 14, 0, 25
 
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/kalman/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/matmul/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/aberr/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/aes/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/aberr/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/aes/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/matmul/a.o"
 
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/startracker/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/matmul/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/matmul/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/matmul/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/aberr/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/aes/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/matmul/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/matmul/a.o"
 

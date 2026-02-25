@@ -45,6 +45,7 @@ bpf_mem_size(0) {
         { 5, { reinterpret_cast<void*>(bpf_iter_num_new), "bpf_iter_num_new" } },
         { 6, { reinterpret_cast<void*>(bpf_iter_num_next), "bpf_iter_num_destroy" } },
         { 7, { reinterpret_cast<void*>(bpf_iter_num_destroy), "bpf_iter_num_destroy" } },
+        { 8, { reinterpret_cast<void*>(bpf_rand_int), "bpf_rand_int" } },
     });
 }
 

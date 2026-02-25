@@ -17,6 +17,7 @@ static long (* const bpf_map_delete_elem)(void *map, const void *key) = (void *)
 static unsigned int (* const bpf_iter_num_new)(struct bpf_iter_num *it, int start, int end) = (void *) 5;
 static int *(* const bpf_iter_num_next)(struct bpf_iter_num *it) = (void *) 6;
 static void (* const bpf_iter_num_destroy)(struct bpf_iter_num *it) = (void *) 7;
+static int (* const bpf_rand_int)(int min, int max) = (void *) 8;
 
 #define MAP_BY_FD(MAP_FD) ({ \
     register void *map_ptr_reg asm("r1");                                \
