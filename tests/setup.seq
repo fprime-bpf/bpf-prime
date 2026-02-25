@@ -55,9 +55,9 @@ R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/matmul/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/aberr/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/aes/a.o"
 
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/startracker/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/matmul/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/matmul/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/matmul/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/aberr/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/aes/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/matmul/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/matmul/a.o"
 
