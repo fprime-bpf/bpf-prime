@@ -35,8 +35,11 @@ module Components {
         @ Run benchmarks, comparing native and vm time for each test
         async command BENCHMARK()
 
-        @ Run vm benchmark, return runtime (OUT)
-        output port getVmBenchmark: RunVmBenchmark
+        @ Run bpf benchmark, return runtime (OUT)
+        output port getBpfBenchmark: RunBpfBenchmark
+
+        @ Run wasm benchmark, return runtime (OUT)
+        output port getWasmBenchmark: RunWasmBenchmark
 
         event FailedBenchmarkTest(testName: string, passNum: U32, returnCode: F64) \
             severity warning low \

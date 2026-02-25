@@ -1,37 +1,42 @@
-#include "../bpf_shim.h"
+#include "NativeTests.hpp"
+#include "Components/BpfSequencer/maps/maps.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
 
 #define NUM_ROUND_KEYS_128 (11)
+
+namespace Components {
+
+namespace Aes {
 
 typedef char AES_Block_t[16];
 typedef char AES_Key128_t[256];
 
-__attribute__((always_inline))
-inline char GF_Mult(char a, char b) {
+static char GF_Mult(char a, char b) {
   char result = 0;
   char shiftEscapesField = 0;
 
   // Loop through byte `b`
-    // // If the LSB is set (i.e. we're not multiplying out by zero for this polynomial term)
-    // // then we xor the result with `a` (i.e. adding the polynomial terms of a)
-    // if (b & 1) {
-    //   result ^= a;
-    // }
-    //
-    // // Double `a`, keeping track of whether that causes `a` to leave the field.
-    // shiftEscapesField = a & 0x80;
-    // a <<= 1;
-    //
-    // // Since the next bit we look at in `b` will represent multiplying the terms in `a`
-    // // by the next power of 2, we can achieve the same result by shifting `a` left.
-    // // If `a` left the field, we need to modulo with irreduciable polynomial term.
-    // if (shiftEscapesField) {
-    //   // Note that we use 0x1b instead of 0x11b. If we weren't taking advantage of
-    //   // u8 overflow (i.e. by using u16, we would use the "real" term)
-    //   a ^= 0x1b;
-    // }
-    //
-    // // Shift `b` down in order to look at the next LSB (worth twice as much in the multiplication)
-    // b >>= 1;
+  // // If the LSB is set (i.e. we're not multiplying out by zero for this polynomial term)
+  // // then we xor the result with `a` (i.e. adding the polynomial terms of a)
+  // if (b & 1) {
+  //   result ^= a;
+  // }
+  //
+  // // Double `a`, keeping track of whether that causes `a` to leave the field.
+  // shiftEscapesField = a & 0x80;
+  // a <<= 1;
+  //
+  // // Since the next bit we look at in `b` will represent multiplying the terms in `a`
+  // // by the next power of 2, we can achieve the same result by shifting `a` left.
+  // // If `a` left the field, we need to modulo with irreduciable polynomial term.
+  // if (shiftEscapesField) {
+  //   // Note that we use 0x1b instead of 0x11b. If we weren't taking advantage of
+  //   // u8 overflow (i.e. by using u16, we would use the "real" term)
+  //   a ^= 0x1b;
+  // }
+  //
+  // // Shift `b` down in order to look at the next LSB (worth twice as much in the multiplication)
+  // b >>= 1;
 
   // i = 0
   if (b & 1)
@@ -108,8 +113,7 @@ inline char GF_Mult(char a, char b) {
   return result;
 }
 
-__attribute__((always_inline))
-inline void AES_ShiftRows(AES_Block_t block) {
+static void AES_ShiftRows(AES_Block_t block) {
   // Shift row 1
   char temp0 = block[1];
   block[1] = block[5];
@@ -133,8 +137,7 @@ inline void AES_ShiftRows(AES_Block_t block) {
   block[3] = temp0;
 }
 
-__attribute__((always_inline))
-inline void AES_MixColumns(AES_Block_t block) {
+static void AES_MixColumns(AES_Block_t block) {
   char temp[4] = {0};
   int base;
 
@@ -184,30 +187,25 @@ inline void AES_MixColumns(AES_Block_t block) {
 }
 
 int main() {
-  void *block_map = MAP_BY_FD(10), *key_map = MAP_BY_FD(11), *out_map = MAP_BY_FD(12), *result;
+  void *block_map = (void*)maps::map_by_fd(10), *key_map = (void*)maps::map_by_fd(11), *out_map = (void*)maps::map_by_fd(12), *result;
 
   AES_Block_t block = {12};
   AES_Key128_t key = {13};
   AES_Block_t zero = {0};
-
-  struct bpf_iter_num it;
-  int *i;
-
-  bpf_iter_num_new(&it, 0, 16);
-  while ((i = bpf_iter_num_next(&it))) {
-    void *result = bpf_map_lookup_elem(block_map, i);
-    block[*i] = *(char *)result;
+  
+  for (int i = 0; i < 16; i++) {
+    void *result = maps::bpf_map_lookup_elem(block_map, &i);
+    block[i] = *(char *)result;
   }
 
-  bpf_iter_num_new(&it, 0, 256);
-  while ((i = bpf_iter_num_next(&it))) {
-    void *result = bpf_map_lookup_elem(key_map, i);
-    key[*i] = *(char *)result;
+  for (int i = 0; i < 256; i++) {
+    void *result = maps::bpf_map_lookup_elem(key_map, &i);
+    key[i] = *(char *)result;
   }
 
   // 128 blocks
-  bpf_iter_num_new(&it, 0, 128);
-  while ((i = bpf_iter_num_next(&it))) {
+  for (int i = 0; i < 128; i++) {
+
     // AddRoundKey
     block[0 * 4 + 0] ^= zero[0 * 4 + 0];
     block[0 * 4 + 1] ^= zero[0 * 4 + 1];
@@ -288,10 +286,13 @@ int main() {
     AES_MixColumns(block);
   }
 
-  bpf_iter_num_new(&it, 0, 16);
-  while ((i = bpf_iter_num_next(&it))) {
-    bpf_map_update_elem(out_map, i, &block[*i], 0);
+  for (int i = 0; i < 16; i++) {
+    maps::bpf_map_update_elem(key_map, &i, &block[i], 0);
   }
 
   return 0;
 }
+
+} // namespace Aes
+
+} // namespace Components

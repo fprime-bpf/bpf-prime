@@ -55,7 +55,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store i8 %27, ptr %30, align 1, !tbaa !6
   %31 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
   %32 = icmp eq ptr %31, null
-  br i1 %32, label %33, label %24, !llvm.loop !14
+  br i1 %32, label %33, label %24, !llvm.loop !13
 
 33:                                               ; preds = %24, %20
   %34 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 128) #5
@@ -974,7 +974,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store i8 %853, ptr %52, align 1, !tbaa !6
   %854 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
   %855 = icmp eq ptr %854, null
-  br i1 %855, label %856, label %53, !llvm.loop !15
+  br i1 %855, label %856, label %53, !llvm.loop !14
 
 856:                                              ; preds = %225, %33
   %857 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #5
@@ -990,7 +990,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %865 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %6, ptr noundef nonnull %861, ptr noundef nonnull %864, i64 noundef 0) #5
   %866 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
   %867 = icmp eq ptr %866, null
-  br i1 %867, label %868, label %860, !llvm.loop !16
+  br i1 %867, label %868, label %860, !llvm.loop !15
 
 868:                                              ; preds = %860, %856
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %3) #5
@@ -1026,18 +1026,17 @@ attributes #5 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147509802}
-!4 = !{i64 2147510318}
-!5 = !{i64 2147510834}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147510015}
+!4 = !{i64 2147510531}
+!5 = !{i64 2147511047}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !7, i64 0}
-!11 = distinct !{!11, !12, !13}
+!11 = distinct !{!11, !12}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = !{!"llvm.loop.unroll.disable"}
-!14 = distinct !{!14, !12, !13}
-!15 = distinct !{!15, !12, !13}
-!16 = distinct !{!16, !12, !13}
+!13 = distinct !{!13, !12}
+!14 = distinct !{!14, !12}
+!15 = distinct !{!15, !12}

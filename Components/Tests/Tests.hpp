@@ -64,6 +64,7 @@ class Tests final : public TestsComponentBase {
     // ----------------------------------------------------------------------
   public:
     static void helper_example_noop() { }
+    static const char *get_test_dir(BENCHMARK_TEST test);
   private:
     Fw::CmdResponse test_status_to_response(const char *test_name, I32 result);
     Fw::Success populate_map_random(U32 fd, U32 start, U32 length);

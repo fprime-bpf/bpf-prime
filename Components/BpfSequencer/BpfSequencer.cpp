@@ -386,8 +386,8 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     schedule_jobs_for_tick(cycle_tick);
 }
 
-F64 BpfSequencer::getVmBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test, bool compile) {
-    return get_benchmark_vm(test, compile);
+F64 BpfSequencer::getBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test, bool compile) {
+    return get_benchmark_bpf(test, compile);
 }
 
 // Ping in and out
