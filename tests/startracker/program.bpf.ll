@@ -136,15 +136,15 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %102 = load volatile float, ptr %101, align 4, !tbaa !6
   %103 = fmul float %102, 1.000000e+04
   store float %103, ptr %9, align 8, !tbaa !6
-  %104 = load i64, ptr %8, align 8, !tbaa !14
-  %105 = load i64, ptr %9, align 8, !tbaa !14
+  %104 = load i64, ptr %8, align 8, !tbaa !15
+  %105 = load i64, ptr %9, align 8, !tbaa !15
   %106 = icmp sgt i64 %104, %105
   %107 = select i1 %106, i64 %97, i64 %95
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %8)
   %108 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
   %109 = icmp eq ptr %108, null
-  br i1 %109, label %110, label %93, !llvm.loop !16
+  br i1 %109, label %110, label %93, !llvm.loop !17
 
 110:                                              ; preds = %93, %30
   %111 = phi i64 [ 0, %30 ], [ %107, %93 ]
@@ -169,7 +169,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store volatile float %124, ptr %121, align 4, !tbaa !6
   %125 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
   %126 = icmp eq ptr %125, null
-  br i1 %126, label %127, label %117, !llvm.loop !17
+  br i1 %126, label %127, label %117, !llvm.loop !18
 
 127:                                              ; preds = %117, %110
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
@@ -217,23 +217,23 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %144 = load i32, ptr %143, align 4, !tbaa !10
   %145 = sext i32 %144 to i64
   %146 = getelementptr inbounds [6 x float], ptr %3, i64 0, i64 %145
-  %147 = load i64, ptr %146, align 4, !tbaa !14
+  %147 = load i64, ptr %146, align 4, !tbaa !15
   %148 = getelementptr inbounds [5 x i64], ptr %5, i64 0, i64 %145
-  store i64 %147, ptr %148, align 8, !tbaa !14
+  store i64 %147, ptr %148, align 8, !tbaa !15
   %149 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
   %150 = icmp eq ptr %149, null
-  br i1 %150, label %151, label %142, !llvm.loop !18
+  br i1 %150, label %151, label %142, !llvm.loop !19
 
 151:                                              ; preds = %142
-  %152 = load i64, ptr %5, align 8, !tbaa !14
+  %152 = load i64, ptr %5, align 8, !tbaa !15
   %153 = getelementptr inbounds nuw i8, ptr %5, i64 8
-  %154 = load i64, ptr %153, align 8, !tbaa !14
+  %154 = load i64, ptr %153, align 8, !tbaa !15
   %155 = getelementptr inbounds nuw i8, ptr %5, i64 16
-  %156 = load i64, ptr %155, align 8, !tbaa !14
+  %156 = load i64, ptr %155, align 8, !tbaa !15
   %157 = getelementptr inbounds nuw i8, ptr %5, i64 24
-  %158 = load i64, ptr %157, align 8, !tbaa !14
+  %158 = load i64, ptr %157, align 8, !tbaa !15
   %159 = getelementptr inbounds nuw i8, ptr %5, i64 32
-  %160 = load i64, ptr %159, align 8, !tbaa !14
+  %160 = load i64, ptr %159, align 8, !tbaa !15
   %161 = xor i64 %160, -1
   br label %162
 
@@ -256,7 +256,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %177 = xor i64 %176, %164
   %178 = xor i64 %175, %171
   %179 = xor i64 %178, %177
-  store i64 %179, ptr %6, align 8, !tbaa !14
+  store i64 %179, ptr %6, align 8, !tbaa !15
   %180 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %12, ptr noundef nonnull %6, ptr noundef nonnull %4, i64 noundef 0) #2
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %7) #2
   call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %6) #2
@@ -283,20 +283,21 @@ attributes #2 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147510360}
-!4 = !{i64 2147510872}
-!5 = !{i64 2147511384}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147510540}
+!4 = !{i64 2147511052}
+!5 = !{i64 2147511564}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"float", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}
 !9 = !{!"Simple C/C++ TBAA"}
 !10 = !{!11, !11, i64 0}
 !11 = !{!"int", !8, i64 0}
-!12 = distinct !{!12, !13}
+!12 = distinct !{!12, !13, !14}
 !13 = !{!"llvm.loop.mustprogress"}
-!14 = !{!15, !15, i64 0}
-!15 = !{!"long", !8, i64 0}
-!16 = distinct !{!16, !13}
-!17 = distinct !{!17, !13}
-!18 = distinct !{!18, !13}
+!14 = !{!"llvm.loop.unroll.disable"}
+!15 = !{!16, !16, i64 0}
+!16 = !{!"long", !8, i64 0}
+!17 = distinct !{!17, !13, !14}
+!18 = distinct !{!18, !13, !14}
+!19 = distinct !{!19, !13, !14}

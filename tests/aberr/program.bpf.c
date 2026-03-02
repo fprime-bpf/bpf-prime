@@ -173,7 +173,7 @@ inline float _atan2(float y, float x) {
     long abs_x_bits = x_bits & 0x7FFFFFFF;
 
     float div_result;
-    long use_x = (abs_x_bits > abs_y_bits) ? 1 : 0;  // Integer comparison only
+    int use_x = (abs_x_bits > abs_y_bits) ? 1 : 0;  // Integer comparison only
 
     if (use_x) {
         div_result = y / x;
