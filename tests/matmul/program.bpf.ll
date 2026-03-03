@@ -3,18 +3,18 @@ source_filename = "program.bpf.c"
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-f32:32:32"
 target triple = "bpf"
 
-%struct.bpf_iter_num = type { i64, i64, i64, i64 }
+%struct.bpf_iter_num = type { i32, i32, i32, i32 }
 
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca [100 x float], align 4
   %2 = alloca [100 x float], align 4
   %3 = alloca [100 x float], align 4
-  %4 = alloca %struct.bpf_iter_num, align 8
+  %4 = alloca %struct.bpf_iter_num, align 4
   call void @llvm.lifetime.start.p0(i64 400, ptr nonnull %1) #3
   call void @llvm.lifetime.start.p0(i64 400, ptr nonnull %2) #3
   call void @llvm.lifetime.start.p0(i64 400, ptr nonnull %3) #3
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %4) #3
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %4) #3
   %5 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %4, i32 noundef 0, i32 noundef 100) #3
   %6 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #3
   %7 = icmp eq ptr %6, null
@@ -74,11 +74,11 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store volatile float %50, ptr %48, align 4, !tbaa !7
   %51 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #3
   %52 = icmp eq ptr %51, null
-  br i1 %52, label %53, label %27, !llvm.loop !12
+  br i1 %52, label %53, label %27, !llvm.loop !11
 
 53:                                               ; preds = %27, %23
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %4) #3
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %4) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %4) #3
   call void @llvm.lifetime.end.p0(i64 400, ptr nonnull %3) #3
   call void @llvm.lifetime.end.p0(i64 400, ptr nonnull %2) #3
   call void @llvm.lifetime.end.p0(i64 400, ptr nonnull %1) #3
@@ -104,14 +104,13 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
 !3 = !{!4, !4, i64 0}
 !4 = !{!"int", !5, i64 0}
 !5 = !{!"omnipotent char", !6, i64 0}
 !6 = !{!"Simple C/C++ TBAA"}
 !7 = !{!8, !8, i64 0}
 !8 = !{!"float", !5, i64 0}
-!9 = distinct !{!9, !10, !11}
+!9 = distinct !{!9, !10}
 !10 = !{!"llvm.loop.mustprogress"}
-!11 = !{!"llvm.loop.unroll.disable"}
-!12 = distinct !{!12, !10, !11}
+!11 = distinct !{!11, !10}

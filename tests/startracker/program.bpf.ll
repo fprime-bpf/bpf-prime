@@ -3,7 +3,7 @@ source_filename = "program.bpf.c"
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-f32:32:32"
 target triple = "bpf"
 
-%struct.bpf_iter_num = type { i64, i64, i64, i64 }
+%struct.bpf_iter_num = type { i32, i32, i32, i32 }
 
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
@@ -13,7 +13,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %4 = alloca float, align 4
   %5 = alloca [5 x i64], align 8
   %6 = alloca i64, align 8
-  %7 = alloca %struct.bpf_iter_num, align 8
+  %7 = alloca %struct.bpf_iter_num, align 4
   %8 = alloca float, align 8
   %9 = alloca float, align 8
   %10 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
@@ -25,7 +25,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4) #2
   call void @llvm.lifetime.start.p0(i64 40, ptr nonnull %5) #2
   call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %6) #2
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %7) #2
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %7) #2
   %13 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 4) #2
   %14 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
   %15 = icmp eq ptr %14, null
@@ -258,7 +258,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %179 = xor i64 %178, %177
   store i64 %179, ptr %6, align 8, !tbaa !14
   %180 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %12, ptr noundef nonnull %6, ptr noundef nonnull %4, i64 noundef 0) #2
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %7) #2
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %7) #2
   call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %6) #2
   call void @llvm.lifetime.end.p0(i64 40, ptr nonnull %5) #2
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %4) #2
@@ -284,9 +284,9 @@ attributes #2 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147510360}
-!4 = !{i64 2147510872}
-!5 = !{i64 2147511384}
+!3 = !{i64 2147510535}
+!4 = !{i64 2147511047}
+!5 = !{i64 2147511559}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"float", !8, i64 0}
 !8 = !{!"omnipotent char", !9, i64 0}

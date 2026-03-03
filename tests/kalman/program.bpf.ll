@@ -3,16 +3,16 @@ source_filename = "program.bpf.c"
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-f32:32:32"
 target triple = "bpf"
 
-%struct.bpf_iter_num = type { i64, i64, i64, i64 }
+%struct.bpf_iter_num = type { i32, i32, i32, i32 }
 
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
-  %1 = alloca %struct.bpf_iter_num, align 8
+  %1 = alloca %struct.bpf_iter_num, align 4
   %2 = alloca [7 x float], align 4
   %3 = alloca [7 x float], align 4
   %4 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 3, i32 0, i32 0, i32 0) #2, !srcloc !3
   %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 4, i32 0, i32 0, i32 0) #2, !srcloc !4
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %1) #2
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %1) #2
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %2) #2
   call void @llvm.lifetime.start.p0(i64 28, ptr nonnull %3) #2
   %6 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %1, i32 noundef 0, i32 noundef 7) #2
@@ -102,7 +102,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
   call void @llvm.lifetime.end.p0(i64 28, ptr nonnull %3) #2
   call void @llvm.lifetime.end.p0(i64 28, ptr nonnull %2) #2
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %1) #2
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %1) #2
   ret i32 0
 }
 
@@ -122,8 +122,8 @@ attributes #2 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147502542}
-!4 = !{i64 2147503054}
+!3 = !{i64 2147502529}
+!4 = !{i64 2147503041}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"float", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
