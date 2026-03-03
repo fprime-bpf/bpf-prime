@@ -11,6 +11,7 @@
 #include <climits>
 #include <fstream>
 #include <random>
+#include <sstream>
 
 using timer = std::chrono::high_resolution_clock;
 using ns = std::chrono::nanoseconds;
@@ -116,20 +117,28 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_times(F64 bpf_time, F64 native_time, F64 wasm_time) {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) 
-        << "  - [" 
-        << bpf_time
-        << ", "
-        << native_time 
-        << ", "
-        << wasm_time
-        << "]\n";
+void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64, F64>>& test_results) {
+    output_new_test(test_name);
+
+    std::ostringstream oss;
+
+    for (auto& [bpf_time, native_time, wasm_time] : test_results) {
+        oss << "  - [" 
+            << bpf_time
+            << ", "
+            << native_time 
+            << ", "
+            << wasm_time
+            << "]\n";
+    }
+
+    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
 }
 }  // namespace
 
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {
-    output_new_test(test_name);
+    std::vector<std::tuple<F64, F64, F64>> test_results;
+    test_results.reserve(passes);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -159,9 +168,10 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        output_pass_times(bpf_time, native_time, wasm_time);
+        test_results.emplace_back(bpf_time, native_time, wasm_time);
     }
 
+    output_test_results(test_name, test_results);
     return Fw::Success::SUCCESS;
 }
 
