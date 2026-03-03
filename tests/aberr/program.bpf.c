@@ -1,7 +1,6 @@
 #include "../bpf_shim.h"
 
 #define C_LIGHT 299792458.0f
-#define MAX_ITER 5
 #define PI 3.14159265359f
 
 inline float sqroot(float s) {
@@ -219,7 +218,7 @@ int main() {
     float beta2, gamma, t_emit, M, E, nu, r, h;
     float s_dot_u, denom, factor, u_corr_mag;
     struct bpf_iter_num it;
-    int* i;
+    long* i;
 
     tau = 0.0f;
 
@@ -249,7 +248,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
-    bpf_iter_num_new(&it, 0, MAX_ITER);
+    bpf_iter_num_new(&it, 0, 5);
     while ((i = bpf_iter_num_next(&it))) {
         t_emit = t - tau;
         M = omega * t_emit;
