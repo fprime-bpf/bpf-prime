@@ -161,8 +161,8 @@ inline float cosine(float rad) {
 }
 
 inline float _atan2(float y, float x) {
-    long y_bits = *(long*)&y;
-    long x_bits = *(long*)&x;
+    long y_bits = *(long*)&y & 0xFFFFFFFF;
+    long x_bits = *(long*)&x & 0xFFFFFFFF;
 
     if (x_bits == 0 && y_bits == 0) {
         return 0.0f;
@@ -214,9 +214,9 @@ inline float _atan2(float y, float x) {
 int main() {
     void *input_map = MAP_BY_FD(8), *out_map = MAP_BY_FD(9), *res;
     volatile float v[3], v_orig[3], s_obs[3], u_corrected[3];
-    float t, a, e, omega, tau, dist, tau_old;
-    float beta2, gamma, t_emit, M, E, nu, r, h;
-    float s_dot_u, denom, factor, u_corr_mag;
+    volatile float t, a, e, omega, tau, dist, tau_old;
+    volatile float beta2, gamma, t_emit, M, E, nu, r, h;
+    volatile float s_dot_u, denom, factor, u_corr_mag;
     struct bpf_iter_num it;
     long* i;
 
