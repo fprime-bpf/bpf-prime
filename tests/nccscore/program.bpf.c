@@ -10,7 +10,7 @@ int main() {
     void *map_image_input = MAP_BY_FD(13), *map_match_image = MAP_BY_FD(14);
     void* result;
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
-    int best_match, best_score = 0xffffffff;
+    unsigned int best_match, best_score = 0xffffffff;
 
     // Read in input and match images
     for (int i = 0; i < IMG_SIZE; i++) {
@@ -23,28 +23,31 @@ int main() {
         match_image[i] = *(int*)result;
     }
 
-    for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
-        for (int j = 0; j < IMG_DIM - MATCH_DIM; j++) {
+    for (int i = 0; i <= IMG_DIM - MATCH_DIM; i++) {
+        for (int j = 0; j <= IMG_DIM - MATCH_DIM; j++) {
             int score = 0;
             int temp;
 
             for (int ii = 0; ii < MATCH_DIM; ii++) {
                 for (int jj = 0; jj < MATCH_DIM; jj++) {
-                    temp = ((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x000f) - (match_image[ii + jj] & 0x000f);
+                    int img_pixel = image_input[(i + ii) * IMG_DIM + (j + jj)];
+                    int match_pixel = match_image[ii * MATCH_DIM + jj];
+
+                    temp = (img_pixel & 0x000f) - (match_pixel & 0x000f);
                     if (temp > 0)
                         score += temp;
                     else
                         score -= temp;
 
-                    temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x00f0) >> 8) -
-                           ((match_image[ii + jj] & 0x00f0) >> 8);
+                    temp = ((img_pixel & 0x00f0) >> 4) -
+                           ((match_pixel & 0x00f0) >> 4);
                     if (temp > 0)
                         score += temp;
                     else
                         score -= temp;
 
-                    temp = (((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x0f00) >> 16) -
-                           ((match_image[ii + jj] & 0x0f00) >> 16);
+                    temp = ((img_pixel & 0x0f00) >> 8) -
+                           ((match_pixel & 0x0f00) >> 8);
                     if (temp > 0)
                         score += temp;
                     else
@@ -53,7 +56,7 @@ int main() {
             }
 
             if (score < best_score) {
-                best_match = i;
+                best_match = i * IMG_DIM + j;
                 best_score = score;
             }
         }
