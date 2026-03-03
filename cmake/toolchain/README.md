@@ -36,6 +36,6 @@ virtualenv venv
 source venv/bin/activate
 pip install -r lib/fprime/requirements.txt
 
-CC=clang CXX=clang++ fprime-util generate riscv -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_USE_LINKER=LLD -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_DIR=$(pwd)/cmake/toolchain/llvm-project/build/lib/cmake/llvm
+CC=clang CXX=clang++ fprime-util generate riscv -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_USE_LINKER=LLD -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_DIR=$(pwd)/cmake/toolchain/llvm-project/build/lib/cmake/llvm -DWASMTIME_TARGET=riscv64gc-unknown-linux-gnu
 fprime-util build riscv
 ```
