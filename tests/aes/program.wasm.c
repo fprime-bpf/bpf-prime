@@ -183,9 +183,9 @@ void AES_MixColumns(AES_Block_t block) {
 int main() {
   uint64_t block_map = MAP_BY_FD(10), key_map = MAP_BY_FD(11), out_map = MAP_BY_FD(12), *result;
 
-  AES_Block_t block = {12};
-  AES_Key128_t key = {13};
-  AES_Block_t zero = {0};
+  AES_Block_t block;
+  AES_Key128_t key;
+  AES_Block_t zero;
   
   for (int i = 0; i < 16; i++) {
     uint32_t result = bpf_map_lookup_elem(block_map, i);

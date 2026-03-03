@@ -116,7 +116,7 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_times(float bpf_time, float native_time, float wasm_time) {
+void output_pass_times(F64 bpf_time, F64 native_time, F64 wasm_time) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) 
         << "  - [" 
         << bpf_time

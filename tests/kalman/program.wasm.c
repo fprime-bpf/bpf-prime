@@ -8,7 +8,7 @@ int main() {
     // Read in position and attitude
     for (int i = 0; i < 7; i++) {
         result = bpf_map_lookup_elem(in_map, i);
-        ins[i] = *(float *)result;
+        ins[i] = *(float *)&result;
         preds[i] = ins[i];
     }
 

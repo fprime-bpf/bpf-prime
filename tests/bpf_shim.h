@@ -5,10 +5,10 @@
 #define BPF_EXIST       2
 
 struct bpf_iter_num {
-    unsigned long fd;
-    long start;
-    long end;
-    long curr;
+    int fd;
+    int start;
+    int end;
+    int curr;
 };
 
 static void *(* const bpf_map_lookup_elem)(void *map, const void *key) = (void *) 1;

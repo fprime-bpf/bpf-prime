@@ -17,7 +17,7 @@ int main() {
     void *map_image_input = (void*)maps::map_by_fd(13), *map_match_image = (void*)maps::map_by_fd(14), *result;    
     int image_input[IMG_SIZE], match_image[MATCH_SIZE];
 
-    long best_match, best_score = 0xffffffff;
+    int best_match, best_score = 0xffffffff;
 
     // Read in input and match images
     for (int i = 0; i < IMG_SIZE; i++){
@@ -30,13 +30,13 @@ int main() {
         match_image[i] = *(int *)result;
     }
 
-    for (long i = 0; i < IMG_DIM - MATCH_DIM; i++) {
-        for (long j = 0; j < IMG_DIM - MATCH_DIM; j++) {
-            long score = 0;
+    for (int i = 0; i < IMG_DIM - MATCH_DIM; i++) {
+        for (int j = 0; j < IMG_DIM - MATCH_DIM; j++) {
+            int score = 0;
             int temp;
 
-            for (long ii = 0; ii < MATCH_DIM; ii++) {
-                for (long jj = 0; jj < MATCH_DIM; jj++) {
+            for (int ii = 0; ii < MATCH_DIM; ii++) {
+                for (int jj = 0; jj < MATCH_DIM; jj++) {
                     temp = ((image_input[(i + ii) * IMG_DIM + j + jj]) & 0x000f) - (match_image[ii + jj] & 0x000f);
                     if (temp > 0)
                       score += temp;
