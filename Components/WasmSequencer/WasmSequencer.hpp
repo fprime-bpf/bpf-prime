@@ -71,6 +71,7 @@ class WasmSequencer final : public WasmSequencerComponentBase {
     static uint32_t bpf_map_lookup_elem(uint64_t map_ptr, uint32_t key);
     static uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
     static uint32_t bpf_map_delete_elem(uint64_t map_ptr, uint32_t key);
+    static int32_t bpf_rand_int(int32_t min, int32_t max);
     static uint64_t MAP_BY_FD(uint32_t fd);
 };
 

@@ -20,6 +20,10 @@ uint32_t WasmSequencer::bpf_map_delete_elem(uint64_t map_ptr, uint32_t key) {
     return maps::bpf_map_delete_elem(reinterpret_cast<void*>(map_ptr), &key);
 }
 
+int32_t WasmSequencer::bpf_rand_int(int32_t min, int32_t max) {
+    return BpfSequencer::bpf_rand_int(min, max);
+}
+
 uint64_t WasmSequencer::MAP_BY_FD(uint32_t fd) {
     return maps::map_by_fd(fd);
 }
@@ -58,10 +62,30 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
     auto instance = instance_res.ok();
-    
     const char *exported_func_name = "run";
-    func = std::get<wasmtime::Func>(*instance.get(store, exported_func_name));
-    
+
+auto export_opt = instance.get(store, exported_func_name);
+if (!export_opt) {
+    this->log_ACTIVITY_HI_WasmLoadFailed(
+        loggerFilePath,
+        Fw::LogStringArg("Export 'run' not found")
+    );
+    delete[] buffer;
+    return Fw::Success::FAILURE;
+}
+
+// Check that the export is actually a function
+if (!std::holds_alternative<wasmtime::Func>(*export_opt)) {
+    this->log_ACTIVITY_HI_WasmLoadFailed(
+        loggerFilePath,
+        Fw::LogStringArg("Export 'run' is not a function")
+    );
+    delete[] buffer;
+    return Fw::Success::FAILURE;
+}
+
+// Safe to extract
+func = std::get<wasmtime::Func>(*export_opt);
     delete[] buffer;
     return Fw::Success::SUCCESS;
 }

@@ -224,9 +224,6 @@ Fw::Success Tests::benchmark() {
         }},
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-            tests->populate_map_random(5, 0, 100);
-            tests->populate_map_random(6, 0, 100);
-            tests->populate_map_random(7, 0, 100);
         }},
 
         {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
