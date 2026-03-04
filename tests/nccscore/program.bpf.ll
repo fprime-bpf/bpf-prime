@@ -3,199 +3,186 @@ source_filename = "program.bpf.c"
 target datalayout = "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-f32:32:32"
 target triple = "bpf"
 
+%struct.bpf_iter_num = type { i32, i32, i32, i32 }
+
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca [2500 x i32], align 4
   %2 = alloca [25 x i32], align 4
   %3 = alloca i32, align 4
   %4 = alloca i32, align 4
-  %5 = alloca i32, align 4
-  %6 = alloca i32, align 4
-  %7 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 13, i32 0, i32 0, i32 0) #3, !srcloc !3
-  %8 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 14, i32 0, i32 0, i32 0) #3, !srcloc !4
+  %5 = alloca %struct.bpf_iter_num, align 4
+  %6 = alloca %struct.bpf_iter_num, align 4
+  %7 = alloca %struct.bpf_iter_num, align 4
+  %8 = alloca %struct.bpf_iter_num, align 4
+  %9 = alloca i32, align 4
+  %10 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 13, i32 0, i32 0, i32 0) #3, !srcloc !3
+  %11 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 14, i32 0, i32 0, i32 0) #3, !srcloc !4
   call void @llvm.lifetime.start.p0(i64 10000, ptr nonnull %1) #3
   call void @llvm.lifetime.start.p0(i64 100, ptr nonnull %2) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %3) #3
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4) #3
-  store i32 0, ptr %4, align 4, !tbaa !5
-  br label %10
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4)
+  store volatile i32 -1, ptr %4, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %5) #3
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %6) #3
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %7) #3
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %8) #3
+  %12 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %5, i32 noundef 0, i32 noundef 2500) #3
+  %13 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %14 = icmp eq ptr %13, null
+  br i1 %14, label %24, label %15
 
-9:                                                ; preds = %10
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %4) #3
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %5) #3
-  store i32 0, ptr %5, align 4, !tbaa !5
-  br label %19
+15:                                               ; preds = %0, %15
+  %16 = phi ptr [ %22, %15 ], [ %13, %0 ]
+  %17 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %10, ptr noundef nonnull %16) #3
+  %18 = load i32, ptr %17, align 4, !tbaa !5
+  %19 = load i32, ptr %16, align 4, !tbaa !5
+  %20 = sext i32 %19 to i64
+  %21 = getelementptr inbounds [2500 x i32], ptr %1, i64 0, i64 %20
+  store volatile i32 %18, ptr %21, align 4, !tbaa !5
+  %22 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %23 = icmp eq ptr %22, null
+  br i1 %23, label %24, label %15, !llvm.loop !9
 
-10:                                               ; preds = %0, %10
-  %11 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %7, ptr noundef nonnull %4) #3
-  %12 = load i32, ptr %11, align 4, !tbaa !5
-  %13 = load i32, ptr %4, align 4, !tbaa !5
-  %14 = sext i32 %13 to i64
-  %15 = getelementptr inbounds [2500 x i32], ptr %1, i64 0, i64 %14
-  store i32 %12, ptr %15, align 4, !tbaa !5
-  %16 = add nsw i32 %13, 1
-  store i32 %16, ptr %4, align 4, !tbaa !5
-  %17 = icmp slt i32 %13, 2499
-  br i1 %17, label %10, label %9, !llvm.loop !9
+24:                                               ; preds = %15, %0
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
+  %25 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %5, i32 noundef 0, i32 noundef 25) #3
+  %26 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %27 = icmp eq ptr %26, null
+  br i1 %27, label %37, label %28
 
-18:                                               ; preds = %19
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %5) #3
-  br label %27
+28:                                               ; preds = %24, %28
+  %29 = phi ptr [ %35, %28 ], [ %26, %24 ]
+  %30 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %11, ptr noundef nonnull %29) #3
+  %31 = load i32, ptr %30, align 4, !tbaa !5
+  %32 = load i32, ptr %29, align 4, !tbaa !5
+  %33 = sext i32 %32 to i64
+  %34 = getelementptr inbounds [25 x i32], ptr %2, i64 0, i64 %33
+  store volatile i32 %31, ptr %34, align 4, !tbaa !5
+  %35 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %36 = icmp eq ptr %35, null
+  br i1 %36, label %37, label %28, !llvm.loop !11
 
-19:                                               ; preds = %9, %19
-  %20 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %8, ptr noundef nonnull %5) #3
-  %21 = load i32, ptr %20, align 4, !tbaa !5
-  %22 = load i32, ptr %5, align 4, !tbaa !5
-  %23 = sext i32 %22 to i64
-  %24 = getelementptr inbounds [25 x i32], ptr %2, i64 0, i64 %23
-  store i32 %21, ptr %24, align 4, !tbaa !5
-  %25 = add nsw i32 %22, 1
-  store i32 %25, ptr %5, align 4, !tbaa !5
-  %26 = icmp slt i32 %22, 24
-  br i1 %26, label %19, label %18, !llvm.loop !11
+37:                                               ; preds = %28, %24
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
+  %38 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %5, i32 noundef 0, i32 noundef 46) #3
+  %39 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %40 = icmp eq ptr %39, null
+  br i1 %40, label %116, label %41
 
-27:                                               ; preds = %18, %38
-  %28 = phi i64 [ 0, %18 ], [ %39, %38 ]
-  %29 = phi i32 [ -1, %18 ], [ %148, %38 ]
-  %30 = phi i32 [ undef, %18 ], [ %147, %38 ]
-  %31 = mul nuw nsw i64 %28, 50
-  br label %34
+41:                                               ; preds = %37, %113
+  %42 = phi ptr [ %114, %113 ], [ %39, %37 ]
+  %43 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %6, i32 noundef 0, i32 noundef 46) #3
+  %44 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
+  %45 = icmp eq ptr %44, null
+  br i1 %45, label %113, label %46
 
-32:                                               ; preds = %38
-  store i32 %147, ptr %3, align 4
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6) #3
-  store i32 0, ptr %6, align 4, !tbaa !5
-  %33 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %8, ptr noundef nonnull %6, ptr noundef nonnull %3, i64 noundef 0) #3
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6) #3
+46:                                               ; preds = %41, %110
+  %47 = phi ptr [ %111, %110 ], [ %44, %41 ]
+  %48 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 5) #3
+  %49 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #3
+  %50 = icmp eq ptr %49, null
+  br i1 %50, label %101, label %51
+
+51:                                               ; preds = %46, %97
+  %52 = phi ptr [ %99, %97 ], [ %49, %46 ]
+  %53 = phi i32 [ %98, %97 ], [ 0, %46 ]
+  %54 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %8, i32 noundef 0, i32 noundef 5) #3
+  %55 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %8) #3
+  %56 = icmp eq ptr %55, null
+  br i1 %56, label %97, label %57
+
+57:                                               ; preds = %51, %57
+  %58 = phi ptr [ %95, %57 ], [ %55, %51 ]
+  %59 = phi i32 [ %94, %57 ], [ %53, %51 ]
+  %60 = load i32, ptr %42, align 4, !tbaa !5
+  %61 = load i32, ptr %52, align 4, !tbaa !5
+  %62 = add nsw i32 %61, %60
+  %63 = mul nsw i32 %62, 50
+  %64 = load i32, ptr %47, align 4, !tbaa !5
+  %65 = load i32, ptr %58, align 4, !tbaa !5
+  %66 = add nsw i32 %65, %64
+  %67 = add nsw i32 %66, %63
+  %68 = sext i32 %67 to i64
+  %69 = getelementptr inbounds [2500 x i32], ptr %1, i64 0, i64 %68
+  %70 = load volatile i32, ptr %69, align 4, !tbaa !5
+  %71 = mul nsw i32 %61, 5
+  %72 = add nsw i32 %65, %71
+  %73 = sext i32 %72 to i64
+  %74 = getelementptr inbounds [25 x i32], ptr %2, i64 0, i64 %73
+  %75 = load volatile i32, ptr %74, align 4, !tbaa !5
+  %76 = and i32 %70, 15
+  %77 = and i32 %75, 15
+  %78 = sub nsw i32 %76, %77
+  %79 = call i32 @llvm.abs.i32(i32 %78, i1 true)
+  %80 = add i32 %79, %59
+  %81 = lshr i32 %70, 4
+  %82 = and i32 %81, 15
+  %83 = lshr i32 %75, 4
+  %84 = and i32 %83, 15
+  %85 = sub nsw i32 %82, %84
+  %86 = call i32 @llvm.abs.i32(i32 %85, i1 true)
+  %87 = add i32 %80, %86
+  %88 = lshr i32 %70, 8
+  %89 = and i32 %88, 15
+  %90 = lshr i32 %75, 8
+  %91 = and i32 %90, 15
+  %92 = sub nsw i32 %89, %91
+  %93 = call i32 @llvm.abs.i32(i32 %92, i1 true)
+  %94 = add i32 %87, %93
+  %95 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %8) #3
+  %96 = icmp eq ptr %95, null
+  br i1 %96, label %97, label %57, !llvm.loop !12
+
+97:                                               ; preds = %57, %51
+  %98 = phi i32 [ %53, %51 ], [ %94, %57 ]
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %8) #3
+  %99 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #3
+  %100 = icmp eq ptr %99, null
+  br i1 %100, label %101, label %51, !llvm.loop !13
+
+101:                                              ; preds = %97, %46
+  %102 = phi i32 [ 0, %46 ], [ %98, %97 ]
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #3
+  %103 = load volatile i32, ptr %4, align 4, !tbaa !5
+  %104 = icmp ult i32 %102, %103
+  br i1 %104, label %105, label %110
+
+105:                                              ; preds = %101
+  %106 = load i32, ptr %42, align 4, !tbaa !5
+  %107 = mul nsw i32 %106, 50
+  %108 = load i32, ptr %47, align 4, !tbaa !5
+  %109 = add nsw i32 %107, %108
+  store volatile i32 %109, ptr %3, align 4, !tbaa !5
+  store volatile i32 %102, ptr %4, align 4, !tbaa !5
+  br label %110
+
+110:                                              ; preds = %105, %101
+  %111 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
+  %112 = icmp eq ptr %111, null
+  br i1 %112, label %113, label %46, !llvm.loop !14
+
+113:                                              ; preds = %110, %41
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %6) #3
+  %114 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %115 = icmp eq ptr %114, null
+  br i1 %115, label %116, label %41, !llvm.loop !15
+
+116:                                              ; preds = %113, %37
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %9) #3
+  store i32 0, ptr %9, align 4, !tbaa !5
+  %117 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %11, ptr noundef nonnull %9, ptr noundef nonnull %3, i64 noundef 0) #3
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %8) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %7) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %6) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %5) #3
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %4)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %3) #3
   call void @llvm.lifetime.end.p0(i64 100, ptr nonnull %2) #3
   call void @llvm.lifetime.end.p0(i64 10000, ptr nonnull %1) #3
   ret i32 0
-
-34:                                               ; preds = %27, %143
-  %35 = phi i64 [ 0, %27 ], [ %149, %143 ]
-  %36 = phi i32 [ %29, %27 ], [ %148, %143 ]
-  %37 = phi i32 [ %30, %27 ], [ %147, %143 ]
-  br label %41
-
-38:                                               ; preds = %143
-  %39 = add nuw nsw i64 %28, 1
-  %40 = icmp eq i64 %39, 46
-  br i1 %40, label %32, label %27, !llvm.loop !12
-
-41:                                               ; preds = %34, %41
-  %42 = phi i64 [ 0, %34 ], [ %141, %41 ]
-  %43 = phi i32 [ 0, %34 ], [ %140, %41 ]
-  %44 = add nuw nsw i64 %42, %28
-  %45 = mul nuw nsw i64 %44, 50
-  %46 = add nuw nsw i64 %45, %35
-  %47 = mul nuw nsw i64 %42, 5
-  %48 = getelementptr inbounds nuw [2500 x i32], ptr %1, i64 0, i64 %46
-  %49 = getelementptr inbounds nuw [25 x i32], ptr %2, i64 0, i64 %47
-  %50 = add nuw nsw i64 %46, 2
-  %51 = getelementptr inbounds nuw [2500 x i32], ptr %1, i64 0, i64 %50
-  %52 = load i32, ptr %51, align 4, !tbaa !5
-  %53 = add nuw nsw i64 %47, 2
-  %54 = getelementptr inbounds nuw [25 x i32], ptr %2, i64 0, i64 %53
-  %55 = load i32, ptr %54, align 4, !tbaa !5
-  %56 = lshr i32 %52, 4
-  %57 = lshr i32 %55, 4
-  %58 = load <2 x i32>, ptr %48, align 4, !tbaa !5
-  %59 = load i32, ptr %48, align 4, !tbaa !5
-  %60 = lshr i32 %59, 4
-  %61 = load <2 x i32>, ptr %49, align 4, !tbaa !5
-  %62 = load i32, ptr %49, align 4, !tbaa !5
-  %63 = lshr i32 %62, 4
-  %64 = lshr i32 %59, 8
-  %65 = lshr i32 %62, 8
-  %66 = shufflevector <2 x i32> %58, <2 x i32> poison, <2 x i32> <i32 1, i32 1>
-  %67 = lshr <2 x i32> %66, <i32 4, i32 8>
-  %68 = shufflevector <2 x i32> %61, <2 x i32> poison, <2 x i32> <i32 1, i32 1>
-  %69 = lshr <2 x i32> %68, <i32 4, i32 8>
-  %70 = shufflevector <2 x i32> %58, <2 x i32> poison, <8 x i32> <i32 0, i32 poison, i32 poison, i32 1, i32 poison, i32 poison, i32 poison, i32 poison>
-  %71 = insertelement <8 x i32> %70, i32 %60, i64 1
-  %72 = insertelement <8 x i32> %71, i32 %64, i64 2
-  %73 = insertelement <8 x i32> %72, i32 %52, i64 6
-  %74 = insertelement <8 x i32> %73, i32 %56, i64 7
-  %75 = shufflevector <2 x i32> %67, <2 x i32> poison, <8 x i32> <i32 0, i32 1, i32 poison, i32 poison, i32 poison, i32 poison, i32 poison, i32 poison>
-  %76 = shufflevector <8 x i32> %74, <8 x i32> %75, <8 x i32> <i32 0, i32 1, i32 2, i32 3, i32 8, i32 9, i32 6, i32 7>
-  %77 = and <8 x i32> %76, splat (i32 15)
-  %78 = shufflevector <2 x i32> %61, <2 x i32> poison, <8 x i32> <i32 0, i32 poison, i32 poison, i32 1, i32 poison, i32 poison, i32 poison, i32 poison>
-  %79 = insertelement <8 x i32> %78, i32 %63, i64 1
-  %80 = insertelement <8 x i32> %79, i32 %65, i64 2
-  %81 = insertelement <8 x i32> %80, i32 %55, i64 6
-  %82 = insertelement <8 x i32> %81, i32 %57, i64 7
-  %83 = shufflevector <2 x i32> %69, <2 x i32> poison, <8 x i32> <i32 0, i32 1, i32 poison, i32 poison, i32 poison, i32 poison, i32 poison, i32 poison>
-  %84 = shufflevector <8 x i32> %82, <8 x i32> %83, <8 x i32> <i32 0, i32 1, i32 2, i32 3, i32 8, i32 9, i32 6, i32 7>
-  %85 = and <8 x i32> %84, splat (i32 15)
-  %86 = sub nsw <8 x i32> %77, %85
-  %87 = call <8 x i32> @llvm.abs.v8i32(<8 x i32> %86, i1 true)
-  %88 = lshr i32 %52, 8
-  %89 = and i32 %88, 15
-  %90 = lshr i32 %55, 8
-  %91 = and i32 %90, 15
-  %92 = sub nsw i32 %89, %91
-  %93 = call i32 @llvm.abs.i32(i32 %92, i1 true)
-  %94 = add nuw nsw i64 %46, 3
-  %95 = getelementptr inbounds nuw [2500 x i32], ptr %1, i64 0, i64 %94
-  %96 = add nuw nsw i64 %47, 3
-  %97 = getelementptr inbounds nuw [25 x i32], ptr %2, i64 0, i64 %96
-  %98 = add nuw nsw i64 %46, 4
-  %99 = getelementptr inbounds nuw [2500 x i32], ptr %1, i64 0, i64 %98
-  %100 = add nuw nsw i64 %47, 4
-  %101 = getelementptr inbounds nuw [25 x i32], ptr %2, i64 0, i64 %100
-  %102 = load i32, ptr %99, align 4, !tbaa !5
-  %103 = load <2 x i32>, ptr %95, align 4, !tbaa !5
-  %104 = load i32, ptr %95, align 4, !tbaa !5
-  %105 = lshr i32 %104, 4
-  %106 = load i32, ptr %101, align 4, !tbaa !5
-  %107 = load <2 x i32>, ptr %97, align 4, !tbaa !5
-  %108 = load i32, ptr %97, align 4, !tbaa !5
-  %109 = lshr i32 %108, 4
-  %110 = lshr i32 %104, 8
-  %111 = lshr i32 %108, 8
-  %112 = shufflevector <2 x i32> %103, <2 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 poison, i32 1>
-  %113 = insertelement <4 x i32> %112, i32 %105, i64 1
-  %114 = insertelement <4 x i32> %113, i32 %110, i64 2
-  %115 = and <4 x i32> %114, splat (i32 15)
-  %116 = shufflevector <2 x i32> %107, <2 x i32> poison, <4 x i32> <i32 0, i32 poison, i32 poison, i32 1>
-  %117 = insertelement <4 x i32> %116, i32 %109, i64 1
-  %118 = insertelement <4 x i32> %117, i32 %111, i64 2
-  %119 = and <4 x i32> %118, splat (i32 15)
-  %120 = sub nsw <4 x i32> %115, %119
-  %121 = call <4 x i32> @llvm.abs.v4i32(<4 x i32> %120, i1 true)
-  %122 = lshr i32 %102, 4
-  %123 = and i32 %122, 15
-  %124 = lshr i32 %106, 4
-  %125 = and i32 %124, 15
-  %126 = sub nsw i32 %123, %125
-  %127 = call i32 @llvm.abs.i32(i32 %126, i1 true)
-  %128 = lshr i32 %102, 8
-  %129 = and i32 %128, 15
-  %130 = lshr i32 %106, 8
-  %131 = and i32 %130, 15
-  %132 = sub nsw i32 %129, %131
-  %133 = call i32 @llvm.abs.i32(i32 %132, i1 true)
-  %134 = call i32 @llvm.vector.reduce.add.v8i32(<8 x i32> %87)
-  %135 = call i32 @llvm.vector.reduce.add.v4i32(<4 x i32> %121)
-  %136 = add i32 %134, %135
-  %137 = add i32 %136, %93
-  %138 = add nuw nsw i32 %127, %133
-  %139 = add i32 %137, %138
-  %140 = add i32 %139, %43
-  %141 = add nuw nsw i64 %42, 1
-  %142 = icmp eq i64 %141, 5
-  br i1 %142, label %143, label %41, !llvm.loop !13
-
-143:                                              ; preds = %41
-  %144 = icmp ult i32 %140, %36
-  %145 = add nuw nsw i64 %35, %31
-  %146 = trunc nuw nsw i64 %145 to i32
-  %147 = select i1 %144, i32 %146, i32 %37
-  %148 = call i32 @llvm.umin.i32(i32 %140, i32 %36)
-  %149 = add nuw nsw i64 %35, 1
-  %150 = icmp eq i64 %149, 46
-  br i1 %150, label %38, label %34, !llvm.loop !14
 }
 
 ; Function Attrs: mustprogress nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
@@ -207,21 +194,6 @@ declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #1
 ; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
 declare i32 @llvm.abs.i32(i32, i1 immarg) #2
 
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare i32 @llvm.umin.i32(i32, i32) #2
-
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare <8 x i32> @llvm.abs.v8i32(<8 x i32>, i1 immarg) #2
-
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare i32 @llvm.vector.reduce.add.v8i32(<8 x i32>) #2
-
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare <4 x i32> @llvm.abs.v4i32(<4 x i32>, i1 immarg) #2
-
-; Function Attrs: nocallback nofree nosync nounwind speculatable willreturn memory(none)
-declare i32 @llvm.vector.reduce.add.v4i32(<4 x i32>) #2
-
 attributes #0 = { nounwind "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="duotronic" }
 attributes #1 = { mustprogress nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
 attributes #2 = { nocallback nofree nosync nounwind speculatable willreturn memory(none) }
@@ -232,9 +204,9 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147503628}
-!4 = !{i64 2147504144}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
+!3 = !{i64 2147504222}
+!4 = !{i64 2147504738}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
@@ -245,3 +217,4 @@ attributes #3 = { nounwind }
 !12 = distinct !{!12, !10}
 !13 = distinct !{!13, !10}
 !14 = distinct !{!14, !10}
+!15 = distinct !{!15, !10}
