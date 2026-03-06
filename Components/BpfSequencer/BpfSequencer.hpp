@@ -290,7 +290,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     static U32 bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept;
 
-    static I32 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
+    static I64 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
     
     static void bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept;
 
@@ -305,10 +305,10 @@ class BpfSequencer : public BpfSequencerComponentBase {
 };
 
 struct BpfSequencer::bpf_iter_num {
-    I32 fd;
-    I32 start;
-    I32 end;
-    I32 curr;
+    U64 fd;
+    I64 start;
+    I64 end;
+    I64 curr;
 };
 
 }  // namespace Components

@@ -71,7 +71,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
 40:                                               ; preds = %37, %29
   %41 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
   %42 = icmp eq ptr %41, null
-  br i1 %42, label %43, label %25, !llvm.loop !13
+  br i1 %42, label %43, label %25, !llvm.loop !14
 
 43:                                               ; preds = %40, %19
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
@@ -96,7 +96,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %58 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %5, ptr noundef nonnull %48, ptr noundef nonnull %53, i64 noundef 0) #2
   %59 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %1) #2
   %60 = icmp eq ptr %59, null
-  br i1 %60, label %61, label %47, !llvm.loop !14
+  br i1 %60, label %61, label %47, !llvm.loop !15
 
 61:                                               ; preds = %47, %43
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %1) #2
@@ -121,16 +121,17 @@ attributes #2 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147502529}
-!4 = !{i64 2147503041}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
+!3 = !{i64 2147502600}
+!4 = !{i64 2147503112}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"float", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"int", !7, i64 0}
-!11 = distinct !{!11, !12}
+!11 = distinct !{!11, !12, !13}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = distinct !{!13, !12}
-!14 = distinct !{!14, !12}
+!13 = !{!"llvm.loop.unroll.disable"}
+!14 = distinct !{!14, !12, !13}
+!15 = distinct !{!15, !12, !13}

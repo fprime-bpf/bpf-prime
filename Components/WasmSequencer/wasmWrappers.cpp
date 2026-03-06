@@ -62,30 +62,18 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
     auto instance = instance_res.ok();
+
     const char *exported_func_name = "run";
+    auto exported_func = instance.get(store, exported_func_name);
+    if (!exported_func) {
+        Fw::LogStringArg errMsg("Export not found");
+        this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
+        delete[] buffer;
+        return Fw::Success::FAILURE;
+    }
 
-auto export_opt = instance.get(store, exported_func_name);
-if (!export_opt) {
-    this->log_ACTIVITY_HI_WasmLoadFailed(
-        loggerFilePath,
-        Fw::LogStringArg("Export 'run' not found")
-    );
-    delete[] buffer;
-    return Fw::Success::FAILURE;
-}
+    func = std::get<wasmtime::Func>(*exported_func);
 
-// Check that the export is actually a function
-if (!std::holds_alternative<wasmtime::Func>(*export_opt)) {
-    this->log_ACTIVITY_HI_WasmLoadFailed(
-        loggerFilePath,
-        Fw::LogStringArg("Export 'run' is not a function")
-    );
-    delete[] buffer;
-    return Fw::Success::FAILURE;
-}
-
-// Safe to extract
-func = std::get<wasmtime::Func>(*export_opt);
     delete[] buffer;
     return Fw::Success::SUCCESS;
 }

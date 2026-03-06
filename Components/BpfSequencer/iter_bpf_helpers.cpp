@@ -23,14 +23,15 @@ U32 BpfSequencer::bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) 
     return 0;
 }
 
-I32 *BpfSequencer::bpf_iter_num_next(struct bpf_iter_num *it) noexcept {
+I64 *BpfSequencer::bpf_iter_num_next(struct bpf_iter_num *it) noexcept {
     if (it->fd != 1)
         return NULL;
 
-    if (it->curr + 1 == it->end)
+    it->curr += 1;
+
+    if (it->curr >= it->end)
         return NULL;
 
-    it->curr += 1;
     return &it->curr;
 }
 
