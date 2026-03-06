@@ -11,6 +11,7 @@
 #include <climits>
 #include <fstream>
 #include <random>
+#include <sstream>
 
 using timer = std::chrono::high_resolution_clock;
 using ns = std::chrono::nanoseconds;
@@ -116,20 +117,28 @@ void create_output_file() {
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
-void output_pass_times(float bpf_time, float native_time, float wasm_time) {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) 
-        << "  - [" 
-        << bpf_time
-        << ", "
-        << native_time 
-        << ", "
-        << wasm_time
-        << "]\n";
+void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64, F64>>& test_results) {
+    output_new_test(test_name);
+
+    std::ostringstream oss;
+
+    for (auto& [bpf_time, native_time, wasm_time] : test_results) {
+        oss << "  - [" 
+            << bpf_time
+            << ", "
+            << native_time 
+            << ", "
+            << wasm_time
+            << "]\n";
+    }
+
+    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
 }
 }  // namespace
 
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {
-    output_new_test(test_name);
+    std::vector<std::tuple<F64, F64, F64>> test_results;
+    test_results.reserve(passes);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -159,9 +168,10 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        output_pass_times(bpf_time, native_time, wasm_time);
+        test_results.emplace_back(bpf_time, native_time, wasm_time);
     }
 
+    output_test_results(test_name, test_results);
     return Fw::Success::SUCCESS;
 }
 
@@ -201,11 +211,10 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        // TODO:
-        // {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
-        //     tests->populate_map_random(8, 0, 6);
-        //     tests->populate_map_random(9, 0, 3);
-        // }},
+        {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
+            tests->populate_map_random(8, 0, 6);
+            tests->populate_map_random(9, 0, 3);
+        }},
 
         {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
             tests->populate_map_random(10, 0, 16);
@@ -224,9 +233,6 @@ Fw::Success Tests::benchmark() {
         }},
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-            tests->populate_map_random(5, 0, 100);
-            tests->populate_map_random(6, 0, 100);
-            tests->populate_map_random(7, 0, 100);
         }},
 
         {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
@@ -259,35 +265,33 @@ Fw::Success Tests::benchmark() {
 Fw::Success Tests::populate_map_random(U32 fd, U32 start, U32 length) {
     auto map = reinterpret_cast<Components::map*>(maps::map_by_fd(fd));
     if (!map) {
-        Fw::LogStringArg errMsg(("Could not find map with fd " + std::to_string(fd)).c_str());
-        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
+        auto errMsg = "Could not find map with fd " + std::to_string(fd);
+        this->log_WARNING_LO_FailedToPopulateMap(Fw::LogStringArg(errMsg.c_str()));
         return Fw::Success::FAILURE;
     }
 
     const auto max_key_size = sizeof(size_t);
     if (map->key_size > max_key_size) {
-        Fw::LogStringArg errMsg(
-            ("Map keys may not be greater than " + std::to_string(max_key_size) + " bytes").c_str());
-        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
-        return Fw::Success::FAILURE;
-    }
-    if (map->max_entries < start + length) {
-        Fw::LogStringArg errMsg("Requested range exceeds map bounds");
-        this->log_WARNING_LO_FailedToPopulateMap(errMsg);
+        auto errMsg = "Map key size too large";
+        this->log_WARNING_LO_FailedToPopulateMap(Fw::LogStringArg(errMsg));
         return Fw::Success::FAILURE;
     }
 
-    const size_t totalBytes = map->value_size * length;
-    U8 values[totalBytes];
+    if (start >= map->max_entries || length > map->max_entries - start) {
+        auto errMsg = "Requested range exceeds map bounds";
+        this->log_WARNING_LO_FailedToPopulateMap(Fw::LogStringArg(errMsg));
+        return Fw::Success::FAILURE;
+    }
+    
+    std::vector<U8> value(map->value_size);
+    
+    static thread_local
+        std::independent_bits_engine<std::mt19937, CHAR_BIT, U8> engine(std::random_device{}());
 
-    std::independent_bits_engine<std::mt19937, CHAR_BIT, U8> engine(std::random_device{}());
-
-    std::generate(values, values + totalBytes, std::ref(engine));
-
-    for (size_t i = 0; i < length; ++i) {
-        size_t key = start + i;
-        U8* value = &values[i * map->value_size];
-        map->update_elem(&key, value, 0);
+    for (U32 i = 0; i < length; i++) {
+        U32 key = start + i;
+        std::generate(value.begin(), value.end(), std::ref(engine));
+        map->update_elem(&key, value.data(), 0);
     }
 
     return Fw::Success::SUCCESS;

@@ -305,7 +305,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
 };
 
 struct BpfSequencer::bpf_iter_num {
-    I64 fd;
+    U64 fd;
     I64 start;
     I64 end;
     I64 curr;

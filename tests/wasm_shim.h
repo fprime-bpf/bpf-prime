@@ -18,5 +18,7 @@ __attribute__((import_module("env"), import_name("bpf_map_update_elem")))
 uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
 __attribute__((import_module("env"), import_name("bpf_map_delete_elem")))
 uint32_t bpf_map_delete_elem(uint64_t map_ptr, uint32_t key);
+__attribute__((import_module("env"), import_name("bpf_rand_int")))
+int32_t bpf_rand_int(int32_t min, int32_t max);
 __attribute__((import_module("env"), import_name("MAP_BY_FD")))
 uint64_t MAP_BY_FD(uint32_t fd);

@@ -18,7 +18,7 @@ int main() {
     // Load observer position into v
     for (long i = 0; i < 3; i++) {
         res = bpf_map_lookup_elem(input_map, i);
-        v[i] = *(float *)res;
+        v[i] = *(float *)&res;
         v_orig[i] = v[i];
     }
     
@@ -26,7 +26,7 @@ int main() {
     for (long i = 0; i < 3; i++) {
         long j = i + 3;
         res = bpf_map_lookup_elem(input_map, j);
-        s_obs[i] = (*(float *)res) / C_LIGHT;
+        s_obs[i] = (*(float *)&res) / C_LIGHT;
     }
     
     beta2 = s_obs[0] * s_obs[0] + s_obs[1] * s_obs[1] + s_obs[2] * s_obs[2];

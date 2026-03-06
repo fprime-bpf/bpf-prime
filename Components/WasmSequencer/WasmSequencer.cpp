@@ -21,6 +21,7 @@ WasmSequencer ::WasmSequencer(const char* const compName)
         {"bpf_map_lookup_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_lookup_elem)},
         {"bpf_map_update_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_update_elem)},
         {"bpf_map_delete_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_delete_elem)},
+        {"bpf_rand_int", wasmtime::Func::wrap(store, WasmSequencer::bpf_rand_int)},
         {"MAP_BY_FD", wasmtime::Func::wrap(store, WasmSequencer::MAP_BY_FD)},
     };
     

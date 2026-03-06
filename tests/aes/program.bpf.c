@@ -183,12 +183,12 @@ __attribute__((always_inline)) inline void AES_MixColumns(AES_Block_t block) {
 int main() {
     void *block_map = MAP_BY_FD(10), *key_map = MAP_BY_FD(11), *out_map = MAP_BY_FD(12), *result;
 
-    AES_Block_t block = {12};
-    AES_Key128_t key = {13};
-    AES_Block_t zero = {0};
+    AES_Block_t block;
+    AES_Key128_t key;
+    AES_Block_t zero;
 
     struct bpf_iter_num it;
-    int* i;
+    long long* i;
 
     bpf_iter_num_new(&it, 0, 16);
     while ((i = bpf_iter_num_next(&it))) {

@@ -26,6 +26,6 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 #set(LLVM_DIR "${CMAKE_CURRENT_LIST_DIR}/llvm-project/build/lib/cmake/llvm")
 
-add_link_options(
-	-fuse-ld=lld
-)
+# add_link_options(
+# 	-fuse-ld=lld
+# )

@@ -164,7 +164,7 @@ int main() {
     volatile float star_x[4], star_y[4], distances[6], hash_val;
     long locs[5], ii;
     struct bpf_iter_num it;
-    int* i;
+    long long* i;
 
     // Fetch star infos from BPF maps
     bpf_iter_num_new(&it, 0, 4);

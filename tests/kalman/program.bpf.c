@@ -4,7 +4,7 @@ int main() {
     void *in_map = MAP_BY_FD(3), *out_map = MAP_BY_FD(4), *result;
     struct bpf_iter_num it;
     float ins[7], preds[7];
-    int* i;
+    long long* i;
 
     // Read in position and attitude
     bpf_iter_num_new(&it, 0, 7);

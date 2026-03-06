@@ -5,997 +5,988 @@ target triple = "bpf"
 
 %struct.bpf_iter_num = type { i64, i64, i64, i64 }
 
-@__const.main.block = private unnamed_addr constant <{ i8, [15 x i8] }> <{ i8 12, [15 x i8] zeroinitializer }>, align 1
-
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %1 = alloca [16 x i8], align 1
   %2 = alloca [256 x i8], align 1
   %3 = alloca %struct.bpf_iter_num, align 8
-  %4 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 10, i32 0, i32 0, i32 0) #5, !srcloc !3
-  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 11, i32 0, i32 0, i32 0) #5, !srcloc !4
-  %6 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 12, i32 0, i32 0, i32 0) #5, !srcloc !5
-  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %1) #5
-  call void @llvm.memcpy.p0.p0.i64(ptr noundef nonnull align 1 dereferenceable(16) %1, ptr noundef nonnull align 1 dereferenceable(16) @__const.main.block, i64 16, i1 false)
-  call void @llvm.lifetime.start.p0(i64 256, ptr nonnull %2) #5
-  %7 = getelementptr inbounds nuw i8, ptr %2, i64 1
-  call void @llvm.memset.p0.i64(ptr noundef nonnull align 1 dereferenceable(256) %7, i8 0, i64 255, i1 false)
-  store i8 13, ptr %2, align 1
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %3) #5
-  %8 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #5
-  %9 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %10 = icmp eq ptr %9, null
-  br i1 %10, label %20, label %11
+  %4 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 10, i32 0, i32 0, i32 0) #3, !srcloc !3
+  %5 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 11, i32 0, i32 0, i32 0) #3, !srcloc !4
+  %6 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 12, i32 0, i32 0, i32 0) #3, !srcloc !5
+  call void @llvm.lifetime.start.p0(i64 16, ptr nonnull %1) #3
+  call void @llvm.lifetime.start.p0(i64 256, ptr nonnull %2) #3
+  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %3) #3
+  %7 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #3
+  %8 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %9 = icmp eq ptr %8, null
+  br i1 %9, label %18, label %10
 
-11:                                               ; preds = %0, %11
-  %12 = phi ptr [ %18, %11 ], [ %9, %0 ]
-  %13 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %4, ptr noundef nonnull %12) #5
-  %14 = load i8, ptr %13, align 1, !tbaa !6
-  %15 = load i32, ptr %12, align 4, !tbaa !9
-  %16 = sext i32 %15 to i64
-  %17 = getelementptr inbounds [16 x i8], ptr %1, i64 0, i64 %16
-  store i8 %14, ptr %17, align 1, !tbaa !6
-  %18 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %19 = icmp eq ptr %18, null
-  br i1 %19, label %20, label %11, !llvm.loop !11
+10:                                               ; preds = %0, %10
+  %11 = phi ptr [ %16, %10 ], [ %8, %0 ]
+  %12 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %4, ptr noundef nonnull %11) #3
+  %13 = load i8, ptr %12, align 1, !tbaa !6
+  %14 = load i64, ptr %11, align 8, !tbaa !9
+  %15 = getelementptr inbounds [16 x i8], ptr %1, i64 0, i64 %14
+  store i8 %13, ptr %15, align 1, !tbaa !6
+  %16 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %17 = icmp eq ptr %16, null
+  br i1 %17, label %18, label %10, !llvm.loop !11
 
-20:                                               ; preds = %11, %0
-  %21 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 256) #5
-  %22 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %23 = icmp eq ptr %22, null
-  br i1 %23, label %33, label %24
+18:                                               ; preds = %10, %0
+  %19 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 256) #3
+  %20 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %21 = icmp eq ptr %20, null
+  br i1 %21, label %30, label %22
 
-24:                                               ; preds = %20, %24
-  %25 = phi ptr [ %31, %24 ], [ %22, %20 ]
-  %26 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %5, ptr noundef nonnull %25) #5
-  %27 = load i8, ptr %26, align 1, !tbaa !6
-  %28 = load i32, ptr %25, align 4, !tbaa !9
-  %29 = sext i32 %28 to i64
-  %30 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %29
-  store i8 %27, ptr %30, align 1, !tbaa !6
-  %31 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %32 = icmp eq ptr %31, null
-  br i1 %32, label %33, label %24, !llvm.loop !14
+22:                                               ; preds = %18, %22
+  %23 = phi ptr [ %28, %22 ], [ %20, %18 ]
+  %24 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %5, ptr noundef nonnull %23) #3
+  %25 = load i8, ptr %24, align 1, !tbaa !6
+  %26 = load i64, ptr %23, align 8, !tbaa !9
+  %27 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %26
+  store i8 %25, ptr %27, align 1, !tbaa !6
+  %28 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %29 = icmp eq ptr %28, null
+  br i1 %29, label %30, label %22, !llvm.loop !13
 
-33:                                               ; preds = %24, %20
-  %34 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 128) #5
-  %35 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %36 = icmp eq ptr %35, null
-  br i1 %36, label %856, label %37
+30:                                               ; preds = %22, %18
+  %31 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 128) #3
+  %32 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %33 = icmp eq ptr %32, null
+  br i1 %33, label %853, label %34
 
-37:                                               ; preds = %33
-  %38 = getelementptr inbounds nuw i8, ptr %1, i64 1
-  %39 = getelementptr inbounds nuw i8, ptr %1, i64 2
-  %40 = getelementptr inbounds nuw i8, ptr %1, i64 3
-  %41 = getelementptr inbounds nuw i8, ptr %1, i64 4
-  %42 = getelementptr inbounds nuw i8, ptr %1, i64 5
-  %43 = getelementptr inbounds nuw i8, ptr %1, i64 6
-  %44 = getelementptr inbounds nuw i8, ptr %1, i64 7
-  %45 = getelementptr inbounds nuw i8, ptr %1, i64 8
-  %46 = getelementptr inbounds nuw i8, ptr %1, i64 9
-  %47 = getelementptr inbounds nuw i8, ptr %1, i64 10
-  %48 = getelementptr inbounds nuw i8, ptr %1, i64 11
-  %49 = getelementptr inbounds nuw i8, ptr %1, i64 12
-  %50 = getelementptr inbounds nuw i8, ptr %1, i64 13
-  %51 = getelementptr inbounds nuw i8, ptr %1, i64 14
-  %52 = getelementptr inbounds nuw i8, ptr %1, i64 15
-  br label %53
+34:                                               ; preds = %30
+  %35 = getelementptr inbounds nuw i8, ptr %1, i64 1
+  %36 = getelementptr inbounds nuw i8, ptr %1, i64 2
+  %37 = getelementptr inbounds nuw i8, ptr %1, i64 3
+  %38 = getelementptr inbounds nuw i8, ptr %1, i64 4
+  %39 = getelementptr inbounds nuw i8, ptr %1, i64 5
+  %40 = getelementptr inbounds nuw i8, ptr %1, i64 6
+  %41 = getelementptr inbounds nuw i8, ptr %1, i64 7
+  %42 = getelementptr inbounds nuw i8, ptr %1, i64 8
+  %43 = getelementptr inbounds nuw i8, ptr %1, i64 9
+  %44 = getelementptr inbounds nuw i8, ptr %1, i64 10
+  %45 = getelementptr inbounds nuw i8, ptr %1, i64 11
+  %46 = getelementptr inbounds nuw i8, ptr %1, i64 12
+  %47 = getelementptr inbounds nuw i8, ptr %1, i64 13
+  %48 = getelementptr inbounds nuw i8, ptr %1, i64 14
+  %49 = getelementptr inbounds nuw i8, ptr %1, i64 15
+  br label %50
 
-53:                                               ; preds = %37, %225
-  %54 = load i8, ptr %1, align 1, !tbaa !6
-  %55 = icmp sgt i8 %54, -1
-  %56 = call i1 @llvm.bpf.passthrough.i1.i1(i32 0, i1 %55)
-  %57 = icmp slt i8 %54, 16
-  %58 = select i1 %56, i1 %57, i1 false
-  br i1 %58, label %59, label %63
+50:                                               ; preds = %34, %222
+  %51 = load i8, ptr %1, align 1, !tbaa !6
+  %52 = icmp sgt i8 %51, -1
+  %53 = call i1 @llvm.bpf.passthrough.i1.i1(i32 0, i1 %52)
+  %54 = icmp slt i8 %51, 16
+  %55 = select i1 %53, i1 %54, i1 false
+  br i1 %55, label %56, label %60
 
-59:                                               ; preds = %53
-  %60 = sext i8 %54 to i64
-  %61 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %60
-  %62 = load i8, ptr %61, align 1, !tbaa !6
-  store i8 %62, ptr %1, align 1, !tbaa !6
-  br label %63
+56:                                               ; preds = %50
+  %57 = sext i8 %51 to i64
+  %58 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %57
+  %59 = load i8, ptr %58, align 1, !tbaa !6
+  store i8 %59, ptr %1, align 1, !tbaa !6
+  br label %60
 
-63:                                               ; preds = %59, %53
-  %64 = phi i8 [ %62, %59 ], [ %54, %53 ]
-  %65 = load i8, ptr %38, align 1, !tbaa !6
-  %66 = icmp sgt i8 %65, -1
-  %67 = call i1 @llvm.bpf.passthrough.i1.i1(i32 1, i1 %66)
-  %68 = icmp slt i8 %65, 16
-  %69 = select i1 %67, i1 %68, i1 false
-  br i1 %69, label %70, label %74
+60:                                               ; preds = %56, %50
+  %61 = phi i8 [ %59, %56 ], [ %51, %50 ]
+  %62 = load i8, ptr %35, align 1, !tbaa !6
+  %63 = icmp sgt i8 %62, -1
+  %64 = call i1 @llvm.bpf.passthrough.i1.i1(i32 1, i1 %63)
+  %65 = icmp slt i8 %62, 16
+  %66 = select i1 %64, i1 %65, i1 false
+  br i1 %66, label %67, label %71
 
-70:                                               ; preds = %63
-  %71 = sext i8 %65 to i64
-  %72 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %71
-  %73 = load i8, ptr %72, align 1, !tbaa !6
-  store i8 %73, ptr %38, align 1, !tbaa !6
-  br label %74
+67:                                               ; preds = %60
+  %68 = sext i8 %62 to i64
+  %69 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %68
+  %70 = load i8, ptr %69, align 1, !tbaa !6
+  store i8 %70, ptr %35, align 1, !tbaa !6
+  br label %71
 
-74:                                               ; preds = %70, %63
-  %75 = phi i8 [ %73, %70 ], [ %65, %63 ]
-  %76 = load i8, ptr %39, align 1, !tbaa !6
-  %77 = icmp sgt i8 %76, -1
-  %78 = call i1 @llvm.bpf.passthrough.i1.i1(i32 2, i1 %77)
-  %79 = icmp slt i8 %76, 16
-  %80 = select i1 %78, i1 %79, i1 false
-  br i1 %80, label %81, label %85
+71:                                               ; preds = %67, %60
+  %72 = phi i8 [ %70, %67 ], [ %62, %60 ]
+  %73 = load i8, ptr %36, align 1, !tbaa !6
+  %74 = icmp sgt i8 %73, -1
+  %75 = call i1 @llvm.bpf.passthrough.i1.i1(i32 2, i1 %74)
+  %76 = icmp slt i8 %73, 16
+  %77 = select i1 %75, i1 %76, i1 false
+  br i1 %77, label %78, label %82
 
-81:                                               ; preds = %74
-  %82 = sext i8 %76 to i64
-  %83 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %82
-  %84 = load i8, ptr %83, align 1, !tbaa !6
-  store i8 %84, ptr %39, align 1, !tbaa !6
-  br label %85
+78:                                               ; preds = %71
+  %79 = sext i8 %73 to i64
+  %80 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %79
+  %81 = load i8, ptr %80, align 1, !tbaa !6
+  store i8 %81, ptr %36, align 1, !tbaa !6
+  br label %82
 
-85:                                               ; preds = %81, %74
-  %86 = phi i8 [ %84, %81 ], [ %76, %74 ]
-  %87 = load i8, ptr %40, align 1, !tbaa !6
-  %88 = icmp sgt i8 %87, -1
-  %89 = call i1 @llvm.bpf.passthrough.i1.i1(i32 3, i1 %88)
-  %90 = icmp slt i8 %87, 16
-  %91 = select i1 %89, i1 %90, i1 false
-  br i1 %91, label %92, label %96
+82:                                               ; preds = %78, %71
+  %83 = phi i8 [ %81, %78 ], [ %73, %71 ]
+  %84 = load i8, ptr %37, align 1, !tbaa !6
+  %85 = icmp sgt i8 %84, -1
+  %86 = call i1 @llvm.bpf.passthrough.i1.i1(i32 3, i1 %85)
+  %87 = icmp slt i8 %84, 16
+  %88 = select i1 %86, i1 %87, i1 false
+  br i1 %88, label %89, label %93
 
-92:                                               ; preds = %85
-  %93 = sext i8 %87 to i64
-  %94 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %93
-  %95 = load i8, ptr %94, align 1, !tbaa !6
-  store i8 %95, ptr %40, align 1, !tbaa !6
-  br label %96
+89:                                               ; preds = %82
+  %90 = sext i8 %84 to i64
+  %91 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %90
+  %92 = load i8, ptr %91, align 1, !tbaa !6
+  store i8 %92, ptr %37, align 1, !tbaa !6
+  br label %93
 
-96:                                               ; preds = %92, %85
-  %97 = phi i8 [ %95, %92 ], [ %87, %85 ]
-  %98 = load i8, ptr %41, align 1, !tbaa !6
-  %99 = icmp sgt i8 %98, -1
-  %100 = call i1 @llvm.bpf.passthrough.i1.i1(i32 4, i1 %99)
-  %101 = icmp slt i8 %98, 16
-  %102 = select i1 %100, i1 %101, i1 false
-  br i1 %102, label %103, label %107
+93:                                               ; preds = %89, %82
+  %94 = phi i8 [ %92, %89 ], [ %84, %82 ]
+  %95 = load i8, ptr %38, align 1, !tbaa !6
+  %96 = icmp sgt i8 %95, -1
+  %97 = call i1 @llvm.bpf.passthrough.i1.i1(i32 4, i1 %96)
+  %98 = icmp slt i8 %95, 16
+  %99 = select i1 %97, i1 %98, i1 false
+  br i1 %99, label %100, label %104
 
-103:                                              ; preds = %96
-  %104 = sext i8 %98 to i64
-  %105 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %104
-  %106 = load i8, ptr %105, align 1, !tbaa !6
-  store i8 %106, ptr %41, align 1, !tbaa !6
-  br label %107
+100:                                              ; preds = %93
+  %101 = sext i8 %95 to i64
+  %102 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %101
+  %103 = load i8, ptr %102, align 1, !tbaa !6
+  store i8 %103, ptr %38, align 1, !tbaa !6
+  br label %104
 
-107:                                              ; preds = %103, %96
-  %108 = load i8, ptr %42, align 1, !tbaa !6
-  %109 = icmp sgt i8 %108, -1
-  %110 = call i1 @llvm.bpf.passthrough.i1.i1(i32 5, i1 %109)
-  %111 = icmp slt i8 %108, 16
-  %112 = select i1 %110, i1 %111, i1 false
-  br i1 %112, label %113, label %117
+104:                                              ; preds = %100, %93
+  %105 = load i8, ptr %39, align 1, !tbaa !6
+  %106 = icmp sgt i8 %105, -1
+  %107 = call i1 @llvm.bpf.passthrough.i1.i1(i32 5, i1 %106)
+  %108 = icmp slt i8 %105, 16
+  %109 = select i1 %107, i1 %108, i1 false
+  br i1 %109, label %110, label %114
 
-113:                                              ; preds = %107
-  %114 = sext i8 %108 to i64
-  %115 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %114
-  %116 = load i8, ptr %115, align 1, !tbaa !6
-  store i8 %116, ptr %42, align 1, !tbaa !6
-  br label %117
+110:                                              ; preds = %104
+  %111 = sext i8 %105 to i64
+  %112 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %111
+  %113 = load i8, ptr %112, align 1, !tbaa !6
+  store i8 %113, ptr %39, align 1, !tbaa !6
+  br label %114
 
-117:                                              ; preds = %113, %107
-  %118 = phi i8 [ %116, %113 ], [ %108, %107 ]
-  %119 = load i8, ptr %43, align 1, !tbaa !6
-  %120 = icmp sgt i8 %119, -1
-  %121 = call i1 @llvm.bpf.passthrough.i1.i1(i32 6, i1 %120)
-  %122 = icmp slt i8 %119, 16
-  %123 = select i1 %121, i1 %122, i1 false
-  br i1 %123, label %124, label %128
+114:                                              ; preds = %110, %104
+  %115 = phi i8 [ %113, %110 ], [ %105, %104 ]
+  %116 = load i8, ptr %40, align 1, !tbaa !6
+  %117 = icmp sgt i8 %116, -1
+  %118 = call i1 @llvm.bpf.passthrough.i1.i1(i32 6, i1 %117)
+  %119 = icmp slt i8 %116, 16
+  %120 = select i1 %118, i1 %119, i1 false
+  br i1 %120, label %121, label %125
 
-124:                                              ; preds = %117
-  %125 = sext i8 %119 to i64
-  %126 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %125
-  %127 = load i8, ptr %126, align 1, !tbaa !6
-  store i8 %127, ptr %43, align 1, !tbaa !6
-  br label %128
+121:                                              ; preds = %114
+  %122 = sext i8 %116 to i64
+  %123 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %122
+  %124 = load i8, ptr %123, align 1, !tbaa !6
+  store i8 %124, ptr %40, align 1, !tbaa !6
+  br label %125
 
-128:                                              ; preds = %124, %117
-  %129 = phi i8 [ %127, %124 ], [ %119, %117 ]
-  %130 = load i8, ptr %44, align 1, !tbaa !6
-  %131 = icmp sgt i8 %130, -1
-  %132 = call i1 @llvm.bpf.passthrough.i1.i1(i32 7, i1 %131)
-  %133 = icmp slt i8 %130, 16
-  %134 = select i1 %132, i1 %133, i1 false
-  br i1 %134, label %135, label %139
+125:                                              ; preds = %121, %114
+  %126 = phi i8 [ %124, %121 ], [ %116, %114 ]
+  %127 = load i8, ptr %41, align 1, !tbaa !6
+  %128 = icmp sgt i8 %127, -1
+  %129 = call i1 @llvm.bpf.passthrough.i1.i1(i32 7, i1 %128)
+  %130 = icmp slt i8 %127, 16
+  %131 = select i1 %129, i1 %130, i1 false
+  br i1 %131, label %132, label %136
 
-135:                                              ; preds = %128
-  %136 = sext i8 %130 to i64
-  %137 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %136
-  %138 = load i8, ptr %137, align 1, !tbaa !6
-  store i8 %138, ptr %44, align 1, !tbaa !6
-  br label %139
+132:                                              ; preds = %125
+  %133 = sext i8 %127 to i64
+  %134 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %133
+  %135 = load i8, ptr %134, align 1, !tbaa !6
+  store i8 %135, ptr %41, align 1, !tbaa !6
+  br label %136
 
-139:                                              ; preds = %135, %128
-  %140 = phi i8 [ %138, %135 ], [ %130, %128 ]
-  %141 = load i8, ptr %45, align 1, !tbaa !6
-  %142 = icmp sgt i8 %141, -1
-  %143 = call i1 @llvm.bpf.passthrough.i1.i1(i32 8, i1 %142)
-  %144 = icmp slt i8 %141, 16
-  %145 = select i1 %143, i1 %144, i1 false
-  br i1 %145, label %146, label %150
+136:                                              ; preds = %132, %125
+  %137 = phi i8 [ %135, %132 ], [ %127, %125 ]
+  %138 = load i8, ptr %42, align 1, !tbaa !6
+  %139 = icmp sgt i8 %138, -1
+  %140 = call i1 @llvm.bpf.passthrough.i1.i1(i32 8, i1 %139)
+  %141 = icmp slt i8 %138, 16
+  %142 = select i1 %140, i1 %141, i1 false
+  br i1 %142, label %143, label %147
 
-146:                                              ; preds = %139
-  %147 = sext i8 %141 to i64
-  %148 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %147
-  %149 = load i8, ptr %148, align 1, !tbaa !6
-  store i8 %149, ptr %45, align 1, !tbaa !6
-  br label %150
+143:                                              ; preds = %136
+  %144 = sext i8 %138 to i64
+  %145 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %144
+  %146 = load i8, ptr %145, align 1, !tbaa !6
+  store i8 %146, ptr %42, align 1, !tbaa !6
+  br label %147
 
-150:                                              ; preds = %146, %139
-  %151 = load i8, ptr %46, align 1, !tbaa !6
-  %152 = icmp sgt i8 %151, -1
-  %153 = call i1 @llvm.bpf.passthrough.i1.i1(i32 9, i1 %152)
-  %154 = icmp slt i8 %151, 16
-  %155 = select i1 %153, i1 %154, i1 false
-  br i1 %155, label %156, label %160
+147:                                              ; preds = %143, %136
+  %148 = load i8, ptr %43, align 1, !tbaa !6
+  %149 = icmp sgt i8 %148, -1
+  %150 = call i1 @llvm.bpf.passthrough.i1.i1(i32 9, i1 %149)
+  %151 = icmp slt i8 %148, 16
+  %152 = select i1 %150, i1 %151, i1 false
+  br i1 %152, label %153, label %157
 
-156:                                              ; preds = %150
-  %157 = sext i8 %151 to i64
-  %158 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %157
-  %159 = load i8, ptr %158, align 1, !tbaa !6
-  br label %160
+153:                                              ; preds = %147
+  %154 = sext i8 %148 to i64
+  %155 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %154
+  %156 = load i8, ptr %155, align 1, !tbaa !6
+  br label %157
 
-160:                                              ; preds = %156, %150
-  %161 = phi i8 [ %159, %156 ], [ %151, %150 ]
-  %162 = load i8, ptr %47, align 1, !tbaa !6
-  %163 = icmp sgt i8 %162, -1
-  %164 = call i1 @llvm.bpf.passthrough.i1.i1(i32 10, i1 %163)
-  %165 = icmp slt i8 %162, 16
-  %166 = select i1 %164, i1 %165, i1 false
-  br i1 %166, label %167, label %171
+157:                                              ; preds = %153, %147
+  %158 = phi i8 [ %156, %153 ], [ %148, %147 ]
+  %159 = load i8, ptr %44, align 1, !tbaa !6
+  %160 = icmp sgt i8 %159, -1
+  %161 = call i1 @llvm.bpf.passthrough.i1.i1(i32 10, i1 %160)
+  %162 = icmp slt i8 %159, 16
+  %163 = select i1 %161, i1 %162, i1 false
+  br i1 %163, label %164, label %168
 
-167:                                              ; preds = %160
-  %168 = sext i8 %162 to i64
-  %169 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %168
-  %170 = load i8, ptr %169, align 1, !tbaa !6
-  br label %171
+164:                                              ; preds = %157
+  %165 = sext i8 %159 to i64
+  %166 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %165
+  %167 = load i8, ptr %166, align 1, !tbaa !6
+  br label %168
 
-171:                                              ; preds = %167, %160
-  %172 = phi i8 [ %170, %167 ], [ %162, %160 ]
-  %173 = load i8, ptr %48, align 1, !tbaa !6
-  %174 = icmp sgt i8 %173, -1
-  %175 = call i1 @llvm.bpf.passthrough.i1.i1(i32 11, i1 %174)
-  %176 = icmp slt i8 %173, 16
-  %177 = select i1 %175, i1 %176, i1 false
-  br i1 %177, label %178, label %182
+168:                                              ; preds = %164, %157
+  %169 = phi i8 [ %167, %164 ], [ %159, %157 ]
+  %170 = load i8, ptr %45, align 1, !tbaa !6
+  %171 = icmp sgt i8 %170, -1
+  %172 = call i1 @llvm.bpf.passthrough.i1.i1(i32 11, i1 %171)
+  %173 = icmp slt i8 %170, 16
+  %174 = select i1 %172, i1 %173, i1 false
+  br i1 %174, label %175, label %179
 
-178:                                              ; preds = %171
-  %179 = sext i8 %173 to i64
-  %180 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %179
-  %181 = load i8, ptr %180, align 1, !tbaa !6
-  br label %182
+175:                                              ; preds = %168
+  %176 = sext i8 %170 to i64
+  %177 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %176
+  %178 = load i8, ptr %177, align 1, !tbaa !6
+  br label %179
 
-182:                                              ; preds = %178, %171
-  %183 = phi i8 [ %181, %178 ], [ %173, %171 ]
-  %184 = load i8, ptr %49, align 1, !tbaa !6
-  %185 = icmp sgt i8 %184, -1
-  %186 = call i1 @llvm.bpf.passthrough.i1.i1(i32 12, i1 %185)
-  %187 = icmp slt i8 %184, 16
-  %188 = select i1 %186, i1 %187, i1 false
-  br i1 %188, label %189, label %193
+179:                                              ; preds = %175, %168
+  %180 = phi i8 [ %178, %175 ], [ %170, %168 ]
+  %181 = load i8, ptr %46, align 1, !tbaa !6
+  %182 = icmp sgt i8 %181, -1
+  %183 = call i1 @llvm.bpf.passthrough.i1.i1(i32 12, i1 %182)
+  %184 = icmp slt i8 %181, 16
+  %185 = select i1 %183, i1 %184, i1 false
+  br i1 %185, label %186, label %190
 
-189:                                              ; preds = %182
-  %190 = sext i8 %184 to i64
-  %191 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %190
-  %192 = load i8, ptr %191, align 1, !tbaa !6
-  store i8 %192, ptr %49, align 1, !tbaa !6
-  br label %193
+186:                                              ; preds = %179
+  %187 = sext i8 %181 to i64
+  %188 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %187
+  %189 = load i8, ptr %188, align 1, !tbaa !6
+  store i8 %189, ptr %46, align 1, !tbaa !6
+  br label %190
 
-193:                                              ; preds = %189, %182
-  %194 = load i8, ptr %50, align 1, !tbaa !6
-  %195 = icmp sgt i8 %194, -1
-  %196 = call i1 @llvm.bpf.passthrough.i1.i1(i32 13, i1 %195)
-  %197 = icmp slt i8 %194, 16
-  %198 = select i1 %196, i1 %197, i1 false
-  br i1 %198, label %199, label %203
+190:                                              ; preds = %186, %179
+  %191 = load i8, ptr %47, align 1, !tbaa !6
+  %192 = icmp sgt i8 %191, -1
+  %193 = call i1 @llvm.bpf.passthrough.i1.i1(i32 13, i1 %192)
+  %194 = icmp slt i8 %191, 16
+  %195 = select i1 %193, i1 %194, i1 false
+  br i1 %195, label %196, label %200
 
-199:                                              ; preds = %193
-  %200 = sext i8 %194 to i64
-  %201 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %200
-  %202 = load i8, ptr %201, align 1, !tbaa !6
-  br label %203
+196:                                              ; preds = %190
+  %197 = sext i8 %191 to i64
+  %198 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %197
+  %199 = load i8, ptr %198, align 1, !tbaa !6
+  br label %200
 
-203:                                              ; preds = %199, %193
-  %204 = phi i8 [ %202, %199 ], [ %194, %193 ]
-  %205 = load i8, ptr %51, align 1, !tbaa !6
-  %206 = icmp sgt i8 %205, -1
-  %207 = call i1 @llvm.bpf.passthrough.i1.i1(i32 14, i1 %206)
-  %208 = icmp slt i8 %205, 16
-  %209 = select i1 %207, i1 %208, i1 false
-  br i1 %209, label %210, label %214
+200:                                              ; preds = %196, %190
+  %201 = phi i8 [ %199, %196 ], [ %191, %190 ]
+  %202 = load i8, ptr %48, align 1, !tbaa !6
+  %203 = icmp sgt i8 %202, -1
+  %204 = call i1 @llvm.bpf.passthrough.i1.i1(i32 14, i1 %203)
+  %205 = icmp slt i8 %202, 16
+  %206 = select i1 %204, i1 %205, i1 false
+  br i1 %206, label %207, label %211
 
-210:                                              ; preds = %203
-  %211 = sext i8 %205 to i64
-  %212 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %211
-  %213 = load i8, ptr %212, align 1, !tbaa !6
-  br label %214
+207:                                              ; preds = %200
+  %208 = sext i8 %202 to i64
+  %209 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %208
+  %210 = load i8, ptr %209, align 1, !tbaa !6
+  br label %211
 
-214:                                              ; preds = %210, %203
-  %215 = phi i8 [ %213, %210 ], [ %205, %203 ]
-  %216 = load i8, ptr %52, align 1, !tbaa !6
-  %217 = icmp sgt i8 %216, -1
-  %218 = call i1 @llvm.bpf.passthrough.i1.i1(i32 15, i1 %217)
-  %219 = icmp slt i8 %216, 16
-  %220 = select i1 %218, i1 %219, i1 false
-  br i1 %220, label %221, label %225
+211:                                              ; preds = %207, %200
+  %212 = phi i8 [ %210, %207 ], [ %202, %200 ]
+  %213 = load i8, ptr %49, align 1, !tbaa !6
+  %214 = icmp sgt i8 %213, -1
+  %215 = call i1 @llvm.bpf.passthrough.i1.i1(i32 15, i1 %214)
+  %216 = icmp slt i8 %213, 16
+  %217 = select i1 %215, i1 %216, i1 false
+  br i1 %217, label %218, label %222
 
-221:                                              ; preds = %214
-  %222 = sext i8 %216 to i64
-  %223 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %222
-  %224 = load i8, ptr %223, align 1, !tbaa !6
-  br label %225
+218:                                              ; preds = %211
+  %219 = sext i8 %213 to i64
+  %220 = getelementptr inbounds [256 x i8], ptr %2, i64 0, i64 %219
+  %221 = load i8, ptr %220, align 1, !tbaa !6
+  br label %222
 
-225:                                              ; preds = %221, %214
-  %226 = phi i8 [ %224, %221 ], [ %216, %214 ]
-  %227 = and i8 %64, 1
-  %228 = icmp eq i8 %227, 0
-  %229 = and i8 %64, 2
-  %230 = icmp eq i8 %229, 0
-  %231 = and i8 %64, 4
-  %232 = icmp eq i8 %231, 0
-  %233 = and i8 %64, 8
-  %234 = icmp eq i8 %233, 0
-  %235 = and i8 %64, 16
-  %236 = icmp eq i8 %235, 0
-  %237 = and i8 %64, 32
-  %238 = icmp eq i8 %237, 0
-  %239 = shl i8 %64, 1
-  %240 = and i8 %239, 126
-  %241 = and i8 %64, 64
-  %242 = icmp eq i8 %241, 0
-  %243 = or i8 %239, -128
-  %244 = select i1 %242, i8 %240, i8 %243
-  %245 = icmp sgt i8 %64, -1
-  %246 = xor i8 %244, 27
-  %247 = select i1 %245, i8 %244, i8 %246
-  %248 = and i8 %118, 1
+222:                                              ; preds = %218, %211
+  %223 = phi i8 [ %221, %218 ], [ %213, %211 ]
+  %224 = and i8 %61, 1
+  %225 = icmp eq i8 %224, 0
+  %226 = and i8 %61, 2
+  %227 = icmp eq i8 %226, 0
+  %228 = and i8 %61, 4
+  %229 = icmp eq i8 %228, 0
+  %230 = and i8 %61, 8
+  %231 = icmp eq i8 %230, 0
+  %232 = and i8 %61, 16
+  %233 = icmp eq i8 %232, 0
+  %234 = and i8 %61, 32
+  %235 = icmp eq i8 %234, 0
+  %236 = shl i8 %61, 1
+  %237 = and i8 %236, 126
+  %238 = and i8 %61, 64
+  %239 = icmp eq i8 %238, 0
+  %240 = or i8 %236, -128
+  %241 = select i1 %239, i8 %237, i8 %240
+  %242 = icmp sgt i8 %61, -1
+  %243 = xor i8 %241, 27
+  %244 = select i1 %242, i8 %241, i8 %243
+  %245 = and i8 %115, 1
+  %246 = icmp eq i8 %245, 0
+  %247 = select i1 %246, i8 0, i8 3
+  %248 = and i8 %115, 2
   %249 = icmp eq i8 %248, 0
-  %250 = select i1 %249, i8 0, i8 3
-  %251 = and i8 %118, 2
-  %252 = icmp eq i8 %251, 0
-  %253 = xor i8 %250, 6
-  %254 = select i1 %252, i8 %250, i8 %253
-  %255 = and i8 %118, 4
-  %256 = icmp eq i8 %255, 0
-  %257 = xor i8 %254, 12
-  %258 = select i1 %256, i8 %254, i8 %257
-  %259 = and i8 %118, 8
-  %260 = icmp eq i8 %259, 0
-  %261 = xor i8 %258, 24
-  %262 = select i1 %260, i8 %258, i8 %261
-  %263 = and i8 %118, 16
-  %264 = icmp eq i8 %263, 0
-  %265 = xor i8 %262, 48
-  %266 = select i1 %264, i8 %262, i8 %265
-  %267 = and i8 %118, 32
-  %268 = icmp eq i8 %267, 0
-  %269 = xor i8 %266, 96
-  %270 = select i1 %268, i8 %266, i8 %269
-  %271 = and i8 %118, 64
-  %272 = icmp eq i8 %271, 0
-  %273 = xor i8 %270, -64
-  %274 = select i1 %272, i8 %270, i8 %273
-  %275 = icmp sgt i8 %118, -1
-  %276 = xor i8 %274, -101
-  %277 = select i1 %275, i8 %274, i8 %276
-  %278 = xor i8 %277, %247
-  %279 = xor i8 %278, %172
-  %280 = xor i8 %279, %226
-  %281 = shl i8 %118, 1
-  %282 = and i8 %281, 126
-  %283 = or i8 %281, -128
-  %284 = select i1 %272, i8 %282, i8 %283
-  %285 = xor i8 %284, 27
-  %286 = select i1 %275, i8 %284, i8 %285
-  %287 = and i8 %172, 1
+  %250 = xor i8 %247, 6
+  %251 = select i1 %249, i8 %247, i8 %250
+  %252 = and i8 %115, 4
+  %253 = icmp eq i8 %252, 0
+  %254 = xor i8 %251, 12
+  %255 = select i1 %253, i8 %251, i8 %254
+  %256 = and i8 %115, 8
+  %257 = icmp eq i8 %256, 0
+  %258 = xor i8 %255, 24
+  %259 = select i1 %257, i8 %255, i8 %258
+  %260 = and i8 %115, 16
+  %261 = icmp eq i8 %260, 0
+  %262 = xor i8 %259, 48
+  %263 = select i1 %261, i8 %259, i8 %262
+  %264 = and i8 %115, 32
+  %265 = icmp eq i8 %264, 0
+  %266 = xor i8 %263, 96
+  %267 = select i1 %265, i8 %263, i8 %266
+  %268 = and i8 %115, 64
+  %269 = icmp eq i8 %268, 0
+  %270 = xor i8 %267, -64
+  %271 = select i1 %269, i8 %267, i8 %270
+  %272 = icmp sgt i8 %115, -1
+  %273 = xor i8 %271, -101
+  %274 = select i1 %272, i8 %271, i8 %273
+  %275 = xor i8 %274, %244
+  %276 = xor i8 %275, %169
+  %277 = xor i8 %276, %223
+  %278 = shl i8 %115, 1
+  %279 = and i8 %278, 126
+  %280 = or i8 %278, -128
+  %281 = select i1 %269, i8 %279, i8 %280
+  %282 = xor i8 %281, 27
+  %283 = select i1 %272, i8 %281, i8 %282
+  %284 = and i8 %169, 1
+  %285 = icmp eq i8 %284, 0
+  %286 = select i1 %285, i8 0, i8 3
+  %287 = and i8 %169, 2
   %288 = icmp eq i8 %287, 0
-  %289 = select i1 %288, i8 0, i8 3
-  %290 = and i8 %172, 2
-  %291 = icmp eq i8 %290, 0
-  %292 = xor i8 %289, 6
-  %293 = select i1 %291, i8 %289, i8 %292
-  %294 = and i8 %172, 4
-  %295 = icmp eq i8 %294, 0
-  %296 = xor i8 %293, 12
-  %297 = select i1 %295, i8 %293, i8 %296
-  %298 = and i8 %172, 8
-  %299 = icmp eq i8 %298, 0
-  %300 = xor i8 %297, 24
-  %301 = select i1 %299, i8 %297, i8 %300
-  %302 = and i8 %172, 16
-  %303 = icmp eq i8 %302, 0
-  %304 = xor i8 %301, 48
-  %305 = select i1 %303, i8 %301, i8 %304
-  %306 = and i8 %172, 32
-  %307 = icmp eq i8 %306, 0
-  %308 = xor i8 %305, 96
-  %309 = select i1 %307, i8 %305, i8 %308
-  %310 = and i8 %172, 64
-  %311 = icmp eq i8 %310, 0
-  %312 = xor i8 %309, -64
-  %313 = select i1 %311, i8 %309, i8 %312
-  %314 = icmp sgt i8 %172, -1
-  %315 = xor i8 %313, -101
-  %316 = select i1 %314, i8 %313, i8 %315
-  %317 = xor i8 %286, %316
-  %318 = xor i8 %317, %226
-  %319 = xor i8 %318, %64
-  %320 = shl i8 %172, 1
-  %321 = and i8 %320, 126
-  %322 = or i8 %320, -128
-  %323 = select i1 %311, i8 %321, i8 %322
-  %324 = xor i8 %323, 27
-  %325 = select i1 %314, i8 %323, i8 %324
-  %326 = and i8 %226, 1
+  %289 = xor i8 %286, 6
+  %290 = select i1 %288, i8 %286, i8 %289
+  %291 = and i8 %169, 4
+  %292 = icmp eq i8 %291, 0
+  %293 = xor i8 %290, 12
+  %294 = select i1 %292, i8 %290, i8 %293
+  %295 = and i8 %169, 8
+  %296 = icmp eq i8 %295, 0
+  %297 = xor i8 %294, 24
+  %298 = select i1 %296, i8 %294, i8 %297
+  %299 = and i8 %169, 16
+  %300 = icmp eq i8 %299, 0
+  %301 = xor i8 %298, 48
+  %302 = select i1 %300, i8 %298, i8 %301
+  %303 = and i8 %169, 32
+  %304 = icmp eq i8 %303, 0
+  %305 = xor i8 %302, 96
+  %306 = select i1 %304, i8 %302, i8 %305
+  %307 = and i8 %169, 64
+  %308 = icmp eq i8 %307, 0
+  %309 = xor i8 %306, -64
+  %310 = select i1 %308, i8 %306, i8 %309
+  %311 = icmp sgt i8 %169, -1
+  %312 = xor i8 %310, -101
+  %313 = select i1 %311, i8 %310, i8 %312
+  %314 = xor i8 %283, %313
+  %315 = xor i8 %314, %223
+  %316 = xor i8 %315, %61
+  %317 = shl i8 %169, 1
+  %318 = and i8 %317, 126
+  %319 = or i8 %317, -128
+  %320 = select i1 %308, i8 %318, i8 %319
+  %321 = xor i8 %320, 27
+  %322 = select i1 %311, i8 %320, i8 %321
+  %323 = and i8 %223, 1
+  %324 = icmp eq i8 %323, 0
+  %325 = select i1 %324, i8 0, i8 3
+  %326 = and i8 %223, 2
   %327 = icmp eq i8 %326, 0
-  %328 = select i1 %327, i8 0, i8 3
-  %329 = and i8 %226, 2
-  %330 = icmp eq i8 %329, 0
-  %331 = xor i8 %328, 6
-  %332 = select i1 %330, i8 %328, i8 %331
-  %333 = and i8 %226, 4
-  %334 = icmp eq i8 %333, 0
-  %335 = xor i8 %332, 12
-  %336 = select i1 %334, i8 %332, i8 %335
-  %337 = and i8 %226, 8
-  %338 = icmp eq i8 %337, 0
-  %339 = xor i8 %336, 24
-  %340 = select i1 %338, i8 %336, i8 %339
-  %341 = and i8 %226, 16
-  %342 = icmp eq i8 %341, 0
-  %343 = xor i8 %340, 48
-  %344 = select i1 %342, i8 %340, i8 %343
-  %345 = and i8 %226, 32
-  %346 = icmp eq i8 %345, 0
-  %347 = xor i8 %344, 96
-  %348 = select i1 %346, i8 %344, i8 %347
-  %349 = and i8 %226, 64
-  %350 = icmp eq i8 %349, 0
-  %351 = xor i8 %348, -64
-  %352 = select i1 %350, i8 %348, i8 %351
-  %353 = icmp sgt i8 %226, -1
-  %354 = xor i8 %352, -101
-  %355 = select i1 %353, i8 %352, i8 %354
-  %356 = xor i8 %325, %355
-  %357 = xor i8 %356, %118
-  %358 = xor i8 %357, %64
-  %359 = select i1 %228, i8 0, i8 3
-  %360 = xor i8 %359, 6
-  %361 = select i1 %230, i8 %359, i8 %360
-  %362 = xor i8 %361, 12
-  %363 = select i1 %232, i8 %361, i8 %362
-  %364 = xor i8 %363, 24
-  %365 = select i1 %234, i8 %363, i8 %364
-  %366 = xor i8 %365, 48
-  %367 = select i1 %236, i8 %365, i8 %366
-  %368 = xor i8 %367, 96
-  %369 = select i1 %238, i8 %367, i8 %368
-  %370 = xor i8 %369, -64
-  %371 = select i1 %242, i8 %369, i8 %370
-  %372 = xor i8 %371, -101
-  %373 = select i1 %245, i8 %371, i8 %372
-  %374 = shl i8 %226, 1
-  %375 = and i8 %374, 126
-  %376 = or i8 %374, -128
-  %377 = select i1 %350, i8 %375, i8 %376
-  %378 = xor i8 %377, 27
-  %379 = select i1 %353, i8 %377, i8 %378
-  %380 = xor i8 %379, %373
-  %381 = xor i8 %380, %118
-  %382 = xor i8 %381, %172
-  store i8 %280, ptr %1, align 1, !tbaa !6
-  store i8 %319, ptr %38, align 1, !tbaa !6
-  store i8 %358, ptr %39, align 1, !tbaa !6
-  store i8 %382, ptr %40, align 1, !tbaa !6
-  %383 = load i8, ptr %41, align 1, !tbaa !6
-  %384 = and i8 %383, 1
-  %385 = icmp eq i8 %384, 0
-  %386 = and i8 %383, 2
-  %387 = icmp eq i8 %386, 0
-  %388 = and i8 %383, 4
-  %389 = icmp eq i8 %388, 0
-  %390 = and i8 %383, 8
-  %391 = icmp eq i8 %390, 0
-  %392 = and i8 %383, 16
-  %393 = icmp eq i8 %392, 0
-  %394 = and i8 %383, 32
-  %395 = icmp eq i8 %394, 0
-  %396 = shl i8 %383, 1
-  %397 = and i8 %396, 126
-  %398 = and i8 %383, 64
-  %399 = icmp eq i8 %398, 0
-  %400 = or i8 %396, -128
-  %401 = select i1 %399, i8 %397, i8 %400
-  %402 = icmp sgt i8 %383, -1
-  %403 = xor i8 %401, 27
-  %404 = select i1 %402, i8 %401, i8 %403
-  %405 = and i8 %161, 1
+  %328 = xor i8 %325, 6
+  %329 = select i1 %327, i8 %325, i8 %328
+  %330 = and i8 %223, 4
+  %331 = icmp eq i8 %330, 0
+  %332 = xor i8 %329, 12
+  %333 = select i1 %331, i8 %329, i8 %332
+  %334 = and i8 %223, 8
+  %335 = icmp eq i8 %334, 0
+  %336 = xor i8 %333, 24
+  %337 = select i1 %335, i8 %333, i8 %336
+  %338 = and i8 %223, 16
+  %339 = icmp eq i8 %338, 0
+  %340 = xor i8 %337, 48
+  %341 = select i1 %339, i8 %337, i8 %340
+  %342 = and i8 %223, 32
+  %343 = icmp eq i8 %342, 0
+  %344 = xor i8 %341, 96
+  %345 = select i1 %343, i8 %341, i8 %344
+  %346 = and i8 %223, 64
+  %347 = icmp eq i8 %346, 0
+  %348 = xor i8 %345, -64
+  %349 = select i1 %347, i8 %345, i8 %348
+  %350 = icmp sgt i8 %223, -1
+  %351 = xor i8 %349, -101
+  %352 = select i1 %350, i8 %349, i8 %351
+  %353 = xor i8 %322, %352
+  %354 = xor i8 %353, %115
+  %355 = xor i8 %354, %61
+  %356 = select i1 %225, i8 0, i8 3
+  %357 = xor i8 %356, 6
+  %358 = select i1 %227, i8 %356, i8 %357
+  %359 = xor i8 %358, 12
+  %360 = select i1 %229, i8 %358, i8 %359
+  %361 = xor i8 %360, 24
+  %362 = select i1 %231, i8 %360, i8 %361
+  %363 = xor i8 %362, 48
+  %364 = select i1 %233, i8 %362, i8 %363
+  %365 = xor i8 %364, 96
+  %366 = select i1 %235, i8 %364, i8 %365
+  %367 = xor i8 %366, -64
+  %368 = select i1 %239, i8 %366, i8 %367
+  %369 = xor i8 %368, -101
+  %370 = select i1 %242, i8 %368, i8 %369
+  %371 = shl i8 %223, 1
+  %372 = and i8 %371, 126
+  %373 = or i8 %371, -128
+  %374 = select i1 %347, i8 %372, i8 %373
+  %375 = xor i8 %374, 27
+  %376 = select i1 %350, i8 %374, i8 %375
+  %377 = xor i8 %376, %370
+  %378 = xor i8 %377, %115
+  %379 = xor i8 %378, %169
+  store i8 %277, ptr %1, align 1, !tbaa !6
+  store i8 %316, ptr %35, align 1, !tbaa !6
+  store i8 %355, ptr %36, align 1, !tbaa !6
+  store i8 %379, ptr %37, align 1, !tbaa !6
+  %380 = load i8, ptr %38, align 1, !tbaa !6
+  %381 = and i8 %380, 1
+  %382 = icmp eq i8 %381, 0
+  %383 = and i8 %380, 2
+  %384 = icmp eq i8 %383, 0
+  %385 = and i8 %380, 4
+  %386 = icmp eq i8 %385, 0
+  %387 = and i8 %380, 8
+  %388 = icmp eq i8 %387, 0
+  %389 = and i8 %380, 16
+  %390 = icmp eq i8 %389, 0
+  %391 = and i8 %380, 32
+  %392 = icmp eq i8 %391, 0
+  %393 = shl i8 %380, 1
+  %394 = and i8 %393, 126
+  %395 = and i8 %380, 64
+  %396 = icmp eq i8 %395, 0
+  %397 = or i8 %393, -128
+  %398 = select i1 %396, i8 %394, i8 %397
+  %399 = icmp sgt i8 %380, -1
+  %400 = xor i8 %398, 27
+  %401 = select i1 %399, i8 %398, i8 %400
+  %402 = and i8 %158, 1
+  %403 = icmp eq i8 %402, 0
+  %404 = select i1 %403, i8 0, i8 3
+  %405 = and i8 %158, 2
   %406 = icmp eq i8 %405, 0
-  %407 = select i1 %406, i8 0, i8 3
-  %408 = and i8 %161, 2
-  %409 = icmp eq i8 %408, 0
-  %410 = xor i8 %407, 6
-  %411 = select i1 %409, i8 %407, i8 %410
-  %412 = and i8 %161, 4
-  %413 = icmp eq i8 %412, 0
-  %414 = xor i8 %411, 12
-  %415 = select i1 %413, i8 %411, i8 %414
-  %416 = and i8 %161, 8
-  %417 = icmp eq i8 %416, 0
-  %418 = xor i8 %415, 24
-  %419 = select i1 %417, i8 %415, i8 %418
-  %420 = and i8 %161, 16
-  %421 = icmp eq i8 %420, 0
-  %422 = xor i8 %419, 48
-  %423 = select i1 %421, i8 %419, i8 %422
-  %424 = and i8 %161, 32
-  %425 = icmp eq i8 %424, 0
-  %426 = xor i8 %423, 96
-  %427 = select i1 %425, i8 %423, i8 %426
-  %428 = and i8 %161, 64
-  %429 = icmp eq i8 %428, 0
-  %430 = xor i8 %427, -64
-  %431 = select i1 %429, i8 %427, i8 %430
-  %432 = icmp sgt i8 %161, -1
-  %433 = xor i8 %431, -101
-  %434 = select i1 %432, i8 %431, i8 %433
-  %435 = xor i8 %434, %404
-  %436 = xor i8 %435, %215
-  %437 = xor i8 %436, %97
-  %438 = shl i8 %161, 1
-  %439 = and i8 %438, 126
-  %440 = or i8 %438, -128
-  %441 = select i1 %429, i8 %439, i8 %440
-  %442 = xor i8 %441, 27
-  %443 = select i1 %432, i8 %441, i8 %442
-  %444 = and i8 %215, 1
+  %407 = xor i8 %404, 6
+  %408 = select i1 %406, i8 %404, i8 %407
+  %409 = and i8 %158, 4
+  %410 = icmp eq i8 %409, 0
+  %411 = xor i8 %408, 12
+  %412 = select i1 %410, i8 %408, i8 %411
+  %413 = and i8 %158, 8
+  %414 = icmp eq i8 %413, 0
+  %415 = xor i8 %412, 24
+  %416 = select i1 %414, i8 %412, i8 %415
+  %417 = and i8 %158, 16
+  %418 = icmp eq i8 %417, 0
+  %419 = xor i8 %416, 48
+  %420 = select i1 %418, i8 %416, i8 %419
+  %421 = and i8 %158, 32
+  %422 = icmp eq i8 %421, 0
+  %423 = xor i8 %420, 96
+  %424 = select i1 %422, i8 %420, i8 %423
+  %425 = and i8 %158, 64
+  %426 = icmp eq i8 %425, 0
+  %427 = xor i8 %424, -64
+  %428 = select i1 %426, i8 %424, i8 %427
+  %429 = icmp sgt i8 %158, -1
+  %430 = xor i8 %428, -101
+  %431 = select i1 %429, i8 %428, i8 %430
+  %432 = xor i8 %431, %401
+  %433 = xor i8 %432, %212
+  %434 = xor i8 %433, %94
+  %435 = shl i8 %158, 1
+  %436 = and i8 %435, 126
+  %437 = or i8 %435, -128
+  %438 = select i1 %426, i8 %436, i8 %437
+  %439 = xor i8 %438, 27
+  %440 = select i1 %429, i8 %438, i8 %439
+  %441 = and i8 %212, 1
+  %442 = icmp eq i8 %441, 0
+  %443 = select i1 %442, i8 0, i8 3
+  %444 = and i8 %212, 2
   %445 = icmp eq i8 %444, 0
-  %446 = select i1 %445, i8 0, i8 3
-  %447 = and i8 %215, 2
-  %448 = icmp eq i8 %447, 0
-  %449 = xor i8 %446, 6
-  %450 = select i1 %448, i8 %446, i8 %449
-  %451 = and i8 %215, 4
-  %452 = icmp eq i8 %451, 0
-  %453 = xor i8 %450, 12
-  %454 = select i1 %452, i8 %450, i8 %453
-  %455 = and i8 %215, 8
-  %456 = icmp eq i8 %455, 0
-  %457 = xor i8 %454, 24
-  %458 = select i1 %456, i8 %454, i8 %457
-  %459 = and i8 %215, 16
-  %460 = icmp eq i8 %459, 0
-  %461 = xor i8 %458, 48
-  %462 = select i1 %460, i8 %458, i8 %461
-  %463 = and i8 %215, 32
-  %464 = icmp eq i8 %463, 0
-  %465 = xor i8 %462, 96
-  %466 = select i1 %464, i8 %462, i8 %465
-  %467 = and i8 %215, 64
-  %468 = icmp eq i8 %467, 0
-  %469 = xor i8 %466, -64
-  %470 = select i1 %468, i8 %466, i8 %469
-  %471 = icmp sgt i8 %215, -1
-  %472 = xor i8 %470, -101
-  %473 = select i1 %471, i8 %470, i8 %472
-  %474 = xor i8 %443, %473
-  %475 = xor i8 %474, %97
-  %476 = xor i8 %475, %383
-  %477 = shl i8 %215, 1
-  %478 = and i8 %477, 126
-  %479 = or i8 %477, -128
-  %480 = select i1 %468, i8 %478, i8 %479
-  %481 = xor i8 %480, 27
-  %482 = select i1 %471, i8 %480, i8 %481
-  %483 = and i8 %97, 1
+  %446 = xor i8 %443, 6
+  %447 = select i1 %445, i8 %443, i8 %446
+  %448 = and i8 %212, 4
+  %449 = icmp eq i8 %448, 0
+  %450 = xor i8 %447, 12
+  %451 = select i1 %449, i8 %447, i8 %450
+  %452 = and i8 %212, 8
+  %453 = icmp eq i8 %452, 0
+  %454 = xor i8 %451, 24
+  %455 = select i1 %453, i8 %451, i8 %454
+  %456 = and i8 %212, 16
+  %457 = icmp eq i8 %456, 0
+  %458 = xor i8 %455, 48
+  %459 = select i1 %457, i8 %455, i8 %458
+  %460 = and i8 %212, 32
+  %461 = icmp eq i8 %460, 0
+  %462 = xor i8 %459, 96
+  %463 = select i1 %461, i8 %459, i8 %462
+  %464 = and i8 %212, 64
+  %465 = icmp eq i8 %464, 0
+  %466 = xor i8 %463, -64
+  %467 = select i1 %465, i8 %463, i8 %466
+  %468 = icmp sgt i8 %212, -1
+  %469 = xor i8 %467, -101
+  %470 = select i1 %468, i8 %467, i8 %469
+  %471 = xor i8 %440, %470
+  %472 = xor i8 %471, %94
+  %473 = xor i8 %472, %380
+  %474 = shl i8 %212, 1
+  %475 = and i8 %474, 126
+  %476 = or i8 %474, -128
+  %477 = select i1 %465, i8 %475, i8 %476
+  %478 = xor i8 %477, 27
+  %479 = select i1 %468, i8 %477, i8 %478
+  %480 = and i8 %94, 1
+  %481 = icmp eq i8 %480, 0
+  %482 = select i1 %481, i8 0, i8 3
+  %483 = and i8 %94, 2
   %484 = icmp eq i8 %483, 0
-  %485 = select i1 %484, i8 0, i8 3
-  %486 = and i8 %97, 2
-  %487 = icmp eq i8 %486, 0
-  %488 = xor i8 %485, 6
-  %489 = select i1 %487, i8 %485, i8 %488
-  %490 = and i8 %97, 4
-  %491 = icmp eq i8 %490, 0
-  %492 = xor i8 %489, 12
-  %493 = select i1 %491, i8 %489, i8 %492
-  %494 = and i8 %97, 8
-  %495 = icmp eq i8 %494, 0
-  %496 = xor i8 %493, 24
-  %497 = select i1 %495, i8 %493, i8 %496
-  %498 = and i8 %97, 16
-  %499 = icmp eq i8 %498, 0
-  %500 = xor i8 %497, 48
-  %501 = select i1 %499, i8 %497, i8 %500
-  %502 = and i8 %97, 32
-  %503 = icmp eq i8 %502, 0
-  %504 = xor i8 %501, 96
-  %505 = select i1 %503, i8 %501, i8 %504
-  %506 = and i8 %97, 64
-  %507 = icmp eq i8 %506, 0
-  %508 = xor i8 %505, -64
-  %509 = select i1 %507, i8 %505, i8 %508
-  %510 = icmp sgt i8 %97, -1
-  %511 = xor i8 %509, -101
-  %512 = select i1 %510, i8 %509, i8 %511
-  %513 = xor i8 %482, %512
-  %514 = xor i8 %513, %161
-  %515 = xor i8 %514, %383
-  %516 = select i1 %385, i8 0, i8 3
-  %517 = xor i8 %516, 6
-  %518 = select i1 %387, i8 %516, i8 %517
-  %519 = xor i8 %518, 12
-  %520 = select i1 %389, i8 %518, i8 %519
-  %521 = xor i8 %520, 24
-  %522 = select i1 %391, i8 %520, i8 %521
-  %523 = xor i8 %522, 48
-  %524 = select i1 %393, i8 %522, i8 %523
-  %525 = xor i8 %524, 96
-  %526 = select i1 %395, i8 %524, i8 %525
-  %527 = xor i8 %526, -64
-  %528 = select i1 %399, i8 %526, i8 %527
-  %529 = xor i8 %528, -101
-  %530 = select i1 %402, i8 %528, i8 %529
-  %531 = shl i8 %97, 1
-  %532 = and i8 %531, 126
-  %533 = or i8 %531, -128
-  %534 = select i1 %507, i8 %532, i8 %533
-  %535 = xor i8 %534, 27
-  %536 = select i1 %510, i8 %534, i8 %535
-  %537 = xor i8 %536, %530
-  %538 = xor i8 %537, %161
-  %539 = xor i8 %538, %215
-  store i8 %437, ptr %41, align 1, !tbaa !6
-  store i8 %476, ptr %42, align 1, !tbaa !6
-  store i8 %515, ptr %43, align 1, !tbaa !6
-  store i8 %539, ptr %44, align 1, !tbaa !6
-  %540 = load i8, ptr %45, align 1, !tbaa !6
-  %541 = and i8 %540, 1
-  %542 = icmp eq i8 %541, 0
-  %543 = and i8 %540, 2
-  %544 = icmp eq i8 %543, 0
-  %545 = and i8 %540, 4
-  %546 = icmp eq i8 %545, 0
-  %547 = and i8 %540, 8
-  %548 = icmp eq i8 %547, 0
-  %549 = and i8 %540, 16
-  %550 = icmp eq i8 %549, 0
-  %551 = and i8 %540, 32
-  %552 = icmp eq i8 %551, 0
-  %553 = shl i8 %540, 1
-  %554 = and i8 %553, 126
-  %555 = and i8 %540, 64
-  %556 = icmp eq i8 %555, 0
-  %557 = or i8 %553, -128
-  %558 = select i1 %556, i8 %554, i8 %557
-  %559 = icmp sgt i8 %540, -1
-  %560 = xor i8 %558, 27
-  %561 = select i1 %559, i8 %558, i8 %560
-  %562 = and i8 %204, 1
+  %485 = xor i8 %482, 6
+  %486 = select i1 %484, i8 %482, i8 %485
+  %487 = and i8 %94, 4
+  %488 = icmp eq i8 %487, 0
+  %489 = xor i8 %486, 12
+  %490 = select i1 %488, i8 %486, i8 %489
+  %491 = and i8 %94, 8
+  %492 = icmp eq i8 %491, 0
+  %493 = xor i8 %490, 24
+  %494 = select i1 %492, i8 %490, i8 %493
+  %495 = and i8 %94, 16
+  %496 = icmp eq i8 %495, 0
+  %497 = xor i8 %494, 48
+  %498 = select i1 %496, i8 %494, i8 %497
+  %499 = and i8 %94, 32
+  %500 = icmp eq i8 %499, 0
+  %501 = xor i8 %498, 96
+  %502 = select i1 %500, i8 %498, i8 %501
+  %503 = and i8 %94, 64
+  %504 = icmp eq i8 %503, 0
+  %505 = xor i8 %502, -64
+  %506 = select i1 %504, i8 %502, i8 %505
+  %507 = icmp sgt i8 %94, -1
+  %508 = xor i8 %506, -101
+  %509 = select i1 %507, i8 %506, i8 %508
+  %510 = xor i8 %479, %509
+  %511 = xor i8 %510, %158
+  %512 = xor i8 %511, %380
+  %513 = select i1 %382, i8 0, i8 3
+  %514 = xor i8 %513, 6
+  %515 = select i1 %384, i8 %513, i8 %514
+  %516 = xor i8 %515, 12
+  %517 = select i1 %386, i8 %515, i8 %516
+  %518 = xor i8 %517, 24
+  %519 = select i1 %388, i8 %517, i8 %518
+  %520 = xor i8 %519, 48
+  %521 = select i1 %390, i8 %519, i8 %520
+  %522 = xor i8 %521, 96
+  %523 = select i1 %392, i8 %521, i8 %522
+  %524 = xor i8 %523, -64
+  %525 = select i1 %396, i8 %523, i8 %524
+  %526 = xor i8 %525, -101
+  %527 = select i1 %399, i8 %525, i8 %526
+  %528 = shl i8 %94, 1
+  %529 = and i8 %528, 126
+  %530 = or i8 %528, -128
+  %531 = select i1 %504, i8 %529, i8 %530
+  %532 = xor i8 %531, 27
+  %533 = select i1 %507, i8 %531, i8 %532
+  %534 = xor i8 %533, %527
+  %535 = xor i8 %534, %158
+  %536 = xor i8 %535, %212
+  store i8 %434, ptr %38, align 1, !tbaa !6
+  store i8 %473, ptr %39, align 1, !tbaa !6
+  store i8 %512, ptr %40, align 1, !tbaa !6
+  store i8 %536, ptr %41, align 1, !tbaa !6
+  %537 = load i8, ptr %42, align 1, !tbaa !6
+  %538 = and i8 %537, 1
+  %539 = icmp eq i8 %538, 0
+  %540 = and i8 %537, 2
+  %541 = icmp eq i8 %540, 0
+  %542 = and i8 %537, 4
+  %543 = icmp eq i8 %542, 0
+  %544 = and i8 %537, 8
+  %545 = icmp eq i8 %544, 0
+  %546 = and i8 %537, 16
+  %547 = icmp eq i8 %546, 0
+  %548 = and i8 %537, 32
+  %549 = icmp eq i8 %548, 0
+  %550 = shl i8 %537, 1
+  %551 = and i8 %550, 126
+  %552 = and i8 %537, 64
+  %553 = icmp eq i8 %552, 0
+  %554 = or i8 %550, -128
+  %555 = select i1 %553, i8 %551, i8 %554
+  %556 = icmp sgt i8 %537, -1
+  %557 = xor i8 %555, 27
+  %558 = select i1 %556, i8 %555, i8 %557
+  %559 = and i8 %201, 1
+  %560 = icmp eq i8 %559, 0
+  %561 = select i1 %560, i8 0, i8 3
+  %562 = and i8 %201, 2
   %563 = icmp eq i8 %562, 0
-  %564 = select i1 %563, i8 0, i8 3
-  %565 = and i8 %204, 2
-  %566 = icmp eq i8 %565, 0
-  %567 = xor i8 %564, 6
-  %568 = select i1 %566, i8 %564, i8 %567
-  %569 = and i8 %204, 4
-  %570 = icmp eq i8 %569, 0
-  %571 = xor i8 %568, 12
-  %572 = select i1 %570, i8 %568, i8 %571
-  %573 = and i8 %204, 8
-  %574 = icmp eq i8 %573, 0
-  %575 = xor i8 %572, 24
-  %576 = select i1 %574, i8 %572, i8 %575
-  %577 = and i8 %204, 16
-  %578 = icmp eq i8 %577, 0
-  %579 = xor i8 %576, 48
-  %580 = select i1 %578, i8 %576, i8 %579
-  %581 = and i8 %204, 32
-  %582 = icmp eq i8 %581, 0
-  %583 = xor i8 %580, 96
-  %584 = select i1 %582, i8 %580, i8 %583
-  %585 = and i8 %204, 64
-  %586 = icmp eq i8 %585, 0
-  %587 = xor i8 %584, -64
-  %588 = select i1 %586, i8 %584, i8 %587
-  %589 = icmp sgt i8 %204, -1
-  %590 = xor i8 %588, -101
-  %591 = select i1 %589, i8 %588, i8 %590
-  %592 = xor i8 %591, %561
-  %593 = xor i8 %592, %86
-  %594 = xor i8 %593, %140
-  %595 = shl i8 %204, 1
-  %596 = and i8 %595, 126
-  %597 = or i8 %595, -128
-  %598 = select i1 %586, i8 %596, i8 %597
-  %599 = xor i8 %598, 27
-  %600 = select i1 %589, i8 %598, i8 %599
-  %601 = and i8 %86, 1
+  %564 = xor i8 %561, 6
+  %565 = select i1 %563, i8 %561, i8 %564
+  %566 = and i8 %201, 4
+  %567 = icmp eq i8 %566, 0
+  %568 = xor i8 %565, 12
+  %569 = select i1 %567, i8 %565, i8 %568
+  %570 = and i8 %201, 8
+  %571 = icmp eq i8 %570, 0
+  %572 = xor i8 %569, 24
+  %573 = select i1 %571, i8 %569, i8 %572
+  %574 = and i8 %201, 16
+  %575 = icmp eq i8 %574, 0
+  %576 = xor i8 %573, 48
+  %577 = select i1 %575, i8 %573, i8 %576
+  %578 = and i8 %201, 32
+  %579 = icmp eq i8 %578, 0
+  %580 = xor i8 %577, 96
+  %581 = select i1 %579, i8 %577, i8 %580
+  %582 = and i8 %201, 64
+  %583 = icmp eq i8 %582, 0
+  %584 = xor i8 %581, -64
+  %585 = select i1 %583, i8 %581, i8 %584
+  %586 = icmp sgt i8 %201, -1
+  %587 = xor i8 %585, -101
+  %588 = select i1 %586, i8 %585, i8 %587
+  %589 = xor i8 %588, %558
+  %590 = xor i8 %589, %83
+  %591 = xor i8 %590, %137
+  %592 = shl i8 %201, 1
+  %593 = and i8 %592, 126
+  %594 = or i8 %592, -128
+  %595 = select i1 %583, i8 %593, i8 %594
+  %596 = xor i8 %595, 27
+  %597 = select i1 %586, i8 %595, i8 %596
+  %598 = and i8 %83, 1
+  %599 = icmp eq i8 %598, 0
+  %600 = select i1 %599, i8 0, i8 3
+  %601 = and i8 %83, 2
   %602 = icmp eq i8 %601, 0
-  %603 = select i1 %602, i8 0, i8 3
-  %604 = and i8 %86, 2
-  %605 = icmp eq i8 %604, 0
-  %606 = xor i8 %603, 6
-  %607 = select i1 %605, i8 %603, i8 %606
-  %608 = and i8 %86, 4
-  %609 = icmp eq i8 %608, 0
-  %610 = xor i8 %607, 12
-  %611 = select i1 %609, i8 %607, i8 %610
-  %612 = and i8 %86, 8
-  %613 = icmp eq i8 %612, 0
-  %614 = xor i8 %611, 24
-  %615 = select i1 %613, i8 %611, i8 %614
-  %616 = and i8 %86, 16
-  %617 = icmp eq i8 %616, 0
-  %618 = xor i8 %615, 48
-  %619 = select i1 %617, i8 %615, i8 %618
-  %620 = and i8 %86, 32
-  %621 = icmp eq i8 %620, 0
-  %622 = xor i8 %619, 96
-  %623 = select i1 %621, i8 %619, i8 %622
-  %624 = and i8 %86, 64
-  %625 = icmp eq i8 %624, 0
-  %626 = xor i8 %623, -64
-  %627 = select i1 %625, i8 %623, i8 %626
-  %628 = icmp sgt i8 %86, -1
-  %629 = xor i8 %627, -101
-  %630 = select i1 %628, i8 %627, i8 %629
-  %631 = xor i8 %600, %630
-  %632 = xor i8 %631, %140
-  %633 = xor i8 %632, %540
-  %634 = shl i8 %86, 1
-  %635 = and i8 %634, 126
-  %636 = or i8 %634, -128
-  %637 = select i1 %625, i8 %635, i8 %636
-  %638 = xor i8 %637, 27
-  %639 = select i1 %628, i8 %637, i8 %638
-  %640 = and i8 %140, 1
+  %603 = xor i8 %600, 6
+  %604 = select i1 %602, i8 %600, i8 %603
+  %605 = and i8 %83, 4
+  %606 = icmp eq i8 %605, 0
+  %607 = xor i8 %604, 12
+  %608 = select i1 %606, i8 %604, i8 %607
+  %609 = and i8 %83, 8
+  %610 = icmp eq i8 %609, 0
+  %611 = xor i8 %608, 24
+  %612 = select i1 %610, i8 %608, i8 %611
+  %613 = and i8 %83, 16
+  %614 = icmp eq i8 %613, 0
+  %615 = xor i8 %612, 48
+  %616 = select i1 %614, i8 %612, i8 %615
+  %617 = and i8 %83, 32
+  %618 = icmp eq i8 %617, 0
+  %619 = xor i8 %616, 96
+  %620 = select i1 %618, i8 %616, i8 %619
+  %621 = and i8 %83, 64
+  %622 = icmp eq i8 %621, 0
+  %623 = xor i8 %620, -64
+  %624 = select i1 %622, i8 %620, i8 %623
+  %625 = icmp sgt i8 %83, -1
+  %626 = xor i8 %624, -101
+  %627 = select i1 %625, i8 %624, i8 %626
+  %628 = xor i8 %597, %627
+  %629 = xor i8 %628, %137
+  %630 = xor i8 %629, %537
+  %631 = shl i8 %83, 1
+  %632 = and i8 %631, 126
+  %633 = or i8 %631, -128
+  %634 = select i1 %622, i8 %632, i8 %633
+  %635 = xor i8 %634, 27
+  %636 = select i1 %625, i8 %634, i8 %635
+  %637 = and i8 %137, 1
+  %638 = icmp eq i8 %637, 0
+  %639 = select i1 %638, i8 0, i8 3
+  %640 = and i8 %137, 2
   %641 = icmp eq i8 %640, 0
-  %642 = select i1 %641, i8 0, i8 3
-  %643 = and i8 %140, 2
-  %644 = icmp eq i8 %643, 0
-  %645 = xor i8 %642, 6
-  %646 = select i1 %644, i8 %642, i8 %645
-  %647 = and i8 %140, 4
-  %648 = icmp eq i8 %647, 0
-  %649 = xor i8 %646, 12
-  %650 = select i1 %648, i8 %646, i8 %649
-  %651 = and i8 %140, 8
-  %652 = icmp eq i8 %651, 0
-  %653 = xor i8 %650, 24
-  %654 = select i1 %652, i8 %650, i8 %653
-  %655 = and i8 %140, 16
-  %656 = icmp eq i8 %655, 0
-  %657 = xor i8 %654, 48
-  %658 = select i1 %656, i8 %654, i8 %657
-  %659 = and i8 %140, 32
-  %660 = icmp eq i8 %659, 0
-  %661 = xor i8 %658, 96
-  %662 = select i1 %660, i8 %658, i8 %661
-  %663 = and i8 %140, 64
-  %664 = icmp eq i8 %663, 0
-  %665 = xor i8 %662, -64
-  %666 = select i1 %664, i8 %662, i8 %665
-  %667 = icmp sgt i8 %140, -1
-  %668 = xor i8 %666, -101
-  %669 = select i1 %667, i8 %666, i8 %668
-  %670 = xor i8 %639, %669
-  %671 = xor i8 %670, %204
-  %672 = xor i8 %671, %540
-  %673 = select i1 %542, i8 0, i8 3
-  %674 = xor i8 %673, 6
-  %675 = select i1 %544, i8 %673, i8 %674
-  %676 = xor i8 %675, 12
-  %677 = select i1 %546, i8 %675, i8 %676
-  %678 = xor i8 %677, 24
-  %679 = select i1 %548, i8 %677, i8 %678
-  %680 = xor i8 %679, 48
-  %681 = select i1 %550, i8 %679, i8 %680
-  %682 = xor i8 %681, 96
-  %683 = select i1 %552, i8 %681, i8 %682
-  %684 = xor i8 %683, -64
-  %685 = select i1 %556, i8 %683, i8 %684
-  %686 = xor i8 %685, -101
-  %687 = select i1 %559, i8 %685, i8 %686
-  %688 = shl i8 %140, 1
-  %689 = and i8 %688, 126
-  %690 = or i8 %688, -128
-  %691 = select i1 %664, i8 %689, i8 %690
-  %692 = xor i8 %691, 27
-  %693 = select i1 %667, i8 %691, i8 %692
-  %694 = xor i8 %693, %687
-  %695 = xor i8 %694, %204
-  %696 = xor i8 %695, %86
-  store i8 %594, ptr %45, align 1, !tbaa !6
-  store i8 %633, ptr %46, align 1, !tbaa !6
-  store i8 %672, ptr %47, align 1, !tbaa !6
-  store i8 %696, ptr %48, align 1, !tbaa !6
-  %697 = load i8, ptr %49, align 1, !tbaa !6
-  %698 = and i8 %697, 1
-  %699 = icmp eq i8 %698, 0
-  %700 = and i8 %697, 2
-  %701 = icmp eq i8 %700, 0
-  %702 = and i8 %697, 4
-  %703 = icmp eq i8 %702, 0
-  %704 = and i8 %697, 8
-  %705 = icmp eq i8 %704, 0
-  %706 = and i8 %697, 16
-  %707 = icmp eq i8 %706, 0
-  %708 = and i8 %697, 32
-  %709 = icmp eq i8 %708, 0
-  %710 = shl i8 %697, 1
-  %711 = and i8 %710, 126
-  %712 = and i8 %697, 64
-  %713 = icmp eq i8 %712, 0
-  %714 = or i8 %710, -128
-  %715 = select i1 %713, i8 %711, i8 %714
-  %716 = icmp sgt i8 %697, -1
-  %717 = xor i8 %715, 27
-  %718 = select i1 %716, i8 %715, i8 %717
-  %719 = and i8 %75, 1
+  %642 = xor i8 %639, 6
+  %643 = select i1 %641, i8 %639, i8 %642
+  %644 = and i8 %137, 4
+  %645 = icmp eq i8 %644, 0
+  %646 = xor i8 %643, 12
+  %647 = select i1 %645, i8 %643, i8 %646
+  %648 = and i8 %137, 8
+  %649 = icmp eq i8 %648, 0
+  %650 = xor i8 %647, 24
+  %651 = select i1 %649, i8 %647, i8 %650
+  %652 = and i8 %137, 16
+  %653 = icmp eq i8 %652, 0
+  %654 = xor i8 %651, 48
+  %655 = select i1 %653, i8 %651, i8 %654
+  %656 = and i8 %137, 32
+  %657 = icmp eq i8 %656, 0
+  %658 = xor i8 %655, 96
+  %659 = select i1 %657, i8 %655, i8 %658
+  %660 = and i8 %137, 64
+  %661 = icmp eq i8 %660, 0
+  %662 = xor i8 %659, -64
+  %663 = select i1 %661, i8 %659, i8 %662
+  %664 = icmp sgt i8 %137, -1
+  %665 = xor i8 %663, -101
+  %666 = select i1 %664, i8 %663, i8 %665
+  %667 = xor i8 %636, %666
+  %668 = xor i8 %667, %201
+  %669 = xor i8 %668, %537
+  %670 = select i1 %539, i8 0, i8 3
+  %671 = xor i8 %670, 6
+  %672 = select i1 %541, i8 %670, i8 %671
+  %673 = xor i8 %672, 12
+  %674 = select i1 %543, i8 %672, i8 %673
+  %675 = xor i8 %674, 24
+  %676 = select i1 %545, i8 %674, i8 %675
+  %677 = xor i8 %676, 48
+  %678 = select i1 %547, i8 %676, i8 %677
+  %679 = xor i8 %678, 96
+  %680 = select i1 %549, i8 %678, i8 %679
+  %681 = xor i8 %680, -64
+  %682 = select i1 %553, i8 %680, i8 %681
+  %683 = xor i8 %682, -101
+  %684 = select i1 %556, i8 %682, i8 %683
+  %685 = shl i8 %137, 1
+  %686 = and i8 %685, 126
+  %687 = or i8 %685, -128
+  %688 = select i1 %661, i8 %686, i8 %687
+  %689 = xor i8 %688, 27
+  %690 = select i1 %664, i8 %688, i8 %689
+  %691 = xor i8 %690, %684
+  %692 = xor i8 %691, %201
+  %693 = xor i8 %692, %83
+  store i8 %591, ptr %42, align 1, !tbaa !6
+  store i8 %630, ptr %43, align 1, !tbaa !6
+  store i8 %669, ptr %44, align 1, !tbaa !6
+  store i8 %693, ptr %45, align 1, !tbaa !6
+  %694 = load i8, ptr %46, align 1, !tbaa !6
+  %695 = and i8 %694, 1
+  %696 = icmp eq i8 %695, 0
+  %697 = and i8 %694, 2
+  %698 = icmp eq i8 %697, 0
+  %699 = and i8 %694, 4
+  %700 = icmp eq i8 %699, 0
+  %701 = and i8 %694, 8
+  %702 = icmp eq i8 %701, 0
+  %703 = and i8 %694, 16
+  %704 = icmp eq i8 %703, 0
+  %705 = and i8 %694, 32
+  %706 = icmp eq i8 %705, 0
+  %707 = shl i8 %694, 1
+  %708 = and i8 %707, 126
+  %709 = and i8 %694, 64
+  %710 = icmp eq i8 %709, 0
+  %711 = or i8 %707, -128
+  %712 = select i1 %710, i8 %708, i8 %711
+  %713 = icmp sgt i8 %694, -1
+  %714 = xor i8 %712, 27
+  %715 = select i1 %713, i8 %712, i8 %714
+  %716 = and i8 %72, 1
+  %717 = icmp eq i8 %716, 0
+  %718 = select i1 %717, i8 0, i8 3
+  %719 = and i8 %72, 2
   %720 = icmp eq i8 %719, 0
-  %721 = select i1 %720, i8 0, i8 3
-  %722 = and i8 %75, 2
-  %723 = icmp eq i8 %722, 0
-  %724 = xor i8 %721, 6
-  %725 = select i1 %723, i8 %721, i8 %724
-  %726 = and i8 %75, 4
-  %727 = icmp eq i8 %726, 0
-  %728 = xor i8 %725, 12
-  %729 = select i1 %727, i8 %725, i8 %728
-  %730 = and i8 %75, 8
-  %731 = icmp eq i8 %730, 0
-  %732 = xor i8 %729, 24
-  %733 = select i1 %731, i8 %729, i8 %732
-  %734 = and i8 %75, 16
-  %735 = icmp eq i8 %734, 0
-  %736 = xor i8 %733, 48
-  %737 = select i1 %735, i8 %733, i8 %736
-  %738 = and i8 %75, 32
-  %739 = icmp eq i8 %738, 0
-  %740 = xor i8 %737, 96
-  %741 = select i1 %739, i8 %737, i8 %740
-  %742 = and i8 %75, 64
-  %743 = icmp eq i8 %742, 0
-  %744 = xor i8 %741, -64
-  %745 = select i1 %743, i8 %741, i8 %744
-  %746 = icmp sgt i8 %75, -1
-  %747 = xor i8 %745, -101
-  %748 = select i1 %746, i8 %745, i8 %747
-  %749 = xor i8 %748, %718
-  %750 = xor i8 %749, %129
-  %751 = xor i8 %750, %183
-  %752 = shl i8 %75, 1
-  %753 = and i8 %752, 126
-  %754 = or i8 %752, -128
-  %755 = select i1 %743, i8 %753, i8 %754
-  %756 = xor i8 %755, 27
-  %757 = select i1 %746, i8 %755, i8 %756
-  %758 = and i8 %129, 1
+  %721 = xor i8 %718, 6
+  %722 = select i1 %720, i8 %718, i8 %721
+  %723 = and i8 %72, 4
+  %724 = icmp eq i8 %723, 0
+  %725 = xor i8 %722, 12
+  %726 = select i1 %724, i8 %722, i8 %725
+  %727 = and i8 %72, 8
+  %728 = icmp eq i8 %727, 0
+  %729 = xor i8 %726, 24
+  %730 = select i1 %728, i8 %726, i8 %729
+  %731 = and i8 %72, 16
+  %732 = icmp eq i8 %731, 0
+  %733 = xor i8 %730, 48
+  %734 = select i1 %732, i8 %730, i8 %733
+  %735 = and i8 %72, 32
+  %736 = icmp eq i8 %735, 0
+  %737 = xor i8 %734, 96
+  %738 = select i1 %736, i8 %734, i8 %737
+  %739 = and i8 %72, 64
+  %740 = icmp eq i8 %739, 0
+  %741 = xor i8 %738, -64
+  %742 = select i1 %740, i8 %738, i8 %741
+  %743 = icmp sgt i8 %72, -1
+  %744 = xor i8 %742, -101
+  %745 = select i1 %743, i8 %742, i8 %744
+  %746 = xor i8 %745, %715
+  %747 = xor i8 %746, %126
+  %748 = xor i8 %747, %180
+  %749 = shl i8 %72, 1
+  %750 = and i8 %749, 126
+  %751 = or i8 %749, -128
+  %752 = select i1 %740, i8 %750, i8 %751
+  %753 = xor i8 %752, 27
+  %754 = select i1 %743, i8 %752, i8 %753
+  %755 = and i8 %126, 1
+  %756 = icmp eq i8 %755, 0
+  %757 = select i1 %756, i8 0, i8 3
+  %758 = and i8 %126, 2
   %759 = icmp eq i8 %758, 0
-  %760 = select i1 %759, i8 0, i8 3
-  %761 = and i8 %129, 2
-  %762 = icmp eq i8 %761, 0
-  %763 = xor i8 %760, 6
-  %764 = select i1 %762, i8 %760, i8 %763
-  %765 = and i8 %129, 4
-  %766 = icmp eq i8 %765, 0
-  %767 = xor i8 %764, 12
-  %768 = select i1 %766, i8 %764, i8 %767
-  %769 = and i8 %129, 8
-  %770 = icmp eq i8 %769, 0
-  %771 = xor i8 %768, 24
-  %772 = select i1 %770, i8 %768, i8 %771
-  %773 = and i8 %129, 16
-  %774 = icmp eq i8 %773, 0
-  %775 = xor i8 %772, 48
-  %776 = select i1 %774, i8 %772, i8 %775
-  %777 = and i8 %129, 32
-  %778 = icmp eq i8 %777, 0
-  %779 = xor i8 %776, 96
-  %780 = select i1 %778, i8 %776, i8 %779
-  %781 = and i8 %129, 64
-  %782 = icmp eq i8 %781, 0
-  %783 = xor i8 %780, -64
-  %784 = select i1 %782, i8 %780, i8 %783
-  %785 = icmp sgt i8 %129, -1
-  %786 = xor i8 %784, -101
-  %787 = select i1 %785, i8 %784, i8 %786
-  %788 = xor i8 %757, %787
-  %789 = xor i8 %788, %183
-  %790 = xor i8 %789, %697
-  %791 = shl i8 %129, 1
-  %792 = and i8 %791, 126
-  %793 = or i8 %791, -128
-  %794 = select i1 %782, i8 %792, i8 %793
-  %795 = xor i8 %794, 27
-  %796 = select i1 %785, i8 %794, i8 %795
-  %797 = and i8 %183, 1
+  %760 = xor i8 %757, 6
+  %761 = select i1 %759, i8 %757, i8 %760
+  %762 = and i8 %126, 4
+  %763 = icmp eq i8 %762, 0
+  %764 = xor i8 %761, 12
+  %765 = select i1 %763, i8 %761, i8 %764
+  %766 = and i8 %126, 8
+  %767 = icmp eq i8 %766, 0
+  %768 = xor i8 %765, 24
+  %769 = select i1 %767, i8 %765, i8 %768
+  %770 = and i8 %126, 16
+  %771 = icmp eq i8 %770, 0
+  %772 = xor i8 %769, 48
+  %773 = select i1 %771, i8 %769, i8 %772
+  %774 = and i8 %126, 32
+  %775 = icmp eq i8 %774, 0
+  %776 = xor i8 %773, 96
+  %777 = select i1 %775, i8 %773, i8 %776
+  %778 = and i8 %126, 64
+  %779 = icmp eq i8 %778, 0
+  %780 = xor i8 %777, -64
+  %781 = select i1 %779, i8 %777, i8 %780
+  %782 = icmp sgt i8 %126, -1
+  %783 = xor i8 %781, -101
+  %784 = select i1 %782, i8 %781, i8 %783
+  %785 = xor i8 %754, %784
+  %786 = xor i8 %785, %180
+  %787 = xor i8 %786, %694
+  %788 = shl i8 %126, 1
+  %789 = and i8 %788, 126
+  %790 = or i8 %788, -128
+  %791 = select i1 %779, i8 %789, i8 %790
+  %792 = xor i8 %791, 27
+  %793 = select i1 %782, i8 %791, i8 %792
+  %794 = and i8 %180, 1
+  %795 = icmp eq i8 %794, 0
+  %796 = select i1 %795, i8 0, i8 3
+  %797 = and i8 %180, 2
   %798 = icmp eq i8 %797, 0
-  %799 = select i1 %798, i8 0, i8 3
-  %800 = and i8 %183, 2
-  %801 = icmp eq i8 %800, 0
-  %802 = xor i8 %799, 6
-  %803 = select i1 %801, i8 %799, i8 %802
-  %804 = and i8 %183, 4
-  %805 = icmp eq i8 %804, 0
-  %806 = xor i8 %803, 12
-  %807 = select i1 %805, i8 %803, i8 %806
-  %808 = and i8 %183, 8
-  %809 = icmp eq i8 %808, 0
-  %810 = xor i8 %807, 24
-  %811 = select i1 %809, i8 %807, i8 %810
-  %812 = and i8 %183, 16
-  %813 = icmp eq i8 %812, 0
-  %814 = xor i8 %811, 48
-  %815 = select i1 %813, i8 %811, i8 %814
-  %816 = and i8 %183, 32
-  %817 = icmp eq i8 %816, 0
-  %818 = xor i8 %815, 96
-  %819 = select i1 %817, i8 %815, i8 %818
-  %820 = and i8 %183, 64
-  %821 = icmp eq i8 %820, 0
-  %822 = xor i8 %819, -64
-  %823 = select i1 %821, i8 %819, i8 %822
-  %824 = icmp sgt i8 %183, -1
-  %825 = xor i8 %823, -101
-  %826 = select i1 %824, i8 %823, i8 %825
-  %827 = xor i8 %796, %826
-  %828 = xor i8 %827, %75
-  %829 = xor i8 %828, %697
-  %830 = select i1 %699, i8 0, i8 3
-  %831 = xor i8 %830, 6
-  %832 = select i1 %701, i8 %830, i8 %831
-  %833 = xor i8 %832, 12
-  %834 = select i1 %703, i8 %832, i8 %833
-  %835 = xor i8 %834, 24
-  %836 = select i1 %705, i8 %834, i8 %835
-  %837 = xor i8 %836, 48
-  %838 = select i1 %707, i8 %836, i8 %837
-  %839 = xor i8 %838, 96
-  %840 = select i1 %709, i8 %838, i8 %839
-  %841 = xor i8 %840, -64
-  %842 = select i1 %713, i8 %840, i8 %841
-  %843 = xor i8 %842, -101
-  %844 = select i1 %716, i8 %842, i8 %843
-  %845 = shl i8 %183, 1
-  %846 = and i8 %845, 126
-  %847 = or i8 %845, -128
-  %848 = select i1 %821, i8 %846, i8 %847
-  %849 = xor i8 %848, 27
-  %850 = select i1 %824, i8 %848, i8 %849
-  %851 = xor i8 %850, %844
-  %852 = xor i8 %851, %75
-  %853 = xor i8 %852, %129
-  store i8 %751, ptr %49, align 1, !tbaa !6
-  store i8 %790, ptr %50, align 1, !tbaa !6
-  store i8 %829, ptr %51, align 1, !tbaa !6
-  store i8 %853, ptr %52, align 1, !tbaa !6
-  %854 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %855 = icmp eq ptr %854, null
-  br i1 %855, label %856, label %53, !llvm.loop !15
+  %799 = xor i8 %796, 6
+  %800 = select i1 %798, i8 %796, i8 %799
+  %801 = and i8 %180, 4
+  %802 = icmp eq i8 %801, 0
+  %803 = xor i8 %800, 12
+  %804 = select i1 %802, i8 %800, i8 %803
+  %805 = and i8 %180, 8
+  %806 = icmp eq i8 %805, 0
+  %807 = xor i8 %804, 24
+  %808 = select i1 %806, i8 %804, i8 %807
+  %809 = and i8 %180, 16
+  %810 = icmp eq i8 %809, 0
+  %811 = xor i8 %808, 48
+  %812 = select i1 %810, i8 %808, i8 %811
+  %813 = and i8 %180, 32
+  %814 = icmp eq i8 %813, 0
+  %815 = xor i8 %812, 96
+  %816 = select i1 %814, i8 %812, i8 %815
+  %817 = and i8 %180, 64
+  %818 = icmp eq i8 %817, 0
+  %819 = xor i8 %816, -64
+  %820 = select i1 %818, i8 %816, i8 %819
+  %821 = icmp sgt i8 %180, -1
+  %822 = xor i8 %820, -101
+  %823 = select i1 %821, i8 %820, i8 %822
+  %824 = xor i8 %793, %823
+  %825 = xor i8 %824, %72
+  %826 = xor i8 %825, %694
+  %827 = select i1 %696, i8 0, i8 3
+  %828 = xor i8 %827, 6
+  %829 = select i1 %698, i8 %827, i8 %828
+  %830 = xor i8 %829, 12
+  %831 = select i1 %700, i8 %829, i8 %830
+  %832 = xor i8 %831, 24
+  %833 = select i1 %702, i8 %831, i8 %832
+  %834 = xor i8 %833, 48
+  %835 = select i1 %704, i8 %833, i8 %834
+  %836 = xor i8 %835, 96
+  %837 = select i1 %706, i8 %835, i8 %836
+  %838 = xor i8 %837, -64
+  %839 = select i1 %710, i8 %837, i8 %838
+  %840 = xor i8 %839, -101
+  %841 = select i1 %713, i8 %839, i8 %840
+  %842 = shl i8 %180, 1
+  %843 = and i8 %842, 126
+  %844 = or i8 %842, -128
+  %845 = select i1 %818, i8 %843, i8 %844
+  %846 = xor i8 %845, 27
+  %847 = select i1 %821, i8 %845, i8 %846
+  %848 = xor i8 %847, %841
+  %849 = xor i8 %848, %72
+  %850 = xor i8 %849, %126
+  store i8 %748, ptr %46, align 1, !tbaa !6
+  store i8 %787, ptr %47, align 1, !tbaa !6
+  store i8 %826, ptr %48, align 1, !tbaa !6
+  store i8 %850, ptr %49, align 1, !tbaa !6
+  %851 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %852 = icmp eq ptr %851, null
+  br i1 %852, label %853, label %50, !llvm.loop !14
 
-856:                                              ; preds = %225, %33
-  %857 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #5
-  %858 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %859 = icmp eq ptr %858, null
-  br i1 %859, label %868, label %860
+853:                                              ; preds = %222, %30
+  %854 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #3
+  %855 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %856 = icmp eq ptr %855, null
+  br i1 %856, label %864, label %857
 
-860:                                              ; preds = %856, %860
-  %861 = phi ptr [ %866, %860 ], [ %858, %856 ]
-  %862 = load i32, ptr %861, align 4, !tbaa !9
-  %863 = sext i32 %862 to i64
-  %864 = getelementptr inbounds [16 x i8], ptr %1, i64 0, i64 %863
-  %865 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %6, ptr noundef nonnull %861, ptr noundef nonnull %864, i64 noundef 0) #5
-  %866 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #5
-  %867 = icmp eq ptr %866, null
-  br i1 %867, label %868, label %860, !llvm.loop !16
+857:                                              ; preds = %853, %857
+  %858 = phi ptr [ %862, %857 ], [ %855, %853 ]
+  %859 = load i64, ptr %858, align 8, !tbaa !9
+  %860 = getelementptr inbounds [16 x i8], ptr %1, i64 0, i64 %859
+  %861 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %6, ptr noundef nonnull %858, ptr noundef nonnull %860, i64 noundef 0) #3
+  %862 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #3
+  %863 = icmp eq ptr %862, null
+  br i1 %863, label %864, label %857, !llvm.loop !15
 
-868:                                              ; preds = %860, %856
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %3) #5
-  call void @llvm.lifetime.end.p0(i64 256, ptr nonnull %2) #5
-  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %1) #5
+864:                                              ; preds = %857, %853
+  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %3) #3
+  call void @llvm.lifetime.end.p0(i64 256, ptr nonnull %2) #3
+  call void @llvm.lifetime.end.p0(i64 16, ptr nonnull %1) #3
   ret i32 0
 }
 
@@ -1005,39 +996,30 @@ declare void @llvm.lifetime.start.p0(i64 immarg, ptr nocapture) #1
 ; Function Attrs: mustprogress nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
 declare void @llvm.lifetime.end.p0(i64 immarg, ptr nocapture) #1
 
-; Function Attrs: mustprogress nocallback nofree nounwind willreturn memory(argmem: readwrite)
-declare void @llvm.memcpy.p0.p0.i64(ptr noalias nocapture writeonly, ptr noalias nocapture readonly, i64, i1 immarg) #2
-
-; Function Attrs: mustprogress nocallback nofree nounwind willreturn memory(argmem: write)
-declare void @llvm.memset.p0.i64(ptr nocapture writeonly, i8, i64, i1 immarg) #3
-
 ; Function Attrs: nounwind memory(none)
-declare i1 @llvm.bpf.passthrough.i1.i1(i32, i1) #4
+declare i1 @llvm.bpf.passthrough.i1.i1(i32, i1) #2
 
 attributes #0 = { nounwind "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="duotronic" }
 attributes #1 = { mustprogress nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-attributes #2 = { mustprogress nocallback nofree nounwind willreturn memory(argmem: readwrite) }
-attributes #3 = { mustprogress nocallback nofree nounwind willreturn memory(argmem: write) }
-attributes #4 = { nounwind memory(none) }
-attributes #5 = { nounwind }
+attributes #2 = { nounwind memory(none) }
+attributes #3 = { nounwind }
 
 !llvm.module.flags = !{!0, !1}
 !llvm.ident = !{!2}
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 3047ef595b8b4944540de771dcf86dc85a97ef76)"}
-!3 = !{i64 2147510745}
-!4 = !{i64 2147511261}
-!5 = !{i64 2147511777}
+!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
+!3 = !{i64 2147510764}
+!4 = !{i64 2147511280}
+!5 = !{i64 2147511796}
 !6 = !{!7, !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
-!10 = !{!"int", !7, i64 0}
-!11 = distinct !{!11, !12, !13}
+!10 = !{!"long long", !7, i64 0}
+!11 = distinct !{!11, !12}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = !{!"llvm.loop.unroll.disable"}
-!14 = distinct !{!14, !12, !13}
-!15 = distinct !{!15, !12, !13}
-!16 = distinct !{!16, !12, !13}
+!13 = distinct !{!13, !12}
+!14 = distinct !{!14, !12}
+!15 = distinct !{!15, !12}

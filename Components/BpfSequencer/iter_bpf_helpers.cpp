@@ -3,7 +3,6 @@
 #include "bpf.hpp"
 #include "maps/maps.hpp"
 
-#include <iostream>
 #include <chrono>
 #include <cstring>
 #include <new>
