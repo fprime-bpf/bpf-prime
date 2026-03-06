@@ -211,11 +211,10 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        // TODO:
-        // {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
-        //     tests->populate_map_random(8, 0, 6);
-        //     tests->populate_map_random(9, 0, 3);
-        // }},
+        {passes, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
+            tests->populate_map_random(8, 0, 6);
+            tests->populate_map_random(9, 0, 3);
+        }},
 
         {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
             tests->populate_map_random(10, 0, 16);

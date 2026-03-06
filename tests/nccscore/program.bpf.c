@@ -13,7 +13,7 @@ int main() {
     volatile unsigned int best_match, best_score = 0xffffffff;
 
     struct bpf_iter_num it, ij, iii, ijj;
-    int* i, *j, *ii, *jj;
+    long long* i, *j, *ii, *jj;
 
     // Read in input and match images
     bpf_iter_num_new(&it, 0, IMG_SIZE);

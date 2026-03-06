@@ -188,7 +188,7 @@ int main() {
     AES_Block_t zero;
 
     struct bpf_iter_num it;
-    int* i;
+    long long* i;
 
     bpf_iter_num_new(&it, 0, 16);
     while ((i = bpf_iter_num_next(&it))) {

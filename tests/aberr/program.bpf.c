@@ -218,7 +218,7 @@ int main() {
     volatile float beta2, gamma, t_emit, M, E, nu, r, h;
     volatile float s_dot_u, denom, factor, u_corr_mag;
     struct bpf_iter_num it;
-    long* i;
+    long long* i;
 
     tau = 0.0f;
 
