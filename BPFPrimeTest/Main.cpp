@@ -7,12 +7,21 @@
 #include <BPFPrimeTest/Top/BPFPrimeTestTopology.hpp>
 // OSAL initialization
 #include <Os/Os.hpp>
+#include <Svc/CmdSequencer/CmdSequencerImpl.hpp>
+#include <Fw/Types/String.hpp>
+
 // Used for signal handling shutdown
 #include <signal.h>
 // Used for command line argument processing
 #include <getopt.h>
 // Used for printf functions
 #include <cstdlib>
+#include <cstring>
+#include <cstdio>
+
+namespace BPFPrimeTest {
+    extern Svc::CmdSequencerComponentImpl cmdSeq;
+}
 
 /**
  * \brief print command line help message
@@ -49,13 +58,13 @@ static void signalHandler(int signum) {
  */
 int main(int argc, char* argv[]) {
     I32 option = 0;
-    CHAR* hostname = nullptr;
+    CHAR* hostname = nullptr, *seq_file = nullptr;
     U16 port_number = 0;
 
     Os::init();
 
     // Loop while reading the getopt supplied options
-    while ((option = getopt(argc, argv, "hp:a:")) != -1) {
+    while ((option = getopt(argc, argv, "hp:a:s:")) != -1) {
         switch (option) {
             // Handle the -a argument for address/hostname
             case 'a':
@@ -64,6 +73,10 @@ int main(int argc, char* argv[]) {
             // Handle the -p port number argument
             case 'p':
                 port_number = static_cast<U16>(atoi(optarg));
+                break;
+            // Handle the -s argument for an input sequence
+            case 's':
+                seq_file = optarg;
                 break;
             // Cascade intended: help output
             case 'h':
@@ -87,6 +100,18 @@ int main(int argc, char* argv[]) {
 
     // Setup, cycle, and teardown topology
     BPFPrimeTest::setupTopology(inputs);
+
+    // Trigger the sequence if the user provided one via '-s'
+    if (seq_file != nullptr) {
+        Fw::String seqFwStr(seq_file);
+        printf("[INIT] Triggering auto-sequence: %s\n", seq_file);
+        
+        // Invoke the sequencer. 
+        // Note: 'cmdSeq' is the default name. If your topology uses a namespace, 
+        // it might be something like 'MyDeploy::cmdSeq' or 'state.cmdSeq'.
+        cmdSeq.get_seqRunIn_InputPort(0)->invoke(seqFwStr);
+    }
+
     BPFPrimeTest::startRateGroups(Fw::TimeInterval(0, 1000));  // Program loop cycling rate groups at 1kHz
     BPFPrimeTest::teardownTopology(inputs);
     (void)printf("Exiting...\n");

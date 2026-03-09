@@ -360,6 +360,10 @@ U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
 
 // Port for handling rate groups - implements EDF scheduling
 void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
+    // Skip if rate groups disabled
+    if (this->num_workers == 0)
+        return;
+
     // Check if any workers reported a slip (VM was still running when new job arrived)
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
         // Use exchange to atomically check and clear the slip flag
