@@ -12,6 +12,7 @@
 #include <fstream>
 #include <random>
 #include <sstream>
+#include <sys/mman.h>
 
 using timer = std::chrono::high_resolution_clock;
 using ns = std::chrono::nanoseconds;
@@ -193,15 +194,31 @@ Fw::Success Tests::benchmark() {
         BpfSequencer::maps.create_map(map_def, fd);
     }
 
-    struct sched_param p;
-    p.sched_priority = 20;
-    int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
+    #ifdef __linux__
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(3, &cpuset);
+
+    int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
     if (rc != 0) {
         this->log_WARNING_HI_BenchMarkFailed(
             Fw::LogStringArg(strerror(rc))
         );
-        // return Fw::Success::FAILURE;
+        return Fw::Success::FAILURE;
     }
+
+    struct sched_param p = {0};
+    p.sched_priority = 20;
+    rc = pthread_setschedparam(pthread_self(), SCHED_FIFO, &p);
+    if (rc != 0) {
+        this->log_WARNING_HI_BenchMarkFailed(
+            Fw::LogStringArg(strerror(rc))
+        );
+        return Fw::Success::FAILURE;
+    }
+
+    mlockall(MCL_CURRENT | MCL_FUTURE);
+    #endif
 
     struct TestInfo {
         U32 passes;

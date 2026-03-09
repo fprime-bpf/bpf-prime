@@ -125,7 +125,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<std::thread> workers;
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
-    U32 num_workers = 2;
+    U32 num_workers = 0;
     
     // Per-worker timing for telemetry (max 6 workers to match ExecutorTickDurations array)
     // Tracks tick durations in microseconds for each worker
