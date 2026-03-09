@@ -18,6 +18,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <sched.h>
+#include <unistd.h>
 
 namespace BPFPrimeTest {
     extern Svc::CmdSequencerComponentImpl cmdSeq;
@@ -100,6 +102,13 @@ int main(int argc, char* argv[]) {
 
     // Setup, cycle, and teardown topology
     BPFPrimeTest::setupTopology(inputs);
+
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(0, &cpuset);
+    CPU_SET(1, &cpuset);
+    CPU_SET(2, &cpuset);
+    sched_setaffinity(getpid(), sizeof(cpu_set_t), &cpuset);
 
     // Trigger the sequence if the user provided one via '-s'
     if (seq_file != nullptr) {
