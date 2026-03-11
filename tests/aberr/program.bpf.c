@@ -248,56 +248,52 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
-    bpf_iter_num_new(&it, 0, 5);
-    while ((i = bpf_iter_num_next(&it))) {
-        t_emit = t - tau;
-        M = omega * t_emit;
-        E = M;
+    t_emit = t - tau;
+    M = omega * t_emit;
+    E = M;
 
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
+    E = M + e * sine(E);
+    E = M + e * sine(E);
+    E = M + e * sine(E);
+    E = M + e * sine(E);
+    E = M + e * sine(E);
 
-        nu = 2.0f * _atan2(sqroot(1 + e) * sine(E / 2), sqroot(1 - e) * cosine(E / 2));
-        r = a * (1 - e * cosine(E));
+    nu = 2.0f * _atan2(sqroot(1 + e) * sine(E / 2), sqroot(1 - e) * cosine(E / 2));
+    r = a * (1 - e * cosine(E));
 
-        float cos_nu = cosine(nu);
-        float sin_nu = sine(nu);
+    float cos_nu = cosine(nu);
+    float sin_nu = sine(nu);
 
-        float d0 = r * cos_nu - v_orig[0];
-        v[0] = d0;
-        float d1 = r * sin_nu - v_orig[1];
-        v[1] = d1;
-        float d2 = 0.0f - v_orig[2];
-        v[2] = d2;
+    float d0 = r * cos_nu - v_orig[0];
+    v[0] = d0;
+    float d1 = r * sin_nu - v_orig[1];
+    v[1] = d1;
+    float d2 = 0.0f - v_orig[2];
+    v[2] = d2;
 
-        dist = sqroot(d0 * d0 + d1 * d1 + d2 * d2);
+    dist = sqroot(d0 * d0 + d1 * d1 + d2 * d2);
 
-        // Normalize v (which is diff) to get unit vector
-        v[0] /= dist;
-        v[1] /= dist;
-        v[2] /= dist;
+    // Normalize v (which is diff) to get unit vector
+    v[0] /= dist;
+    v[1] /= dist;
+    v[2] /= dist;
 
-        // Aberration correction
-        s_dot_u = s_obs[0] * v[0] + s_obs[1] * v[1] + s_obs[2] * v[2];
-        denom = gamma * (1.0f + s_dot_u);
-        factor = gamma / (1.0f + gamma) * s_dot_u;
+    // Aberration correction
+    s_dot_u = s_obs[0] * v[0] + s_obs[1] * v[1] + s_obs[2] * v[2];
+    denom = gamma * (1.0f + s_dot_u);
+    factor = gamma / (1.0f + gamma) * s_dot_u;
 
-        u_corrected[0] = (v[0] + factor * s_obs[0] + s_obs[0]) / denom;
-        u_corrected[1] = (v[1] + factor * s_obs[1] + s_obs[1]) / denom;
-        u_corrected[2] = (v[2] + factor * s_obs[2] + s_obs[2]) / denom;
+    u_corrected[0] = (v[0] + factor * s_obs[0] + s_obs[0]) / denom;
+    u_corrected[1] = (v[1] + factor * s_obs[1] + s_obs[1]) / denom;
+    u_corrected[2] = (v[2] + factor * s_obs[2] + s_obs[2]) / denom;
 
-        u_corr_mag =
-            sqroot(u_corrected[0] * u_corrected[0] + u_corrected[1] * u_corrected[1] + u_corrected[2] * u_corrected[2]);
-        u_corrected[0] /= u_corr_mag;
-        u_corrected[1] /= u_corr_mag;
-        u_corrected[2] /= u_corr_mag;
+    u_corr_mag =
+        sqroot(u_corrected[0] * u_corrected[0] + u_corrected[1] * u_corrected[1] + u_corrected[2] * u_corrected[2]);
+    u_corrected[0] /= u_corr_mag;
+    u_corrected[1] /= u_corr_mag;
+    u_corrected[2] /= u_corr_mag;
 
-        tau = dist / C_LIGHT;
-    }
-    bpf_iter_num_destroy(&it);
+    tau = dist / C_LIGHT;
 
     // Write results
     bpf_iter_num_new(&it, 0, 3);

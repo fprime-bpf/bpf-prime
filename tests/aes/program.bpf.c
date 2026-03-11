@@ -202,88 +202,84 @@ int main() {
         key[*i] = *(char*)result;
     }
 
-    // 128 blocks
-    bpf_iter_num_new(&it, 0, 128);
-    while ((i = bpf_iter_num_next(&it))) {
-        // AddRoundKey
-        block[0 * 4 + 0] ^= zero[0 * 4 + 0];
-        block[0 * 4 + 1] ^= zero[0 * 4 + 1];
-        block[0 * 4 + 2] ^= zero[0 * 4 + 2];
-        block[0 * 4 + 3] ^= zero[0 * 4 + 3];
+    // AddRoundKey
+    block[0 * 4 + 0] ^= zero[0 * 4 + 0];
+    block[0 * 4 + 1] ^= zero[0 * 4 + 1];
+    block[0 * 4 + 2] ^= zero[0 * 4 + 2];
+    block[0 * 4 + 3] ^= zero[0 * 4 + 3];
 
-        block[1 * 4 + 0] ^= zero[1 * 4 + 0];
-        block[1 * 4 + 1] ^= zero[1 * 4 + 1];
-        block[1 * 4 + 2] ^= zero[1 * 4 + 2];
-        block[1 * 4 + 3] ^= zero[1 * 4 + 3];
+    block[1 * 4 + 0] ^= zero[1 * 4 + 0];
+    block[1 * 4 + 1] ^= zero[1 * 4 + 1];
+    block[1 * 4 + 2] ^= zero[1 * 4 + 2];
+    block[1 * 4 + 3] ^= zero[1 * 4 + 3];
 
-        block[2 * 4 + 0] ^= zero[2 * 4 + 0];
-        block[2 * 4 + 1] ^= zero[2 * 4 + 1];
-        block[2 * 4 + 2] ^= zero[2 * 4 + 2];
-        block[2 * 4 + 3] ^= zero[2 * 4 + 3];
+    block[2 * 4 + 0] ^= zero[2 * 4 + 0];
+    block[2 * 4 + 1] ^= zero[2 * 4 + 1];
+    block[2 * 4 + 2] ^= zero[2 * 4 + 2];
+    block[2 * 4 + 3] ^= zero[2 * 4 + 3];
 
-        block[3 * 4 + 0] ^= zero[3 * 4 + 0];
-        block[3 * 4 + 1] ^= zero[3 * 4 + 1];
-        block[3 * 4 + 2] ^= zero[3 * 4 + 2];
-        block[3 * 4 + 3] ^= zero[3 * 4 + 3];
+    block[3 * 4 + 0] ^= zero[3 * 4 + 0];
+    block[3 * 4 + 1] ^= zero[3 * 4 + 1];
+    block[3 * 4 + 2] ^= zero[3 * 4 + 2];
+    block[3 * 4 + 3] ^= zero[3 * 4 + 3];
 
-        // SubBytes
-        int index;
-        index = 0 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 0 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 0 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 0 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+    // SubBytes
+    int index;
+    index = 0 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 0 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 0 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 0 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
 
-        index = 1 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 1 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 1 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 1 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+    index = 1 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 1 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 1 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 1 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
 
-        index = 2 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 2 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 2 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 2 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+    index = 2 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 2 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 2 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 2 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
 
-        index = 3 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 3 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 3 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
-        index = 3 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+    index = 3 * 4 + 0;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 3 * 4 + 1;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 3 * 4 + 2;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
+    index = 3 * 4 + 3;
+    if (block[index] >= 0 && block[index] < 16)
+        block[index] = key[block[index]];
 
-        AES_ShiftRows(block);
+    AES_ShiftRows(block);
 
-        AES_MixColumns(block);
-    }
+    AES_MixColumns(block);
 
     bpf_iter_num_new(&it, 0, 16);
     while ((i = bpf_iter_num_next(&it))) {
