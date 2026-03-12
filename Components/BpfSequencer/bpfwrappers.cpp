@@ -5,12 +5,16 @@
 
 #include <chrono>
 #include <cstring>
+#include <exception>
 #include <new>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
 
-using timer = std::chrono::high_resolution_clock;
-using ms = std::chrono::milliseconds;
+static inline uint64_t get_cpu_cycles() {
+    uint64_t cycles;
+    __asm__ __volatile__("rdcycle %0" : "=r"(cycles));
+    return cycles;
+}
 
 namespace Components {
 
@@ -92,7 +96,7 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
 
 Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     uint64_t err = 0;
-    timer::time_point start, end;
+    U64 start, end;
 
     // Validate VM ID
     if (!validate_vm_id(vmId))
@@ -106,13 +110,13 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     auto vm = vms[vmId];
 
     if (log_time)
-        start = timer::now();
+        start = get_cpu_cycles();
     
     // Run the compiled sequence using VM's own bpf_mem
     err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
     
     if (log_time)
-        end = timer::now();
+        end = get_cpu_cycles();
 
     if (err) {
         Fw::LogStringArg errMsg(vm->bpf_vm.get_error_message().c_str());
@@ -120,8 +124,9 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
         return Fw::Success::FAILURE;
     }
 
+    // 667,000,000 Hz, looking at ms so 667,000 cycles per second
     if (log_time)
-        this->log_ACTIVITY_LO_CommandRunSuccess(vmId, std::chrono::duration<F64, ms::period>(end - start).count());
+        this->log_ACTIVITY_LO_CommandRunSuccess(vmId, (F64)(end - start) / 100000);
     return Fw::Success::SUCCESS;
 }
 
