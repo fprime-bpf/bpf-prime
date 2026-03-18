@@ -296,6 +296,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     static I32 bpf_rand_int(I32 min, I32 max) noexcept;
     
+    static F32 BpfSequencer::bpf_math_sqrt(F32 elem) noexcept;
+
+    static F32 BpfSequencer::bpf_math_sin(F32 elem) noexcept;
+
+    static F32 BpfSequencer::bpf_math_cos(F32 elem) noexcept;
+
+    static F32 BpfSequencer::bpf_math_atan2(F32 elem) noexcept;
   private:
     bool validate_vm_id(U32 vmId);
 
