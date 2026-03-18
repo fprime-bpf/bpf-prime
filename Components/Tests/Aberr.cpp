@@ -261,7 +261,7 @@ int main() {
         E = M + e * sine(E);
         E = M + e * sine(E);
 
-        nu = 2.0f * atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
+        nu = 2.0f * _atan2(sqroot(1+e) * sine(E/2), sqroot(1-e) * cosine(E/2));
         r = a * (1 - e * cosine(E));
 
         float cos_nu = cosine(nu);

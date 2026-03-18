@@ -57,8 +57,8 @@ F32 BpfSequencer::bpf_math_cos(F32 elem) noexcept {
     return std::cos(elem);
 }
 
-F32 BpfSequencer::bpf_math_atan2(F32 elem) noexcept {
-    return std::atan2(elem);
+F32 BpfSequencer::bpf_math_atan2(F32 x, F32 y) noexcept {
+    return std::atan2(x, y);
 }
 
 
