@@ -39,6 +39,8 @@ set(MOD_DEPS
   Components_WasmSequencer
 )
 
+set_source_files_properties("${CMAKE_CURRENT_LIST_DIR}/Aberr.cpp" PROPERTIES COMPILE_OPTIONS "-O3")
+
 register_fprime_module()
 
 get_module_name("${CMAKE_CURRENT_LIST_DIR}")
