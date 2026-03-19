@@ -46,6 +46,10 @@ bpf_mem_size(0) {
         { 6, { reinterpret_cast<void*>(bpf_iter_num_next), "bpf_iter_num_next" } },
         { 7, { reinterpret_cast<void*>(bpf_iter_num_destroy), "bpf_iter_num_destroy" } },
         { 8, { reinterpret_cast<void*>(bpf_rand_int), "bpf_rand_int" } },
+        { 9, { reinterpret_cast<void*>(bpf_math_sqrt), "bpf_math_sqrt" } },
+        { 10, { reinterpret_cast<void*>(bpf_math_sin), "bpf_math_sin" } },
+        { 11, { reinterpret_cast<void*>(bpf_math_cos), "bpf_math_cos" } },
+        { 12, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
     });
 }
 
