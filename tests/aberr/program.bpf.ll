@@ -7,12 +7,12 @@ target triple = "bpf"
 
 ; Function Attrs: nounwind
 define dso_local noundef i32 @main() local_unnamed_addr #0 {
-  %1 = alloca float, align 8
-  %2 = alloca float, align 8
-  %3 = alloca [3 x float], align 4
-  %4 = alloca [3 x float], align 4
-  %5 = alloca [3 x float], align 4
-  %6 = alloca [3 x float], align 4
+  %1 = alloca float, align 4
+  %2 = alloca float, align 4
+  %3 = alloca float, align 4
+  %4 = alloca float, align 4
+  %5 = alloca float, align 4
+  %6 = alloca float, align 4
   %7 = alloca float, align 4
   %8 = alloca float, align 4
   %9 = alloca float, align 4
@@ -22,1318 +22,2960 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %13 = alloca float, align 4
   %14 = alloca float, align 4
   %15 = alloca float, align 4
-  %16 = alloca float, align 4
-  %17 = alloca float, align 4
+  %16 = alloca float, align 8
+  %17 = alloca float, align 8
   %18 = alloca float, align 4
   %19 = alloca float, align 4
   %20 = alloca float, align 4
   %21 = alloca float, align 4
   %22 = alloca float, align 4
   %23 = alloca float, align 4
-  %24 = alloca %struct.bpf_iter_num, align 8
-  %25 = alloca i64, align 8
+  %24 = alloca float, align 4
+  %25 = alloca float, align 4
   %26 = alloca float, align 4
-  %27 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 8, i32 0, i32 0, i32 0) #3, !srcloc !3
-  %28 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 9, i32 0, i32 0, i32 0) #3, !srcloc !4
-  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %3) #3
-  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %4) #3
-  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %5) #3
-  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %6) #3
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %8)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %9)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %10)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %11)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %12)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %13)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %14)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %15)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %16)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %17)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %18)
+  %27 = alloca float, align 4
+  %28 = alloca float, align 4
+  %29 = alloca float, align 4
+  %30 = alloca float, align 4
+  %31 = alloca float, align 4
+  %32 = alloca float, align 4
+  %33 = alloca float, align 4
+  %34 = alloca float, align 4
+  %35 = alloca float, align 4
+  %36 = alloca float, align 4
+  %37 = alloca float, align 4
+  %38 = alloca float, align 4
+  %39 = alloca float, align 4
+  %40 = alloca float, align 4
+  %41 = alloca float, align 4
+  %42 = alloca float, align 4
+  %43 = alloca float, align 4
+  %44 = alloca float, align 4
+  %45 = alloca float, align 4
+  %46 = alloca float, align 4
+  %47 = alloca float, align 4
+  %48 = alloca float, align 4
+  %49 = alloca float, align 4
+  %50 = alloca float, align 4
+  %51 = alloca float, align 4
+  %52 = alloca float, align 4
+  %53 = alloca float, align 4
+  %54 = alloca float, align 4
+  %55 = alloca float, align 4
+  %56 = alloca float, align 4
+  %57 = alloca float, align 4
+  %58 = alloca float, align 4
+  %59 = alloca [3 x float], align 4
+  %60 = alloca [3 x float], align 4
+  %61 = alloca [3 x float], align 4
+  %62 = alloca [3 x float], align 4
+  %63 = alloca float, align 4
+  %64 = alloca float, align 4
+  %65 = alloca float, align 4
+  %66 = alloca float, align 4
+  %67 = alloca float, align 4
+  %68 = alloca float, align 4
+  %69 = alloca float, align 4
+  %70 = alloca float, align 4
+  %71 = alloca float, align 4
+  %72 = alloca float, align 4
+  %73 = alloca float, align 4
+  %74 = alloca float, align 4
+  %75 = alloca float, align 4
+  %76 = alloca float, align 4
+  %77 = alloca float, align 4
+  %78 = alloca float, align 4
+  %79 = alloca float, align 4
+  %80 = alloca %struct.bpf_iter_num, align 8
+  %81 = alloca i64, align 8
+  %82 = alloca float, align 4
+  %83 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 8, i32 0, i32 0, i32 0) #3, !srcloc !3
+  %84 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 9, i32 0, i32 0, i32 0) #3, !srcloc !4
+  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %59) #3
+  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %60) #3
+  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %61) #3
+  call void @llvm.lifetime.start.p0(i64 12, ptr nonnull %62) #3
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %63)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %64)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %65)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %66)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %67)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %68)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %69)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %70)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %71)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %72)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %73)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %74)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %75)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %76)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %77)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %78)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %79)
+  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %80) #3
+  store volatile float 0.000000e+00, ptr %67, align 4, !tbaa !5
+  %85 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %80, i32 noundef 0, i32 noundef 3) #3
+  %86 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %87 = icmp eq ptr %86, null
+  br i1 %87, label %98, label %88
+
+88:                                               ; preds = %0, %88
+  %89 = phi ptr [ %96, %88 ], [ %86, %0 ]
+  %90 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %83, ptr noundef nonnull %89) #3
+  %91 = load float, ptr %90, align 4, !tbaa !5
+  %92 = load i64, ptr %89, align 8, !tbaa !9
+  %93 = getelementptr inbounds [3 x float], ptr %59, i64 0, i64 %92
+  store volatile float %91, ptr %93, align 4, !tbaa !5
+  %94 = load volatile float, ptr %93, align 4, !tbaa !5
+  %95 = getelementptr inbounds [3 x float], ptr %60, i64 0, i64 %92
+  store volatile float %94, ptr %95, align 4, !tbaa !5
+  %96 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %97 = icmp eq ptr %96, null
+  br i1 %97, label %98, label %88, !llvm.loop !11
+
+98:                                               ; preds = %88, %0
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %80) #3
+  %99 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %80, i32 noundef 0, i32 noundef 3) #3
+  %100 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %101 = icmp eq ptr %100, null
+  br i1 %101, label %113, label %102
+
+102:                                              ; preds = %98, %102
+  %103 = phi ptr [ %111, %102 ], [ %100, %98 ]
+  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %81) #3
+  %104 = load i64, ptr %103, align 8, !tbaa !9
+  %105 = add nsw i64 %104, 3
+  store i64 %105, ptr %81, align 8, !tbaa !14
+  %106 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %83, ptr noundef nonnull %81) #3
+  %107 = load float, ptr %106, align 4, !tbaa !5
+  %108 = fdiv float %107, 0x41B1DE7840000000
+  %109 = load i64, ptr %103, align 8, !tbaa !9
+  %110 = getelementptr inbounds [3 x float], ptr %61, i64 0, i64 %109
+  store volatile float %108, ptr %110, align 4, !tbaa !5
+  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %81) #3
+  %111 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %112 = icmp eq ptr %111, null
+  br i1 %112, label %113, label %102, !llvm.loop !16
+
+113:                                              ; preds = %102, %98
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %80) #3
+  %114 = load volatile float, ptr %61, align 4, !tbaa !5
+  %115 = load volatile float, ptr %61, align 4, !tbaa !5
+  %116 = getelementptr inbounds nuw i8, ptr %61, i64 4
+  %117 = load volatile float, ptr %116, align 4, !tbaa !5
+  %118 = load volatile float, ptr %116, align 4, !tbaa !5
+  %119 = fmul float %117, %118
+  %120 = call float @llvm.fmuladd.f32(float %114, float %115, float %119)
+  %121 = getelementptr inbounds nuw i8, ptr %61, i64 8
+  %122 = load volatile float, ptr %121, align 4, !tbaa !5
+  %123 = load volatile float, ptr %121, align 4, !tbaa !5
+  %124 = call float @llvm.fmuladd.f32(float %122, float %123, float %120)
+  store volatile float %124, ptr %69, align 4, !tbaa !5
+  %125 = load volatile float, ptr %69, align 4, !tbaa !5
+  %126 = fsub float 1.000000e+00, %125
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %54)
+  %127 = fmul float %126, 5.000000e-01
+  store volatile float %127, ptr %54, align 4, !tbaa !5
+  %128 = fcmp ugt float %126, 0.000000e+00
+  br i1 %128, label %129, label %141
+
+129:                                              ; preds = %113
+  %130 = bitcast float %126 to i32
+  %131 = ashr i32 %130, 1
+  %132 = sub nsw i32 1597463007, %131
+  %133 = bitcast i32 %132 to float
+  %134 = load volatile float, ptr %54, align 4, !tbaa !5
+  %135 = fneg float %133
+  %136 = fmul float %134, %135
+  %137 = call float @llvm.fmuladd.f32(float %136, float %133, float 1.500000e+00)
+  %138 = fmul float %137, %133
+  store volatile float %138, ptr %54, align 4, !tbaa !5
+  %139 = load volatile float, ptr %54, align 4, !tbaa !5
+  %140 = fdiv float 1.000000e+00, %139
+  br label %141
+
+141:                                              ; preds = %113, %129
+  %142 = phi float [ %140, %129 ], [ 0.000000e+00, %113 ]
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %54)
+  %143 = fdiv float 1.000000e+00, %142
+  store volatile float %143, ptr %70, align 4, !tbaa !5
+  store volatile float 0x40101EB860000000, ptr %63, align 4, !tbaa !5
+  store volatile float 0x404F3C2900000000, ptr %64, align 4, !tbaa !5
+  store volatile float 0x3FA47AE140000000, ptr %65, align 4, !tbaa !5
+  store volatile float 1.000000e+02, ptr %66, align 4, !tbaa !5
+  %144 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %80, i32 noundef 0, i32 noundef 5) #3
+  %145 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %146 = icmp eq ptr %145, null
+  br i1 %146, label %1584, label %147
+
+147:                                              ; preds = %141
+  %148 = getelementptr inbounds nuw i8, ptr %60, i64 4
+  %149 = getelementptr inbounds nuw i8, ptr %59, i64 4
+  %150 = getelementptr inbounds nuw i8, ptr %60, i64 8
+  %151 = getelementptr inbounds nuw i8, ptr %59, i64 8
+  %152 = getelementptr inbounds nuw i8, ptr %62, i64 4
+  %153 = getelementptr inbounds nuw i8, ptr %62, i64 8
+  br label %154
+
+154:                                              ; preds = %147, %1569
+  %155 = load volatile float, ptr %63, align 4, !tbaa !5
+  %156 = load volatile float, ptr %67, align 4, !tbaa !5
+  %157 = fsub float %155, %156
+  store volatile float %157, ptr %71, align 4, !tbaa !5
+  %158 = load volatile float, ptr %66, align 4, !tbaa !5
+  %159 = load volatile float, ptr %71, align 4, !tbaa !5
+  %160 = fmul float %158, %159
+  store volatile float %160, ptr %72, align 4, !tbaa !5
+  %161 = load volatile float, ptr %72, align 4, !tbaa !5
+  store volatile float %161, ptr %73, align 4, !tbaa !5
+  %162 = load volatile float, ptr %72, align 4, !tbaa !5
+  %163 = load volatile float, ptr %65, align 4, !tbaa !5
+  %164 = load volatile float, ptr %73, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %19)
+  store volatile float 0x3FD921FB60000000, ptr %19, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %20)
+  store volatile float 0.000000e+00, ptr %20, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %21)
+  store volatile float 0x3FD87DE2A0000000, ptr %21, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %22)
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %23)
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %24) #3
-  store volatile float 0.000000e+00, ptr %11, align 4, !tbaa !5
-  %29 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %24, i32 noundef 0, i32 noundef 3) #3
-  %30 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %31 = icmp eq ptr %30, null
-  br i1 %31, label %42, label %32
+  store volatile float %164, ptr %23, align 4, !tbaa !5
+  %165 = fcmp olt float %164, 0.000000e+00
+  %166 = fadd float %164, 0x401921FB60000000
+  %167 = select i1 %165, float %166, float %164
+  %168 = fcmp ult float %167, 0x401921FB60000000
+  %169 = fadd float %167, 0xC01921FB60000000
+  %170 = select i1 %168, float %167, float %169
+  %171 = load volatile float, ptr %19, align 4, !tbaa !5
+  %172 = fcmp ult float %170, %171
+  br i1 %172, label %176, label %173
 
-32:                                               ; preds = %0, %32
-  %33 = phi ptr [ %40, %32 ], [ %30, %0 ]
-  %34 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %27, ptr noundef nonnull %33) #3
-  %35 = load float, ptr %34, align 4, !tbaa !5
-  %36 = load i64, ptr %33, align 8, !tbaa !9
-  %37 = getelementptr inbounds [3 x float], ptr %3, i64 0, i64 %36
-  store volatile float %35, ptr %37, align 4, !tbaa !5
-  %38 = load volatile float, ptr %37, align 4, !tbaa !5
-  %39 = getelementptr inbounds [3 x float], ptr %4, i64 0, i64 %36
-  store volatile float %38, ptr %39, align 4, !tbaa !5
-  %40 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %41 = icmp eq ptr %40, null
-  br i1 %41, label %42, label %32, !llvm.loop !11
+173:                                              ; preds = %154
+  %174 = load volatile float, ptr %19, align 4, !tbaa !5
+  %175 = fsub float %170, %174
+  store volatile float %175, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %21, align 4, !tbaa !5
+  br label %176
 
-42:                                               ; preds = %32, %0
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %24) #3
-  %43 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %24, i32 noundef 0, i32 noundef 3) #3
-  %44 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %45 = icmp eq ptr %44, null
-  br i1 %45, label %57, label %46
+176:                                              ; preds = %173, %154
+  %177 = load volatile float, ptr %19, align 4, !tbaa !5
+  %178 = fmul float %177, 2.000000e+00
+  %179 = fcmp ult float %170, %178
+  br i1 %179, label %183, label %180
 
-46:                                               ; preds = %42, %46
-  %47 = phi ptr [ %55, %46 ], [ %44, %42 ]
-  call void @llvm.lifetime.start.p0(i64 8, ptr nonnull %25) #3
-  %48 = load i64, ptr %47, align 8, !tbaa !9
-  %49 = add nsw i64 %48, 3
-  store i64 %49, ptr %25, align 8, !tbaa !13
-  %50 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %27, ptr noundef nonnull %25) #3
-  %51 = load float, ptr %50, align 4, !tbaa !5
-  %52 = fdiv float %51, 0x41B1DE7840000000
-  %53 = load i64, ptr %47, align 8, !tbaa !9
-  %54 = getelementptr inbounds [3 x float], ptr %5, i64 0, i64 %53
-  store volatile float %52, ptr %54, align 4, !tbaa !5
-  call void @llvm.lifetime.end.p0(i64 8, ptr nonnull %25) #3
-  %55 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %56 = icmp eq ptr %55, null
-  br i1 %56, label %57, label %46, !llvm.loop !15
+180:                                              ; preds = %176
+  %181 = load volatile float, ptr %19, align 4, !tbaa !5
+  %182 = call float @llvm.fmuladd.f32(float %181, float -2.000000e+00, float %170)
+  store volatile float %182, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %21, align 4, !tbaa !5
+  br label %183
 
-57:                                               ; preds = %46, %42
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %24) #3
-  %58 = load volatile float, ptr %5, align 4, !tbaa !5
-  %59 = load volatile float, ptr %5, align 4, !tbaa !5
-  %60 = getelementptr inbounds nuw i8, ptr %5, i64 4
-  %61 = load volatile float, ptr %60, align 4, !tbaa !5
-  %62 = load volatile float, ptr %60, align 4, !tbaa !5
-  %63 = fmul float %61, %62
-  %64 = call float @llvm.fmuladd.f32(float %58, float %59, float %63)
-  %65 = getelementptr inbounds nuw i8, ptr %5, i64 8
-  %66 = load volatile float, ptr %65, align 4, !tbaa !5
-  %67 = load volatile float, ptr %65, align 4, !tbaa !5
-  %68 = call float @llvm.fmuladd.f32(float %66, float %67, float %64)
-  store volatile float %68, ptr %13, align 4, !tbaa !5
-  %69 = load volatile float, ptr %13, align 4, !tbaa !5
-  %70 = fsub float 1.000000e+00, %69
-  %71 = fcmp ugt float %70, 0.000000e+00
-  br i1 %71, label %72, label %83
+183:                                              ; preds = %180, %176
+  %184 = load volatile float, ptr %19, align 4, !tbaa !5
+  %185 = fmul float %184, 3.000000e+00
+  %186 = fcmp ult float %170, %185
+  br i1 %186, label %190, label %187
 
-72:                                               ; preds = %57
-  %73 = fmul float %70, 5.000000e-01
-  %74 = bitcast float %70 to i32
-  %75 = ashr i32 %74, 1
-  %76 = sub nsw i32 1597463007, %75
-  %77 = bitcast i32 %76 to float
-  %78 = fneg float %77
-  %79 = fmul float %73, %78
-  %80 = call float @llvm.fmuladd.f32(float %79, float %77, float 1.500000e+00)
-  %81 = fmul float %80, %77
-  %82 = fdiv float 1.000000e+00, %81
-  br label %83
+187:                                              ; preds = %183
+  %188 = load volatile float, ptr %19, align 4, !tbaa !5
+  %189 = call float @llvm.fmuladd.f32(float %188, float -3.000000e+00, float %170)
+  store volatile float %189, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %21, align 4, !tbaa !5
+  br label %190
 
-83:                                               ; preds = %57, %72
-  %84 = phi float [ %82, %72 ], [ 0.000000e+00, %57 ]
-  %85 = fdiv float 1.000000e+00, %84
-  store volatile float %85, ptr %14, align 4, !tbaa !5
-  store volatile float 0x40101EB860000000, ptr %7, align 4, !tbaa !5
-  store volatile float 0x404F3C2900000000, ptr %8, align 4, !tbaa !5
-  store volatile float 0x3FA47AE140000000, ptr %9, align 4, !tbaa !5
-  store volatile float 1.000000e+02, ptr %10, align 4, !tbaa !5
-  %86 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %24, i32 noundef 0, i32 noundef 5) #3
-  %87 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %88 = icmp eq ptr %87, null
-  br i1 %88, label %1165, label %89
+190:                                              ; preds = %187, %183
+  %191 = load volatile float, ptr %19, align 4, !tbaa !5
+  %192 = fmul float %191, 4.000000e+00
+  %193 = fcmp ult float %170, %192
+  br i1 %193, label %197, label %194
 
-89:                                               ; preds = %83
-  %90 = getelementptr inbounds nuw i8, ptr %4, i64 4
-  %91 = getelementptr inbounds nuw i8, ptr %3, i64 4
-  %92 = getelementptr inbounds nuw i8, ptr %4, i64 8
-  %93 = getelementptr inbounds nuw i8, ptr %3, i64 8
-  %94 = getelementptr inbounds nuw i8, ptr %6, i64 4
-  %95 = getelementptr inbounds nuw i8, ptr %6, i64 8
-  br label %96
+194:                                              ; preds = %190
+  %195 = load volatile float, ptr %19, align 4, !tbaa !5
+  %196 = call float @llvm.fmuladd.f32(float %195, float -4.000000e+00, float %170)
+  store volatile float %196, ptr %23, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %20, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %21, align 4, !tbaa !5
+  br label %197
 
-96:                                               ; preds = %89, %1150
-  %97 = load volatile float, ptr %7, align 4, !tbaa !5
-  %98 = load volatile float, ptr %11, align 4, !tbaa !5
-  %99 = fsub float %97, %98
-  store volatile float %99, ptr %15, align 4, !tbaa !5
-  %100 = load volatile float, ptr %10, align 4, !tbaa !5
-  %101 = load volatile float, ptr %15, align 4, !tbaa !5
-  %102 = fmul float %100, %101
-  store volatile float %102, ptr %16, align 4, !tbaa !5
-  %103 = load volatile float, ptr %16, align 4, !tbaa !5
-  store volatile float %103, ptr %17, align 4, !tbaa !5
-  %104 = load volatile float, ptr %16, align 4, !tbaa !5
-  %105 = load volatile float, ptr %9, align 4, !tbaa !5
-  %106 = load volatile float, ptr %17, align 4, !tbaa !5
-  %107 = fcmp olt float %106, 0.000000e+00
-  %108 = fadd float %106, 0x401921FB60000000
-  %109 = select i1 %107, float %108, float %106
-  %110 = fcmp ult float %109, 0x401921FB60000000
-  %111 = fadd float %109, 0xC01921FB60000000
-  %112 = select i1 %110, float %109, float %111
-  %113 = fcmp oge float %112, 0x3FD921FB60000000
-  %114 = fadd float %112, 0xBFD921FB60000000
-  %115 = select i1 %113, float %114, float %106
-  %116 = select i1 %113, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %117 = select i1 %113, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %118 = fcmp oge float %112, 0x3FE921FB60000000
-  %119 = fadd float %112, 0xBFE921FB60000000
-  %120 = select i1 %118, float %119, float %115
-  %121 = select i1 %118, float 0x3FE6A09E60000000, float %116
-  %122 = select i1 %118, float 0x3FED906BC0000000, float %117
-  %123 = fcmp oge float %112, 0x3FF2D97C80000000
-  %124 = fadd float %112, 0xBFF2D97C80000000
-  %125 = select i1 %123, float %124, float %120
-  %126 = select i1 %123, float 0x3FED906BC0000000, float %121
-  %127 = select i1 %123, float 1.000000e+00, float %122
-  %128 = fcmp oge float %112, 0x3FF921FB60000000
-  %129 = fadd float %112, 0xBFF921FB60000000
-  %130 = select i1 %128, float %129, float %125
-  %131 = select i1 %128, float 1.000000e+00, float %126
-  %132 = select i1 %128, float 0x3FED906BC0000000, float %127
-  %133 = fcmp oge float %112, 0x3FFF6A7A40000000
-  %134 = fadd float %112, 0xBFFF6A7A40000000
-  %135 = select i1 %133, float %134, float %130
-  %136 = select i1 %133, float 0x3FED906BC0000000, float %131
-  %137 = select i1 %133, float 0x3FE6A09E60000000, float %132
-  %138 = fcmp oge float %112, 0x4002D97C80000000
-  %139 = fadd float %112, 0xC002D97C80000000
-  %140 = select i1 %138, float %139, float %135
-  %141 = select i1 %138, float 0x3FE6A09E60000000, float %136
-  %142 = select i1 %138, float 0x3FD87DE2A0000000, float %137
-  %143 = fcmp oge float %112, 0x4005FDBC00000000
-  %144 = fadd float %112, 0xC005FDBC00000000
-  %145 = select i1 %143, float %144, float %140
-  %146 = select i1 %143, float 0x3FD87DE2A0000000, float %141
-  %147 = select i1 %143, float 0.000000e+00, float %142
-  %148 = fcmp oge float %112, 0x400921FB60000000
-  %149 = fadd float %112, 0xC00921FB60000000
-  %150 = select i1 %148, float %149, float %145
-  %151 = select i1 %148, float 0.000000e+00, float %146
-  %152 = select i1 %148, float 0xBFD87DE2A0000000, float %147
-  %153 = fcmp oge float %112, 0x400C463AC0000000
-  %154 = fadd float %112, 0xC00C463AC0000000
-  %155 = select i1 %153, float %154, float %150
-  %156 = select i1 %153, float 0xBFD87DE2A0000000, float %151
-  %157 = select i1 %153, float 0xBFE6A09E60000000, float %152
-  %158 = fcmp oge float %112, 0x400F6A7A40000000
-  %159 = fadd float %112, 0xC00F6A7A40000000
-  %160 = select i1 %158, float %159, float %155
-  %161 = select i1 %158, float 0xBFE6A09E60000000, float %156
-  %162 = select i1 %158, float 0xBFED906BC0000000, float %157
-  %163 = fcmp oge float %112, 0x4011475CE0000000
-  %164 = fadd float %112, 0xC011475CE0000000
-  %165 = select i1 %163, float %164, float %160
-  %166 = select i1 %163, float 0xBFED906BC0000000, float %161
-  %167 = select i1 %163, float -1.000000e+00, float %162
-  %168 = fcmp oge float %112, 0x4012D97C80000000
-  %169 = fadd float %112, 0xC012D97C80000000
-  %170 = select i1 %168, float %169, float %165
-  %171 = select i1 %168, float -1.000000e+00, float %166
-  %172 = select i1 %168, float 0xBFED906BC0000000, float %167
-  %173 = fcmp oge float %112, 0x40146B9C40000000
-  %174 = fadd float %112, 0xC0146B9C40000000
-  %175 = select i1 %173, float %174, float %170
-  %176 = select i1 %173, float 0xBFED906BC0000000, float %171
-  %177 = select i1 %173, float 0xBFE6A09E60000000, float %172
-  %178 = fcmp oge float %112, 0x4015FDBC00000000
-  %179 = fadd float %112, 0xC015FDBC00000000
-  %180 = select i1 %178, float %179, float %175
-  %181 = select i1 %178, float 0xBFE6A09E60000000, float %176
-  %182 = select i1 %178, float 0xBFD87DE2A0000000, float %177
-  %183 = fcmp oge float %112, 0x40178FDBA0000000
-  %184 = fadd float %112, 0xC0178FDBA0000000
-  %185 = select i1 %183, float %184, float %180
-  %186 = select i1 %183, float 0xBFD87DE2A0000000, float %181
-  %187 = select i1 %183, float 0.000000e+00, float %182
-  %188 = fdiv float %185, 0x3FD921FB60000000
-  %189 = fsub float %187, %186
-  %190 = call float @llvm.fmuladd.f32(float %188, float %189, float %186)
-  %191 = call float @llvm.fmuladd.f32(float %105, float %190, float %104)
-  store volatile float %191, ptr %17, align 4, !tbaa !5
-  %192 = load volatile float, ptr %16, align 4, !tbaa !5
-  %193 = load volatile float, ptr %9, align 4, !tbaa !5
-  %194 = load volatile float, ptr %17, align 4, !tbaa !5
-  %195 = fcmp olt float %194, 0.000000e+00
-  %196 = fadd float %194, 0x401921FB60000000
-  %197 = select i1 %195, float %196, float %194
-  %198 = fcmp ult float %197, 0x401921FB60000000
-  %199 = fadd float %197, 0xC01921FB60000000
-  %200 = select i1 %198, float %197, float %199
-  %201 = fcmp oge float %200, 0x3FD921FB60000000
-  %202 = fadd float %200, 0xBFD921FB60000000
-  %203 = select i1 %201, float %202, float %194
-  %204 = select i1 %201, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %205 = select i1 %201, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %206 = fcmp oge float %200, 0x3FE921FB60000000
-  %207 = fadd float %200, 0xBFE921FB60000000
-  %208 = select i1 %206, float %207, float %203
-  %209 = select i1 %206, float 0x3FE6A09E60000000, float %204
-  %210 = select i1 %206, float 0x3FED906BC0000000, float %205
-  %211 = fcmp oge float %200, 0x3FF2D97C80000000
-  %212 = fadd float %200, 0xBFF2D97C80000000
-  %213 = select i1 %211, float %212, float %208
-  %214 = select i1 %211, float 0x3FED906BC0000000, float %209
-  %215 = select i1 %211, float 1.000000e+00, float %210
-  %216 = fcmp oge float %200, 0x3FF921FB60000000
-  %217 = fadd float %200, 0xBFF921FB60000000
-  %218 = select i1 %216, float %217, float %213
-  %219 = select i1 %216, float 1.000000e+00, float %214
-  %220 = select i1 %216, float 0x3FED906BC0000000, float %215
-  %221 = fcmp oge float %200, 0x3FFF6A7A40000000
-  %222 = fadd float %200, 0xBFFF6A7A40000000
-  %223 = select i1 %221, float %222, float %218
-  %224 = select i1 %221, float 0x3FED906BC0000000, float %219
-  %225 = select i1 %221, float 0x3FE6A09E60000000, float %220
-  %226 = fcmp oge float %200, 0x4002D97C80000000
-  %227 = fadd float %200, 0xC002D97C80000000
-  %228 = select i1 %226, float %227, float %223
-  %229 = select i1 %226, float 0x3FE6A09E60000000, float %224
-  %230 = select i1 %226, float 0x3FD87DE2A0000000, float %225
-  %231 = fcmp oge float %200, 0x4005FDBC00000000
-  %232 = fadd float %200, 0xC005FDBC00000000
-  %233 = select i1 %231, float %232, float %228
-  %234 = select i1 %231, float 0x3FD87DE2A0000000, float %229
-  %235 = select i1 %231, float 0.000000e+00, float %230
-  %236 = fcmp oge float %200, 0x400921FB60000000
-  %237 = fadd float %200, 0xC00921FB60000000
-  %238 = select i1 %236, float %237, float %233
-  %239 = select i1 %236, float 0.000000e+00, float %234
-  %240 = select i1 %236, float 0xBFD87DE2A0000000, float %235
-  %241 = fcmp oge float %200, 0x400C463AC0000000
-  %242 = fadd float %200, 0xC00C463AC0000000
-  %243 = select i1 %241, float %242, float %238
-  %244 = select i1 %241, float 0xBFD87DE2A0000000, float %239
-  %245 = select i1 %241, float 0xBFE6A09E60000000, float %240
-  %246 = fcmp oge float %200, 0x400F6A7A40000000
-  %247 = fadd float %200, 0xC00F6A7A40000000
-  %248 = select i1 %246, float %247, float %243
-  %249 = select i1 %246, float 0xBFE6A09E60000000, float %244
-  %250 = select i1 %246, float 0xBFED906BC0000000, float %245
-  %251 = fcmp oge float %200, 0x4011475CE0000000
-  %252 = fadd float %200, 0xC011475CE0000000
-  %253 = select i1 %251, float %252, float %248
-  %254 = select i1 %251, float 0xBFED906BC0000000, float %249
-  %255 = select i1 %251, float -1.000000e+00, float %250
-  %256 = fcmp oge float %200, 0x4012D97C80000000
-  %257 = fadd float %200, 0xC012D97C80000000
-  %258 = select i1 %256, float %257, float %253
-  %259 = select i1 %256, float -1.000000e+00, float %254
-  %260 = select i1 %256, float 0xBFED906BC0000000, float %255
-  %261 = fcmp oge float %200, 0x40146B9C40000000
-  %262 = fadd float %200, 0xC0146B9C40000000
-  %263 = select i1 %261, float %262, float %258
-  %264 = select i1 %261, float 0xBFED906BC0000000, float %259
-  %265 = select i1 %261, float 0xBFE6A09E60000000, float %260
-  %266 = fcmp oge float %200, 0x4015FDBC00000000
-  %267 = fadd float %200, 0xC015FDBC00000000
-  %268 = select i1 %266, float %267, float %263
-  %269 = select i1 %266, float 0xBFE6A09E60000000, float %264
-  %270 = select i1 %266, float 0xBFD87DE2A0000000, float %265
-  %271 = fcmp oge float %200, 0x40178FDBA0000000
-  %272 = fadd float %200, 0xC0178FDBA0000000
-  %273 = select i1 %271, float %272, float %268
-  %274 = select i1 %271, float 0xBFD87DE2A0000000, float %269
-  %275 = select i1 %271, float 0.000000e+00, float %270
-  %276 = fdiv float %273, 0x3FD921FB60000000
-  %277 = fsub float %275, %274
-  %278 = call float @llvm.fmuladd.f32(float %276, float %277, float %274)
-  %279 = call float @llvm.fmuladd.f32(float %193, float %278, float %192)
-  store volatile float %279, ptr %17, align 4, !tbaa !5
-  %280 = load volatile float, ptr %16, align 4, !tbaa !5
-  %281 = load volatile float, ptr %9, align 4, !tbaa !5
-  %282 = load volatile float, ptr %17, align 4, !tbaa !5
-  %283 = fcmp olt float %282, 0.000000e+00
-  %284 = fadd float %282, 0x401921FB60000000
-  %285 = select i1 %283, float %284, float %282
-  %286 = fcmp ult float %285, 0x401921FB60000000
-  %287 = fadd float %285, 0xC01921FB60000000
-  %288 = select i1 %286, float %285, float %287
-  %289 = fcmp oge float %288, 0x3FD921FB60000000
-  %290 = fadd float %288, 0xBFD921FB60000000
-  %291 = select i1 %289, float %290, float %282
-  %292 = select i1 %289, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %293 = select i1 %289, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %294 = fcmp oge float %288, 0x3FE921FB60000000
-  %295 = fadd float %288, 0xBFE921FB60000000
-  %296 = select i1 %294, float %295, float %291
-  %297 = select i1 %294, float 0x3FE6A09E60000000, float %292
-  %298 = select i1 %294, float 0x3FED906BC0000000, float %293
-  %299 = fcmp oge float %288, 0x3FF2D97C80000000
-  %300 = fadd float %288, 0xBFF2D97C80000000
-  %301 = select i1 %299, float %300, float %296
-  %302 = select i1 %299, float 0x3FED906BC0000000, float %297
-  %303 = select i1 %299, float 1.000000e+00, float %298
-  %304 = fcmp oge float %288, 0x3FF921FB60000000
-  %305 = fadd float %288, 0xBFF921FB60000000
-  %306 = select i1 %304, float %305, float %301
-  %307 = select i1 %304, float 1.000000e+00, float %302
-  %308 = select i1 %304, float 0x3FED906BC0000000, float %303
-  %309 = fcmp oge float %288, 0x3FFF6A7A40000000
-  %310 = fadd float %288, 0xBFFF6A7A40000000
-  %311 = select i1 %309, float %310, float %306
-  %312 = select i1 %309, float 0x3FED906BC0000000, float %307
-  %313 = select i1 %309, float 0x3FE6A09E60000000, float %308
-  %314 = fcmp oge float %288, 0x4002D97C80000000
-  %315 = fadd float %288, 0xC002D97C80000000
-  %316 = select i1 %314, float %315, float %311
-  %317 = select i1 %314, float 0x3FE6A09E60000000, float %312
-  %318 = select i1 %314, float 0x3FD87DE2A0000000, float %313
-  %319 = fcmp oge float %288, 0x4005FDBC00000000
-  %320 = fadd float %288, 0xC005FDBC00000000
-  %321 = select i1 %319, float %320, float %316
-  %322 = select i1 %319, float 0x3FD87DE2A0000000, float %317
-  %323 = select i1 %319, float 0.000000e+00, float %318
-  %324 = fcmp oge float %288, 0x400921FB60000000
-  %325 = fadd float %288, 0xC00921FB60000000
-  %326 = select i1 %324, float %325, float %321
-  %327 = select i1 %324, float 0.000000e+00, float %322
-  %328 = select i1 %324, float 0xBFD87DE2A0000000, float %323
-  %329 = fcmp oge float %288, 0x400C463AC0000000
-  %330 = fadd float %288, 0xC00C463AC0000000
-  %331 = select i1 %329, float %330, float %326
-  %332 = select i1 %329, float 0xBFD87DE2A0000000, float %327
-  %333 = select i1 %329, float 0xBFE6A09E60000000, float %328
-  %334 = fcmp oge float %288, 0x400F6A7A40000000
-  %335 = fadd float %288, 0xC00F6A7A40000000
-  %336 = select i1 %334, float %335, float %331
-  %337 = select i1 %334, float 0xBFE6A09E60000000, float %332
-  %338 = select i1 %334, float 0xBFED906BC0000000, float %333
-  %339 = fcmp oge float %288, 0x4011475CE0000000
-  %340 = fadd float %288, 0xC011475CE0000000
-  %341 = select i1 %339, float %340, float %336
-  %342 = select i1 %339, float 0xBFED906BC0000000, float %337
-  %343 = select i1 %339, float -1.000000e+00, float %338
-  %344 = fcmp oge float %288, 0x4012D97C80000000
-  %345 = fadd float %288, 0xC012D97C80000000
-  %346 = select i1 %344, float %345, float %341
-  %347 = select i1 %344, float -1.000000e+00, float %342
-  %348 = select i1 %344, float 0xBFED906BC0000000, float %343
-  %349 = fcmp oge float %288, 0x40146B9C40000000
-  %350 = fadd float %288, 0xC0146B9C40000000
-  %351 = select i1 %349, float %350, float %346
-  %352 = select i1 %349, float 0xBFED906BC0000000, float %347
-  %353 = select i1 %349, float 0xBFE6A09E60000000, float %348
-  %354 = fcmp oge float %288, 0x4015FDBC00000000
-  %355 = fadd float %288, 0xC015FDBC00000000
-  %356 = select i1 %354, float %355, float %351
-  %357 = select i1 %354, float 0xBFE6A09E60000000, float %352
-  %358 = select i1 %354, float 0xBFD87DE2A0000000, float %353
-  %359 = fcmp oge float %288, 0x40178FDBA0000000
-  %360 = fadd float %288, 0xC0178FDBA0000000
-  %361 = select i1 %359, float %360, float %356
-  %362 = select i1 %359, float 0xBFD87DE2A0000000, float %357
-  %363 = select i1 %359, float 0.000000e+00, float %358
-  %364 = fdiv float %361, 0x3FD921FB60000000
-  %365 = fsub float %363, %362
-  %366 = call float @llvm.fmuladd.f32(float %364, float %365, float %362)
-  %367 = call float @llvm.fmuladd.f32(float %281, float %366, float %280)
-  store volatile float %367, ptr %17, align 4, !tbaa !5
-  %368 = load volatile float, ptr %16, align 4, !tbaa !5
-  %369 = load volatile float, ptr %9, align 4, !tbaa !5
-  %370 = load volatile float, ptr %17, align 4, !tbaa !5
-  %371 = fcmp olt float %370, 0.000000e+00
-  %372 = fadd float %370, 0x401921FB60000000
-  %373 = select i1 %371, float %372, float %370
-  %374 = fcmp ult float %373, 0x401921FB60000000
-  %375 = fadd float %373, 0xC01921FB60000000
-  %376 = select i1 %374, float %373, float %375
-  %377 = fcmp oge float %376, 0x3FD921FB60000000
-  %378 = fadd float %376, 0xBFD921FB60000000
-  %379 = select i1 %377, float %378, float %370
-  %380 = select i1 %377, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %381 = select i1 %377, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %382 = fcmp oge float %376, 0x3FE921FB60000000
-  %383 = fadd float %376, 0xBFE921FB60000000
-  %384 = select i1 %382, float %383, float %379
-  %385 = select i1 %382, float 0x3FE6A09E60000000, float %380
-  %386 = select i1 %382, float 0x3FED906BC0000000, float %381
-  %387 = fcmp oge float %376, 0x3FF2D97C80000000
-  %388 = fadd float %376, 0xBFF2D97C80000000
-  %389 = select i1 %387, float %388, float %384
-  %390 = select i1 %387, float 0x3FED906BC0000000, float %385
-  %391 = select i1 %387, float 1.000000e+00, float %386
-  %392 = fcmp oge float %376, 0x3FF921FB60000000
-  %393 = fadd float %376, 0xBFF921FB60000000
-  %394 = select i1 %392, float %393, float %389
-  %395 = select i1 %392, float 1.000000e+00, float %390
-  %396 = select i1 %392, float 0x3FED906BC0000000, float %391
-  %397 = fcmp oge float %376, 0x3FFF6A7A40000000
-  %398 = fadd float %376, 0xBFFF6A7A40000000
-  %399 = select i1 %397, float %398, float %394
-  %400 = select i1 %397, float 0x3FED906BC0000000, float %395
-  %401 = select i1 %397, float 0x3FE6A09E60000000, float %396
-  %402 = fcmp oge float %376, 0x4002D97C80000000
-  %403 = fadd float %376, 0xC002D97C80000000
-  %404 = select i1 %402, float %403, float %399
-  %405 = select i1 %402, float 0x3FE6A09E60000000, float %400
-  %406 = select i1 %402, float 0x3FD87DE2A0000000, float %401
-  %407 = fcmp oge float %376, 0x4005FDBC00000000
-  %408 = fadd float %376, 0xC005FDBC00000000
-  %409 = select i1 %407, float %408, float %404
-  %410 = select i1 %407, float 0x3FD87DE2A0000000, float %405
-  %411 = select i1 %407, float 0.000000e+00, float %406
-  %412 = fcmp oge float %376, 0x400921FB60000000
-  %413 = fadd float %376, 0xC00921FB60000000
-  %414 = select i1 %412, float %413, float %409
-  %415 = select i1 %412, float 0.000000e+00, float %410
-  %416 = select i1 %412, float 0xBFD87DE2A0000000, float %411
-  %417 = fcmp oge float %376, 0x400C463AC0000000
-  %418 = fadd float %376, 0xC00C463AC0000000
-  %419 = select i1 %417, float %418, float %414
-  %420 = select i1 %417, float 0xBFD87DE2A0000000, float %415
-  %421 = select i1 %417, float 0xBFE6A09E60000000, float %416
-  %422 = fcmp oge float %376, 0x400F6A7A40000000
-  %423 = fadd float %376, 0xC00F6A7A40000000
-  %424 = select i1 %422, float %423, float %419
-  %425 = select i1 %422, float 0xBFE6A09E60000000, float %420
-  %426 = select i1 %422, float 0xBFED906BC0000000, float %421
-  %427 = fcmp oge float %376, 0x4011475CE0000000
-  %428 = fadd float %376, 0xC011475CE0000000
-  %429 = select i1 %427, float %428, float %424
-  %430 = select i1 %427, float 0xBFED906BC0000000, float %425
-  %431 = select i1 %427, float -1.000000e+00, float %426
-  %432 = fcmp oge float %376, 0x4012D97C80000000
-  %433 = fadd float %376, 0xC012D97C80000000
-  %434 = select i1 %432, float %433, float %429
-  %435 = select i1 %432, float -1.000000e+00, float %430
-  %436 = select i1 %432, float 0xBFED906BC0000000, float %431
-  %437 = fcmp oge float %376, 0x40146B9C40000000
-  %438 = fadd float %376, 0xC0146B9C40000000
-  %439 = select i1 %437, float %438, float %434
-  %440 = select i1 %437, float 0xBFED906BC0000000, float %435
-  %441 = select i1 %437, float 0xBFE6A09E60000000, float %436
-  %442 = fcmp oge float %376, 0x4015FDBC00000000
-  %443 = fadd float %376, 0xC015FDBC00000000
-  %444 = select i1 %442, float %443, float %439
-  %445 = select i1 %442, float 0xBFE6A09E60000000, float %440
-  %446 = select i1 %442, float 0xBFD87DE2A0000000, float %441
-  %447 = fcmp oge float %376, 0x40178FDBA0000000
-  %448 = fadd float %376, 0xC0178FDBA0000000
-  %449 = select i1 %447, float %448, float %444
-  %450 = select i1 %447, float 0xBFD87DE2A0000000, float %445
-  %451 = select i1 %447, float 0.000000e+00, float %446
-  %452 = fdiv float %449, 0x3FD921FB60000000
-  %453 = fsub float %451, %450
-  %454 = call float @llvm.fmuladd.f32(float %452, float %453, float %450)
-  %455 = call float @llvm.fmuladd.f32(float %369, float %454, float %368)
-  store volatile float %455, ptr %17, align 4, !tbaa !5
-  %456 = load volatile float, ptr %16, align 4, !tbaa !5
-  %457 = load volatile float, ptr %9, align 4, !tbaa !5
-  %458 = load volatile float, ptr %17, align 4, !tbaa !5
-  %459 = fcmp olt float %458, 0.000000e+00
-  %460 = fadd float %458, 0x401921FB60000000
-  %461 = select i1 %459, float %460, float %458
-  %462 = fcmp ult float %461, 0x401921FB60000000
-  %463 = fadd float %461, 0xC01921FB60000000
-  %464 = select i1 %462, float %461, float %463
-  %465 = fcmp oge float %464, 0x3FD921FB60000000
-  %466 = fadd float %464, 0xBFD921FB60000000
-  %467 = select i1 %465, float %466, float %458
-  %468 = select i1 %465, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %469 = select i1 %465, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %470 = fcmp oge float %464, 0x3FE921FB60000000
-  %471 = fadd float %464, 0xBFE921FB60000000
-  %472 = select i1 %470, float %471, float %467
-  %473 = select i1 %470, float 0x3FE6A09E60000000, float %468
-  %474 = select i1 %470, float 0x3FED906BC0000000, float %469
-  %475 = fcmp oge float %464, 0x3FF2D97C80000000
-  %476 = fadd float %464, 0xBFF2D97C80000000
-  %477 = select i1 %475, float %476, float %472
-  %478 = select i1 %475, float 0x3FED906BC0000000, float %473
-  %479 = select i1 %475, float 1.000000e+00, float %474
-  %480 = fcmp oge float %464, 0x3FF921FB60000000
-  %481 = fadd float %464, 0xBFF921FB60000000
-  %482 = select i1 %480, float %481, float %477
-  %483 = select i1 %480, float 1.000000e+00, float %478
-  %484 = select i1 %480, float 0x3FED906BC0000000, float %479
-  %485 = fcmp oge float %464, 0x3FFF6A7A40000000
-  %486 = fadd float %464, 0xBFFF6A7A40000000
-  %487 = select i1 %485, float %486, float %482
-  %488 = select i1 %485, float 0x3FED906BC0000000, float %483
-  %489 = select i1 %485, float 0x3FE6A09E60000000, float %484
-  %490 = fcmp oge float %464, 0x4002D97C80000000
-  %491 = fadd float %464, 0xC002D97C80000000
-  %492 = select i1 %490, float %491, float %487
-  %493 = select i1 %490, float 0x3FE6A09E60000000, float %488
-  %494 = select i1 %490, float 0x3FD87DE2A0000000, float %489
-  %495 = fcmp oge float %464, 0x4005FDBC00000000
-  %496 = fadd float %464, 0xC005FDBC00000000
-  %497 = select i1 %495, float %496, float %492
-  %498 = select i1 %495, float 0x3FD87DE2A0000000, float %493
-  %499 = select i1 %495, float 0.000000e+00, float %494
-  %500 = fcmp oge float %464, 0x400921FB60000000
-  %501 = fadd float %464, 0xC00921FB60000000
-  %502 = select i1 %500, float %501, float %497
-  %503 = select i1 %500, float 0.000000e+00, float %498
-  %504 = select i1 %500, float 0xBFD87DE2A0000000, float %499
-  %505 = fcmp oge float %464, 0x400C463AC0000000
-  %506 = fadd float %464, 0xC00C463AC0000000
-  %507 = select i1 %505, float %506, float %502
-  %508 = select i1 %505, float 0xBFD87DE2A0000000, float %503
-  %509 = select i1 %505, float 0xBFE6A09E60000000, float %504
-  %510 = fcmp oge float %464, 0x400F6A7A40000000
-  %511 = fadd float %464, 0xC00F6A7A40000000
-  %512 = select i1 %510, float %511, float %507
-  %513 = select i1 %510, float 0xBFE6A09E60000000, float %508
-  %514 = select i1 %510, float 0xBFED906BC0000000, float %509
-  %515 = fcmp oge float %464, 0x4011475CE0000000
-  %516 = fadd float %464, 0xC011475CE0000000
-  %517 = select i1 %515, float %516, float %512
-  %518 = select i1 %515, float 0xBFED906BC0000000, float %513
-  %519 = select i1 %515, float -1.000000e+00, float %514
-  %520 = fcmp oge float %464, 0x4012D97C80000000
-  %521 = fadd float %464, 0xC012D97C80000000
-  %522 = select i1 %520, float %521, float %517
-  %523 = select i1 %520, float -1.000000e+00, float %518
-  %524 = select i1 %520, float 0xBFED906BC0000000, float %519
-  %525 = fcmp oge float %464, 0x40146B9C40000000
-  %526 = fadd float %464, 0xC0146B9C40000000
-  %527 = select i1 %525, float %526, float %522
-  %528 = select i1 %525, float 0xBFED906BC0000000, float %523
-  %529 = select i1 %525, float 0xBFE6A09E60000000, float %524
-  %530 = fcmp oge float %464, 0x4015FDBC00000000
-  %531 = fadd float %464, 0xC015FDBC00000000
-  %532 = select i1 %530, float %531, float %527
-  %533 = select i1 %530, float 0xBFE6A09E60000000, float %528
-  %534 = select i1 %530, float 0xBFD87DE2A0000000, float %529
-  %535 = fcmp oge float %464, 0x40178FDBA0000000
-  %536 = fadd float %464, 0xC0178FDBA0000000
-  %537 = select i1 %535, float %536, float %532
-  %538 = select i1 %535, float 0xBFD87DE2A0000000, float %533
-  %539 = select i1 %535, float 0.000000e+00, float %534
-  %540 = fdiv float %537, 0x3FD921FB60000000
-  %541 = fsub float %539, %538
-  %542 = call float @llvm.fmuladd.f32(float %540, float %541, float %538)
-  %543 = call float @llvm.fmuladd.f32(float %457, float %542, float %456)
-  store volatile float %543, ptr %17, align 4, !tbaa !5
-  %544 = load volatile float, ptr %9, align 4, !tbaa !5
-  %545 = fadd float %544, 1.000000e+00
-  %546 = fcmp ugt float %545, 0.000000e+00
-  br i1 %546, label %547, label %558
+197:                                              ; preds = %194, %190
+  %198 = load volatile float, ptr %19, align 4, !tbaa !5
+  %199 = fmul float %198, 5.000000e+00
+  %200 = fcmp ult float %170, %199
+  br i1 %200, label %204, label %201
 
-547:                                              ; preds = %96
-  %548 = fmul float %545, 5.000000e-01
-  %549 = bitcast float %545 to i32
-  %550 = ashr i32 %549, 1
-  %551 = sub nsw i32 1597463007, %550
-  %552 = bitcast i32 %551 to float
-  %553 = fneg float %552
-  %554 = fmul float %548, %553
-  %555 = call float @llvm.fmuladd.f32(float %554, float %552, float 1.500000e+00)
-  %556 = fmul float %555, %552
-  %557 = fdiv float 1.000000e+00, %556
-  br label %558
+201:                                              ; preds = %197
+  %202 = load volatile float, ptr %19, align 4, !tbaa !5
+  %203 = call float @llvm.fmuladd.f32(float %202, float -5.000000e+00, float %170)
+  store volatile float %203, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %21, align 4, !tbaa !5
+  br label %204
 
-558:                                              ; preds = %96, %547
-  %559 = phi float [ %557, %547 ], [ 0.000000e+00, %96 ]
-  %560 = load volatile float, ptr %17, align 4, !tbaa !5
-  %561 = fmul float %560, 5.000000e-01
-  %562 = fcmp olt float %561, 0.000000e+00
-  %563 = fadd float %561, 0x401921FB60000000
-  %564 = select i1 %562, float %563, float %561
-  %565 = fcmp ult float %564, 0x401921FB60000000
-  %566 = fadd float %564, 0xC01921FB60000000
-  %567 = select i1 %565, float %564, float %566
-  %568 = fcmp oge float %567, 0x3FD921FB60000000
-  %569 = fadd float %567, 0xBFD921FB60000000
-  %570 = select i1 %568, float %569, float %561
-  %571 = select i1 %568, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %572 = select i1 %568, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %573 = fcmp oge float %567, 0x3FE921FB60000000
-  %574 = fadd float %567, 0xBFE921FB60000000
-  %575 = select i1 %573, float %574, float %570
-  %576 = select i1 %573, float 0x3FE6A09E60000000, float %571
-  %577 = select i1 %573, float 0x3FED906BC0000000, float %572
-  %578 = fcmp oge float %567, 0x3FF2D97C80000000
-  %579 = fadd float %567, 0xBFF2D97C80000000
-  %580 = select i1 %578, float %579, float %575
-  %581 = select i1 %578, float 0x3FED906BC0000000, float %576
-  %582 = select i1 %578, float 1.000000e+00, float %577
-  %583 = fcmp oge float %567, 0x3FF921FB60000000
-  %584 = fadd float %567, 0xBFF921FB60000000
-  %585 = select i1 %583, float %584, float %580
-  %586 = select i1 %583, float 1.000000e+00, float %581
-  %587 = select i1 %583, float 0x3FED906BC0000000, float %582
-  %588 = fcmp oge float %567, 0x3FFF6A7A40000000
-  %589 = fadd float %567, 0xBFFF6A7A40000000
-  %590 = select i1 %588, float %589, float %585
-  %591 = select i1 %588, float 0x3FED906BC0000000, float %586
-  %592 = select i1 %588, float 0x3FE6A09E60000000, float %587
-  %593 = fcmp oge float %567, 0x4002D97C80000000
-  %594 = fadd float %567, 0xC002D97C80000000
-  %595 = select i1 %593, float %594, float %590
-  %596 = select i1 %593, float 0x3FE6A09E60000000, float %591
-  %597 = select i1 %593, float 0x3FD87DE2A0000000, float %592
-  %598 = fcmp oge float %567, 0x4005FDBC00000000
-  %599 = fadd float %567, 0xC005FDBC00000000
-  %600 = select i1 %598, float %599, float %595
-  %601 = select i1 %598, float 0x3FD87DE2A0000000, float %596
-  %602 = select i1 %598, float 0.000000e+00, float %597
-  %603 = fcmp oge float %567, 0x400921FB60000000
-  %604 = fadd float %567, 0xC00921FB60000000
-  %605 = select i1 %603, float %604, float %600
-  %606 = select i1 %603, float 0.000000e+00, float %601
-  %607 = select i1 %603, float 0xBFD87DE2A0000000, float %602
-  %608 = fcmp oge float %567, 0x400C463AC0000000
-  %609 = fadd float %567, 0xC00C463AC0000000
-  %610 = select i1 %608, float %609, float %605
-  %611 = select i1 %608, float 0xBFD87DE2A0000000, float %606
-  %612 = select i1 %608, float 0xBFE6A09E60000000, float %607
-  %613 = fcmp oge float %567, 0x400F6A7A40000000
-  %614 = fadd float %567, 0xC00F6A7A40000000
-  %615 = select i1 %613, float %614, float %610
-  %616 = select i1 %613, float 0xBFE6A09E60000000, float %611
-  %617 = select i1 %613, float 0xBFED906BC0000000, float %612
-  %618 = fcmp oge float %567, 0x4011475CE0000000
-  %619 = fadd float %567, 0xC011475CE0000000
-  %620 = select i1 %618, float %619, float %615
-  %621 = select i1 %618, float 0xBFED906BC0000000, float %616
-  %622 = select i1 %618, float -1.000000e+00, float %617
-  %623 = fcmp oge float %567, 0x4012D97C80000000
-  %624 = fadd float %567, 0xC012D97C80000000
-  %625 = select i1 %623, float %624, float %620
-  %626 = select i1 %623, float -1.000000e+00, float %621
-  %627 = select i1 %623, float 0xBFED906BC0000000, float %622
-  %628 = fcmp oge float %567, 0x40146B9C40000000
-  %629 = fadd float %567, 0xC0146B9C40000000
-  %630 = select i1 %628, float %629, float %625
-  %631 = select i1 %628, float 0xBFED906BC0000000, float %626
-  %632 = select i1 %628, float 0xBFE6A09E60000000, float %627
-  %633 = fcmp oge float %567, 0x4015FDBC00000000
-  %634 = fadd float %567, 0xC015FDBC00000000
-  %635 = select i1 %633, float %634, float %630
-  %636 = select i1 %633, float 0xBFE6A09E60000000, float %631
-  %637 = select i1 %633, float 0xBFD87DE2A0000000, float %632
-  %638 = fcmp oge float %567, 0x40178FDBA0000000
-  %639 = fadd float %567, 0xC0178FDBA0000000
-  %640 = select i1 %638, float %639, float %635
-  %641 = select i1 %638, float 0xBFD87DE2A0000000, float %636
-  %642 = select i1 %638, float 0.000000e+00, float %637
-  %643 = fdiv float %640, 0x3FD921FB60000000
-  %644 = fsub float %642, %641
-  %645 = call float @llvm.fmuladd.f32(float %643, float %644, float %641)
-  %646 = fmul float %559, %645
-  %647 = load volatile float, ptr %9, align 4, !tbaa !5
-  %648 = fsub float 1.000000e+00, %647
-  %649 = fcmp ugt float %648, 0.000000e+00
-  br i1 %649, label %650, label %661
+204:                                              ; preds = %201, %197
+  %205 = load volatile float, ptr %19, align 4, !tbaa !5
+  %206 = fmul float %205, 6.000000e+00
+  %207 = fcmp ult float %170, %206
+  br i1 %207, label %211, label %208
 
-650:                                              ; preds = %558
-  %651 = fmul float %648, 5.000000e-01
-  %652 = bitcast float %648 to i32
-  %653 = ashr i32 %652, 1
-  %654 = sub nsw i32 1597463007, %653
-  %655 = bitcast i32 %654 to float
-  %656 = fneg float %655
-  %657 = fmul float %651, %656
-  %658 = call float @llvm.fmuladd.f32(float %657, float %655, float 1.500000e+00)
-  %659 = fmul float %658, %655
-  %660 = fdiv float 1.000000e+00, %659
-  br label %661
+208:                                              ; preds = %204
+  %209 = load volatile float, ptr %19, align 4, !tbaa !5
+  %210 = call float @llvm.fmuladd.f32(float %209, float -6.000000e+00, float %170)
+  store volatile float %210, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %21, align 4, !tbaa !5
+  br label %211
 
-661:                                              ; preds = %558, %650
-  %662 = phi float [ %660, %650 ], [ 0.000000e+00, %558 ]
-  %663 = load volatile float, ptr %17, align 4, !tbaa !5
-  %664 = fmul float %663, 5.000000e-01
-  %665 = fcmp olt float %664, 0.000000e+00
-  %666 = fadd float %664, 0x401921FB60000000
-  %667 = select i1 %665, float %666, float %664
-  %668 = fcmp ult float %667, 0x401921FB60000000
-  %669 = fadd float %667, 0xC01921FB60000000
-  %670 = select i1 %668, float %667, float %669
-  %671 = fcmp oge float %670, 0x3FD921FB60000000
-  %672 = fadd float %670, 0xBFD921FB60000000
-  %673 = select i1 %671, float %672, float %664
-  %674 = select i1 %671, float 0x3FED906BC0000000, float 1.000000e+00
-  %675 = select i1 %671, float 0x3FE6A09E60000000, float 0x3FED906BC0000000
-  %676 = fcmp oge float %670, 0x3FE921FB60000000
-  %677 = fadd float %670, 0xBFE921FB60000000
-  %678 = select i1 %676, float %677, float %673
-  %679 = select i1 %676, float 0x3FE6A09E60000000, float %674
-  %680 = select i1 %676, float 0x3FD87DE2A0000000, float %675
-  %681 = fcmp oge float %670, 0x3FF2D97C80000000
-  %682 = fadd float %670, 0xBFF2D97C80000000
-  %683 = select i1 %681, float %682, float %678
-  %684 = select i1 %681, float 0x3FD87DE2A0000000, float %679
-  %685 = select i1 %681, float 0.000000e+00, float %680
-  %686 = fcmp oge float %670, 0x3FF921FB60000000
-  %687 = fadd float %670, 0xBFF921FB60000000
-  %688 = select i1 %686, float %687, float %683
-  %689 = select i1 %686, float 0.000000e+00, float %684
-  %690 = select i1 %686, float 0xBFD87DE2A0000000, float %685
-  %691 = fcmp oge float %670, 0x3FFF6A7A40000000
-  %692 = fadd float %670, 0xBFFF6A7A40000000
-  %693 = select i1 %691, float %692, float %688
-  %694 = select i1 %691, float 0xBFD87DE2A0000000, float %689
-  %695 = select i1 %691, float 0xBFE6A09E60000000, float %690
-  %696 = fcmp oge float %670, 0x4002D97C80000000
-  %697 = fadd float %670, 0xC002D97C80000000
-  %698 = select i1 %696, float %697, float %693
-  %699 = select i1 %696, float 0xBFE6A09E60000000, float %694
-  %700 = select i1 %696, float 0xBFED906BC0000000, float %695
-  %701 = fcmp oge float %670, 0x4005FDBC00000000
-  %702 = fadd float %670, 0xC005FDBC00000000
-  %703 = select i1 %701, float %702, float %698
-  %704 = select i1 %701, float 0xBFED906BC0000000, float %699
-  %705 = select i1 %701, float -1.000000e+00, float %700
-  %706 = fcmp oge float %670, 0x400921FB60000000
-  %707 = fadd float %670, 0xC00921FB60000000
-  %708 = select i1 %706, float %707, float %703
-  %709 = select i1 %706, float -1.000000e+00, float %704
-  %710 = select i1 %706, float 0xBFED906BC0000000, float %705
-  %711 = fcmp oge float %670, 0x400C463AC0000000
-  %712 = fadd float %670, 0xC00C463AC0000000
-  %713 = select i1 %711, float %712, float %708
-  %714 = select i1 %711, float 0xBFED906BC0000000, float %709
-  %715 = select i1 %711, float 0xBFE6A09E60000000, float %710
-  %716 = fcmp oge float %670, 0x400F6A7A40000000
-  %717 = fadd float %670, 0xC00F6A7A40000000
-  %718 = select i1 %716, float %717, float %713
-  %719 = select i1 %716, float 0xBFE6A09E60000000, float %714
-  %720 = select i1 %716, float 0xBFD87DE2A0000000, float %715
-  %721 = fcmp oge float %670, 0x4011475CE0000000
-  %722 = fadd float %670, 0xC011475CE0000000
-  %723 = select i1 %721, float %722, float %718
-  %724 = select i1 %721, float 0xBFD87DE2A0000000, float %719
-  %725 = select i1 %721, float 0.000000e+00, float %720
-  %726 = fcmp oge float %670, 0x4012D97C80000000
-  %727 = fadd float %670, 0xC012D97C80000000
-  %728 = select i1 %726, float %727, float %723
-  %729 = select i1 %726, float 0.000000e+00, float %724
-  %730 = select i1 %726, float 0x3FD87DE2A0000000, float %725
-  %731 = fcmp oge float %670, 0x40146B9C40000000
-  %732 = fadd float %670, 0xC0146B9C40000000
-  %733 = select i1 %731, float %732, float %728
-  %734 = select i1 %731, float 0x3FD87DE2A0000000, float %729
-  %735 = select i1 %731, float 0x3FE6A09E60000000, float %730
-  %736 = fcmp oge float %670, 0x4015FDBC00000000
-  %737 = fadd float %670, 0xC015FDBC00000000
-  %738 = select i1 %736, float %737, float %733
-  %739 = select i1 %736, float 0x3FE6A09E60000000, float %734
-  %740 = select i1 %736, float 0x3FED906BC0000000, float %735
-  %741 = fcmp oge float %670, 0x40178FDBA0000000
-  %742 = fadd float %670, 0xC0178FDBA0000000
-  %743 = select i1 %741, float %742, float %738
-  %744 = select i1 %741, float 0x3FED906BC0000000, float %739
-  %745 = select i1 %741, float 1.000000e+00, float %740
-  %746 = fdiv float %743, 0x3FD921FB60000000
-  %747 = fsub float %745, %744
-  %748 = call float @llvm.fmuladd.f32(float %746, float %747, float %744)
-  %749 = fmul float %662, %748
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %1)
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %2)
-  store float %646, ptr %1, align 8, !tbaa !5
-  store float %749, ptr %2, align 8, !tbaa !5
-  %750 = load i64, ptr %1, align 8
-  %751 = and i64 %750, 4294967295
-  %752 = load i64, ptr %2, align 8
-  %753 = and i64 %752, 4294967295
-  %754 = icmp eq i64 %753, 0
-  %755 = icmp eq i64 %751, 0
-  %756 = select i1 %754, i1 %755, i1 false
-  %757 = trunc i64 %752 to i32
-  %758 = bitcast i32 %757 to float
-  %759 = trunc i64 %750 to i32
-  %760 = bitcast i32 %759 to float
-  br i1 %756, label %788, label %761
+211:                                              ; preds = %208, %204
+  %212 = load volatile float, ptr %19, align 4, !tbaa !5
+  %213 = fmul float %212, 7.000000e+00
+  %214 = fcmp ult float %170, %213
+  br i1 %214, label %218, label %215
 
-761:                                              ; preds = %661
-  %762 = and i64 %750, 2147483647
-  %763 = and i64 %752, 2147483647
-  %764 = icmp samesign ugt i64 %763, %762
-  br i1 %764, label %765, label %767
+215:                                              ; preds = %211
+  %216 = load volatile float, ptr %19, align 4, !tbaa !5
+  %217 = call float @llvm.fmuladd.f32(float %216, float -7.000000e+00, float %170)
+  store volatile float %217, ptr %23, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %21, align 4, !tbaa !5
+  br label %218
 
-765:                                              ; preds = %761
-  %766 = fdiv float %760, %758
-  br label %769
+218:                                              ; preds = %215, %211
+  %219 = load volatile float, ptr %19, align 4, !tbaa !5
+  %220 = fmul float %219, 8.000000e+00
+  %221 = fcmp ult float %170, %220
+  br i1 %221, label %225, label %222
 
-767:                                              ; preds = %761
-  %768 = fdiv float %758, %760
-  br label %769
+222:                                              ; preds = %218
+  %223 = load volatile float, ptr %19, align 4, !tbaa !5
+  %224 = call float @llvm.fmuladd.f32(float %223, float -8.000000e+00, float %170)
+  store volatile float %224, ptr %23, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %21, align 4, !tbaa !5
+  br label %225
 
-769:                                              ; preds = %767, %765
-  %770 = phi float [ %766, %765 ], [ %768, %767 ]
-  %771 = fneg float %770
-  %772 = fmul float %770, %771
-  %773 = fmul float %770, %772
-  %774 = fdiv float %773, 3.000000e+00
-  %775 = fmul float %772, %774
-  %776 = fdiv float %775, 5.000000e+00
-  %777 = fmul float %772, %776
-  %778 = fdiv float %777, 7.000000e+00
-  %779 = fmul float %772, %778
-  %780 = fdiv float %779, 9.000000e+00
-  %781 = fadd float %770, %774
-  %782 = fadd float %781, %776
-  %783 = fadd float %782, %778
-  %784 = fadd float %783, %780
-  %785 = fsub float 0x3FF921FB40000000, %784
-  %786 = select i1 %764, float %784, float %785
-  %787 = fmul float %786, 2.000000e+00
-  br label %788
+225:                                              ; preds = %222, %218
+  %226 = load volatile float, ptr %19, align 4, !tbaa !5
+  %227 = fmul float %226, 9.000000e+00
+  %228 = fcmp ult float %170, %227
+  br i1 %228, label %232, label %229
 
-788:                                              ; preds = %661, %769
-  %789 = phi float [ %787, %769 ], [ 0.000000e+00, %661 ]
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %1)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %2)
-  store volatile float %789, ptr %18, align 4, !tbaa !5
-  %790 = load volatile float, ptr %8, align 4, !tbaa !5
-  %791 = load volatile float, ptr %9, align 4, !tbaa !5
-  %792 = load volatile float, ptr %17, align 4, !tbaa !5
-  %793 = fcmp olt float %792, 0.000000e+00
-  %794 = fadd float %792, 0x401921FB60000000
-  %795 = select i1 %793, float %794, float %792
-  %796 = fcmp ult float %795, 0x401921FB60000000
-  %797 = fadd float %795, 0xC01921FB60000000
-  %798 = select i1 %796, float %795, float %797
-  %799 = fcmp oge float %798, 0x3FD921FB60000000
-  %800 = fadd float %798, 0xBFD921FB60000000
-  %801 = select i1 %799, float %800, float %792
-  %802 = select i1 %799, float 0x3FED906BC0000000, float 1.000000e+00
-  %803 = select i1 %799, float 0x3FE6A09E60000000, float 0x3FED906BC0000000
-  %804 = fcmp oge float %798, 0x3FE921FB60000000
-  %805 = fadd float %798, 0xBFE921FB60000000
-  %806 = select i1 %804, float %805, float %801
-  %807 = select i1 %804, float 0x3FE6A09E60000000, float %802
-  %808 = select i1 %804, float 0x3FD87DE2A0000000, float %803
-  %809 = fcmp oge float %798, 0x3FF2D97C80000000
-  %810 = fadd float %798, 0xBFF2D97C80000000
-  %811 = select i1 %809, float %810, float %806
-  %812 = select i1 %809, float 0x3FD87DE2A0000000, float %807
-  %813 = select i1 %809, float 0.000000e+00, float %808
-  %814 = fcmp oge float %798, 0x3FF921FB60000000
-  %815 = fadd float %798, 0xBFF921FB60000000
-  %816 = select i1 %814, float %815, float %811
-  %817 = select i1 %814, float 0.000000e+00, float %812
-  %818 = select i1 %814, float 0xBFD87DE2A0000000, float %813
-  %819 = fcmp oge float %798, 0x3FFF6A7A40000000
-  %820 = fadd float %798, 0xBFFF6A7A40000000
-  %821 = select i1 %819, float %820, float %816
-  %822 = select i1 %819, float 0xBFD87DE2A0000000, float %817
-  %823 = select i1 %819, float 0xBFE6A09E60000000, float %818
-  %824 = fcmp oge float %798, 0x4002D97C80000000
-  %825 = fadd float %798, 0xC002D97C80000000
-  %826 = select i1 %824, float %825, float %821
-  %827 = select i1 %824, float 0xBFE6A09E60000000, float %822
-  %828 = select i1 %824, float 0xBFED906BC0000000, float %823
-  %829 = fcmp oge float %798, 0x4005FDBC00000000
-  %830 = fadd float %798, 0xC005FDBC00000000
-  %831 = select i1 %829, float %830, float %826
-  %832 = select i1 %829, float 0xBFED906BC0000000, float %827
-  %833 = select i1 %829, float -1.000000e+00, float %828
-  %834 = fcmp oge float %798, 0x400921FB60000000
-  %835 = fadd float %798, 0xC00921FB60000000
-  %836 = select i1 %834, float %835, float %831
-  %837 = select i1 %834, float -1.000000e+00, float %832
-  %838 = select i1 %834, float 0xBFED906BC0000000, float %833
-  %839 = fcmp oge float %798, 0x400C463AC0000000
-  %840 = fadd float %798, 0xC00C463AC0000000
-  %841 = select i1 %839, float %840, float %836
-  %842 = select i1 %839, float 0xBFED906BC0000000, float %837
-  %843 = select i1 %839, float 0xBFE6A09E60000000, float %838
-  %844 = fcmp oge float %798, 0x400F6A7A40000000
-  %845 = fadd float %798, 0xC00F6A7A40000000
-  %846 = select i1 %844, float %845, float %841
-  %847 = select i1 %844, float 0xBFE6A09E60000000, float %842
-  %848 = select i1 %844, float 0xBFD87DE2A0000000, float %843
-  %849 = fcmp oge float %798, 0x4011475CE0000000
-  %850 = fadd float %798, 0xC011475CE0000000
-  %851 = select i1 %849, float %850, float %846
-  %852 = select i1 %849, float 0xBFD87DE2A0000000, float %847
-  %853 = select i1 %849, float 0.000000e+00, float %848
-  %854 = fcmp oge float %798, 0x4012D97C80000000
-  %855 = fadd float %798, 0xC012D97C80000000
-  %856 = select i1 %854, float %855, float %851
-  %857 = select i1 %854, float 0.000000e+00, float %852
-  %858 = select i1 %854, float 0x3FD87DE2A0000000, float %853
-  %859 = fcmp oge float %798, 0x40146B9C40000000
-  %860 = fadd float %798, 0xC0146B9C40000000
-  %861 = select i1 %859, float %860, float %856
-  %862 = select i1 %859, float 0x3FD87DE2A0000000, float %857
-  %863 = select i1 %859, float 0x3FE6A09E60000000, float %858
-  %864 = fcmp oge float %798, 0x4015FDBC00000000
-  %865 = fadd float %798, 0xC015FDBC00000000
-  %866 = select i1 %864, float %865, float %861
-  %867 = select i1 %864, float 0x3FE6A09E60000000, float %862
-  %868 = select i1 %864, float 0x3FED906BC0000000, float %863
-  %869 = fcmp oge float %798, 0x40178FDBA0000000
-  %870 = fadd float %798, 0xC0178FDBA0000000
-  %871 = select i1 %869, float %870, float %866
-  %872 = select i1 %869, float 0x3FED906BC0000000, float %867
-  %873 = select i1 %869, float 1.000000e+00, float %868
-  %874 = fdiv float %871, 0x3FD921FB60000000
-  %875 = fsub float %873, %872
-  %876 = call float @llvm.fmuladd.f32(float %874, float %875, float %872)
-  %877 = fneg float %791
-  %878 = call float @llvm.fmuladd.f32(float %877, float %876, float 1.000000e+00)
-  %879 = fmul float %790, %878
-  store volatile float %879, ptr %19, align 4, !tbaa !5
-  %880 = load volatile float, ptr %18, align 4, !tbaa !5
-  %881 = fcmp olt float %880, 0.000000e+00
-  %882 = fadd float %880, 0x401921FB60000000
-  %883 = select i1 %881, float %882, float %880
-  %884 = fcmp ult float %883, 0x401921FB60000000
-  %885 = fadd float %883, 0xC01921FB60000000
-  %886 = select i1 %884, float %883, float %885
-  %887 = fcmp oge float %886, 0x3FD921FB60000000
-  %888 = fadd float %886, 0xBFD921FB60000000
-  %889 = select i1 %887, float %888, float %880
-  %890 = select i1 %887, float 0x3FED906BC0000000, float 1.000000e+00
-  %891 = select i1 %887, float 0x3FE6A09E60000000, float 0x3FED906BC0000000
-  %892 = fcmp oge float %886, 0x3FE921FB60000000
-  %893 = fadd float %886, 0xBFE921FB60000000
-  %894 = select i1 %892, float %893, float %889
-  %895 = select i1 %892, float 0x3FE6A09E60000000, float %890
-  %896 = select i1 %892, float 0x3FD87DE2A0000000, float %891
-  %897 = fcmp oge float %886, 0x3FF2D97C80000000
-  %898 = fadd float %886, 0xBFF2D97C80000000
-  %899 = select i1 %897, float %898, float %894
-  %900 = select i1 %897, float 0x3FD87DE2A0000000, float %895
-  %901 = select i1 %897, float 0.000000e+00, float %896
-  %902 = fcmp oge float %886, 0x3FF921FB60000000
-  %903 = fadd float %886, 0xBFF921FB60000000
-  %904 = select i1 %902, float %903, float %899
-  %905 = select i1 %902, float 0.000000e+00, float %900
-  %906 = select i1 %902, float 0xBFD87DE2A0000000, float %901
-  %907 = fcmp oge float %886, 0x3FFF6A7A40000000
-  %908 = fadd float %886, 0xBFFF6A7A40000000
-  %909 = select i1 %907, float %908, float %904
-  %910 = select i1 %907, float 0xBFD87DE2A0000000, float %905
-  %911 = select i1 %907, float 0xBFE6A09E60000000, float %906
-  %912 = fcmp oge float %886, 0x4002D97C80000000
-  %913 = fadd float %886, 0xC002D97C80000000
-  %914 = select i1 %912, float %913, float %909
-  %915 = select i1 %912, float 0xBFE6A09E60000000, float %910
-  %916 = select i1 %912, float 0xBFED906BC0000000, float %911
-  %917 = fcmp oge float %886, 0x4005FDBC00000000
-  %918 = fadd float %886, 0xC005FDBC00000000
-  %919 = select i1 %917, float %918, float %914
-  %920 = select i1 %917, float 0xBFED906BC0000000, float %915
-  %921 = select i1 %917, float -1.000000e+00, float %916
-  %922 = fcmp oge float %886, 0x400921FB60000000
-  %923 = fadd float %886, 0xC00921FB60000000
-  %924 = select i1 %922, float %923, float %919
-  %925 = select i1 %922, float -1.000000e+00, float %920
-  %926 = select i1 %922, float 0xBFED906BC0000000, float %921
-  %927 = fcmp oge float %886, 0x400C463AC0000000
-  %928 = fadd float %886, 0xC00C463AC0000000
-  %929 = select i1 %927, float %928, float %924
-  %930 = select i1 %927, float 0xBFED906BC0000000, float %925
-  %931 = select i1 %927, float 0xBFE6A09E60000000, float %926
-  %932 = fcmp oge float %886, 0x400F6A7A40000000
-  %933 = fadd float %886, 0xC00F6A7A40000000
-  %934 = select i1 %932, float %933, float %929
-  %935 = select i1 %932, float 0xBFE6A09E60000000, float %930
-  %936 = select i1 %932, float 0xBFD87DE2A0000000, float %931
-  %937 = fcmp oge float %886, 0x4011475CE0000000
-  %938 = fadd float %886, 0xC011475CE0000000
-  %939 = select i1 %937, float %938, float %934
-  %940 = select i1 %937, float 0xBFD87DE2A0000000, float %935
-  %941 = select i1 %937, float 0.000000e+00, float %936
-  %942 = fcmp oge float %886, 0x4012D97C80000000
-  %943 = fadd float %886, 0xC012D97C80000000
-  %944 = select i1 %942, float %943, float %939
-  %945 = select i1 %942, float 0.000000e+00, float %940
-  %946 = select i1 %942, float 0x3FD87DE2A0000000, float %941
-  %947 = fcmp oge float %886, 0x40146B9C40000000
-  %948 = fadd float %886, 0xC0146B9C40000000
-  %949 = select i1 %947, float %948, float %944
-  %950 = select i1 %947, float 0x3FD87DE2A0000000, float %945
-  %951 = select i1 %947, float 0x3FE6A09E60000000, float %946
-  %952 = fcmp oge float %886, 0x4015FDBC00000000
-  %953 = fadd float %886, 0xC015FDBC00000000
-  %954 = select i1 %952, float %953, float %949
-  %955 = select i1 %952, float 0x3FE6A09E60000000, float %950
-  %956 = select i1 %952, float 0x3FED906BC0000000, float %951
-  %957 = fcmp oge float %886, 0x40178FDBA0000000
-  %958 = fadd float %886, 0xC0178FDBA0000000
-  %959 = select i1 %957, float %958, float %954
-  %960 = select i1 %957, float 0x3FED906BC0000000, float %955
-  %961 = select i1 %957, float 1.000000e+00, float %956
-  %962 = fdiv float %959, 0x3FD921FB60000000
-  %963 = fsub float %961, %960
-  %964 = call float @llvm.fmuladd.f32(float %962, float %963, float %960)
-  %965 = load volatile float, ptr %18, align 4, !tbaa !5
-  %966 = fcmp olt float %965, 0.000000e+00
-  %967 = fadd float %965, 0x401921FB60000000
-  %968 = select i1 %966, float %967, float %965
-  %969 = fcmp ult float %968, 0x401921FB60000000
-  %970 = fadd float %968, 0xC01921FB60000000
-  %971 = select i1 %969, float %968, float %970
-  %972 = fcmp oge float %971, 0x3FD921FB60000000
-  %973 = fadd float %971, 0xBFD921FB60000000
-  %974 = select i1 %972, float %973, float %965
-  %975 = select i1 %972, float 0x3FD87DE2A0000000, float 0.000000e+00
-  %976 = select i1 %972, float 0x3FE6A09E60000000, float 0x3FD87DE2A0000000
-  %977 = fcmp oge float %971, 0x3FE921FB60000000
-  %978 = fadd float %971, 0xBFE921FB60000000
-  %979 = select i1 %977, float %978, float %974
-  %980 = select i1 %977, float 0x3FE6A09E60000000, float %975
-  %981 = select i1 %977, float 0x3FED906BC0000000, float %976
-  %982 = fcmp oge float %971, 0x3FF2D97C80000000
-  %983 = fadd float %971, 0xBFF2D97C80000000
-  %984 = select i1 %982, float %983, float %979
-  %985 = select i1 %982, float 0x3FED906BC0000000, float %980
-  %986 = select i1 %982, float 1.000000e+00, float %981
-  %987 = fcmp oge float %971, 0x3FF921FB60000000
-  %988 = fadd float %971, 0xBFF921FB60000000
-  %989 = select i1 %987, float %988, float %984
-  %990 = select i1 %987, float 1.000000e+00, float %985
-  %991 = select i1 %987, float 0x3FED906BC0000000, float %986
-  %992 = fcmp oge float %971, 0x3FFF6A7A40000000
-  %993 = fadd float %971, 0xBFFF6A7A40000000
-  %994 = select i1 %992, float %993, float %989
-  %995 = select i1 %992, float 0x3FED906BC0000000, float %990
-  %996 = select i1 %992, float 0x3FE6A09E60000000, float %991
-  %997 = fcmp oge float %971, 0x4002D97C80000000
-  %998 = fadd float %971, 0xC002D97C80000000
-  %999 = select i1 %997, float %998, float %994
-  %1000 = select i1 %997, float 0x3FE6A09E60000000, float %995
-  %1001 = select i1 %997, float 0x3FD87DE2A0000000, float %996
-  %1002 = fcmp oge float %971, 0x4005FDBC00000000
-  %1003 = fadd float %971, 0xC005FDBC00000000
-  %1004 = select i1 %1002, float %1003, float %999
-  %1005 = select i1 %1002, float 0x3FD87DE2A0000000, float %1000
-  %1006 = select i1 %1002, float 0.000000e+00, float %1001
-  %1007 = fcmp oge float %971, 0x400921FB60000000
-  %1008 = fadd float %971, 0xC00921FB60000000
-  %1009 = select i1 %1007, float %1008, float %1004
-  %1010 = select i1 %1007, float 0.000000e+00, float %1005
-  %1011 = select i1 %1007, float 0xBFD87DE2A0000000, float %1006
-  %1012 = fcmp oge float %971, 0x400C463AC0000000
-  %1013 = fadd float %971, 0xC00C463AC0000000
-  %1014 = select i1 %1012, float %1013, float %1009
-  %1015 = select i1 %1012, float 0xBFD87DE2A0000000, float %1010
-  %1016 = select i1 %1012, float 0xBFE6A09E60000000, float %1011
-  %1017 = fcmp oge float %971, 0x400F6A7A40000000
-  %1018 = fadd float %971, 0xC00F6A7A40000000
-  %1019 = select i1 %1017, float %1018, float %1014
-  %1020 = select i1 %1017, float 0xBFE6A09E60000000, float %1015
-  %1021 = select i1 %1017, float 0xBFED906BC0000000, float %1016
-  %1022 = fcmp oge float %971, 0x4011475CE0000000
-  %1023 = fadd float %971, 0xC011475CE0000000
-  %1024 = select i1 %1022, float %1023, float %1019
-  %1025 = select i1 %1022, float 0xBFED906BC0000000, float %1020
-  %1026 = select i1 %1022, float -1.000000e+00, float %1021
-  %1027 = fcmp oge float %971, 0x4012D97C80000000
-  %1028 = fadd float %971, 0xC012D97C80000000
-  %1029 = select i1 %1027, float %1028, float %1024
-  %1030 = select i1 %1027, float -1.000000e+00, float %1025
-  %1031 = select i1 %1027, float 0xBFED906BC0000000, float %1026
-  %1032 = fcmp oge float %971, 0x40146B9C40000000
-  %1033 = fadd float %971, 0xC0146B9C40000000
-  %1034 = select i1 %1032, float %1033, float %1029
-  %1035 = select i1 %1032, float 0xBFED906BC0000000, float %1030
-  %1036 = select i1 %1032, float 0xBFE6A09E60000000, float %1031
-  %1037 = fcmp oge float %971, 0x4015FDBC00000000
-  %1038 = fadd float %971, 0xC015FDBC00000000
-  %1039 = select i1 %1037, float %1038, float %1034
-  %1040 = select i1 %1037, float 0xBFE6A09E60000000, float %1035
-  %1041 = select i1 %1037, float 0xBFD87DE2A0000000, float %1036
-  %1042 = fcmp oge float %971, 0x40178FDBA0000000
-  %1043 = fadd float %971, 0xC0178FDBA0000000
-  %1044 = select i1 %1042, float %1043, float %1039
-  %1045 = select i1 %1042, float 0xBFD87DE2A0000000, float %1040
-  %1046 = select i1 %1042, float 0.000000e+00, float %1041
-  %1047 = fdiv float %1044, 0x3FD921FB60000000
-  %1048 = fsub float %1046, %1045
-  %1049 = call float @llvm.fmuladd.f32(float %1047, float %1048, float %1045)
-  %1050 = load volatile float, ptr %19, align 4, !tbaa !5
-  %1051 = load volatile float, ptr %4, align 4, !tbaa !5
-  %1052 = fneg float %1051
-  %1053 = call float @llvm.fmuladd.f32(float %1050, float %964, float %1052)
-  store volatile float %1053, ptr %3, align 4, !tbaa !5
-  %1054 = load volatile float, ptr %19, align 4, !tbaa !5
-  %1055 = load volatile float, ptr %90, align 4, !tbaa !5
-  %1056 = fneg float %1055
-  %1057 = call float @llvm.fmuladd.f32(float %1054, float %1049, float %1056)
-  store volatile float %1057, ptr %91, align 4, !tbaa !5
-  %1058 = load volatile float, ptr %92, align 4, !tbaa !5
-  %1059 = fsub float 0.000000e+00, %1058
-  store volatile float %1059, ptr %93, align 4, !tbaa !5
-  %1060 = fmul float %1057, %1057
-  %1061 = call float @llvm.fmuladd.f32(float %1053, float %1053, float %1060)
-  %1062 = call float @llvm.fmuladd.f32(float %1059, float %1059, float %1061)
-  %1063 = fcmp ugt float %1062, 0.000000e+00
-  br i1 %1063, label %1064, label %1075
+229:                                              ; preds = %225
+  %230 = load volatile float, ptr %19, align 4, !tbaa !5
+  %231 = call float @llvm.fmuladd.f32(float %230, float -9.000000e+00, float %170)
+  store volatile float %231, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %21, align 4, !tbaa !5
+  br label %232
 
-1064:                                             ; preds = %788
-  %1065 = fmul float %1062, 5.000000e-01
-  %1066 = bitcast float %1062 to i32
-  %1067 = ashr i32 %1066, 1
-  %1068 = sub nsw i32 1597463007, %1067
-  %1069 = bitcast i32 %1068 to float
-  %1070 = fneg float %1069
-  %1071 = fmul float %1065, %1070
-  %1072 = call float @llvm.fmuladd.f32(float %1071, float %1069, float 1.500000e+00)
-  %1073 = fmul float %1072, %1069
-  %1074 = fdiv float 1.000000e+00, %1073
-  br label %1075
+232:                                              ; preds = %229, %225
+  %233 = load volatile float, ptr %19, align 4, !tbaa !5
+  %234 = fmul float %233, 1.000000e+01
+  %235 = fcmp ult float %170, %234
+  br i1 %235, label %239, label %236
 
-1075:                                             ; preds = %788, %1064
-  %1076 = phi float [ %1074, %1064 ], [ 0.000000e+00, %788 ]
-  store volatile float %1076, ptr %12, align 4, !tbaa !5
-  %1077 = load volatile float, ptr %12, align 4, !tbaa !5
-  %1078 = load volatile float, ptr %3, align 4, !tbaa !5
-  %1079 = fdiv float %1078, %1077
-  store volatile float %1079, ptr %3, align 4, !tbaa !5
-  %1080 = load volatile float, ptr %12, align 4, !tbaa !5
-  %1081 = load volatile float, ptr %91, align 4, !tbaa !5
-  %1082 = fdiv float %1081, %1080
-  store volatile float %1082, ptr %91, align 4, !tbaa !5
-  %1083 = load volatile float, ptr %12, align 4, !tbaa !5
-  %1084 = load volatile float, ptr %93, align 4, !tbaa !5
-  %1085 = fdiv float %1084, %1083
-  store volatile float %1085, ptr %93, align 4, !tbaa !5
-  %1086 = load volatile float, ptr %5, align 4, !tbaa !5
-  %1087 = load volatile float, ptr %3, align 4, !tbaa !5
-  %1088 = load volatile float, ptr %60, align 4, !tbaa !5
-  %1089 = load volatile float, ptr %91, align 4, !tbaa !5
-  %1090 = fmul float %1088, %1089
-  %1091 = call float @llvm.fmuladd.f32(float %1086, float %1087, float %1090)
-  %1092 = load volatile float, ptr %65, align 4, !tbaa !5
-  %1093 = load volatile float, ptr %93, align 4, !tbaa !5
-  %1094 = call float @llvm.fmuladd.f32(float %1092, float %1093, float %1091)
-  store volatile float %1094, ptr %20, align 4, !tbaa !5
-  %1095 = load volatile float, ptr %14, align 4, !tbaa !5
-  %1096 = load volatile float, ptr %20, align 4, !tbaa !5
-  %1097 = fadd float %1096, 1.000000e+00
-  %1098 = fmul float %1095, %1097
-  store volatile float %1098, ptr %21, align 4, !tbaa !5
-  %1099 = load volatile float, ptr %14, align 4, !tbaa !5
-  %1100 = load volatile float, ptr %14, align 4, !tbaa !5
-  %1101 = fadd float %1100, 1.000000e+00
-  %1102 = fdiv float %1099, %1101
-  %1103 = load volatile float, ptr %20, align 4, !tbaa !5
-  %1104 = fmul float %1103, %1102
-  store volatile float %1104, ptr %22, align 4, !tbaa !5
-  %1105 = load volatile float, ptr %3, align 4, !tbaa !5
-  %1106 = load volatile float, ptr %22, align 4, !tbaa !5
-  %1107 = load volatile float, ptr %5, align 4, !tbaa !5
-  %1108 = call float @llvm.fmuladd.f32(float %1106, float %1107, float %1105)
-  %1109 = load volatile float, ptr %5, align 4, !tbaa !5
-  %1110 = fadd float %1108, %1109
-  %1111 = load volatile float, ptr %21, align 4, !tbaa !5
-  %1112 = fdiv float %1110, %1111
-  store volatile float %1112, ptr %6, align 4, !tbaa !5
-  %1113 = load volatile float, ptr %91, align 4, !tbaa !5
-  %1114 = load volatile float, ptr %22, align 4, !tbaa !5
-  %1115 = load volatile float, ptr %60, align 4, !tbaa !5
-  %1116 = call float @llvm.fmuladd.f32(float %1114, float %1115, float %1113)
-  %1117 = load volatile float, ptr %60, align 4, !tbaa !5
-  %1118 = fadd float %1116, %1117
-  %1119 = load volatile float, ptr %21, align 4, !tbaa !5
-  %1120 = fdiv float %1118, %1119
-  store volatile float %1120, ptr %94, align 4, !tbaa !5
-  %1121 = load volatile float, ptr %93, align 4, !tbaa !5
-  %1122 = load volatile float, ptr %22, align 4, !tbaa !5
-  %1123 = load volatile float, ptr %65, align 4, !tbaa !5
-  %1124 = call float @llvm.fmuladd.f32(float %1122, float %1123, float %1121)
-  %1125 = load volatile float, ptr %65, align 4, !tbaa !5
-  %1126 = fadd float %1124, %1125
-  %1127 = load volatile float, ptr %21, align 4, !tbaa !5
-  %1128 = fdiv float %1126, %1127
-  store volatile float %1128, ptr %95, align 4, !tbaa !5
-  %1129 = load volatile float, ptr %6, align 4, !tbaa !5
-  %1130 = load volatile float, ptr %6, align 4, !tbaa !5
-  %1131 = load volatile float, ptr %94, align 4, !tbaa !5
-  %1132 = load volatile float, ptr %94, align 4, !tbaa !5
-  %1133 = fmul float %1131, %1132
-  %1134 = call float @llvm.fmuladd.f32(float %1129, float %1130, float %1133)
-  %1135 = load volatile float, ptr %95, align 4, !tbaa !5
-  %1136 = load volatile float, ptr %95, align 4, !tbaa !5
-  %1137 = call float @llvm.fmuladd.f32(float %1135, float %1136, float %1134)
-  %1138 = fcmp ugt float %1137, 0.000000e+00
-  br i1 %1138, label %1139, label %1150
+236:                                              ; preds = %232
+  %237 = load volatile float, ptr %19, align 4, !tbaa !5
+  %238 = call float @llvm.fmuladd.f32(float %237, float -1.000000e+01, float %170)
+  store volatile float %238, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %21, align 4, !tbaa !5
+  br label %239
 
-1139:                                             ; preds = %1075
-  %1140 = fmul float %1137, 5.000000e-01
-  %1141 = bitcast float %1137 to i32
-  %1142 = ashr i32 %1141, 1
-  %1143 = sub nsw i32 1597463007, %1142
-  %1144 = bitcast i32 %1143 to float
-  %1145 = fneg float %1144
-  %1146 = fmul float %1140, %1145
-  %1147 = call float @llvm.fmuladd.f32(float %1146, float %1144, float 1.500000e+00)
-  %1148 = fmul float %1147, %1144
-  %1149 = fdiv float 1.000000e+00, %1148
-  br label %1150
+239:                                              ; preds = %236, %232
+  %240 = load volatile float, ptr %19, align 4, !tbaa !5
+  %241 = fmul float %240, 1.100000e+01
+  %242 = fcmp ult float %170, %241
+  br i1 %242, label %246, label %243
 
-1150:                                             ; preds = %1075, %1139
-  %1151 = phi float [ %1149, %1139 ], [ 0.000000e+00, %1075 ]
-  store volatile float %1151, ptr %23, align 4, !tbaa !5
-  %1152 = load volatile float, ptr %23, align 4, !tbaa !5
-  %1153 = load volatile float, ptr %6, align 4, !tbaa !5
-  %1154 = fdiv float %1153, %1152
-  store volatile float %1154, ptr %6, align 4, !tbaa !5
-  %1155 = load volatile float, ptr %23, align 4, !tbaa !5
-  %1156 = load volatile float, ptr %94, align 4, !tbaa !5
-  %1157 = fdiv float %1156, %1155
-  store volatile float %1157, ptr %94, align 4, !tbaa !5
-  %1158 = load volatile float, ptr %23, align 4, !tbaa !5
-  %1159 = load volatile float, ptr %95, align 4, !tbaa !5
-  %1160 = fdiv float %1159, %1158
-  store volatile float %1160, ptr %95, align 4, !tbaa !5
-  %1161 = load volatile float, ptr %12, align 4, !tbaa !5
-  %1162 = fdiv float %1161, 0x41B1DE7840000000
-  store volatile float %1162, ptr %11, align 4, !tbaa !5
-  %1163 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %1164 = icmp eq ptr %1163, null
-  br i1 %1164, label %1165, label %96, !llvm.loop !16
+243:                                              ; preds = %239
+  %244 = load volatile float, ptr %19, align 4, !tbaa !5
+  %245 = call float @llvm.fmuladd.f32(float %244, float -1.100000e+01, float %170)
+  store volatile float %245, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %20, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %21, align 4, !tbaa !5
+  br label %246
 
-1165:                                             ; preds = %1150, %83
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %24) #3
-  %1166 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %24, i32 noundef 0, i32 noundef 3) #3
-  %1167 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %1168 = icmp eq ptr %1167, null
-  br i1 %1168, label %1181, label %1169
+246:                                              ; preds = %243, %239
+  %247 = load volatile float, ptr %19, align 4, !tbaa !5
+  %248 = fmul float %247, 1.200000e+01
+  %249 = fcmp ult float %170, %248
+  br i1 %249, label %253, label %250
 
-1169:                                             ; preds = %1165, %1169
-  %1170 = phi ptr [ %1179, %1169 ], [ %1167, %1165 ]
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %26) #3
-  %1171 = load i64, ptr %1170, align 8, !tbaa !9
-  %1172 = getelementptr inbounds [3 x float], ptr %4, i64 0, i64 %1171
-  %1173 = load volatile float, ptr %1172, align 4, !tbaa !5
-  %1174 = load volatile float, ptr %12, align 4, !tbaa !5
-  %1175 = getelementptr inbounds [3 x float], ptr %6, i64 0, i64 %1171
-  %1176 = load volatile float, ptr %1175, align 4, !tbaa !5
-  %1177 = call float @llvm.fmuladd.f32(float %1174, float %1176, float %1173)
-  store float %1177, ptr %26, align 4, !tbaa !5
-  %1178 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %28, ptr noundef nonnull %1170, ptr noundef nonnull %26, i64 noundef 0) #3
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %26) #3
-  %1179 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %24) #3
-  %1180 = icmp eq ptr %1179, null
-  br i1 %1180, label %1181, label %1169, !llvm.loop !17
+250:                                              ; preds = %246
+  %251 = load volatile float, ptr %19, align 4, !tbaa !5
+  %252 = call float @llvm.fmuladd.f32(float %251, float -1.200000e+01, float %170)
+  store volatile float %252, ptr %23, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %21, align 4, !tbaa !5
+  br label %253
 
-1181:                                             ; preds = %1169, %1165
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %24) #3
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %24) #3
+253:                                              ; preds = %250, %246
+  %254 = load volatile float, ptr %19, align 4, !tbaa !5
+  %255 = fmul float %254, 1.300000e+01
+  %256 = fcmp ult float %170, %255
+  br i1 %256, label %260, label %257
+
+257:                                              ; preds = %253
+  %258 = load volatile float, ptr %19, align 4, !tbaa !5
+  %259 = call float @llvm.fmuladd.f32(float %258, float -1.300000e+01, float %170)
+  store volatile float %259, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %21, align 4, !tbaa !5
+  br label %260
+
+260:                                              ; preds = %257, %253
+  %261 = load volatile float, ptr %19, align 4, !tbaa !5
+  %262 = fmul float %261, 1.400000e+01
+  %263 = fcmp ult float %170, %262
+  br i1 %263, label %267, label %264
+
+264:                                              ; preds = %260
+  %265 = load volatile float, ptr %19, align 4, !tbaa !5
+  %266 = call float @llvm.fmuladd.f32(float %265, float -1.400000e+01, float %170)
+  store volatile float %266, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %21, align 4, !tbaa !5
+  br label %267
+
+267:                                              ; preds = %264, %260
+  %268 = load volatile float, ptr %19, align 4, !tbaa !5
+  %269 = fmul float %268, 1.500000e+01
+  %270 = fcmp ult float %170, %269
+  br i1 %270, label %274, label %271
+
+271:                                              ; preds = %267
+  %272 = load volatile float, ptr %19, align 4, !tbaa !5
+  %273 = call float @llvm.fmuladd.f32(float %272, float -1.500000e+01, float %170)
+  store volatile float %273, ptr %23, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %20, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %21, align 4, !tbaa !5
+  br label %274
+
+274:                                              ; preds = %267, %271
+  %275 = load volatile float, ptr %23, align 4, !tbaa !5
+  %276 = load volatile float, ptr %19, align 4, !tbaa !5
+  %277 = fdiv float %275, %276
+  store volatile float %277, ptr %22, align 4, !tbaa !5
+  %278 = load volatile float, ptr %20, align 4, !tbaa !5
+  %279 = load volatile float, ptr %22, align 4, !tbaa !5
+  %280 = load volatile float, ptr %21, align 4, !tbaa !5
+  %281 = load volatile float, ptr %20, align 4, !tbaa !5
+  %282 = fsub float %280, %281
+  %283 = call float @llvm.fmuladd.f32(float %279, float %282, float %278)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %23)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %22)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %21)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %20)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %19)
+  %284 = call float @llvm.fmuladd.f32(float %163, float %283, float %162)
+  store volatile float %284, ptr %73, align 4, !tbaa !5
+  %285 = load volatile float, ptr %72, align 4, !tbaa !5
+  %286 = load volatile float, ptr %65, align 4, !tbaa !5
+  %287 = load volatile float, ptr %73, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %24)
+  store volatile float 0x3FD921FB60000000, ptr %24, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %25)
+  store volatile float 0.000000e+00, ptr %25, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %26)
+  store volatile float 0x3FD87DE2A0000000, ptr %26, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %27)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %28)
+  store volatile float %287, ptr %28, align 4, !tbaa !5
+  %288 = fcmp olt float %287, 0.000000e+00
+  %289 = fadd float %287, 0x401921FB60000000
+  %290 = select i1 %288, float %289, float %287
+  %291 = fcmp ult float %290, 0x401921FB60000000
+  %292 = fadd float %290, 0xC01921FB60000000
+  %293 = select i1 %291, float %290, float %292
+  %294 = load volatile float, ptr %24, align 4, !tbaa !5
+  %295 = fcmp ult float %293, %294
+  br i1 %295, label %299, label %296
+
+296:                                              ; preds = %274
+  %297 = load volatile float, ptr %24, align 4, !tbaa !5
+  %298 = fsub float %293, %297
+  store volatile float %298, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %26, align 4, !tbaa !5
+  br label %299
+
+299:                                              ; preds = %296, %274
+  %300 = load volatile float, ptr %24, align 4, !tbaa !5
+  %301 = fmul float %300, 2.000000e+00
+  %302 = fcmp ult float %293, %301
+  br i1 %302, label %306, label %303
+
+303:                                              ; preds = %299
+  %304 = load volatile float, ptr %24, align 4, !tbaa !5
+  %305 = call float @llvm.fmuladd.f32(float %304, float -2.000000e+00, float %293)
+  store volatile float %305, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %26, align 4, !tbaa !5
+  br label %306
+
+306:                                              ; preds = %303, %299
+  %307 = load volatile float, ptr %24, align 4, !tbaa !5
+  %308 = fmul float %307, 3.000000e+00
+  %309 = fcmp ult float %293, %308
+  br i1 %309, label %313, label %310
+
+310:                                              ; preds = %306
+  %311 = load volatile float, ptr %24, align 4, !tbaa !5
+  %312 = call float @llvm.fmuladd.f32(float %311, float -3.000000e+00, float %293)
+  store volatile float %312, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %26, align 4, !tbaa !5
+  br label %313
+
+313:                                              ; preds = %310, %306
+  %314 = load volatile float, ptr %24, align 4, !tbaa !5
+  %315 = fmul float %314, 4.000000e+00
+  %316 = fcmp ult float %293, %315
+  br i1 %316, label %320, label %317
+
+317:                                              ; preds = %313
+  %318 = load volatile float, ptr %24, align 4, !tbaa !5
+  %319 = call float @llvm.fmuladd.f32(float %318, float -4.000000e+00, float %293)
+  store volatile float %319, ptr %28, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %25, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %26, align 4, !tbaa !5
+  br label %320
+
+320:                                              ; preds = %317, %313
+  %321 = load volatile float, ptr %24, align 4, !tbaa !5
+  %322 = fmul float %321, 5.000000e+00
+  %323 = fcmp ult float %293, %322
+  br i1 %323, label %327, label %324
+
+324:                                              ; preds = %320
+  %325 = load volatile float, ptr %24, align 4, !tbaa !5
+  %326 = call float @llvm.fmuladd.f32(float %325, float -5.000000e+00, float %293)
+  store volatile float %326, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %26, align 4, !tbaa !5
+  br label %327
+
+327:                                              ; preds = %324, %320
+  %328 = load volatile float, ptr %24, align 4, !tbaa !5
+  %329 = fmul float %328, 6.000000e+00
+  %330 = fcmp ult float %293, %329
+  br i1 %330, label %334, label %331
+
+331:                                              ; preds = %327
+  %332 = load volatile float, ptr %24, align 4, !tbaa !5
+  %333 = call float @llvm.fmuladd.f32(float %332, float -6.000000e+00, float %293)
+  store volatile float %333, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %26, align 4, !tbaa !5
+  br label %334
+
+334:                                              ; preds = %331, %327
+  %335 = load volatile float, ptr %24, align 4, !tbaa !5
+  %336 = fmul float %335, 7.000000e+00
+  %337 = fcmp ult float %293, %336
+  br i1 %337, label %341, label %338
+
+338:                                              ; preds = %334
+  %339 = load volatile float, ptr %24, align 4, !tbaa !5
+  %340 = call float @llvm.fmuladd.f32(float %339, float -7.000000e+00, float %293)
+  store volatile float %340, ptr %28, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %26, align 4, !tbaa !5
+  br label %341
+
+341:                                              ; preds = %338, %334
+  %342 = load volatile float, ptr %24, align 4, !tbaa !5
+  %343 = fmul float %342, 8.000000e+00
+  %344 = fcmp ult float %293, %343
+  br i1 %344, label %348, label %345
+
+345:                                              ; preds = %341
+  %346 = load volatile float, ptr %24, align 4, !tbaa !5
+  %347 = call float @llvm.fmuladd.f32(float %346, float -8.000000e+00, float %293)
+  store volatile float %347, ptr %28, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %26, align 4, !tbaa !5
+  br label %348
+
+348:                                              ; preds = %345, %341
+  %349 = load volatile float, ptr %24, align 4, !tbaa !5
+  %350 = fmul float %349, 9.000000e+00
+  %351 = fcmp ult float %293, %350
+  br i1 %351, label %355, label %352
+
+352:                                              ; preds = %348
+  %353 = load volatile float, ptr %24, align 4, !tbaa !5
+  %354 = call float @llvm.fmuladd.f32(float %353, float -9.000000e+00, float %293)
+  store volatile float %354, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %26, align 4, !tbaa !5
+  br label %355
+
+355:                                              ; preds = %352, %348
+  %356 = load volatile float, ptr %24, align 4, !tbaa !5
+  %357 = fmul float %356, 1.000000e+01
+  %358 = fcmp ult float %293, %357
+  br i1 %358, label %362, label %359
+
+359:                                              ; preds = %355
+  %360 = load volatile float, ptr %24, align 4, !tbaa !5
+  %361 = call float @llvm.fmuladd.f32(float %360, float -1.000000e+01, float %293)
+  store volatile float %361, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %26, align 4, !tbaa !5
+  br label %362
+
+362:                                              ; preds = %359, %355
+  %363 = load volatile float, ptr %24, align 4, !tbaa !5
+  %364 = fmul float %363, 1.100000e+01
+  %365 = fcmp ult float %293, %364
+  br i1 %365, label %369, label %366
+
+366:                                              ; preds = %362
+  %367 = load volatile float, ptr %24, align 4, !tbaa !5
+  %368 = call float @llvm.fmuladd.f32(float %367, float -1.100000e+01, float %293)
+  store volatile float %368, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %25, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %26, align 4, !tbaa !5
+  br label %369
+
+369:                                              ; preds = %366, %362
+  %370 = load volatile float, ptr %24, align 4, !tbaa !5
+  %371 = fmul float %370, 1.200000e+01
+  %372 = fcmp ult float %293, %371
+  br i1 %372, label %376, label %373
+
+373:                                              ; preds = %369
+  %374 = load volatile float, ptr %24, align 4, !tbaa !5
+  %375 = call float @llvm.fmuladd.f32(float %374, float -1.200000e+01, float %293)
+  store volatile float %375, ptr %28, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %26, align 4, !tbaa !5
+  br label %376
+
+376:                                              ; preds = %373, %369
+  %377 = load volatile float, ptr %24, align 4, !tbaa !5
+  %378 = fmul float %377, 1.300000e+01
+  %379 = fcmp ult float %293, %378
+  br i1 %379, label %383, label %380
+
+380:                                              ; preds = %376
+  %381 = load volatile float, ptr %24, align 4, !tbaa !5
+  %382 = call float @llvm.fmuladd.f32(float %381, float -1.300000e+01, float %293)
+  store volatile float %382, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %26, align 4, !tbaa !5
+  br label %383
+
+383:                                              ; preds = %380, %376
+  %384 = load volatile float, ptr %24, align 4, !tbaa !5
+  %385 = fmul float %384, 1.400000e+01
+  %386 = fcmp ult float %293, %385
+  br i1 %386, label %390, label %387
+
+387:                                              ; preds = %383
+  %388 = load volatile float, ptr %24, align 4, !tbaa !5
+  %389 = call float @llvm.fmuladd.f32(float %388, float -1.400000e+01, float %293)
+  store volatile float %389, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %26, align 4, !tbaa !5
+  br label %390
+
+390:                                              ; preds = %387, %383
+  %391 = load volatile float, ptr %24, align 4, !tbaa !5
+  %392 = fmul float %391, 1.500000e+01
+  %393 = fcmp ult float %293, %392
+  br i1 %393, label %397, label %394
+
+394:                                              ; preds = %390
+  %395 = load volatile float, ptr %24, align 4, !tbaa !5
+  %396 = call float @llvm.fmuladd.f32(float %395, float -1.500000e+01, float %293)
+  store volatile float %396, ptr %28, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %25, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %26, align 4, !tbaa !5
+  br label %397
+
+397:                                              ; preds = %390, %394
+  %398 = load volatile float, ptr %28, align 4, !tbaa !5
+  %399 = load volatile float, ptr %24, align 4, !tbaa !5
+  %400 = fdiv float %398, %399
+  store volatile float %400, ptr %27, align 4, !tbaa !5
+  %401 = load volatile float, ptr %25, align 4, !tbaa !5
+  %402 = load volatile float, ptr %27, align 4, !tbaa !5
+  %403 = load volatile float, ptr %26, align 4, !tbaa !5
+  %404 = load volatile float, ptr %25, align 4, !tbaa !5
+  %405 = fsub float %403, %404
+  %406 = call float @llvm.fmuladd.f32(float %402, float %405, float %401)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %28)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %27)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %26)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %25)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %24)
+  %407 = call float @llvm.fmuladd.f32(float %286, float %406, float %285)
+  store volatile float %407, ptr %73, align 4, !tbaa !5
+  %408 = load volatile float, ptr %72, align 4, !tbaa !5
+  %409 = load volatile float, ptr %65, align 4, !tbaa !5
+  %410 = load volatile float, ptr %73, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %29)
+  store volatile float 0x3FD921FB60000000, ptr %29, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %30)
+  store volatile float 0.000000e+00, ptr %30, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %31)
+  store volatile float 0x3FD87DE2A0000000, ptr %31, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %32)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %33)
+  store volatile float %410, ptr %33, align 4, !tbaa !5
+  %411 = fcmp olt float %410, 0.000000e+00
+  %412 = fadd float %410, 0x401921FB60000000
+  %413 = select i1 %411, float %412, float %410
+  %414 = fcmp ult float %413, 0x401921FB60000000
+  %415 = fadd float %413, 0xC01921FB60000000
+  %416 = select i1 %414, float %413, float %415
+  %417 = load volatile float, ptr %29, align 4, !tbaa !5
+  %418 = fcmp ult float %416, %417
+  br i1 %418, label %422, label %419
+
+419:                                              ; preds = %397
+  %420 = load volatile float, ptr %29, align 4, !tbaa !5
+  %421 = fsub float %416, %420
+  store volatile float %421, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %31, align 4, !tbaa !5
+  br label %422
+
+422:                                              ; preds = %419, %397
+  %423 = load volatile float, ptr %29, align 4, !tbaa !5
+  %424 = fmul float %423, 2.000000e+00
+  %425 = fcmp ult float %416, %424
+  br i1 %425, label %429, label %426
+
+426:                                              ; preds = %422
+  %427 = load volatile float, ptr %29, align 4, !tbaa !5
+  %428 = call float @llvm.fmuladd.f32(float %427, float -2.000000e+00, float %416)
+  store volatile float %428, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %31, align 4, !tbaa !5
+  br label %429
+
+429:                                              ; preds = %426, %422
+  %430 = load volatile float, ptr %29, align 4, !tbaa !5
+  %431 = fmul float %430, 3.000000e+00
+  %432 = fcmp ult float %416, %431
+  br i1 %432, label %436, label %433
+
+433:                                              ; preds = %429
+  %434 = load volatile float, ptr %29, align 4, !tbaa !5
+  %435 = call float @llvm.fmuladd.f32(float %434, float -3.000000e+00, float %416)
+  store volatile float %435, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %31, align 4, !tbaa !5
+  br label %436
+
+436:                                              ; preds = %433, %429
+  %437 = load volatile float, ptr %29, align 4, !tbaa !5
+  %438 = fmul float %437, 4.000000e+00
+  %439 = fcmp ult float %416, %438
+  br i1 %439, label %443, label %440
+
+440:                                              ; preds = %436
+  %441 = load volatile float, ptr %29, align 4, !tbaa !5
+  %442 = call float @llvm.fmuladd.f32(float %441, float -4.000000e+00, float %416)
+  store volatile float %442, ptr %33, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %30, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %31, align 4, !tbaa !5
+  br label %443
+
+443:                                              ; preds = %440, %436
+  %444 = load volatile float, ptr %29, align 4, !tbaa !5
+  %445 = fmul float %444, 5.000000e+00
+  %446 = fcmp ult float %416, %445
+  br i1 %446, label %450, label %447
+
+447:                                              ; preds = %443
+  %448 = load volatile float, ptr %29, align 4, !tbaa !5
+  %449 = call float @llvm.fmuladd.f32(float %448, float -5.000000e+00, float %416)
+  store volatile float %449, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %31, align 4, !tbaa !5
+  br label %450
+
+450:                                              ; preds = %447, %443
+  %451 = load volatile float, ptr %29, align 4, !tbaa !5
+  %452 = fmul float %451, 6.000000e+00
+  %453 = fcmp ult float %416, %452
+  br i1 %453, label %457, label %454
+
+454:                                              ; preds = %450
+  %455 = load volatile float, ptr %29, align 4, !tbaa !5
+  %456 = call float @llvm.fmuladd.f32(float %455, float -6.000000e+00, float %416)
+  store volatile float %456, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %31, align 4, !tbaa !5
+  br label %457
+
+457:                                              ; preds = %454, %450
+  %458 = load volatile float, ptr %29, align 4, !tbaa !5
+  %459 = fmul float %458, 7.000000e+00
+  %460 = fcmp ult float %416, %459
+  br i1 %460, label %464, label %461
+
+461:                                              ; preds = %457
+  %462 = load volatile float, ptr %29, align 4, !tbaa !5
+  %463 = call float @llvm.fmuladd.f32(float %462, float -7.000000e+00, float %416)
+  store volatile float %463, ptr %33, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %31, align 4, !tbaa !5
+  br label %464
+
+464:                                              ; preds = %461, %457
+  %465 = load volatile float, ptr %29, align 4, !tbaa !5
+  %466 = fmul float %465, 8.000000e+00
+  %467 = fcmp ult float %416, %466
+  br i1 %467, label %471, label %468
+
+468:                                              ; preds = %464
+  %469 = load volatile float, ptr %29, align 4, !tbaa !5
+  %470 = call float @llvm.fmuladd.f32(float %469, float -8.000000e+00, float %416)
+  store volatile float %470, ptr %33, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %31, align 4, !tbaa !5
+  br label %471
+
+471:                                              ; preds = %468, %464
+  %472 = load volatile float, ptr %29, align 4, !tbaa !5
+  %473 = fmul float %472, 9.000000e+00
+  %474 = fcmp ult float %416, %473
+  br i1 %474, label %478, label %475
+
+475:                                              ; preds = %471
+  %476 = load volatile float, ptr %29, align 4, !tbaa !5
+  %477 = call float @llvm.fmuladd.f32(float %476, float -9.000000e+00, float %416)
+  store volatile float %477, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %31, align 4, !tbaa !5
+  br label %478
+
+478:                                              ; preds = %475, %471
+  %479 = load volatile float, ptr %29, align 4, !tbaa !5
+  %480 = fmul float %479, 1.000000e+01
+  %481 = fcmp ult float %416, %480
+  br i1 %481, label %485, label %482
+
+482:                                              ; preds = %478
+  %483 = load volatile float, ptr %29, align 4, !tbaa !5
+  %484 = call float @llvm.fmuladd.f32(float %483, float -1.000000e+01, float %416)
+  store volatile float %484, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %31, align 4, !tbaa !5
+  br label %485
+
+485:                                              ; preds = %482, %478
+  %486 = load volatile float, ptr %29, align 4, !tbaa !5
+  %487 = fmul float %486, 1.100000e+01
+  %488 = fcmp ult float %416, %487
+  br i1 %488, label %492, label %489
+
+489:                                              ; preds = %485
+  %490 = load volatile float, ptr %29, align 4, !tbaa !5
+  %491 = call float @llvm.fmuladd.f32(float %490, float -1.100000e+01, float %416)
+  store volatile float %491, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %30, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %31, align 4, !tbaa !5
+  br label %492
+
+492:                                              ; preds = %489, %485
+  %493 = load volatile float, ptr %29, align 4, !tbaa !5
+  %494 = fmul float %493, 1.200000e+01
+  %495 = fcmp ult float %416, %494
+  br i1 %495, label %499, label %496
+
+496:                                              ; preds = %492
+  %497 = load volatile float, ptr %29, align 4, !tbaa !5
+  %498 = call float @llvm.fmuladd.f32(float %497, float -1.200000e+01, float %416)
+  store volatile float %498, ptr %33, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %31, align 4, !tbaa !5
+  br label %499
+
+499:                                              ; preds = %496, %492
+  %500 = load volatile float, ptr %29, align 4, !tbaa !5
+  %501 = fmul float %500, 1.300000e+01
+  %502 = fcmp ult float %416, %501
+  br i1 %502, label %506, label %503
+
+503:                                              ; preds = %499
+  %504 = load volatile float, ptr %29, align 4, !tbaa !5
+  %505 = call float @llvm.fmuladd.f32(float %504, float -1.300000e+01, float %416)
+  store volatile float %505, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %31, align 4, !tbaa !5
+  br label %506
+
+506:                                              ; preds = %503, %499
+  %507 = load volatile float, ptr %29, align 4, !tbaa !5
+  %508 = fmul float %507, 1.400000e+01
+  %509 = fcmp ult float %416, %508
+  br i1 %509, label %513, label %510
+
+510:                                              ; preds = %506
+  %511 = load volatile float, ptr %29, align 4, !tbaa !5
+  %512 = call float @llvm.fmuladd.f32(float %511, float -1.400000e+01, float %416)
+  store volatile float %512, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %31, align 4, !tbaa !5
+  br label %513
+
+513:                                              ; preds = %510, %506
+  %514 = load volatile float, ptr %29, align 4, !tbaa !5
+  %515 = fmul float %514, 1.500000e+01
+  %516 = fcmp ult float %416, %515
+  br i1 %516, label %520, label %517
+
+517:                                              ; preds = %513
+  %518 = load volatile float, ptr %29, align 4, !tbaa !5
+  %519 = call float @llvm.fmuladd.f32(float %518, float -1.500000e+01, float %416)
+  store volatile float %519, ptr %33, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %30, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %31, align 4, !tbaa !5
+  br label %520
+
+520:                                              ; preds = %513, %517
+  %521 = load volatile float, ptr %33, align 4, !tbaa !5
+  %522 = load volatile float, ptr %29, align 4, !tbaa !5
+  %523 = fdiv float %521, %522
+  store volatile float %523, ptr %32, align 4, !tbaa !5
+  %524 = load volatile float, ptr %30, align 4, !tbaa !5
+  %525 = load volatile float, ptr %32, align 4, !tbaa !5
+  %526 = load volatile float, ptr %31, align 4, !tbaa !5
+  %527 = load volatile float, ptr %30, align 4, !tbaa !5
+  %528 = fsub float %526, %527
+  %529 = call float @llvm.fmuladd.f32(float %525, float %528, float %524)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %33)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %32)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %31)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %30)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %29)
+  %530 = call float @llvm.fmuladd.f32(float %409, float %529, float %408)
+  store volatile float %530, ptr %73, align 4, !tbaa !5
+  %531 = load volatile float, ptr %72, align 4, !tbaa !5
+  %532 = load volatile float, ptr %65, align 4, !tbaa !5
+  %533 = load volatile float, ptr %73, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %34)
+  store volatile float 0x3FD921FB60000000, ptr %34, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %35)
+  store volatile float 0.000000e+00, ptr %35, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %36)
+  store volatile float 0x3FD87DE2A0000000, ptr %36, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %37)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %38)
+  store volatile float %533, ptr %38, align 4, !tbaa !5
+  %534 = fcmp olt float %533, 0.000000e+00
+  %535 = fadd float %533, 0x401921FB60000000
+  %536 = select i1 %534, float %535, float %533
+  %537 = fcmp ult float %536, 0x401921FB60000000
+  %538 = fadd float %536, 0xC01921FB60000000
+  %539 = select i1 %537, float %536, float %538
+  %540 = load volatile float, ptr %34, align 4, !tbaa !5
+  %541 = fcmp ult float %539, %540
+  br i1 %541, label %545, label %542
+
+542:                                              ; preds = %520
+  %543 = load volatile float, ptr %34, align 4, !tbaa !5
+  %544 = fsub float %539, %543
+  store volatile float %544, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %36, align 4, !tbaa !5
+  br label %545
+
+545:                                              ; preds = %542, %520
+  %546 = load volatile float, ptr %34, align 4, !tbaa !5
+  %547 = fmul float %546, 2.000000e+00
+  %548 = fcmp ult float %539, %547
+  br i1 %548, label %552, label %549
+
+549:                                              ; preds = %545
+  %550 = load volatile float, ptr %34, align 4, !tbaa !5
+  %551 = call float @llvm.fmuladd.f32(float %550, float -2.000000e+00, float %539)
+  store volatile float %551, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %36, align 4, !tbaa !5
+  br label %552
+
+552:                                              ; preds = %549, %545
+  %553 = load volatile float, ptr %34, align 4, !tbaa !5
+  %554 = fmul float %553, 3.000000e+00
+  %555 = fcmp ult float %539, %554
+  br i1 %555, label %559, label %556
+
+556:                                              ; preds = %552
+  %557 = load volatile float, ptr %34, align 4, !tbaa !5
+  %558 = call float @llvm.fmuladd.f32(float %557, float -3.000000e+00, float %539)
+  store volatile float %558, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %36, align 4, !tbaa !5
+  br label %559
+
+559:                                              ; preds = %556, %552
+  %560 = load volatile float, ptr %34, align 4, !tbaa !5
+  %561 = fmul float %560, 4.000000e+00
+  %562 = fcmp ult float %539, %561
+  br i1 %562, label %566, label %563
+
+563:                                              ; preds = %559
+  %564 = load volatile float, ptr %34, align 4, !tbaa !5
+  %565 = call float @llvm.fmuladd.f32(float %564, float -4.000000e+00, float %539)
+  store volatile float %565, ptr %38, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %35, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %36, align 4, !tbaa !5
+  br label %566
+
+566:                                              ; preds = %563, %559
+  %567 = load volatile float, ptr %34, align 4, !tbaa !5
+  %568 = fmul float %567, 5.000000e+00
+  %569 = fcmp ult float %539, %568
+  br i1 %569, label %573, label %570
+
+570:                                              ; preds = %566
+  %571 = load volatile float, ptr %34, align 4, !tbaa !5
+  %572 = call float @llvm.fmuladd.f32(float %571, float -5.000000e+00, float %539)
+  store volatile float %572, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %36, align 4, !tbaa !5
+  br label %573
+
+573:                                              ; preds = %570, %566
+  %574 = load volatile float, ptr %34, align 4, !tbaa !5
+  %575 = fmul float %574, 6.000000e+00
+  %576 = fcmp ult float %539, %575
+  br i1 %576, label %580, label %577
+
+577:                                              ; preds = %573
+  %578 = load volatile float, ptr %34, align 4, !tbaa !5
+  %579 = call float @llvm.fmuladd.f32(float %578, float -6.000000e+00, float %539)
+  store volatile float %579, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %36, align 4, !tbaa !5
+  br label %580
+
+580:                                              ; preds = %577, %573
+  %581 = load volatile float, ptr %34, align 4, !tbaa !5
+  %582 = fmul float %581, 7.000000e+00
+  %583 = fcmp ult float %539, %582
+  br i1 %583, label %587, label %584
+
+584:                                              ; preds = %580
+  %585 = load volatile float, ptr %34, align 4, !tbaa !5
+  %586 = call float @llvm.fmuladd.f32(float %585, float -7.000000e+00, float %539)
+  store volatile float %586, ptr %38, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %36, align 4, !tbaa !5
+  br label %587
+
+587:                                              ; preds = %584, %580
+  %588 = load volatile float, ptr %34, align 4, !tbaa !5
+  %589 = fmul float %588, 8.000000e+00
+  %590 = fcmp ult float %539, %589
+  br i1 %590, label %594, label %591
+
+591:                                              ; preds = %587
+  %592 = load volatile float, ptr %34, align 4, !tbaa !5
+  %593 = call float @llvm.fmuladd.f32(float %592, float -8.000000e+00, float %539)
+  store volatile float %593, ptr %38, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %36, align 4, !tbaa !5
+  br label %594
+
+594:                                              ; preds = %591, %587
+  %595 = load volatile float, ptr %34, align 4, !tbaa !5
+  %596 = fmul float %595, 9.000000e+00
+  %597 = fcmp ult float %539, %596
+  br i1 %597, label %601, label %598
+
+598:                                              ; preds = %594
+  %599 = load volatile float, ptr %34, align 4, !tbaa !5
+  %600 = call float @llvm.fmuladd.f32(float %599, float -9.000000e+00, float %539)
+  store volatile float %600, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %36, align 4, !tbaa !5
+  br label %601
+
+601:                                              ; preds = %598, %594
+  %602 = load volatile float, ptr %34, align 4, !tbaa !5
+  %603 = fmul float %602, 1.000000e+01
+  %604 = fcmp ult float %539, %603
+  br i1 %604, label %608, label %605
+
+605:                                              ; preds = %601
+  %606 = load volatile float, ptr %34, align 4, !tbaa !5
+  %607 = call float @llvm.fmuladd.f32(float %606, float -1.000000e+01, float %539)
+  store volatile float %607, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %36, align 4, !tbaa !5
+  br label %608
+
+608:                                              ; preds = %605, %601
+  %609 = load volatile float, ptr %34, align 4, !tbaa !5
+  %610 = fmul float %609, 1.100000e+01
+  %611 = fcmp ult float %539, %610
+  br i1 %611, label %615, label %612
+
+612:                                              ; preds = %608
+  %613 = load volatile float, ptr %34, align 4, !tbaa !5
+  %614 = call float @llvm.fmuladd.f32(float %613, float -1.100000e+01, float %539)
+  store volatile float %614, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %35, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %36, align 4, !tbaa !5
+  br label %615
+
+615:                                              ; preds = %612, %608
+  %616 = load volatile float, ptr %34, align 4, !tbaa !5
+  %617 = fmul float %616, 1.200000e+01
+  %618 = fcmp ult float %539, %617
+  br i1 %618, label %622, label %619
+
+619:                                              ; preds = %615
+  %620 = load volatile float, ptr %34, align 4, !tbaa !5
+  %621 = call float @llvm.fmuladd.f32(float %620, float -1.200000e+01, float %539)
+  store volatile float %621, ptr %38, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %36, align 4, !tbaa !5
+  br label %622
+
+622:                                              ; preds = %619, %615
+  %623 = load volatile float, ptr %34, align 4, !tbaa !5
+  %624 = fmul float %623, 1.300000e+01
+  %625 = fcmp ult float %539, %624
+  br i1 %625, label %629, label %626
+
+626:                                              ; preds = %622
+  %627 = load volatile float, ptr %34, align 4, !tbaa !5
+  %628 = call float @llvm.fmuladd.f32(float %627, float -1.300000e+01, float %539)
+  store volatile float %628, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %36, align 4, !tbaa !5
+  br label %629
+
+629:                                              ; preds = %626, %622
+  %630 = load volatile float, ptr %34, align 4, !tbaa !5
+  %631 = fmul float %630, 1.400000e+01
+  %632 = fcmp ult float %539, %631
+  br i1 %632, label %636, label %633
+
+633:                                              ; preds = %629
+  %634 = load volatile float, ptr %34, align 4, !tbaa !5
+  %635 = call float @llvm.fmuladd.f32(float %634, float -1.400000e+01, float %539)
+  store volatile float %635, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %36, align 4, !tbaa !5
+  br label %636
+
+636:                                              ; preds = %633, %629
+  %637 = load volatile float, ptr %34, align 4, !tbaa !5
+  %638 = fmul float %637, 1.500000e+01
+  %639 = fcmp ult float %539, %638
+  br i1 %639, label %643, label %640
+
+640:                                              ; preds = %636
+  %641 = load volatile float, ptr %34, align 4, !tbaa !5
+  %642 = call float @llvm.fmuladd.f32(float %641, float -1.500000e+01, float %539)
+  store volatile float %642, ptr %38, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %35, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %36, align 4, !tbaa !5
+  br label %643
+
+643:                                              ; preds = %636, %640
+  %644 = load volatile float, ptr %38, align 4, !tbaa !5
+  %645 = load volatile float, ptr %34, align 4, !tbaa !5
+  %646 = fdiv float %644, %645
+  store volatile float %646, ptr %37, align 4, !tbaa !5
+  %647 = load volatile float, ptr %35, align 4, !tbaa !5
+  %648 = load volatile float, ptr %37, align 4, !tbaa !5
+  %649 = load volatile float, ptr %36, align 4, !tbaa !5
+  %650 = load volatile float, ptr %35, align 4, !tbaa !5
+  %651 = fsub float %649, %650
+  %652 = call float @llvm.fmuladd.f32(float %648, float %651, float %647)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %38)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %37)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %36)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %35)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %34)
+  %653 = call float @llvm.fmuladd.f32(float %532, float %652, float %531)
+  store volatile float %653, ptr %73, align 4, !tbaa !5
+  %654 = load volatile float, ptr %72, align 4, !tbaa !5
+  %655 = load volatile float, ptr %65, align 4, !tbaa !5
+  %656 = load volatile float, ptr %73, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %39)
+  store volatile float 0x3FD921FB60000000, ptr %39, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %40)
+  store volatile float 0.000000e+00, ptr %40, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %41)
+  store volatile float 0x3FD87DE2A0000000, ptr %41, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %42)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %43)
+  store volatile float %656, ptr %43, align 4, !tbaa !5
+  %657 = fcmp olt float %656, 0.000000e+00
+  %658 = fadd float %656, 0x401921FB60000000
+  %659 = select i1 %657, float %658, float %656
+  %660 = fcmp ult float %659, 0x401921FB60000000
+  %661 = fadd float %659, 0xC01921FB60000000
+  %662 = select i1 %660, float %659, float %661
+  %663 = load volatile float, ptr %39, align 4, !tbaa !5
+  %664 = fcmp ult float %662, %663
+  br i1 %664, label %668, label %665
+
+665:                                              ; preds = %643
+  %666 = load volatile float, ptr %39, align 4, !tbaa !5
+  %667 = fsub float %662, %666
+  store volatile float %667, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %41, align 4, !tbaa !5
+  br label %668
+
+668:                                              ; preds = %665, %643
+  %669 = load volatile float, ptr %39, align 4, !tbaa !5
+  %670 = fmul float %669, 2.000000e+00
+  %671 = fcmp ult float %662, %670
+  br i1 %671, label %675, label %672
+
+672:                                              ; preds = %668
+  %673 = load volatile float, ptr %39, align 4, !tbaa !5
+  %674 = call float @llvm.fmuladd.f32(float %673, float -2.000000e+00, float %662)
+  store volatile float %674, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %41, align 4, !tbaa !5
+  br label %675
+
+675:                                              ; preds = %672, %668
+  %676 = load volatile float, ptr %39, align 4, !tbaa !5
+  %677 = fmul float %676, 3.000000e+00
+  %678 = fcmp ult float %662, %677
+  br i1 %678, label %682, label %679
+
+679:                                              ; preds = %675
+  %680 = load volatile float, ptr %39, align 4, !tbaa !5
+  %681 = call float @llvm.fmuladd.f32(float %680, float -3.000000e+00, float %662)
+  store volatile float %681, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %41, align 4, !tbaa !5
+  br label %682
+
+682:                                              ; preds = %679, %675
+  %683 = load volatile float, ptr %39, align 4, !tbaa !5
+  %684 = fmul float %683, 4.000000e+00
+  %685 = fcmp ult float %662, %684
+  br i1 %685, label %689, label %686
+
+686:                                              ; preds = %682
+  %687 = load volatile float, ptr %39, align 4, !tbaa !5
+  %688 = call float @llvm.fmuladd.f32(float %687, float -4.000000e+00, float %662)
+  store volatile float %688, ptr %43, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %40, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %41, align 4, !tbaa !5
+  br label %689
+
+689:                                              ; preds = %686, %682
+  %690 = load volatile float, ptr %39, align 4, !tbaa !5
+  %691 = fmul float %690, 5.000000e+00
+  %692 = fcmp ult float %662, %691
+  br i1 %692, label %696, label %693
+
+693:                                              ; preds = %689
+  %694 = load volatile float, ptr %39, align 4, !tbaa !5
+  %695 = call float @llvm.fmuladd.f32(float %694, float -5.000000e+00, float %662)
+  store volatile float %695, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %41, align 4, !tbaa !5
+  br label %696
+
+696:                                              ; preds = %693, %689
+  %697 = load volatile float, ptr %39, align 4, !tbaa !5
+  %698 = fmul float %697, 6.000000e+00
+  %699 = fcmp ult float %662, %698
+  br i1 %699, label %703, label %700
+
+700:                                              ; preds = %696
+  %701 = load volatile float, ptr %39, align 4, !tbaa !5
+  %702 = call float @llvm.fmuladd.f32(float %701, float -6.000000e+00, float %662)
+  store volatile float %702, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %41, align 4, !tbaa !5
+  br label %703
+
+703:                                              ; preds = %700, %696
+  %704 = load volatile float, ptr %39, align 4, !tbaa !5
+  %705 = fmul float %704, 7.000000e+00
+  %706 = fcmp ult float %662, %705
+  br i1 %706, label %710, label %707
+
+707:                                              ; preds = %703
+  %708 = load volatile float, ptr %39, align 4, !tbaa !5
+  %709 = call float @llvm.fmuladd.f32(float %708, float -7.000000e+00, float %662)
+  store volatile float %709, ptr %43, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %41, align 4, !tbaa !5
+  br label %710
+
+710:                                              ; preds = %707, %703
+  %711 = load volatile float, ptr %39, align 4, !tbaa !5
+  %712 = fmul float %711, 8.000000e+00
+  %713 = fcmp ult float %662, %712
+  br i1 %713, label %717, label %714
+
+714:                                              ; preds = %710
+  %715 = load volatile float, ptr %39, align 4, !tbaa !5
+  %716 = call float @llvm.fmuladd.f32(float %715, float -8.000000e+00, float %662)
+  store volatile float %716, ptr %43, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %41, align 4, !tbaa !5
+  br label %717
+
+717:                                              ; preds = %714, %710
+  %718 = load volatile float, ptr %39, align 4, !tbaa !5
+  %719 = fmul float %718, 9.000000e+00
+  %720 = fcmp ult float %662, %719
+  br i1 %720, label %724, label %721
+
+721:                                              ; preds = %717
+  %722 = load volatile float, ptr %39, align 4, !tbaa !5
+  %723 = call float @llvm.fmuladd.f32(float %722, float -9.000000e+00, float %662)
+  store volatile float %723, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %41, align 4, !tbaa !5
+  br label %724
+
+724:                                              ; preds = %721, %717
+  %725 = load volatile float, ptr %39, align 4, !tbaa !5
+  %726 = fmul float %725, 1.000000e+01
+  %727 = fcmp ult float %662, %726
+  br i1 %727, label %731, label %728
+
+728:                                              ; preds = %724
+  %729 = load volatile float, ptr %39, align 4, !tbaa !5
+  %730 = call float @llvm.fmuladd.f32(float %729, float -1.000000e+01, float %662)
+  store volatile float %730, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %41, align 4, !tbaa !5
+  br label %731
+
+731:                                              ; preds = %728, %724
+  %732 = load volatile float, ptr %39, align 4, !tbaa !5
+  %733 = fmul float %732, 1.100000e+01
+  %734 = fcmp ult float %662, %733
+  br i1 %734, label %738, label %735
+
+735:                                              ; preds = %731
+  %736 = load volatile float, ptr %39, align 4, !tbaa !5
+  %737 = call float @llvm.fmuladd.f32(float %736, float -1.100000e+01, float %662)
+  store volatile float %737, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %40, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %41, align 4, !tbaa !5
+  br label %738
+
+738:                                              ; preds = %735, %731
+  %739 = load volatile float, ptr %39, align 4, !tbaa !5
+  %740 = fmul float %739, 1.200000e+01
+  %741 = fcmp ult float %662, %740
+  br i1 %741, label %745, label %742
+
+742:                                              ; preds = %738
+  %743 = load volatile float, ptr %39, align 4, !tbaa !5
+  %744 = call float @llvm.fmuladd.f32(float %743, float -1.200000e+01, float %662)
+  store volatile float %744, ptr %43, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %41, align 4, !tbaa !5
+  br label %745
+
+745:                                              ; preds = %742, %738
+  %746 = load volatile float, ptr %39, align 4, !tbaa !5
+  %747 = fmul float %746, 1.300000e+01
+  %748 = fcmp ult float %662, %747
+  br i1 %748, label %752, label %749
+
+749:                                              ; preds = %745
+  %750 = load volatile float, ptr %39, align 4, !tbaa !5
+  %751 = call float @llvm.fmuladd.f32(float %750, float -1.300000e+01, float %662)
+  store volatile float %751, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %41, align 4, !tbaa !5
+  br label %752
+
+752:                                              ; preds = %749, %745
+  %753 = load volatile float, ptr %39, align 4, !tbaa !5
+  %754 = fmul float %753, 1.400000e+01
+  %755 = fcmp ult float %662, %754
+  br i1 %755, label %759, label %756
+
+756:                                              ; preds = %752
+  %757 = load volatile float, ptr %39, align 4, !tbaa !5
+  %758 = call float @llvm.fmuladd.f32(float %757, float -1.400000e+01, float %662)
+  store volatile float %758, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %41, align 4, !tbaa !5
+  br label %759
+
+759:                                              ; preds = %756, %752
+  %760 = load volatile float, ptr %39, align 4, !tbaa !5
+  %761 = fmul float %760, 1.500000e+01
+  %762 = fcmp ult float %662, %761
+  br i1 %762, label %766, label %763
+
+763:                                              ; preds = %759
+  %764 = load volatile float, ptr %39, align 4, !tbaa !5
+  %765 = call float @llvm.fmuladd.f32(float %764, float -1.500000e+01, float %662)
+  store volatile float %765, ptr %43, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %40, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %41, align 4, !tbaa !5
+  br label %766
+
+766:                                              ; preds = %759, %763
+  %767 = load volatile float, ptr %43, align 4, !tbaa !5
+  %768 = load volatile float, ptr %39, align 4, !tbaa !5
+  %769 = fdiv float %767, %768
+  store volatile float %769, ptr %42, align 4, !tbaa !5
+  %770 = load volatile float, ptr %40, align 4, !tbaa !5
+  %771 = load volatile float, ptr %42, align 4, !tbaa !5
+  %772 = load volatile float, ptr %41, align 4, !tbaa !5
+  %773 = load volatile float, ptr %40, align 4, !tbaa !5
+  %774 = fsub float %772, %773
+  %775 = call float @llvm.fmuladd.f32(float %771, float %774, float %770)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %43)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %42)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %41)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %40)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %39)
+  %776 = call float @llvm.fmuladd.f32(float %655, float %775, float %654)
+  store volatile float %776, ptr %73, align 4, !tbaa !5
+  %777 = load volatile float, ptr %65, align 4, !tbaa !5
+  %778 = fadd float %777, 1.000000e+00
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %55)
+  %779 = fmul float %778, 5.000000e-01
+  store volatile float %779, ptr %55, align 4, !tbaa !5
+  %780 = fcmp ugt float %778, 0.000000e+00
+  br i1 %780, label %781, label %793
+
+781:                                              ; preds = %766
+  %782 = bitcast float %778 to i32
+  %783 = ashr i32 %782, 1
+  %784 = sub nsw i32 1597463007, %783
+  %785 = bitcast i32 %784 to float
+  %786 = load volatile float, ptr %55, align 4, !tbaa !5
+  %787 = fneg float %785
+  %788 = fmul float %786, %787
+  %789 = call float @llvm.fmuladd.f32(float %788, float %785, float 1.500000e+00)
+  %790 = fmul float %789, %785
+  store volatile float %790, ptr %55, align 4, !tbaa !5
+  %791 = load volatile float, ptr %55, align 4, !tbaa !5
+  %792 = fdiv float 1.000000e+00, %791
+  br label %793
+
+793:                                              ; preds = %766, %781
+  %794 = phi float [ %792, %781 ], [ 0.000000e+00, %766 ]
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %55)
+  %795 = load volatile float, ptr %73, align 4, !tbaa !5
+  %796 = fmul float %795, 5.000000e-01
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %44)
+  store volatile float 0x3FD921FB60000000, ptr %44, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %45)
+  store volatile float 0.000000e+00, ptr %45, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %46)
+  store volatile float 0x3FD87DE2A0000000, ptr %46, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %47)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %48)
+  store volatile float %796, ptr %48, align 4, !tbaa !5
+  %797 = fcmp olt float %796, 0.000000e+00
+  %798 = fadd float %796, 0x401921FB60000000
+  %799 = select i1 %797, float %798, float %796
+  %800 = fcmp ult float %799, 0x401921FB60000000
+  %801 = fadd float %799, 0xC01921FB60000000
+  %802 = select i1 %800, float %799, float %801
+  %803 = load volatile float, ptr %44, align 4, !tbaa !5
+  %804 = fcmp ult float %802, %803
+  br i1 %804, label %808, label %805
+
+805:                                              ; preds = %793
+  %806 = load volatile float, ptr %44, align 4, !tbaa !5
+  %807 = fsub float %802, %806
+  store volatile float %807, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %46, align 4, !tbaa !5
+  br label %808
+
+808:                                              ; preds = %805, %793
+  %809 = load volatile float, ptr %44, align 4, !tbaa !5
+  %810 = fmul float %809, 2.000000e+00
+  %811 = fcmp ult float %802, %810
+  br i1 %811, label %815, label %812
+
+812:                                              ; preds = %808
+  %813 = load volatile float, ptr %44, align 4, !tbaa !5
+  %814 = call float @llvm.fmuladd.f32(float %813, float -2.000000e+00, float %802)
+  store volatile float %814, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %46, align 4, !tbaa !5
+  br label %815
+
+815:                                              ; preds = %812, %808
+  %816 = load volatile float, ptr %44, align 4, !tbaa !5
+  %817 = fmul float %816, 3.000000e+00
+  %818 = fcmp ult float %802, %817
+  br i1 %818, label %822, label %819
+
+819:                                              ; preds = %815
+  %820 = load volatile float, ptr %44, align 4, !tbaa !5
+  %821 = call float @llvm.fmuladd.f32(float %820, float -3.000000e+00, float %802)
+  store volatile float %821, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %46, align 4, !tbaa !5
+  br label %822
+
+822:                                              ; preds = %819, %815
+  %823 = load volatile float, ptr %44, align 4, !tbaa !5
+  %824 = fmul float %823, 4.000000e+00
+  %825 = fcmp ult float %802, %824
+  br i1 %825, label %829, label %826
+
+826:                                              ; preds = %822
+  %827 = load volatile float, ptr %44, align 4, !tbaa !5
+  %828 = call float @llvm.fmuladd.f32(float %827, float -4.000000e+00, float %802)
+  store volatile float %828, ptr %48, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %45, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %46, align 4, !tbaa !5
+  br label %829
+
+829:                                              ; preds = %826, %822
+  %830 = load volatile float, ptr %44, align 4, !tbaa !5
+  %831 = fmul float %830, 5.000000e+00
+  %832 = fcmp ult float %802, %831
+  br i1 %832, label %836, label %833
+
+833:                                              ; preds = %829
+  %834 = load volatile float, ptr %44, align 4, !tbaa !5
+  %835 = call float @llvm.fmuladd.f32(float %834, float -5.000000e+00, float %802)
+  store volatile float %835, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %46, align 4, !tbaa !5
+  br label %836
+
+836:                                              ; preds = %833, %829
+  %837 = load volatile float, ptr %44, align 4, !tbaa !5
+  %838 = fmul float %837, 6.000000e+00
+  %839 = fcmp ult float %802, %838
+  br i1 %839, label %843, label %840
+
+840:                                              ; preds = %836
+  %841 = load volatile float, ptr %44, align 4, !tbaa !5
+  %842 = call float @llvm.fmuladd.f32(float %841, float -6.000000e+00, float %802)
+  store volatile float %842, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %46, align 4, !tbaa !5
+  br label %843
+
+843:                                              ; preds = %840, %836
+  %844 = load volatile float, ptr %44, align 4, !tbaa !5
+  %845 = fmul float %844, 7.000000e+00
+  %846 = fcmp ult float %802, %845
+  br i1 %846, label %850, label %847
+
+847:                                              ; preds = %843
+  %848 = load volatile float, ptr %44, align 4, !tbaa !5
+  %849 = call float @llvm.fmuladd.f32(float %848, float -7.000000e+00, float %802)
+  store volatile float %849, ptr %48, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %46, align 4, !tbaa !5
+  br label %850
+
+850:                                              ; preds = %847, %843
+  %851 = load volatile float, ptr %44, align 4, !tbaa !5
+  %852 = fmul float %851, 8.000000e+00
+  %853 = fcmp ult float %802, %852
+  br i1 %853, label %857, label %854
+
+854:                                              ; preds = %850
+  %855 = load volatile float, ptr %44, align 4, !tbaa !5
+  %856 = call float @llvm.fmuladd.f32(float %855, float -8.000000e+00, float %802)
+  store volatile float %856, ptr %48, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %46, align 4, !tbaa !5
+  br label %857
+
+857:                                              ; preds = %854, %850
+  %858 = load volatile float, ptr %44, align 4, !tbaa !5
+  %859 = fmul float %858, 9.000000e+00
+  %860 = fcmp ult float %802, %859
+  br i1 %860, label %864, label %861
+
+861:                                              ; preds = %857
+  %862 = load volatile float, ptr %44, align 4, !tbaa !5
+  %863 = call float @llvm.fmuladd.f32(float %862, float -9.000000e+00, float %802)
+  store volatile float %863, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %46, align 4, !tbaa !5
+  br label %864
+
+864:                                              ; preds = %861, %857
+  %865 = load volatile float, ptr %44, align 4, !tbaa !5
+  %866 = fmul float %865, 1.000000e+01
+  %867 = fcmp ult float %802, %866
+  br i1 %867, label %871, label %868
+
+868:                                              ; preds = %864
+  %869 = load volatile float, ptr %44, align 4, !tbaa !5
+  %870 = call float @llvm.fmuladd.f32(float %869, float -1.000000e+01, float %802)
+  store volatile float %870, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %46, align 4, !tbaa !5
+  br label %871
+
+871:                                              ; preds = %868, %864
+  %872 = load volatile float, ptr %44, align 4, !tbaa !5
+  %873 = fmul float %872, 1.100000e+01
+  %874 = fcmp ult float %802, %873
+  br i1 %874, label %878, label %875
+
+875:                                              ; preds = %871
+  %876 = load volatile float, ptr %44, align 4, !tbaa !5
+  %877 = call float @llvm.fmuladd.f32(float %876, float -1.100000e+01, float %802)
+  store volatile float %877, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %45, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %46, align 4, !tbaa !5
+  br label %878
+
+878:                                              ; preds = %875, %871
+  %879 = load volatile float, ptr %44, align 4, !tbaa !5
+  %880 = fmul float %879, 1.200000e+01
+  %881 = fcmp ult float %802, %880
+  br i1 %881, label %885, label %882
+
+882:                                              ; preds = %878
+  %883 = load volatile float, ptr %44, align 4, !tbaa !5
+  %884 = call float @llvm.fmuladd.f32(float %883, float -1.200000e+01, float %802)
+  store volatile float %884, ptr %48, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %46, align 4, !tbaa !5
+  br label %885
+
+885:                                              ; preds = %882, %878
+  %886 = load volatile float, ptr %44, align 4, !tbaa !5
+  %887 = fmul float %886, 1.300000e+01
+  %888 = fcmp ult float %802, %887
+  br i1 %888, label %892, label %889
+
+889:                                              ; preds = %885
+  %890 = load volatile float, ptr %44, align 4, !tbaa !5
+  %891 = call float @llvm.fmuladd.f32(float %890, float -1.300000e+01, float %802)
+  store volatile float %891, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %46, align 4, !tbaa !5
+  br label %892
+
+892:                                              ; preds = %889, %885
+  %893 = load volatile float, ptr %44, align 4, !tbaa !5
+  %894 = fmul float %893, 1.400000e+01
+  %895 = fcmp ult float %802, %894
+  br i1 %895, label %899, label %896
+
+896:                                              ; preds = %892
+  %897 = load volatile float, ptr %44, align 4, !tbaa !5
+  %898 = call float @llvm.fmuladd.f32(float %897, float -1.400000e+01, float %802)
+  store volatile float %898, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %46, align 4, !tbaa !5
+  br label %899
+
+899:                                              ; preds = %896, %892
+  %900 = load volatile float, ptr %44, align 4, !tbaa !5
+  %901 = fmul float %900, 1.500000e+01
+  %902 = fcmp ult float %802, %901
+  br i1 %902, label %906, label %903
+
+903:                                              ; preds = %899
+  %904 = load volatile float, ptr %44, align 4, !tbaa !5
+  %905 = call float @llvm.fmuladd.f32(float %904, float -1.500000e+01, float %802)
+  store volatile float %905, ptr %48, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %45, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %46, align 4, !tbaa !5
+  br label %906
+
+906:                                              ; preds = %899, %903
+  %907 = load volatile float, ptr %48, align 4, !tbaa !5
+  %908 = load volatile float, ptr %44, align 4, !tbaa !5
+  %909 = fdiv float %907, %908
+  store volatile float %909, ptr %47, align 4, !tbaa !5
+  %910 = load volatile float, ptr %45, align 4, !tbaa !5
+  %911 = load volatile float, ptr %47, align 4, !tbaa !5
+  %912 = load volatile float, ptr %46, align 4, !tbaa !5
+  %913 = load volatile float, ptr %45, align 4, !tbaa !5
+  %914 = fsub float %912, %913
+  %915 = call float @llvm.fmuladd.f32(float %911, float %914, float %910)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %48)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %47)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %46)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %45)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %44)
+  %916 = fmul float %794, %915
+  %917 = load volatile float, ptr %65, align 4, !tbaa !5
+  %918 = fsub float 1.000000e+00, %917
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %56)
+  %919 = fmul float %918, 5.000000e-01
+  store volatile float %919, ptr %56, align 4, !tbaa !5
+  %920 = fcmp ugt float %918, 0.000000e+00
+  br i1 %920, label %921, label %933
+
+921:                                              ; preds = %906
+  %922 = bitcast float %918 to i32
+  %923 = ashr i32 %922, 1
+  %924 = sub nsw i32 1597463007, %923
+  %925 = bitcast i32 %924 to float
+  %926 = load volatile float, ptr %56, align 4, !tbaa !5
+  %927 = fneg float %925
+  %928 = fmul float %926, %927
+  %929 = call float @llvm.fmuladd.f32(float %928, float %925, float 1.500000e+00)
+  %930 = fmul float %929, %925
+  store volatile float %930, ptr %56, align 4, !tbaa !5
+  %931 = load volatile float, ptr %56, align 4, !tbaa !5
+  %932 = fdiv float 1.000000e+00, %931
+  br label %933
+
+933:                                              ; preds = %906, %921
+  %934 = phi float [ %932, %921 ], [ 0.000000e+00, %906 ]
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %56)
+  %935 = load volatile float, ptr %73, align 4, !tbaa !5
+  %936 = fmul float %935, 5.000000e-01
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %1)
+  store volatile float 0x3FD921FB60000000, ptr %1, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %2)
+  store volatile float 1.000000e+00, ptr %2, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %3)
+  store volatile float 0x3FED906BC0000000, ptr %3, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %5)
+  store volatile float %936, ptr %5, align 4, !tbaa !5
+  %937 = fcmp olt float %936, 0.000000e+00
+  %938 = fadd float %936, 0x401921FB60000000
+  %939 = select i1 %937, float %938, float %936
+  %940 = fcmp ult float %939, 0x401921FB60000000
+  %941 = fadd float %939, 0xC01921FB60000000
+  %942 = select i1 %940, float %939, float %941
+  %943 = load volatile float, ptr %1, align 4, !tbaa !5
+  %944 = fcmp ult float %942, %943
+  br i1 %944, label %948, label %945
+
+945:                                              ; preds = %933
+  %946 = load volatile float, ptr %1, align 4, !tbaa !5
+  %947 = fsub float %942, %946
+  store volatile float %947, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %3, align 4, !tbaa !5
+  br label %948
+
+948:                                              ; preds = %945, %933
+  %949 = load volatile float, ptr %1, align 4, !tbaa !5
+  %950 = fmul float %949, 2.000000e+00
+  %951 = fcmp ult float %942, %950
+  br i1 %951, label %955, label %952
+
+952:                                              ; preds = %948
+  %953 = load volatile float, ptr %1, align 4, !tbaa !5
+  %954 = call float @llvm.fmuladd.f32(float %953, float -2.000000e+00, float %942)
+  store volatile float %954, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %3, align 4, !tbaa !5
+  br label %955
+
+955:                                              ; preds = %952, %948
+  %956 = load volatile float, ptr %1, align 4, !tbaa !5
+  %957 = fmul float %956, 3.000000e+00
+  %958 = fcmp ult float %942, %957
+  br i1 %958, label %962, label %959
+
+959:                                              ; preds = %955
+  %960 = load volatile float, ptr %1, align 4, !tbaa !5
+  %961 = call float @llvm.fmuladd.f32(float %960, float -3.000000e+00, float %942)
+  store volatile float %961, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %3, align 4, !tbaa !5
+  br label %962
+
+962:                                              ; preds = %959, %955
+  %963 = load volatile float, ptr %1, align 4, !tbaa !5
+  %964 = fmul float %963, 4.000000e+00
+  %965 = fcmp ult float %942, %964
+  br i1 %965, label %969, label %966
+
+966:                                              ; preds = %962
+  %967 = load volatile float, ptr %1, align 4, !tbaa !5
+  %968 = call float @llvm.fmuladd.f32(float %967, float -4.000000e+00, float %942)
+  store volatile float %968, ptr %5, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %3, align 4, !tbaa !5
+  br label %969
+
+969:                                              ; preds = %966, %962
+  %970 = load volatile float, ptr %1, align 4, !tbaa !5
+  %971 = fmul float %970, 5.000000e+00
+  %972 = fcmp ult float %942, %971
+  br i1 %972, label %976, label %973
+
+973:                                              ; preds = %969
+  %974 = load volatile float, ptr %1, align 4, !tbaa !5
+  %975 = call float @llvm.fmuladd.f32(float %974, float -5.000000e+00, float %942)
+  store volatile float %975, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %3, align 4, !tbaa !5
+  br label %976
+
+976:                                              ; preds = %973, %969
+  %977 = load volatile float, ptr %1, align 4, !tbaa !5
+  %978 = fmul float %977, 6.000000e+00
+  %979 = fcmp ult float %942, %978
+  br i1 %979, label %983, label %980
+
+980:                                              ; preds = %976
+  %981 = load volatile float, ptr %1, align 4, !tbaa !5
+  %982 = call float @llvm.fmuladd.f32(float %981, float -6.000000e+00, float %942)
+  store volatile float %982, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %3, align 4, !tbaa !5
+  br label %983
+
+983:                                              ; preds = %980, %976
+  %984 = load volatile float, ptr %1, align 4, !tbaa !5
+  %985 = fmul float %984, 7.000000e+00
+  %986 = fcmp ult float %942, %985
+  br i1 %986, label %990, label %987
+
+987:                                              ; preds = %983
+  %988 = load volatile float, ptr %1, align 4, !tbaa !5
+  %989 = call float @llvm.fmuladd.f32(float %988, float -7.000000e+00, float %942)
+  store volatile float %989, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %2, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %3, align 4, !tbaa !5
+  br label %990
+
+990:                                              ; preds = %987, %983
+  %991 = load volatile float, ptr %1, align 4, !tbaa !5
+  %992 = fmul float %991, 8.000000e+00
+  %993 = fcmp ult float %942, %992
+  br i1 %993, label %997, label %994
+
+994:                                              ; preds = %990
+  %995 = load volatile float, ptr %1, align 4, !tbaa !5
+  %996 = call float @llvm.fmuladd.f32(float %995, float -8.000000e+00, float %942)
+  store volatile float %996, ptr %5, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %3, align 4, !tbaa !5
+  br label %997
+
+997:                                              ; preds = %994, %990
+  %998 = load volatile float, ptr %1, align 4, !tbaa !5
+  %999 = fmul float %998, 9.000000e+00
+  %1000 = fcmp ult float %942, %999
+  br i1 %1000, label %1004, label %1001
+
+1001:                                             ; preds = %997
+  %1002 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1003 = call float @llvm.fmuladd.f32(float %1002, float -9.000000e+00, float %942)
+  store volatile float %1003, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %3, align 4, !tbaa !5
+  br label %1004
+
+1004:                                             ; preds = %1001, %997
+  %1005 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1006 = fmul float %1005, 1.000000e+01
+  %1007 = fcmp ult float %942, %1006
+  br i1 %1007, label %1011, label %1008
+
+1008:                                             ; preds = %1004
+  %1009 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1010 = call float @llvm.fmuladd.f32(float %1009, float -1.000000e+01, float %942)
+  store volatile float %1010, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %3, align 4, !tbaa !5
+  br label %1011
+
+1011:                                             ; preds = %1008, %1004
+  %1012 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1013 = fmul float %1012, 1.100000e+01
+  %1014 = fcmp ult float %942, %1013
+  br i1 %1014, label %1018, label %1015
+
+1015:                                             ; preds = %1011
+  %1016 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1017 = call float @llvm.fmuladd.f32(float %1016, float -1.100000e+01, float %942)
+  store volatile float %1017, ptr %5, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %3, align 4, !tbaa !5
+  br label %1018
+
+1018:                                             ; preds = %1015, %1011
+  %1019 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1020 = fmul float %1019, 1.200000e+01
+  %1021 = fcmp ult float %942, %1020
+  br i1 %1021, label %1025, label %1022
+
+1022:                                             ; preds = %1018
+  %1023 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1024 = call float @llvm.fmuladd.f32(float %1023, float -1.200000e+01, float %942)
+  store volatile float %1024, ptr %5, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %2, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %3, align 4, !tbaa !5
+  br label %1025
+
+1025:                                             ; preds = %1022, %1018
+  %1026 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1027 = fmul float %1026, 1.300000e+01
+  %1028 = fcmp ult float %942, %1027
+  br i1 %1028, label %1032, label %1029
+
+1029:                                             ; preds = %1025
+  %1030 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1031 = call float @llvm.fmuladd.f32(float %1030, float -1.300000e+01, float %942)
+  store volatile float %1031, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %3, align 4, !tbaa !5
+  br label %1032
+
+1032:                                             ; preds = %1029, %1025
+  %1033 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1034 = fmul float %1033, 1.400000e+01
+  %1035 = fcmp ult float %942, %1034
+  br i1 %1035, label %1039, label %1036
+
+1036:                                             ; preds = %1032
+  %1037 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1038 = call float @llvm.fmuladd.f32(float %1037, float -1.400000e+01, float %942)
+  store volatile float %1038, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %2, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %3, align 4, !tbaa !5
+  br label %1039
+
+1039:                                             ; preds = %1036, %1032
+  %1040 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1041 = fmul float %1040, 1.500000e+01
+  %1042 = fcmp ult float %942, %1041
+  br i1 %1042, label %1046, label %1043
+
+1043:                                             ; preds = %1039
+  %1044 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1045 = call float @llvm.fmuladd.f32(float %1044, float -1.500000e+01, float %942)
+  store volatile float %1045, ptr %5, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %2, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %3, align 4, !tbaa !5
+  br label %1046
+
+1046:                                             ; preds = %1039, %1043
+  %1047 = load volatile float, ptr %5, align 4, !tbaa !5
+  %1048 = load volatile float, ptr %1, align 4, !tbaa !5
+  %1049 = fdiv float %1047, %1048
+  store volatile float %1049, ptr %4, align 4, !tbaa !5
+  %1050 = load volatile float, ptr %2, align 4, !tbaa !5
+  %1051 = load volatile float, ptr %4, align 4, !tbaa !5
+  %1052 = load volatile float, ptr %3, align 4, !tbaa !5
+  %1053 = load volatile float, ptr %2, align 4, !tbaa !5
+  %1054 = fsub float %1052, %1053
+  %1055 = call float @llvm.fmuladd.f32(float %1051, float %1054, float %1050)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %5)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %4)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %3)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %2)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %1)
+  %1056 = fmul float %934, %1055
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %16)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %17)
+  store float %916, ptr %16, align 8, !tbaa !5
+  store float %1056, ptr %17, align 8, !tbaa !5
+  %1057 = load i64, ptr %16, align 8
+  %1058 = and i64 %1057, 4294967295
+  %1059 = load i64, ptr %17, align 8
+  %1060 = and i64 %1059, 4294967295
+  %1061 = icmp eq i64 %1060, 0
+  %1062 = icmp eq i64 %1058, 0
+  %1063 = select i1 %1061, i1 %1062, i1 false
+  %1064 = trunc i64 %1059 to i32
+  %1065 = bitcast i32 %1064 to float
+  %1066 = trunc i64 %1057 to i32
+  %1067 = bitcast i32 %1066 to float
+  br i1 %1063, label %1098, label %1068
+
+1068:                                             ; preds = %1046
+  %1069 = and i64 %1057, 2147483647
+  %1070 = and i64 %1059, 2147483647
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %18)
+  %1071 = icmp samesign ugt i64 %1070, %1069
+  br i1 %1071, label %1072, label %1074
+
+1072:                                             ; preds = %1068
+  %1073 = fdiv float %1067, %1065
+  br label %1076
+
+1074:                                             ; preds = %1068
+  %1075 = fdiv float %1065, %1067
+  br label %1076
+
+1076:                                             ; preds = %1074, %1072
+  %1077 = phi float [ %1075, %1074 ], [ %1073, %1072 ]
+  store volatile float %1077, ptr %18, align 4, !tbaa !5
+  %1078 = load volatile float, ptr %18, align 4, !tbaa !5
+  %1079 = load volatile float, ptr %18, align 4, !tbaa !5
+  %1080 = fneg float %1079
+  %1081 = fmul float %1078, %1080
+  %1082 = load volatile float, ptr %18, align 4, !tbaa !5
+  %1083 = fmul float %1082, %1081
+  %1084 = fdiv float %1083, 3.000000e+00
+  %1085 = fmul float %1081, %1084
+  %1086 = fdiv float %1085, 5.000000e+00
+  %1087 = fmul float %1081, %1086
+  %1088 = fdiv float %1087, 7.000000e+00
+  %1089 = fmul float %1081, %1088
+  %1090 = fdiv float %1089, 9.000000e+00
+  %1091 = fadd float %1082, %1084
+  %1092 = fadd float %1091, %1086
+  %1093 = fadd float %1092, %1088
+  %1094 = fadd float %1093, %1090
+  %1095 = fsub float 0x3FF921FB40000000, %1094
+  %1096 = select i1 %1071, float %1094, float %1095
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %18)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %17)
+  %1097 = fmul float %1096, 2.000000e+00
+  br label %1098
+
+1098:                                             ; preds = %1046, %1076
+  %1099 = phi float [ %1097, %1076 ], [ 0.000000e+00, %1046 ]
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %16)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %17)
+  store volatile float %1099, ptr %74, align 4, !tbaa !5
+  %1100 = load volatile float, ptr %64, align 4, !tbaa !5
+  %1101 = load volatile float, ptr %65, align 4, !tbaa !5
+  %1102 = load volatile float, ptr %73, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6)
+  store volatile float 0x3FD921FB60000000, ptr %6, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7)
+  store volatile float 1.000000e+00, ptr %7, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %8)
+  store volatile float 0x3FED906BC0000000, ptr %8, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %9)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %10)
+  store volatile float %1102, ptr %10, align 4, !tbaa !5
+  %1103 = fcmp olt float %1102, 0.000000e+00
+  %1104 = fadd float %1102, 0x401921FB60000000
+  %1105 = select i1 %1103, float %1104, float %1102
+  %1106 = fcmp ult float %1105, 0x401921FB60000000
+  %1107 = fadd float %1105, 0xC01921FB60000000
+  %1108 = select i1 %1106, float %1105, float %1107
+  %1109 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1110 = fcmp ult float %1108, %1109
+  br i1 %1110, label %1114, label %1111
+
+1111:                                             ; preds = %1098
+  %1112 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1113 = fsub float %1108, %1112
+  store volatile float %1113, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %8, align 4, !tbaa !5
+  br label %1114
+
+1114:                                             ; preds = %1111, %1098
+  %1115 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1116 = fmul float %1115, 2.000000e+00
+  %1117 = fcmp ult float %1108, %1116
+  br i1 %1117, label %1121, label %1118
+
+1118:                                             ; preds = %1114
+  %1119 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1120 = call float @llvm.fmuladd.f32(float %1119, float -2.000000e+00, float %1108)
+  store volatile float %1120, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %8, align 4, !tbaa !5
+  br label %1121
+
+1121:                                             ; preds = %1118, %1114
+  %1122 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1123 = fmul float %1122, 3.000000e+00
+  %1124 = fcmp ult float %1108, %1123
+  br i1 %1124, label %1128, label %1125
+
+1125:                                             ; preds = %1121
+  %1126 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1127 = call float @llvm.fmuladd.f32(float %1126, float -3.000000e+00, float %1108)
+  store volatile float %1127, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %8, align 4, !tbaa !5
+  br label %1128
+
+1128:                                             ; preds = %1125, %1121
+  %1129 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1130 = fmul float %1129, 4.000000e+00
+  %1131 = fcmp ult float %1108, %1130
+  br i1 %1131, label %1135, label %1132
+
+1132:                                             ; preds = %1128
+  %1133 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1134 = call float @llvm.fmuladd.f32(float %1133, float -4.000000e+00, float %1108)
+  store volatile float %1134, ptr %10, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %8, align 4, !tbaa !5
+  br label %1135
+
+1135:                                             ; preds = %1132, %1128
+  %1136 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1137 = fmul float %1136, 5.000000e+00
+  %1138 = fcmp ult float %1108, %1137
+  br i1 %1138, label %1142, label %1139
+
+1139:                                             ; preds = %1135
+  %1140 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1141 = call float @llvm.fmuladd.f32(float %1140, float -5.000000e+00, float %1108)
+  store volatile float %1141, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %8, align 4, !tbaa !5
+  br label %1142
+
+1142:                                             ; preds = %1139, %1135
+  %1143 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1144 = fmul float %1143, 6.000000e+00
+  %1145 = fcmp ult float %1108, %1144
+  br i1 %1145, label %1149, label %1146
+
+1146:                                             ; preds = %1142
+  %1147 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1148 = call float @llvm.fmuladd.f32(float %1147, float -6.000000e+00, float %1108)
+  store volatile float %1148, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %8, align 4, !tbaa !5
+  br label %1149
+
+1149:                                             ; preds = %1146, %1142
+  %1150 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1151 = fmul float %1150, 7.000000e+00
+  %1152 = fcmp ult float %1108, %1151
+  br i1 %1152, label %1156, label %1153
+
+1153:                                             ; preds = %1149
+  %1154 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1155 = call float @llvm.fmuladd.f32(float %1154, float -7.000000e+00, float %1108)
+  store volatile float %1155, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %7, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %8, align 4, !tbaa !5
+  br label %1156
+
+1156:                                             ; preds = %1153, %1149
+  %1157 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1158 = fmul float %1157, 8.000000e+00
+  %1159 = fcmp ult float %1108, %1158
+  br i1 %1159, label %1163, label %1160
+
+1160:                                             ; preds = %1156
+  %1161 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1162 = call float @llvm.fmuladd.f32(float %1161, float -8.000000e+00, float %1108)
+  store volatile float %1162, ptr %10, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %8, align 4, !tbaa !5
+  br label %1163
+
+1163:                                             ; preds = %1160, %1156
+  %1164 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1165 = fmul float %1164, 9.000000e+00
+  %1166 = fcmp ult float %1108, %1165
+  br i1 %1166, label %1170, label %1167
+
+1167:                                             ; preds = %1163
+  %1168 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1169 = call float @llvm.fmuladd.f32(float %1168, float -9.000000e+00, float %1108)
+  store volatile float %1169, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %8, align 4, !tbaa !5
+  br label %1170
+
+1170:                                             ; preds = %1167, %1163
+  %1171 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1172 = fmul float %1171, 1.000000e+01
+  %1173 = fcmp ult float %1108, %1172
+  br i1 %1173, label %1177, label %1174
+
+1174:                                             ; preds = %1170
+  %1175 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1176 = call float @llvm.fmuladd.f32(float %1175, float -1.000000e+01, float %1108)
+  store volatile float %1176, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %8, align 4, !tbaa !5
+  br label %1177
+
+1177:                                             ; preds = %1174, %1170
+  %1178 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1179 = fmul float %1178, 1.100000e+01
+  %1180 = fcmp ult float %1108, %1179
+  br i1 %1180, label %1184, label %1181
+
+1181:                                             ; preds = %1177
+  %1182 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1183 = call float @llvm.fmuladd.f32(float %1182, float -1.100000e+01, float %1108)
+  store volatile float %1183, ptr %10, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %8, align 4, !tbaa !5
+  br label %1184
+
+1184:                                             ; preds = %1181, %1177
+  %1185 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1186 = fmul float %1185, 1.200000e+01
+  %1187 = fcmp ult float %1108, %1186
+  br i1 %1187, label %1191, label %1188
+
+1188:                                             ; preds = %1184
+  %1189 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1190 = call float @llvm.fmuladd.f32(float %1189, float -1.200000e+01, float %1108)
+  store volatile float %1190, ptr %10, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %7, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %8, align 4, !tbaa !5
+  br label %1191
+
+1191:                                             ; preds = %1188, %1184
+  %1192 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1193 = fmul float %1192, 1.300000e+01
+  %1194 = fcmp ult float %1108, %1193
+  br i1 %1194, label %1198, label %1195
+
+1195:                                             ; preds = %1191
+  %1196 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1197 = call float @llvm.fmuladd.f32(float %1196, float -1.300000e+01, float %1108)
+  store volatile float %1197, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %8, align 4, !tbaa !5
+  br label %1198
+
+1198:                                             ; preds = %1195, %1191
+  %1199 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1200 = fmul float %1199, 1.400000e+01
+  %1201 = fcmp ult float %1108, %1200
+  br i1 %1201, label %1205, label %1202
+
+1202:                                             ; preds = %1198
+  %1203 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1204 = call float @llvm.fmuladd.f32(float %1203, float -1.400000e+01, float %1108)
+  store volatile float %1204, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %7, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %8, align 4, !tbaa !5
+  br label %1205
+
+1205:                                             ; preds = %1202, %1198
+  %1206 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1207 = fmul float %1206, 1.500000e+01
+  %1208 = fcmp ult float %1108, %1207
+  br i1 %1208, label %1212, label %1209
+
+1209:                                             ; preds = %1205
+  %1210 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1211 = call float @llvm.fmuladd.f32(float %1210, float -1.500000e+01, float %1108)
+  store volatile float %1211, ptr %10, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %7, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %8, align 4, !tbaa !5
+  br label %1212
+
+1212:                                             ; preds = %1205, %1209
+  %1213 = load volatile float, ptr %10, align 4, !tbaa !5
+  %1214 = load volatile float, ptr %6, align 4, !tbaa !5
+  %1215 = fdiv float %1213, %1214
+  store volatile float %1215, ptr %9, align 4, !tbaa !5
+  %1216 = load volatile float, ptr %7, align 4, !tbaa !5
+  %1217 = load volatile float, ptr %9, align 4, !tbaa !5
+  %1218 = load volatile float, ptr %8, align 4, !tbaa !5
+  %1219 = load volatile float, ptr %7, align 4, !tbaa !5
+  %1220 = fsub float %1218, %1219
+  %1221 = call float @llvm.fmuladd.f32(float %1217, float %1220, float %1216)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %10)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %8)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6)
+  %1222 = fneg float %1101
+  %1223 = call float @llvm.fmuladd.f32(float %1222, float %1221, float 1.000000e+00)
+  %1224 = fmul float %1100, %1223
+  store volatile float %1224, ptr %75, align 4, !tbaa !5
+  %1225 = load volatile float, ptr %74, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %11)
+  store volatile float 0x3FD921FB60000000, ptr %11, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %12)
+  store volatile float 1.000000e+00, ptr %12, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %13)
+  store volatile float 0x3FED906BC0000000, ptr %13, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %14)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %15)
+  store volatile float %1225, ptr %15, align 4, !tbaa !5
+  %1226 = fcmp olt float %1225, 0.000000e+00
+  %1227 = fadd float %1225, 0x401921FB60000000
+  %1228 = select i1 %1226, float %1227, float %1225
+  %1229 = fcmp ult float %1228, 0x401921FB60000000
+  %1230 = fadd float %1228, 0xC01921FB60000000
+  %1231 = select i1 %1229, float %1228, float %1230
+  %1232 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1233 = fcmp ult float %1231, %1232
+  br i1 %1233, label %1237, label %1234
+
+1234:                                             ; preds = %1212
+  %1235 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1236 = fsub float %1231, %1235
+  store volatile float %1236, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %13, align 4, !tbaa !5
+  br label %1237
+
+1237:                                             ; preds = %1234, %1212
+  %1238 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1239 = fmul float %1238, 2.000000e+00
+  %1240 = fcmp ult float %1231, %1239
+  br i1 %1240, label %1244, label %1241
+
+1241:                                             ; preds = %1237
+  %1242 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1243 = call float @llvm.fmuladd.f32(float %1242, float -2.000000e+00, float %1231)
+  store volatile float %1243, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %13, align 4, !tbaa !5
+  br label %1244
+
+1244:                                             ; preds = %1241, %1237
+  %1245 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1246 = fmul float %1245, 3.000000e+00
+  %1247 = fcmp ult float %1231, %1246
+  br i1 %1247, label %1251, label %1248
+
+1248:                                             ; preds = %1244
+  %1249 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1250 = call float @llvm.fmuladd.f32(float %1249, float -3.000000e+00, float %1231)
+  store volatile float %1250, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %13, align 4, !tbaa !5
+  br label %1251
+
+1251:                                             ; preds = %1248, %1244
+  %1252 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1253 = fmul float %1252, 4.000000e+00
+  %1254 = fcmp ult float %1231, %1253
+  br i1 %1254, label %1258, label %1255
+
+1255:                                             ; preds = %1251
+  %1256 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1257 = call float @llvm.fmuladd.f32(float %1256, float -4.000000e+00, float %1231)
+  store volatile float %1257, ptr %15, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %13, align 4, !tbaa !5
+  br label %1258
+
+1258:                                             ; preds = %1255, %1251
+  %1259 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1260 = fmul float %1259, 5.000000e+00
+  %1261 = fcmp ult float %1231, %1260
+  br i1 %1261, label %1265, label %1262
+
+1262:                                             ; preds = %1258
+  %1263 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1264 = call float @llvm.fmuladd.f32(float %1263, float -5.000000e+00, float %1231)
+  store volatile float %1264, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %13, align 4, !tbaa !5
+  br label %1265
+
+1265:                                             ; preds = %1262, %1258
+  %1266 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1267 = fmul float %1266, 6.000000e+00
+  %1268 = fcmp ult float %1231, %1267
+  br i1 %1268, label %1272, label %1269
+
+1269:                                             ; preds = %1265
+  %1270 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1271 = call float @llvm.fmuladd.f32(float %1270, float -6.000000e+00, float %1231)
+  store volatile float %1271, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %13, align 4, !tbaa !5
+  br label %1272
+
+1272:                                             ; preds = %1269, %1265
+  %1273 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1274 = fmul float %1273, 7.000000e+00
+  %1275 = fcmp ult float %1231, %1274
+  br i1 %1275, label %1279, label %1276
+
+1276:                                             ; preds = %1272
+  %1277 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1278 = call float @llvm.fmuladd.f32(float %1277, float -7.000000e+00, float %1231)
+  store volatile float %1278, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %12, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %13, align 4, !tbaa !5
+  br label %1279
+
+1279:                                             ; preds = %1276, %1272
+  %1280 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1281 = fmul float %1280, 8.000000e+00
+  %1282 = fcmp ult float %1231, %1281
+  br i1 %1282, label %1286, label %1283
+
+1283:                                             ; preds = %1279
+  %1284 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1285 = call float @llvm.fmuladd.f32(float %1284, float -8.000000e+00, float %1231)
+  store volatile float %1285, ptr %15, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %13, align 4, !tbaa !5
+  br label %1286
+
+1286:                                             ; preds = %1283, %1279
+  %1287 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1288 = fmul float %1287, 9.000000e+00
+  %1289 = fcmp ult float %1231, %1288
+  br i1 %1289, label %1293, label %1290
+
+1290:                                             ; preds = %1286
+  %1291 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1292 = call float @llvm.fmuladd.f32(float %1291, float -9.000000e+00, float %1231)
+  store volatile float %1292, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %13, align 4, !tbaa !5
+  br label %1293
+
+1293:                                             ; preds = %1290, %1286
+  %1294 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1295 = fmul float %1294, 1.000000e+01
+  %1296 = fcmp ult float %1231, %1295
+  br i1 %1296, label %1300, label %1297
+
+1297:                                             ; preds = %1293
+  %1298 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1299 = call float @llvm.fmuladd.f32(float %1298, float -1.000000e+01, float %1231)
+  store volatile float %1299, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %13, align 4, !tbaa !5
+  br label %1300
+
+1300:                                             ; preds = %1297, %1293
+  %1301 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1302 = fmul float %1301, 1.100000e+01
+  %1303 = fcmp ult float %1231, %1302
+  br i1 %1303, label %1307, label %1304
+
+1304:                                             ; preds = %1300
+  %1305 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1306 = call float @llvm.fmuladd.f32(float %1305, float -1.100000e+01, float %1231)
+  store volatile float %1306, ptr %15, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %13, align 4, !tbaa !5
+  br label %1307
+
+1307:                                             ; preds = %1304, %1300
+  %1308 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1309 = fmul float %1308, 1.200000e+01
+  %1310 = fcmp ult float %1231, %1309
+  br i1 %1310, label %1314, label %1311
+
+1311:                                             ; preds = %1307
+  %1312 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1313 = call float @llvm.fmuladd.f32(float %1312, float -1.200000e+01, float %1231)
+  store volatile float %1313, ptr %15, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %12, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %13, align 4, !tbaa !5
+  br label %1314
+
+1314:                                             ; preds = %1311, %1307
+  %1315 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1316 = fmul float %1315, 1.300000e+01
+  %1317 = fcmp ult float %1231, %1316
+  br i1 %1317, label %1321, label %1318
+
+1318:                                             ; preds = %1314
+  %1319 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1320 = call float @llvm.fmuladd.f32(float %1319, float -1.300000e+01, float %1231)
+  store volatile float %1320, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %13, align 4, !tbaa !5
+  br label %1321
+
+1321:                                             ; preds = %1318, %1314
+  %1322 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1323 = fmul float %1322, 1.400000e+01
+  %1324 = fcmp ult float %1231, %1323
+  br i1 %1324, label %1328, label %1325
+
+1325:                                             ; preds = %1321
+  %1326 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1327 = call float @llvm.fmuladd.f32(float %1326, float -1.400000e+01, float %1231)
+  store volatile float %1327, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %12, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %13, align 4, !tbaa !5
+  br label %1328
+
+1328:                                             ; preds = %1325, %1321
+  %1329 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1330 = fmul float %1329, 1.500000e+01
+  %1331 = fcmp ult float %1231, %1330
+  br i1 %1331, label %1335, label %1332
+
+1332:                                             ; preds = %1328
+  %1333 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1334 = call float @llvm.fmuladd.f32(float %1333, float -1.500000e+01, float %1231)
+  store volatile float %1334, ptr %15, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %12, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %13, align 4, !tbaa !5
+  br label %1335
+
+1335:                                             ; preds = %1328, %1332
+  %1336 = load volatile float, ptr %15, align 4, !tbaa !5
+  %1337 = load volatile float, ptr %11, align 4, !tbaa !5
+  %1338 = fdiv float %1336, %1337
+  store volatile float %1338, ptr %14, align 4, !tbaa !5
+  %1339 = load volatile float, ptr %12, align 4, !tbaa !5
+  %1340 = load volatile float, ptr %14, align 4, !tbaa !5
+  %1341 = load volatile float, ptr %13, align 4, !tbaa !5
+  %1342 = load volatile float, ptr %12, align 4, !tbaa !5
+  %1343 = fsub float %1341, %1342
+  %1344 = call float @llvm.fmuladd.f32(float %1340, float %1343, float %1339)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %15)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %14)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %13)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %12)
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %11)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %10)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %8)
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7)
-  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %6) #3
-  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %5) #3
-  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %4) #3
-  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %3) #3
+  %1345 = load volatile float, ptr %74, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %49)
+  store volatile float 0x3FD921FB60000000, ptr %49, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %50)
+  store volatile float 0.000000e+00, ptr %50, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %51)
+  store volatile float 0x3FD87DE2A0000000, ptr %51, align 4, !tbaa !5
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %52)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %53)
+  store volatile float %1345, ptr %53, align 4, !tbaa !5
+  %1346 = fcmp olt float %1345, 0.000000e+00
+  %1347 = fadd float %1345, 0x401921FB60000000
+  %1348 = select i1 %1346, float %1347, float %1345
+  %1349 = fcmp ult float %1348, 0x401921FB60000000
+  %1350 = fadd float %1348, 0xC01921FB60000000
+  %1351 = select i1 %1349, float %1348, float %1350
+  %1352 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1353 = fcmp ult float %1351, %1352
+  br i1 %1353, label %1357, label %1354
+
+1354:                                             ; preds = %1335
+  %1355 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1356 = fsub float %1351, %1355
+  store volatile float %1356, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %51, align 4, !tbaa !5
+  br label %1357
+
+1357:                                             ; preds = %1354, %1335
+  %1358 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1359 = fmul float %1358, 2.000000e+00
+  %1360 = fcmp ult float %1351, %1359
+  br i1 %1360, label %1364, label %1361
+
+1361:                                             ; preds = %1357
+  %1362 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1363 = call float @llvm.fmuladd.f32(float %1362, float -2.000000e+00, float %1351)
+  store volatile float %1363, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %51, align 4, !tbaa !5
+  br label %1364
+
+1364:                                             ; preds = %1361, %1357
+  %1365 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1366 = fmul float %1365, 3.000000e+00
+  %1367 = fcmp ult float %1351, %1366
+  br i1 %1367, label %1371, label %1368
+
+1368:                                             ; preds = %1364
+  %1369 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1370 = call float @llvm.fmuladd.f32(float %1369, float -3.000000e+00, float %1351)
+  store volatile float %1370, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %51, align 4, !tbaa !5
+  br label %1371
+
+1371:                                             ; preds = %1368, %1364
+  %1372 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1373 = fmul float %1372, 4.000000e+00
+  %1374 = fcmp ult float %1351, %1373
+  br i1 %1374, label %1378, label %1375
+
+1375:                                             ; preds = %1371
+  %1376 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1377 = call float @llvm.fmuladd.f32(float %1376, float -4.000000e+00, float %1351)
+  store volatile float %1377, ptr %53, align 4, !tbaa !5
+  store volatile float 1.000000e+00, ptr %50, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %51, align 4, !tbaa !5
+  br label %1378
+
+1378:                                             ; preds = %1375, %1371
+  %1379 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1380 = fmul float %1379, 5.000000e+00
+  %1381 = fcmp ult float %1351, %1380
+  br i1 %1381, label %1385, label %1382
+
+1382:                                             ; preds = %1378
+  %1383 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1384 = call float @llvm.fmuladd.f32(float %1383, float -5.000000e+00, float %1351)
+  store volatile float %1384, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FED906BC0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %51, align 4, !tbaa !5
+  br label %1385
+
+1385:                                             ; preds = %1382, %1378
+  %1386 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1387 = fmul float %1386, 6.000000e+00
+  %1388 = fcmp ult float %1351, %1387
+  br i1 %1388, label %1392, label %1389
+
+1389:                                             ; preds = %1385
+  %1390 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1391 = call float @llvm.fmuladd.f32(float %1390, float -6.000000e+00, float %1351)
+  store volatile float %1391, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FE6A09E60000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %51, align 4, !tbaa !5
+  br label %1392
+
+1392:                                             ; preds = %1389, %1385
+  %1393 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1394 = fmul float %1393, 7.000000e+00
+  %1395 = fcmp ult float %1351, %1394
+  br i1 %1395, label %1399, label %1396
+
+1396:                                             ; preds = %1392
+  %1397 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1398 = call float @llvm.fmuladd.f32(float %1397, float -7.000000e+00, float %1351)
+  store volatile float %1398, ptr %53, align 4, !tbaa !5
+  store volatile float 0x3FD87DE2A0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %51, align 4, !tbaa !5
+  br label %1399
+
+1399:                                             ; preds = %1396, %1392
+  %1400 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1401 = fmul float %1400, 8.000000e+00
+  %1402 = fcmp ult float %1351, %1401
+  br i1 %1402, label %1406, label %1403
+
+1403:                                             ; preds = %1399
+  %1404 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1405 = call float @llvm.fmuladd.f32(float %1404, float -8.000000e+00, float %1351)
+  store volatile float %1405, ptr %53, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %51, align 4, !tbaa !5
+  br label %1406
+
+1406:                                             ; preds = %1403, %1399
+  %1407 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1408 = fmul float %1407, 9.000000e+00
+  %1409 = fcmp ult float %1351, %1408
+  br i1 %1409, label %1413, label %1410
+
+1410:                                             ; preds = %1406
+  %1411 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1412 = call float @llvm.fmuladd.f32(float %1411, float -9.000000e+00, float %1351)
+  store volatile float %1412, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %51, align 4, !tbaa !5
+  br label %1413
+
+1413:                                             ; preds = %1410, %1406
+  %1414 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1415 = fmul float %1414, 1.000000e+01
+  %1416 = fcmp ult float %1351, %1415
+  br i1 %1416, label %1420, label %1417
+
+1417:                                             ; preds = %1413
+  %1418 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1419 = call float @llvm.fmuladd.f32(float %1418, float -1.000000e+01, float %1351)
+  store volatile float %1419, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %51, align 4, !tbaa !5
+  br label %1420
+
+1420:                                             ; preds = %1417, %1413
+  %1421 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1422 = fmul float %1421, 1.100000e+01
+  %1423 = fcmp ult float %1351, %1422
+  br i1 %1423, label %1427, label %1424
+
+1424:                                             ; preds = %1420
+  %1425 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1426 = call float @llvm.fmuladd.f32(float %1425, float -1.100000e+01, float %1351)
+  store volatile float %1426, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %50, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %51, align 4, !tbaa !5
+  br label %1427
+
+1427:                                             ; preds = %1424, %1420
+  %1428 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1429 = fmul float %1428, 1.200000e+01
+  %1430 = fcmp ult float %1351, %1429
+  br i1 %1430, label %1434, label %1431
+
+1431:                                             ; preds = %1427
+  %1432 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1433 = call float @llvm.fmuladd.f32(float %1432, float -1.200000e+01, float %1351)
+  store volatile float %1433, ptr %53, align 4, !tbaa !5
+  store volatile float -1.000000e+00, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %51, align 4, !tbaa !5
+  br label %1434
+
+1434:                                             ; preds = %1431, %1427
+  %1435 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1436 = fmul float %1435, 1.300000e+01
+  %1437 = fcmp ult float %1351, %1436
+  br i1 %1437, label %1441, label %1438
+
+1438:                                             ; preds = %1434
+  %1439 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1440 = call float @llvm.fmuladd.f32(float %1439, float -1.300000e+01, float %1351)
+  store volatile float %1440, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFED906BC0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %51, align 4, !tbaa !5
+  br label %1441
+
+1441:                                             ; preds = %1438, %1434
+  %1442 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1443 = fmul float %1442, 1.400000e+01
+  %1444 = fcmp ult float %1351, %1443
+  br i1 %1444, label %1448, label %1445
+
+1445:                                             ; preds = %1441
+  %1446 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1447 = call float @llvm.fmuladd.f32(float %1446, float -1.400000e+01, float %1351)
+  store volatile float %1447, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFE6A09E60000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %51, align 4, !tbaa !5
+  br label %1448
+
+1448:                                             ; preds = %1445, %1441
+  %1449 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1450 = fmul float %1449, 1.500000e+01
+  %1451 = fcmp ult float %1351, %1450
+  br i1 %1451, label %1455, label %1452
+
+1452:                                             ; preds = %1448
+  %1453 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1454 = call float @llvm.fmuladd.f32(float %1453, float -1.500000e+01, float %1351)
+  store volatile float %1454, ptr %53, align 4, !tbaa !5
+  store volatile float 0xBFD87DE2A0000000, ptr %50, align 4, !tbaa !5
+  store volatile float 0.000000e+00, ptr %51, align 4, !tbaa !5
+  br label %1455
+
+1455:                                             ; preds = %1448, %1452
+  %1456 = load volatile float, ptr %53, align 4, !tbaa !5
+  %1457 = load volatile float, ptr %49, align 4, !tbaa !5
+  %1458 = fdiv float %1456, %1457
+  store volatile float %1458, ptr %52, align 4, !tbaa !5
+  %1459 = load volatile float, ptr %50, align 4, !tbaa !5
+  %1460 = load volatile float, ptr %52, align 4, !tbaa !5
+  %1461 = load volatile float, ptr %51, align 4, !tbaa !5
+  %1462 = load volatile float, ptr %50, align 4, !tbaa !5
+  %1463 = fsub float %1461, %1462
+  %1464 = call float @llvm.fmuladd.f32(float %1460, float %1463, float %1459)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %53)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %52)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %51)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %50)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %49)
+  %1465 = load volatile float, ptr %75, align 4, !tbaa !5
+  %1466 = load volatile float, ptr %60, align 4, !tbaa !5
+  %1467 = fneg float %1466
+  %1468 = call float @llvm.fmuladd.f32(float %1465, float %1344, float %1467)
+  store volatile float %1468, ptr %59, align 4, !tbaa !5
+  %1469 = load volatile float, ptr %75, align 4, !tbaa !5
+  %1470 = load volatile float, ptr %148, align 4, !tbaa !5
+  %1471 = fneg float %1470
+  %1472 = call float @llvm.fmuladd.f32(float %1469, float %1464, float %1471)
+  store volatile float %1472, ptr %149, align 4, !tbaa !5
+  %1473 = load volatile float, ptr %150, align 4, !tbaa !5
+  %1474 = fsub float 0.000000e+00, %1473
+  store volatile float %1474, ptr %151, align 4, !tbaa !5
+  %1475 = fmul float %1472, %1472
+  %1476 = call float @llvm.fmuladd.f32(float %1468, float %1468, float %1475)
+  %1477 = call float @llvm.fmuladd.f32(float %1474, float %1474, float %1476)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %57)
+  %1478 = fmul float %1477, 5.000000e-01
+  store volatile float %1478, ptr %57, align 4, !tbaa !5
+  %1479 = fcmp ugt float %1477, 0.000000e+00
+  br i1 %1479, label %1480, label %1492
+
+1480:                                             ; preds = %1455
+  %1481 = bitcast float %1477 to i32
+  %1482 = ashr i32 %1481, 1
+  %1483 = sub nsw i32 1597463007, %1482
+  %1484 = bitcast i32 %1483 to float
+  %1485 = load volatile float, ptr %57, align 4, !tbaa !5
+  %1486 = fneg float %1484
+  %1487 = fmul float %1485, %1486
+  %1488 = call float @llvm.fmuladd.f32(float %1487, float %1484, float 1.500000e+00)
+  %1489 = fmul float %1488, %1484
+  store volatile float %1489, ptr %57, align 4, !tbaa !5
+  %1490 = load volatile float, ptr %57, align 4, !tbaa !5
+  %1491 = fdiv float 1.000000e+00, %1490
+  br label %1492
+
+1492:                                             ; preds = %1455, %1480
+  %1493 = phi float [ %1491, %1480 ], [ 0.000000e+00, %1455 ]
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %57)
+  store volatile float %1493, ptr %68, align 4, !tbaa !5
+  %1494 = load volatile float, ptr %68, align 4, !tbaa !5
+  %1495 = load volatile float, ptr %59, align 4, !tbaa !5
+  %1496 = fdiv float %1495, %1494
+  store volatile float %1496, ptr %59, align 4, !tbaa !5
+  %1497 = load volatile float, ptr %68, align 4, !tbaa !5
+  %1498 = load volatile float, ptr %149, align 4, !tbaa !5
+  %1499 = fdiv float %1498, %1497
+  store volatile float %1499, ptr %149, align 4, !tbaa !5
+  %1500 = load volatile float, ptr %68, align 4, !tbaa !5
+  %1501 = load volatile float, ptr %151, align 4, !tbaa !5
+  %1502 = fdiv float %1501, %1500
+  store volatile float %1502, ptr %151, align 4, !tbaa !5
+  %1503 = load volatile float, ptr %61, align 4, !tbaa !5
+  %1504 = load volatile float, ptr %59, align 4, !tbaa !5
+  %1505 = load volatile float, ptr %116, align 4, !tbaa !5
+  %1506 = load volatile float, ptr %149, align 4, !tbaa !5
+  %1507 = fmul float %1505, %1506
+  %1508 = call float @llvm.fmuladd.f32(float %1503, float %1504, float %1507)
+  %1509 = load volatile float, ptr %121, align 4, !tbaa !5
+  %1510 = load volatile float, ptr %151, align 4, !tbaa !5
+  %1511 = call float @llvm.fmuladd.f32(float %1509, float %1510, float %1508)
+  store volatile float %1511, ptr %76, align 4, !tbaa !5
+  %1512 = load volatile float, ptr %70, align 4, !tbaa !5
+  %1513 = load volatile float, ptr %76, align 4, !tbaa !5
+  %1514 = fadd float %1513, 1.000000e+00
+  %1515 = fmul float %1512, %1514
+  store volatile float %1515, ptr %77, align 4, !tbaa !5
+  %1516 = load volatile float, ptr %70, align 4, !tbaa !5
+  %1517 = load volatile float, ptr %70, align 4, !tbaa !5
+  %1518 = fadd float %1517, 1.000000e+00
+  %1519 = fdiv float %1516, %1518
+  %1520 = load volatile float, ptr %76, align 4, !tbaa !5
+  %1521 = fmul float %1520, %1519
+  store volatile float %1521, ptr %78, align 4, !tbaa !5
+  %1522 = load volatile float, ptr %59, align 4, !tbaa !5
+  %1523 = load volatile float, ptr %78, align 4, !tbaa !5
+  %1524 = load volatile float, ptr %61, align 4, !tbaa !5
+  %1525 = call float @llvm.fmuladd.f32(float %1523, float %1524, float %1522)
+  %1526 = load volatile float, ptr %61, align 4, !tbaa !5
+  %1527 = fadd float %1525, %1526
+  %1528 = load volatile float, ptr %77, align 4, !tbaa !5
+  %1529 = fdiv float %1527, %1528
+  store volatile float %1529, ptr %62, align 4, !tbaa !5
+  %1530 = load volatile float, ptr %149, align 4, !tbaa !5
+  %1531 = load volatile float, ptr %78, align 4, !tbaa !5
+  %1532 = load volatile float, ptr %116, align 4, !tbaa !5
+  %1533 = call float @llvm.fmuladd.f32(float %1531, float %1532, float %1530)
+  %1534 = load volatile float, ptr %116, align 4, !tbaa !5
+  %1535 = fadd float %1533, %1534
+  %1536 = load volatile float, ptr %77, align 4, !tbaa !5
+  %1537 = fdiv float %1535, %1536
+  store volatile float %1537, ptr %152, align 4, !tbaa !5
+  %1538 = load volatile float, ptr %151, align 4, !tbaa !5
+  %1539 = load volatile float, ptr %78, align 4, !tbaa !5
+  %1540 = load volatile float, ptr %121, align 4, !tbaa !5
+  %1541 = call float @llvm.fmuladd.f32(float %1539, float %1540, float %1538)
+  %1542 = load volatile float, ptr %121, align 4, !tbaa !5
+  %1543 = fadd float %1541, %1542
+  %1544 = load volatile float, ptr %77, align 4, !tbaa !5
+  %1545 = fdiv float %1543, %1544
+  store volatile float %1545, ptr %153, align 4, !tbaa !5
+  %1546 = load volatile float, ptr %62, align 4, !tbaa !5
+  %1547 = load volatile float, ptr %62, align 4, !tbaa !5
+  %1548 = load volatile float, ptr %152, align 4, !tbaa !5
+  %1549 = load volatile float, ptr %152, align 4, !tbaa !5
+  %1550 = fmul float %1548, %1549
+  %1551 = call float @llvm.fmuladd.f32(float %1546, float %1547, float %1550)
+  %1552 = load volatile float, ptr %153, align 4, !tbaa !5
+  %1553 = load volatile float, ptr %153, align 4, !tbaa !5
+  %1554 = call float @llvm.fmuladd.f32(float %1552, float %1553, float %1551)
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %58)
+  %1555 = fmul float %1554, 5.000000e-01
+  store volatile float %1555, ptr %58, align 4, !tbaa !5
+  %1556 = fcmp ugt float %1554, 0.000000e+00
+  br i1 %1556, label %1557, label %1569
+
+1557:                                             ; preds = %1492
+  %1558 = bitcast float %1554 to i32
+  %1559 = ashr i32 %1558, 1
+  %1560 = sub nsw i32 1597463007, %1559
+  %1561 = bitcast i32 %1560 to float
+  %1562 = load volatile float, ptr %58, align 4, !tbaa !5
+  %1563 = fneg float %1561
+  %1564 = fmul float %1562, %1563
+  %1565 = call float @llvm.fmuladd.f32(float %1564, float %1561, float 1.500000e+00)
+  %1566 = fmul float %1565, %1561
+  store volatile float %1566, ptr %58, align 4, !tbaa !5
+  %1567 = load volatile float, ptr %58, align 4, !tbaa !5
+  %1568 = fdiv float 1.000000e+00, %1567
+  br label %1569
+
+1569:                                             ; preds = %1492, %1557
+  %1570 = phi float [ %1568, %1557 ], [ 0.000000e+00, %1492 ]
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %58)
+  store volatile float %1570, ptr %79, align 4, !tbaa !5
+  %1571 = load volatile float, ptr %79, align 4, !tbaa !5
+  %1572 = load volatile float, ptr %62, align 4, !tbaa !5
+  %1573 = fdiv float %1572, %1571
+  store volatile float %1573, ptr %62, align 4, !tbaa !5
+  %1574 = load volatile float, ptr %79, align 4, !tbaa !5
+  %1575 = load volatile float, ptr %152, align 4, !tbaa !5
+  %1576 = fdiv float %1575, %1574
+  store volatile float %1576, ptr %152, align 4, !tbaa !5
+  %1577 = load volatile float, ptr %79, align 4, !tbaa !5
+  %1578 = load volatile float, ptr %153, align 4, !tbaa !5
+  %1579 = fdiv float %1578, %1577
+  store volatile float %1579, ptr %153, align 4, !tbaa !5
+  %1580 = load volatile float, ptr %68, align 4, !tbaa !5
+  %1581 = fdiv float %1580, 0x41B1DE7840000000
+  store volatile float %1581, ptr %67, align 4, !tbaa !5
+  %1582 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %1583 = icmp eq ptr %1582, null
+  br i1 %1583, label %1584, label %154, !llvm.loop !17
+
+1584:                                             ; preds = %1569, %141
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %80) #3
+  %1585 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %80, i32 noundef 0, i32 noundef 3) #3
+  %1586 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %1587 = icmp eq ptr %1586, null
+  br i1 %1587, label %1600, label %1588
+
+1588:                                             ; preds = %1584, %1588
+  %1589 = phi ptr [ %1598, %1588 ], [ %1586, %1584 ]
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %82) #3
+  %1590 = load i64, ptr %1589, align 8, !tbaa !9
+  %1591 = getelementptr inbounds [3 x float], ptr %60, i64 0, i64 %1590
+  %1592 = load volatile float, ptr %1591, align 4, !tbaa !5
+  %1593 = load volatile float, ptr %68, align 4, !tbaa !5
+  %1594 = getelementptr inbounds [3 x float], ptr %62, i64 0, i64 %1590
+  %1595 = load volatile float, ptr %1594, align 4, !tbaa !5
+  %1596 = call float @llvm.fmuladd.f32(float %1593, float %1595, float %1592)
+  store float %1596, ptr %82, align 4, !tbaa !5
+  %1597 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %84, ptr noundef nonnull %1589, ptr noundef nonnull %82, i64 noundef 0) #3
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %82) #3
+  %1598 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %80) #3
+  %1599 = icmp eq ptr %1598, null
+  br i1 %1599, label %1600, label %1588, !llvm.loop !18
+
+1600:                                             ; preds = %1588, %1584
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %80) #3
+  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %80) #3
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %79)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %78)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %77)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %76)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %75)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %74)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %73)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %72)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %71)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %70)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %69)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %68)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %67)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %66)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %65)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %64)
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %63)
+  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %62) #3
+  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %61) #3
+  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %60) #3
+  call void @llvm.lifetime.end.p0(i64 12, ptr nonnull %59) #3
   ret i32 0
 }
 
@@ -1356,19 +2998,20 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
-!3 = !{i64 2147511606}
-!4 = !{i64 2147512118}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
+!3 = !{i64 2147510113}
+!4 = !{i64 2147510625}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"float", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"long long", !7, i64 0}
-!11 = distinct !{!11, !12}
+!11 = distinct !{!11, !12, !13}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = !{!14, !14, i64 0}
-!14 = !{!"long", !7, i64 0}
-!15 = distinct !{!15, !12}
-!16 = distinct !{!16, !12}
-!17 = distinct !{!17, !12}
+!13 = !{!"llvm.loop.unroll.disable"}
+!14 = !{!15, !15, i64 0}
+!15 = !{!"long", !7, i64 0}
+!16 = distinct !{!16, !12, !13}
+!17 = distinct !{!17, !12, !13}
+!18 = distinct !{!18, !12, !13}

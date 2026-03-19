@@ -3,9 +3,9 @@
 #define C_LIGHT 299792458.0f
 #define PI 3.14159265359f
 
-inline float sqroot(float s) {
-    float r = s / 2;
-    if (s <= 0)
+static inline __attribute__((always_inline)) float sqroot(float s) {
+    volatile float r = s / 2;
+    if (s <= 0.0f)
         return 0;
 
     int i = *(int*)&s;
@@ -16,151 +16,63 @@ inline float sqroot(float s) {
     return 1.0f / r;
 }
 
-inline float sine(float rad) {
-    float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
+static inline __attribute__((always_inline)) float sine(float rad) {
+    volatile float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
     if (rad < 0.0f)
         rad = rad + 2.0f * PI;
     if (rad >= 2.0f * PI)
         rad = rad - 2.0f * PI;
 
-    offset = (rad >= step) ? (rad - step) : offset;
-    v1 = (rad >= step) ? 0.38268343f : v1;
-    v2 = (rad >= step) ? 0.70710678f : v2;
-
-    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
-    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 2.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
-    v1 = (rad >= 3.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 3.0f * step) ? 1.0f : v2;
-
-    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
-    v1 = (rad >= 4.0f * step) ? 1.0f : v1;
-    v2 = (rad >= 4.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
-    v1 = (rad >= 5.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 5.0f * step) ? 0.70710678f : v2;
-
-    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
-    v1 = (rad >= 6.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 6.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
-    v1 = (rad >= 7.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 7.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
-    v1 = (rad >= 8.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 8.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
-    v1 = (rad >= 9.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
-    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 10.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
-    v1 = (rad >= 11.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 11.0f * step) ? -1.0f : v2;
-
-    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
-    v1 = (rad >= 12.0f * step) ? -1.0f : v1;
-    v2 = (rad >= 12.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
-    v1 = (rad >= 13.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 13.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
-    v1 = (rad >= 14.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 14.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
-    v1 = (rad >= 15.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 15.0f * step) ? 0.0f : v2;
+    if (rad >= step)         { offset = rad - step;         v1 = 0.38268343f;  v2 = 0.70710678f;  }
+    if (rad >= 2.0f * step)  { offset = rad - 2.0f * step;  v1 = 0.70710678f;  v2 = 0.92387953f;  }
+    if (rad >= 3.0f * step)  { offset = rad - 3.0f * step;  v1 = 0.92387953f;  v2 = 1.0f;         }
+    if (rad >= 4.0f * step)  { offset = rad - 4.0f * step;  v1 = 1.0f;         v2 = 0.92387953f;  }
+    if (rad >= 5.0f * step)  { offset = rad - 5.0f * step;  v1 = 0.92387953f;  v2 = 0.70710678f;  }
+    if (rad >= 6.0f * step)  { offset = rad - 6.0f * step;  v1 = 0.70710678f;  v2 = 0.38268343f;  }
+    if (rad >= 7.0f * step)  { offset = rad - 7.0f * step;  v1 = 0.38268343f;  v2 = 0.0f;         }
+    if (rad >= 8.0f * step)  { offset = rad - 8.0f * step;  v1 = 0.0f;         v2 = -0.38268343f; }
+    if (rad >= 9.0f * step)  { offset = rad - 9.0f * step;  v1 = -0.38268343f; v2 = -0.70710678f; }
+    if (rad >= 10.0f * step) { offset = rad - 10.0f * step; v1 = -0.70710678f; v2 = -0.92387953f; }
+    if (rad >= 11.0f * step) { offset = rad - 11.0f * step; v1 = -0.92387953f; v2 = -1.0f;        }
+    if (rad >= 12.0f * step) { offset = rad - 12.0f * step; v1 = -1.0f;        v2 = -0.92387953f; }
+    if (rad >= 13.0f * step) { offset = rad - 13.0f * step; v1 = -0.92387953f; v2 = -0.70710678f; }
+    if (rad >= 14.0f * step) { offset = rad - 14.0f * step; v1 = -0.70710678f; v2 = -0.38268343f; }
+    if (rad >= 15.0f * step) { offset = rad - 15.0f * step; v1 = -0.38268343f; v2 = 0.0f;         }
 
     frac = offset / step;
     return v1 + frac * (v2 - v1);
 }
 
-inline float cosine(float rad) {
-    float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
+static inline __attribute__((always_inline)) float cosine(float rad) {
+    volatile float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
     if (rad < 0.0f)
         rad = rad + 2.0f * PI;
     if (rad >= 2.0f * PI)
         rad = rad - 2.0f * PI;
 
-    offset = (rad >= step) ? (rad - step) : offset;
-    v1 = (rad >= step) ? 0.92387953f : v1;
-    v2 = (rad >= step) ? 0.70710678f : v2;
-
-    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
-    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 2.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
-    v1 = (rad >= 3.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 3.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
-    v1 = (rad >= 4.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 4.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
-    v1 = (rad >= 5.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 5.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
-    v1 = (rad >= 6.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 6.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
-    v1 = (rad >= 7.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 7.0f * step) ? -1.0f : v2;
-
-    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
-    v1 = (rad >= 8.0f * step) ? -1.0f : v1;
-    v2 = (rad >= 8.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
-    v1 = (rad >= 9.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
-    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 10.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
-    v1 = (rad >= 11.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 11.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
-    v1 = (rad >= 12.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 12.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
-    v1 = (rad >= 13.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 13.0f * step) ? 0.70710678f : v2;
-
-    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
-    v1 = (rad >= 14.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 14.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
-    v1 = (rad >= 15.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 15.0f * step) ? 1.0f : v2;
+    if (rad >= step)         { offset = rad - step;         v1 = 0.92387953f;  v2 = 0.70710678f;  }
+    if (rad >= 2.0f * step)  { offset = rad - 2.0f * step;  v1 = 0.70710678f;  v2 = 0.38268343f;  }
+    if (rad >= 3.0f * step)  { offset = rad - 3.0f * step;  v1 = 0.38268343f;  v2 = 0.0f;         }
+    if (rad >= 4.0f * step)  { offset = rad - 4.0f * step;  v1 = 0.0f;         v2 = -0.38268343f; }
+    if (rad >= 5.0f * step)  { offset = rad - 5.0f * step;  v1 = -0.38268343f; v2 = -0.70710678f; }
+    if (rad >= 6.0f * step)  { offset = rad - 6.0f * step;  v1 = -0.70710678f; v2 = -0.92387953f; }
+    if (rad >= 7.0f * step)  { offset = rad - 7.0f * step;  v1 = -0.92387953f; v2 = -1.0f;        }
+    if (rad >= 8.0f * step)  { offset = rad - 8.0f * step;  v1 = -1.0f;        v2 = -0.92387953f; }
+    if (rad >= 9.0f * step)  { offset = rad - 9.0f * step;  v1 = -0.92387953f; v2 = -0.70710678f; }
+    if (rad >= 10.0f * step) { offset = rad - 10.0f * step; v1 = -0.70710678f; v2 = -0.38268343f; }
+    if (rad >= 11.0f * step) { offset = rad - 11.0f * step; v1 = -0.38268343f; v2 = 0.0f;         }
+    if (rad >= 12.0f * step) { offset = rad - 12.0f * step; v1 = 0.0f;         v2 = 0.38268343f;  }
+    if (rad >= 13.0f * step) { offset = rad - 13.0f * step; v1 = 0.38268343f;  v2 = 0.70710678f;  }
+    if (rad >= 14.0f * step) { offset = rad - 14.0f * step; v1 = 0.70710678f;  v2 = 0.92387953f;  }
+    if (rad >= 15.0f * step) { offset = rad - 15.0f * step; v1 = 0.92387953f;  v2 = 1.0f;         }
 
     frac = offset / step;
     return v1 + frac * (v2 - v1);
 }
 
-inline float _atan2(float y, float x) {
+static inline __attribute__((always_inline)) float _atan2(float y, float x) {
     long y_bits = *(long*)&y & 0xFFFFFFFF;
     long x_bits = *(long*)&x & 0xFFFFFFFF;
 
@@ -171,7 +83,7 @@ inline float _atan2(float y, float x) {
     long abs_y_bits = y_bits & 0x7FFFFFFF;
     long abs_x_bits = x_bits & 0x7FFFFFFF;
 
-    float div_result;
+    volatile float div_result;
     int use_x = (abs_x_bits > abs_y_bits) ? 1 : 0;  // Integer comparison only
 
     if (use_x) {

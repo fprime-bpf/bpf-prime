@@ -4,7 +4,7 @@
 #define MAX_ITER 5
 #define PI    3.14159265359f
 
-float sqroot(float s) {
+static inline __attribute__((always_inline)) float sqroot(float s) {
     float r = s / 2;
     if (s <= 0)
         return 0;
@@ -17,7 +17,7 @@ float sqroot(float s) {
     return 1.0f / r;
 }
 
-float sine(float rad) {
+static inline __attribute__((always_inline)) float sine(float rad) {
     float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -89,7 +89,7 @@ float sine(float rad) {
     return v1 + frac * (v2 - v1);
 }
 
-float cosine(float rad) {
+static inline __attribute__((always_inline)) float cosine(float rad) {
     float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
 
     if (rad < 0.0f)
@@ -161,7 +161,7 @@ float cosine(float rad) {
     return v1 + frac * (v2 - v1);
 }
 
-float _atan2(float y, float x) {
+static inline __attribute__((always_inline)) float _atan2(float y, float x) {
     long y_bits = *(long*)&y & 0xFFFFFFFF;
     long x_bits = *(long*)&x & 0xFFFFFFFF;
 
