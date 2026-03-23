@@ -18,6 +18,10 @@ static unsigned int (* const bpf_iter_num_new)(struct bpf_iter_num *it, int star
 static long long *(* const bpf_iter_num_next)(struct bpf_iter_num *it) = (void *) 6;
 static void (* const bpf_iter_num_destroy)(struct bpf_iter_num *it) = (void *) 7;
 static int (* const bpf_rand_int)(int min, int max) = (void *) 8;
+static float (* const bpf_math_sqrt)(float elem) = (void *) 9;
+static float (* const bpf_math_sin)(float elem) = (void *) 10;
+static float (* const bpf_math_cos)(float elem) = (void *) 11;
+static float (* const bpf_math_atan2)(float elem) = (void *) 12;
 
 #define MAP_BY_FD(MAP_FD) ({ \
     register void *map_ptr_reg asm("r1");                                \
