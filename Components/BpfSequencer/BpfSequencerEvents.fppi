@@ -47,6 +47,6 @@ event WorkerPrioritySetFailed() \
     severity warning high \ 
     format "Failed to set worker priority"
 
-event ContextSwitchLatency(latencyNs: U64) \
+event ContextSwitchLatency(latencyCycles: U64) \
     severity activity low \
-    format "Context switch latency (aberr -> matmul): {} ns"
+    format "Context switch latency (aberr -> matmul): {} cycles"

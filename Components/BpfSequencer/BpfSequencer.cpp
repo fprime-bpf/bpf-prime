@@ -434,8 +434,6 @@ void BpfSequencer::BENCHMARK_CONTEXT_SWITCH_cmdHandler(
     const Fw::CmdStringArg& aberrFilePath,
     const Fw::CmdStringArg& matmulFilePath) {
 
-    using Clock = std::chrono::high_resolution_clock;
-
     // Use dedicated VM slots so this command doesn't disturb other VMs
     constexpr U32 ABERR_VM_ID = 62;
     constexpr U32 MATMUL_VM_ID = 63;
@@ -453,21 +451,28 @@ void BpfSequencer::BENCHMARK_CONTEXT_SWITCH_cmdHandler(
     auto& aberr_vm = vms[ABERR_VM_ID];
     auto& matmul_vm = vms[MATMUL_VM_ID];
 
-    // Run aberr and record the exact moment it finishes
+    // Run aberr to completion, then record the end timestamp via rdcycle
     uint64_t aberr_res = 0;
     aberr_vm->bpf_vm.exec(&aberr_vm->bpf_mem, aberr_vm->bpf_mem_size, aberr_res);
-    auto aberr_end = Clock::now();
+    uint64_t aberr_end;
+    __asm__ __volatile__("rdcycle %0" : "=r"(aberr_end));
 
-    // Record the exact moment matmul is about to start, then run it
-    auto matmul_start = Clock::now();
+    // Load matmul's first memory byte to simulate the start of the next VM,
+    // then capture rdcycle — this is the "start" of the context switch target
+    volatile uint8_t* matmul_mem = matmul_vm->bpf_mem.get();
+    (void)*matmul_mem;
+    uint64_t matmul_start;
+    __asm__ __volatile__("rdcycle %0" : "=r"(matmul_start));
+
+    // Run matmul
     uint64_t matmul_res = 0;
     matmul_vm->bpf_vm.exec(&matmul_vm->bpf_mem, matmul_vm->bpf_mem_size, matmul_res);
 
-    // The context-switch latency is the gap between aberr ending and matmul starting
-    U64 latency_ns = static_cast<U64>(
-        std::chrono::duration_cast<std::chrono::nanoseconds>(matmul_start - aberr_end).count());
+    // The context-switch latency is the cycle count from aberr ending to matmul's
+    // memory being loaded and the next start timestamp captured
+    U64 latency_cycles = matmul_start - aberr_end;
 
-    this->log_ACTIVITY_LO_ContextSwitchLatency(latency_ns);
+    this->log_ACTIVITY_LO_ContextSwitchLatency(latency_cycles);
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
 }
 
