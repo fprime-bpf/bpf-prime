@@ -208,9 +208,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! when aberr stops and when matmul starts (context-switch latency)
     void BENCHMARK_CONTEXT_SWITCH_cmdHandler(
         FwOpcodeType opCode,  //!< The opcode
-        U32 cmdSeq,           //!< The command sequence number
-        const Fw::CmdStringArg& aberrFilePath,   //!< Path to the aberr BPF bytecode file
-        const Fw::CmdStringArg& matmulFilePath   //!< Path to the matmul BPF bytecode file
+        U32 cmdSeq            //!< The command sequence number
     ) override;
     
     //! Handler for SetVMRateGroup command

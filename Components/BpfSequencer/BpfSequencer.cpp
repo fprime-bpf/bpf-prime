@@ -430,21 +430,22 @@ void BpfSequencer::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 
 
 void BpfSequencer::BENCHMARK_CONTEXT_SWITCH_cmdHandler(
     FwOpcodeType opCode,
-    U32 cmdSeq,
-    const Fw::CmdStringArg& aberrFilePath,
-    const Fw::CmdStringArg& matmulFilePath) {
+    U32 cmdSeq) {
 
     // Use dedicated VM slots so this command doesn't disturb other VMs
     constexpr U32 ABERR_VM_ID = 62;
     constexpr U32 MATMUL_VM_ID = 63;
 
+    constexpr const char* ABERR_PATH  = "tests/aberr/a.o";
+    constexpr const char* MATMUL_PATH = "tests/matmul/a.o";
+
     // Load and compile the aberr program
-    if (this->load(ABERR_VM_ID, aberrFilePath.toChar()) != Fw::Success::SUCCESS) {
+    if (this->load(ABERR_VM_ID, ABERR_PATH) != Fw::Success::SUCCESS) {
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     }
 
     // Load and compile the matmul program
-    if (this->load(MATMUL_VM_ID, matmulFilePath.toChar()) != Fw::Success::SUCCESS) {
+    if (this->load(MATMUL_VM_ID, MATMUL_PATH) != Fw::Success::SUCCESS) {
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
     }
 

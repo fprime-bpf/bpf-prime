@@ -13,8 +13,5 @@ async command RUN_SEQUENCE(
 
 @ Load aberr and matmul BPF programs, then benchmark the context-switch latency
 @ between when aberr stops and when matmul starts
-async command BENCHMARK_CONTEXT_SWITCH(
-            aberrFilePath: string, @< Path to the aberr BPF bytecode file
-            matmulFilePath: string @< Path to the matmul BPF bytecode file
-        ) \
+async command BENCHMARK_CONTEXT_SWITCH \
         opcode 8 priority 7 assert
