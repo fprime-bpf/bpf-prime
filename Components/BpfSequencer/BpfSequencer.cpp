@@ -428,6 +428,49 @@ void BpfSequencer::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
+void BpfSequencer::BENCHMARK_CONTEXT_SWITCH_cmdHandler(
+    FwOpcodeType opCode,
+    U32 cmdSeq,
+    const Fw::CmdStringArg& aberrFilePath,
+    const Fw::CmdStringArg& matmulFilePath) {
+
+    using Clock = std::chrono::high_resolution_clock;
+
+    // Use dedicated VM slots so this command doesn't disturb other VMs
+    constexpr U32 ABERR_VM_ID = 62;
+    constexpr U32 MATMUL_VM_ID = 63;
+
+    // Load and compile the aberr program
+    if (this->load(ABERR_VM_ID, aberrFilePath.toChar()) != Fw::Success::SUCCESS) {
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+
+    // Load and compile the matmul program
+    if (this->load(MATMUL_VM_ID, matmulFilePath.toChar()) != Fw::Success::SUCCESS) {
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+
+    auto& aberr_vm = vms[ABERR_VM_ID];
+    auto& matmul_vm = vms[MATMUL_VM_ID];
+
+    // Run aberr and record the exact moment it finishes
+    uint64_t aberr_res = 0;
+    aberr_vm->bpf_vm.exec(&aberr_vm->bpf_mem, aberr_vm->bpf_mem_size, aberr_res);
+    auto aberr_end = Clock::now();
+
+    // Record the exact moment matmul is about to start, then run it
+    auto matmul_start = Clock::now();
+    uint64_t matmul_res = 0;
+    matmul_vm->bpf_vm.exec(&matmul_vm->bpf_mem, matmul_vm->bpf_mem_size, matmul_res);
+
+    // The context-switch latency is the gap between aberr ending and matmul starting
+    U64 latency_ns = static_cast<U64>(
+        std::chrono::duration_cast<std::chrono::nanoseconds>(matmul_start - aberr_end).count());
+
+    this->log_ACTIVITY_LO_ContextSwitchLatency(latency_ns);
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
 // Set VM Rate Groups - deadline is calculated as: interval - runtime
 void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz, F32 runtime_ms) {
     if (!vms[vm_id]) {  // If we don't have a VM loaded

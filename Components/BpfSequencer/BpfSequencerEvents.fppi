@@ -46,3 +46,7 @@ event SchedulerSlip(vm_id: U32) \
 event WorkerPrioritySetFailed() \
     severity warning high \ 
     format "Failed to set worker priority"
+
+event ContextSwitchLatency(latencyNs: U64) \
+    severity activity low \
+    format "Context switch latency (aberr -> matmul): {} ns"

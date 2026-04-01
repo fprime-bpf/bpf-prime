@@ -10,3 +10,11 @@ async command RUN_SEQUENCE(
             vmId: U32, @< The index of the selected BPF VM (0-63)
         ) \ 
         opcode 2 priority 7 assert
+
+@ Load aberr and matmul BPF programs, then benchmark the context-switch latency
+@ between when aberr stops and when matmul starts
+async command BENCHMARK_CONTEXT_SWITCH(
+            aberrFilePath: string, @< Path to the aberr BPF bytecode file
+            matmulFilePath: string @< Path to the matmul BPF bytecode file
+        ) \
+        opcode 8 priority 7 assert
