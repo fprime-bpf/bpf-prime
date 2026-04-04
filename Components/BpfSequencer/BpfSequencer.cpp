@@ -428,6 +428,55 @@ void BpfSequencer::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 
     return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
 }
 
+void BpfSequencer::BENCHMARK_CONTEXT_SWITCH_cmdHandler(
+    FwOpcodeType opCode,
+    U32 cmdSeq) {
+
+    // Use dedicated VM slots so this command doesn't disturb other VMs
+    constexpr U32 ABERR_VM_ID = 62;
+    constexpr U32 MATMUL_VM_ID = 63;
+
+    constexpr const char* ABERR_PATH  = "tests/aberr/a.o";
+    constexpr const char* MATMUL_PATH = "tests/matmul/a.o";
+
+    // Load and compile the aberr program
+    if (this->load(ABERR_VM_ID, ABERR_PATH) != Fw::Success::SUCCESS) {
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+
+    // Load and compile the matmul program
+    if (this->load(MATMUL_VM_ID, MATMUL_PATH) != Fw::Success::SUCCESS) {
+        return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::EXECUTION_ERROR);
+    }
+
+    auto& aberr_vm = vms[ABERR_VM_ID];
+    auto& matmul_vm = vms[MATMUL_VM_ID];
+
+    // Run aberr to completion, then record the end timestamp via rdcycle
+    uint64_t aberr_res = 0;
+    aberr_vm->bpf_vm.exec(&aberr_vm->bpf_mem, aberr_vm->bpf_mem_size, aberr_res);
+    uint64_t aberr_end;
+    __asm__ __volatile__("rdcycle %0" : "=r"(aberr_end));
+
+    // Load matmul's first memory byte to simulate the start of the next VM,
+    // then capture rdcycle — this is the "start" of the context switch target
+    volatile uint8_t* matmul_mem = matmul_vm->bpf_mem.get();
+    (void)*matmul_mem;
+    uint64_t matmul_start;
+    __asm__ __volatile__("rdcycle %0" : "=r"(matmul_start));
+
+    // Run matmul
+    uint64_t matmul_res = 0;
+    matmul_vm->bpf_vm.exec(&matmul_vm->bpf_mem, matmul_vm->bpf_mem_size, matmul_res);
+
+    // The context-switch latency is the cycle count from aberr ending to matmul's
+    // memory being loaded and the next start timestamp captured
+    U64 latency_cycles = matmul_start - aberr_end;
+
+    this->log_ACTIVITY_LO_ContextSwitchLatency(latency_cycles);
+    return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
 // Set VM Rate Groups - deadline is calculated as: interval - runtime
 void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz, F32 runtime_ms) {
     if (!vms[vm_id]) {  // If we don't have a VM loaded

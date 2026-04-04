@@ -201,6 +201,15 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 cmdSeq,           //!< The command sequence number
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
+
+    //! Handler implementation for command BENCHMARK_CONTEXT_SWITCH
+    //!
+    //! Load aberr and matmul BPF programs and benchmark the latency between
+    //! when aberr stops and when matmul starts (context-switch latency)
+    void BENCHMARK_CONTEXT_SWITCH_cmdHandler(
+        FwOpcodeType opCode,  //!< The opcode
+        U32 cmdSeq            //!< The command sequence number
+    ) override;
     
     //! Handler for SetVMRateGroup command
     //! @param runtime_ms Expected runtime of the VM in milliseconds
