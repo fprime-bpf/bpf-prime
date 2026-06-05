@@ -4,9 +4,6 @@
 [submodule "Components/BpfSequencer/llvmbpf"]
 	path = Components/BpfSequencer/llvmbpf
   url = git@github.com:fprime-bpf/llvmbpf.git
-[submodule "cmake/toolchain/llvm-project"]
-	path = cmake/toolchain/llvm-project
-	url = https://github.com/llvm/llvm-project.git
 [submodule "Components/WasmSequencer/wasmtime"]
 	path = Components/WasmSequencer/wasmtime
 	url = https://github.com/bytecodealliance/wasmtime.git
