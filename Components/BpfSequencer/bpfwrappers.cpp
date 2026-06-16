@@ -74,7 +74,8 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    auto compile_res = vm->bpf_vm.compile();
+    static bpftime::ExeState a;
+    auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
             std::string("Failed to compile BPF program - " + vm->bpf_vm.get_error_message()).c_str());

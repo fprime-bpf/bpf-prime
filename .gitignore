@@ -20,3 +20,4 @@ build-fprime-*
 /.vscode/
 .DS_Store
 *.gcov
+.venv/
