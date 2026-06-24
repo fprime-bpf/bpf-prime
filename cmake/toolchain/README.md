@@ -30,6 +30,8 @@ ninja
 ```
 To generate code for RISC-V, we need to set `LLVM_TARGETS_TO_BUILD`. We also need to set `LLVM_HOST_TRIPLE` and `LLVM_TARGET_ARCH` to tell the JIT that we're compiling for RISC-V. `LLVM_USE_LINKER=lld` uses the LLVM `lld` instead of the GCC `ld` to link, which speeds up cross-compile builds. We also turn off `HAVE_POSIX_REGEX` and `HAVE_STEADY_CLOCK` as the toolchain doesn't include these libs. Since we're cross compiling, we need to generate native versions of `llvm-tblgen` to compile the `.td` files that LLVM uses for code generation info.
 
+Install the Rust riscv toolchain `rustup target add riscv64gc-unknown-linux-gnu`. Create a link in the riscv gcc toolchain: `ln riscv64-unknown-linux-gnu-gcc riscv64-linux-gnu-gcc` inside `riscv/bin`.
+
 Finally, we can target RISC-V when generating our BPF-Prime deployment by linking in our cross-compiled LLVM libs:
 ```bash
 virtualenv venv
