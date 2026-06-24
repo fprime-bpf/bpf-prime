@@ -98,8 +98,14 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
             return -1;
     }
 
+    
+    if (!this->wamr_register_thread())
+        return -1;
+
+    uint32_t argv[1] = {0};
+        
     start = timer::now();
-    auto run_result = func.value().call(store, {});
+    auto run_result = wasm_runtime_call_wasm(exec_env, func.value(), 0, argv);
     end = timer::now();
     
     if (!run_result)

@@ -4,7 +4,7 @@
 // \brief  cpp file for WasmSequencer component implementation class
 // ======================================================================
 
-#include <wasmtime.hh>
+#include "wasm_export.h"
 #include "Components/WasmSequencer/WasmSequencer.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 
@@ -15,29 +15,42 @@ namespace Components {
 // ----------------------------------------------------------------------
 
 WasmSequencer ::WasmSequencer(const char* const compName) 
-    : WasmSequencerComponentBase(compName), engine(), store(engine), linker(engine) {
+    : WasmSequencerComponentBase(compName), module(nullptr), module_inst(nullptr), exec_env(nullptr) {
     
-    const std::pair<const char*, const wasmtime::Extern> bpf_helpers[] = {
-        {"bpf_map_lookup_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_lookup_elem)},
-        {"bpf_map_update_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_update_elem)},
-        {"bpf_map_delete_elem", wasmtime::Func::wrap(store, WasmSequencer::bpf_map_delete_elem)},
-        {"bpf_rand_int", wasmtime::Func::wrap(store, WasmSequencer::bpf_rand_int)},
-        {"MAP_BY_FD", wasmtime::Func::wrap(store, WasmSequencer::MAP_BY_FD)},
+    static NativeSymbol bpf_helpers[] = {
+        {"bpf_map_lookup_elem", (void*)WasmSequencer::bpf_map_lookup_elem, "(Ii)i", nullptr},
+        {"bpf_map_update_elem", (void*)WasmSequencer::bpf_map_update_elem, "(IiiI)i", nullptr},
+        {"bpf_map_delete_elem", (void*)WasmSequencer::bpf_map_delete_elem, "(Ii)i", nullptr},
+        {"bpf_rand_int", (void*)WasmSequencer::bpf_rand_int, "(ii)i", nullptr},
+        {"MAP_BY_FD", (void*)WasmSequencer::MAP_BY_FD, "(i)I", nullptr},
     };
-    
-    const char *moduleName = "env";
-    for (const auto& [name, func] : bpf_helpers) {
-        auto res = linker.define(store, moduleName, name, func);
-        if (!res) {
-            Fw::LogStringArg errMsg(res.err().message().c_str());
-            this->log_WARNING_HI_WasmRegisterFunctionsFailed(errMsg);
-        }
+
+    if (!wasm_runtime_init()) {
+        Fw::LogStringArg errMsg("Failed to initialize WAMR runtime");
+        this->log_WARNING_HI_WasmRegisterFunctionsFailed(errMsg);
+        return;
     }
 
-    linker.define_wasi();
+    const char *moduleName = "env";
+    uint32_t num_helpers = sizeof(bpf_helpers) / sizeof(NativeSymbol);
+
+    if (!wasm_runtime_register_natives(moduleName, bpf_helpers, num_helpers)) {
+        Fw::LogStringArg errMsg("Failed to register bpf helpers");
+        this->log_WARNING_HI_WasmRegisterFunctionsFailed(errMsg);
+    }
 }
 
-WasmSequencer ::~WasmSequencer() {}
+WasmSequencer ::~WasmSequencer() {
+    if (exec_env) {
+        wasm_runtime_destroy_exec_env(exec_env);
+    }
+    if (module_inst) {
+        wasm_runtime_deinstantiate(module_inst);
+    }
+    if (module) {
+        wasm_runtime_unload(module);
+    }
+}
 
 // ----------------------------------------------------------------------
 // Handler implementations for typed input ports
