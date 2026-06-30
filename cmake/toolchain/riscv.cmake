@@ -27,6 +27,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(WAMR_BUILD_PLATFORM "linux")
 set(WAMR_BUILD_TARGET RISCV64)
 
+set(CMAKE_ASM_COMPILER clang-18)
+set(CMAKE_ASM_COMPILER_TARGET riscv64-linux-gnu)
+
 #set(LLVM_DIR "${CMAKE_CURRENT_LIST_DIR}/llvm-project/build/lib/cmake/llvm")
 
 # add_link_options(
