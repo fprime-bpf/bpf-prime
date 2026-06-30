@@ -10,7 +10,7 @@
 #include "Components/WasmSequencer/WasmSequencerComponentAc.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <wasmtime.hh>
+#include "wasm_export.h"
 #include <optional>
 
 namespace Components {
@@ -59,20 +59,21 @@ class WasmSequencer final : public WasmSequencerComponentBase {
                                  ) override;
 
   private:
-    wasmtime::Engine engine;
-    wasmtime::Store store;
-    wasmtime::Linker linker;
-    std::optional<wasmtime::Func> func;
+    wasm_module_t module;
+    wasm_module_inst_t module_inst;
+    wasm_exec_env_t exec_env;
+    std::optional<wasm_function_inst_t> func;
   private:
     Fw::Success load(const char *sequenceFilePath);
     Fw::Success run();
     F64 get_benchmark_wasm(Components::BENCHMARK_TEST test, bool compile);
+    bool wamr_register_thread();
 
-    static uint32_t bpf_map_lookup_elem(uint64_t map_ptr, uint32_t key);
-    static uint32_t bpf_map_update_elem(uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
-    static uint32_t bpf_map_delete_elem(uint64_t map_ptr, uint32_t key);
-    static int32_t bpf_rand_int(int32_t min, int32_t max);
-    static uint64_t MAP_BY_FD(uint32_t fd);
+    static uint32_t bpf_map_lookup_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key);
+    static uint32_t bpf_map_update_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
+    static uint32_t bpf_map_delete_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key);
+    static int32_t bpf_rand_int(wasm_exec_env_t exec_env, int32_t min, int32_t max);
+    static uint64_t MAP_BY_FD(wasm_exec_env_t exec_env, uint32_t fd);
 };
 
 }  // namespace Components
