@@ -53,7 +53,7 @@ module BPFPrimeTest {
 
   instance tests: Components.Tests base id 0x10006000 \
     queue size Default.QUEUE_SIZE \
-    stack size Default.STACK_SIZE \
+    stack size Default.STACK_SIZE * 2 \
     priority 118
 
   instance wasmSequencer: Components.WasmSequencer base id 0x10007000 \
