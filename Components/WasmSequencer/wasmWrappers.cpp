@@ -69,6 +69,11 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
+    if (!wasm_runtime_set_running_mode(module_inst, Mode_LLVM_JIT)) {
+        Fw::LogStringArg errMsg("Failed to set JIT running mode for WASM");
+        this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
+    }
+
     const char *exported_func_name = "run";
     wasm_function_inst_t exported_func = wasm_runtime_lookup_function(module_inst, exported_func_name);
     if (!exported_func) {

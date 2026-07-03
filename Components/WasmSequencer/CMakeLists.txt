@@ -14,17 +14,32 @@
 # root when not specifically overridden by the developer, i.e. the module defined by
 # `MyProj/Some/Path/CMakeLists.txt` will be named `MyProj_Some_Path`.
 
-set(WAMR_BUILD_INTERP 1)
-set(WAMR_BUILD_FAST_INTERP 1)
-set(WAMR_BUILD_AOT 1)
-set(WAMR_BUILD_LIBC_BUILTIN 1)
-set(WAMR_BUILD_LIBC_WASI 1)
+set(WAMR_BUILD_JIT 1)
 set(WAMR_BUILD_SIMD 1)
+set(WAMR_BUILD_LIBC_WASI 1)
+set(WAMR_BUILD_PLATFORM "linux")
 set(WAMR_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/wasm-micro-runtime")
+
+find_package(LLVM REQUIRED CONFIG)
+
+llvm_map_components_to_libnames(LLVM_LIBS
+    Core
+    Support
+    Analysis
+    ExecutionEngine
+    MCJIT
+    OrcJIT
+    RuntimeDyld
+    Target
+    IRReader
+    TransformUtils
+    Passes
+)
 
 include(${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
 add_library(vmlib ${WAMR_RUNTIME_LIB_SOURCE})
 target_include_directories(vmlib PUBLIC ${WAMR_ROOT_DIR}/core/iwasm/include)
+target_link_libraries(vmlib PUBLIC ${LLVM_LIBS})
 
 include (${SHARED_DIR}/utils/uncommon/shared_uncommon.cmake)
 
