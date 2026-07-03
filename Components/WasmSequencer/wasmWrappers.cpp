@@ -33,8 +33,8 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
 
     const char *err_msg;
     FwSizeType buffer_size;
-    auto buffer = BpfSequencer::read_from_file(sequenceFilePath, buffer_size, err_msg);
-    if (!buffer) {
+    auto new_buffer = BpfSequencer::read_from_file(sequenceFilePath, buffer_size, err_msg);
+    if (!new_buffer) {
         this->log_ACTIVITY_HI_WasmLoadFailed(
             loggerFilePath,
             Fw::LogStringArg(err_msg)
@@ -42,8 +42,11 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
+    cleanup_wasm();
+    this->buffer = new_buffer;
+
     char error_buf[128];
-    const uint32_t stack_size = 8092, heap_size = 8092;
+    const uint32_t stack_size = 8192, heap_size = 8192;
 
     module = wasm_runtime_load(
         reinterpret_cast<uint8_t*>(buffer),
@@ -54,7 +57,7 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
     if (!module) {
         Fw::LogStringArg errMsg(error_buf);
         this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
-        delete[] buffer;
+        cleanup_wasm();
         return Fw::Success::FAILURE;
     }
     
@@ -62,7 +65,7 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
     if (!module_inst) {
         Fw::LogStringArg errMsg(error_buf);
         this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
-        delete[] buffer;
+        cleanup_wasm();
         return Fw::Success::FAILURE;
     }
 
@@ -71,7 +74,7 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
     if (!exported_func) {
         Fw::LogStringArg errMsg("Export not found");
         this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
-        delete[] buffer;
+        cleanup_wasm();
         return Fw::Success::FAILURE;
     }
 
@@ -79,13 +82,12 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
     if (!exec_env) {
         Fw::LogStringArg errMsg("Failed to create exec env");
         this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
-        delete[] buffer;
+        cleanup_wasm();
         return Fw::Success::FAILURE;
     }
 
     func = exported_func;
 
-    delete[] buffer;
     return Fw::Success::SUCCESS;
 }
 
@@ -123,6 +125,26 @@ bool WasmSequencer::wamr_register_thread() {
         thread_env_init = true;
     }
     return true;
+}
+
+void WasmSequencer::cleanup_wasm() {
+    if (exec_env) {
+        wasm_runtime_destroy_exec_env(exec_env);
+        exec_env = nullptr;
+    }
+    if (module_inst) {
+        wasm_runtime_deinstantiate(module_inst);
+        module_inst = nullptr;
+    }
+    if (module) {
+        wasm_runtime_unload(module);
+        module = nullptr;
+    }
+
+    delete[] buffer;
+    buffer = nullptr;
+
+    func.reset();
 }
 
 } // namespace Components

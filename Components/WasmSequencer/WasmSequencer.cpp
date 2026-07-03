@@ -15,7 +15,7 @@ namespace Components {
 // ----------------------------------------------------------------------
 
 WasmSequencer ::WasmSequencer(const char* const compName) 
-    : WasmSequencerComponentBase(compName), module(nullptr), module_inst(nullptr), exec_env(nullptr) {
+    : WasmSequencerComponentBase(compName), buffer(nullptr), module(nullptr), module_inst(nullptr), exec_env(nullptr) {
     
     static NativeSymbol bpf_helpers[] = {
         {"bpf_map_lookup_elem", (void*)WasmSequencer::bpf_map_lookup_elem, "(Ii)i", nullptr},
@@ -41,15 +41,7 @@ WasmSequencer ::WasmSequencer(const char* const compName)
 }
 
 WasmSequencer ::~WasmSequencer() {
-    if (exec_env) {
-        wasm_runtime_destroy_exec_env(exec_env);
-    }
-    if (module_inst) {
-        wasm_runtime_deinstantiate(module_inst);
-    }
-    if (module) {
-        wasm_runtime_unload(module);
-    }
+    cleanup_wasm();
 }
 
 // ----------------------------------------------------------------------

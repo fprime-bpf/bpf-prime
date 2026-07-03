@@ -59,6 +59,7 @@ class WasmSequencer final : public WasmSequencerComponentBase {
                                  ) override;
 
   private:
+    U8 *buffer;
     wasm_module_t module;
     wasm_module_inst_t module_inst;
     wasm_exec_env_t exec_env;
@@ -68,6 +69,7 @@ class WasmSequencer final : public WasmSequencerComponentBase {
     Fw::Success run();
     F64 get_benchmark_wasm(Components::BENCHMARK_TEST test, bool compile);
     bool wamr_register_thread();
+    void cleanup_wasm();
 
     static uint32_t bpf_map_lookup_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key);
     static uint32_t bpf_map_update_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key, uint32_t value, uint64_t flags);
