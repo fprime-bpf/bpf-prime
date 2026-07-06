@@ -14,8 +14,34 @@
 # root when not specifically overridden by the developer, i.e. the module defined by
 # `MyProj/Some/Path/CMakeLists.txt` will be named `MyProj_Some_Path`.
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/wasmtime/crates/c-api
-${CMAKE_CURRENT_BINARY_DIR}/wasmtime)
+set(WAMR_BUILD_JIT 1)
+set(WAMR_BUILD_SIMD 1)
+set(WAMR_BUILD_LIBC_WASI 1)
+set(WAMR_BUILD_PLATFORM "linux")
+set(WAMR_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/wasm-micro-runtime")
+
+find_package(LLVM REQUIRED CONFIG)
+
+llvm_map_components_to_libnames(LLVM_LIBS
+    Core
+    Support
+    Analysis
+    ExecutionEngine
+    MCJIT
+    OrcJIT
+    RuntimeDyld
+    Target
+    IRReader
+    TransformUtils
+    Passes
+)
+
+include(${WAMR_ROOT_DIR}/build-scripts/runtime_lib.cmake)
+add_library(vmlib ${WAMR_RUNTIME_LIB_SOURCE})
+target_include_directories(vmlib PUBLIC ${WAMR_ROOT_DIR}/core/iwasm/include)
+target_link_libraries(vmlib PUBLIC ${LLVM_LIBS})
+
+include (${SHARED_DIR}/utils/uncommon/shared_uncommon.cmake)
 
 register_fprime_library(
     AUTOCODER_INPUTS
@@ -27,8 +53,7 @@ register_fprime_library(
       Components_BpfSequencer
 )
 
-target_include_directories("${MODULE_NAME}" PUBLIC wasmtime)
-target_link_libraries("${MODULE_NAME}" PUBLIC wasmtime)
+target_link_libraries("${MODULE_NAME}" PUBLIC vmlib -lm)
 
 ### Unit Tests ###
 # register_fprime_ut(
