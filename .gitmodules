@@ -4,6 +4,6 @@
 [submodule "Components/BpfSequencer/llvmbpf"]
 	path = Components/BpfSequencer/llvmbpf
   url = git@github.com:fprime-bpf/llvmbpf.git
-[submodule "Components/WasmSequencer/wasmtime"]
-	path = Components/WasmSequencer/wasmtime
-	url = https://github.com/bytecodealliance/wasmtime.git
+[submodule "Components/WasmSequencer/wasm-micro-runtime"]
+	path = Components/WasmSequencer/wasm-micro-runtime
+	url = https://github.com/bytecodealliance/wasm-micro-runtime.git
