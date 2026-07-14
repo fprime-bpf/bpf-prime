@@ -1,11 +1,13 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/efg.hpp"
 #include "bpf.hpp"
 #include "maps/maps.hpp"
 
 #include <chrono>
 #include <cstring>
 #include <new>
+#include <memory>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
 
@@ -74,8 +76,13 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    static bpftime::ExeState a;
-    auto compile_res = vm->bpf_vm.compile(&a);
+    static bpftime::ExecState a;
+    const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
+    constexpr uint8_t splitInto=32;
+    const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
+    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}));
+
+    //auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
             std::string("Failed to compile BPF program - " + vm->bpf_vm.get_error_message()).c_str());
