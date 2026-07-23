@@ -76,11 +76,12 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    static bpftime::ExecState a;
+    static std::byte ssMem[40000];//hardcode size for now.
+    static bpftime::ExecState a{.mem=ssMem};
     const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
-    constexpr uint8_t splitInto=32;
+    constexpr uint8_t splitInto=24;
     const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
-    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}));
+    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}),reinterpret_cast<const std::byte*>(vm->bpf_mem.get()),vm->bpf_mem_size);
 
     //auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
