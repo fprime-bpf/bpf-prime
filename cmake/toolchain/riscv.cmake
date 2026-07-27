@@ -2,8 +2,8 @@ set(CMAKE_SYSTEM_PROCESSOR riscv64)
 
 set(CMAKE_LINKER_TYPE LLD)
 
-set(CMAKE_C_COMPILER clang-18)
-set(CMAKE_CXX_COMPILER clang++-18)
+set(CMAKE_C_COMPILER clang-20)
+set(CMAKE_CXX_COMPILER clang++-20)
 
 set(CMAKE_AR llvm-ar)
 set(CMAKE_NM llvm-nm)
@@ -27,7 +27,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(WAMR_BUILD_PLATFORM "linux")
 set(WAMR_BUILD_TARGET RISCV64)
 
-set(CMAKE_ASM_COMPILER clang-18)
+set(CMAKE_ASM_COMPILER clang-20)
 set(CMAKE_ASM_COMPILER_TARGET riscv64-linux-gnu)
 
 #set(LLVM_DIR "${CMAKE_CURRENT_LIST_DIR}/llvm-project/build/lib/cmake/llvm")

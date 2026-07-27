@@ -1,4 +1,4 @@
-TARGETS := kalman low_pass_filter matmul
+TARGETS := kalman low_pass_filter matmul ccsds reed_solomon cfdp_chunk
 
 # example use case: 
 # - PREFIX="../../llvm-project/build/bin" make all
