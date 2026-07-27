@@ -53,7 +53,12 @@ int main() {
 
     // Build the generator polynomial g(x) = (x + a^0)(x + a^1)...(x + a^(NPAR-1)),
     // stored low-degree-first: genpoly[0] is the constant term, genpoly[NPAR]
-    // is the (monic) leading term.
+    // is the (monic) leading term. NPAR (4) is a small compile-time constant,
+    // so the outer "multiply running polynomial by (x+root)" step is unrolled
+    // by hand (deg=0..NPAR-1) instead of nesting a bpf_iter_num loop inside
+    // another: this target's runtime-verifier can't analyze nested loops, and
+    // NPAR never varies at runtime. Each inner loop still walks coefficients
+    // high-to-low so it only ever reads not-yet-written entries.
     genpoly[0] = 1;
     struct bpf_iter_num izero;
     long long *z;
@@ -61,29 +66,66 @@ int main() {
     while ((z = bpf_iter_num_next(&izero))) genpoly[*z] = 0;
     bpf_iter_num_destroy(&izero);
 
-    int deg = 0;
-    bpf_iter_num_new(&it, 0, NPAR);
-    while ((i = bpf_iter_num_next(&it))) {
-        unsigned char root = gfexp[*i];
-
-        // Multiply the running polynomial by (x + root) in place, walking
-        // coefficients high-to-low so each update only reads not-yet-written
-        // entries.
+    {
+        // deg = 0
+        unsigned char root = gfexp[0];
         struct bpf_iter_num ik;
         long long *kk;
-        bpf_iter_num_new(&ik, 0, deg + 2);
+        bpf_iter_num_new(&ik, 0, 2);
         while ((kk = bpf_iter_num_next(&ik))) {
-            long long kidx = (long long)(deg + 1) - *kk;
+            long long kidx = 1 - *kk;
             unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
-            unsigned char hi = (kidx <= deg) ? genpoly[kidx] : 0;
+            unsigned char hi = (kidx <= 0) ? genpoly[kidx] : 0;
             unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
             genpoly[kidx] = lo ^ prod;
         }
         bpf_iter_num_destroy(&ik);
-
-        deg = deg + 1;
     }
-    bpf_iter_num_destroy(&it);
+    {
+        // deg = 1
+        unsigned char root = gfexp[1];
+        struct bpf_iter_num ik;
+        long long *kk;
+        bpf_iter_num_new(&ik, 0, 3);
+        while ((kk = bpf_iter_num_next(&ik))) {
+            long long kidx = 2 - *kk;
+            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
+            unsigned char hi = (kidx <= 1) ? genpoly[kidx] : 0;
+            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
+            genpoly[kidx] = lo ^ prod;
+        }
+        bpf_iter_num_destroy(&ik);
+    }
+    {
+        // deg = 2
+        unsigned char root = gfexp[2];
+        struct bpf_iter_num ik;
+        long long *kk;
+        bpf_iter_num_new(&ik, 0, 4);
+        while ((kk = bpf_iter_num_next(&ik))) {
+            long long kidx = 3 - *kk;
+            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
+            unsigned char hi = (kidx <= 2) ? genpoly[kidx] : 0;
+            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
+            genpoly[kidx] = lo ^ prod;
+        }
+        bpf_iter_num_destroy(&ik);
+    }
+    {
+        // deg = 3
+        unsigned char root = gfexp[3];
+        struct bpf_iter_num ik;
+        long long *kk;
+        bpf_iter_num_new(&ik, 0, 5);
+        while ((kk = bpf_iter_num_next(&ik))) {
+            long long kidx = 4 - *kk;
+            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
+            unsigned char hi = (kidx <= 3) ? genpoly[kidx] : 0;
+            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
+            genpoly[kidx] = lo ^ prod;
+        }
+        bpf_iter_num_destroy(&ik);
+    }
 
     // Load the message into a zero-padded work buffer [data | parity-region]
     bpf_iter_num_new(&it, 0, K);
@@ -97,25 +139,36 @@ int main() {
     while ((i = bpf_iter_num_next(&it))) buf[*i] = 0;
     bpf_iter_num_destroy(&it);
 
+    // Snapshot the message symbols before encoding. The systematic encode
+    // below is one bpf_iter_num_next() coefficient read per message symbol,
+    // reused across NPAR+1 generator-coefficient steps; flattened into a
+    // single loop those steps must all see that same original value, but
+    // the first (jj=0) step zeroes buf[ii] as part of the polynomial-division
+    // cancellation (monic leading term), so re-reading buf[ii] fresh on
+    // every jj would silently lose the later contributions. This target's
+    // runtime-verifier can't analyze nested bpf_iter_num loops, hence the
+    // flattening; the snapshot is what keeps it equivalent to the original
+    // nested form.
+    volatile unsigned char msg_snapshot[K];
+    bpf_iter_num_new(&it, 0, K);
+    while ((i = bpf_iter_num_next(&it))) msg_snapshot[*i] = buf[*i];
+    bpf_iter_num_destroy(&it);
+
     // Systematic encode via polynomial long division (LFSR form): for each
     // message symbol, cancel its leading term by XORing in a scaled copy of
     // the generator polynomial. gflog/gfexp are read on every inner step.
-    bpf_iter_num_new(&it, 0, K);
+    bpf_iter_num_new(&it, 0, K * (NPAR + 1));
     while ((i = bpf_iter_num_next(&it))) {
-        unsigned char coef = buf[*i];
+        unsigned long long ii = (unsigned long long)*i / (NPAR + 1);
+        unsigned long long jj = (unsigned long long)*i % (NPAR + 1);
 
+        unsigned char coef = msg_snapshot[ii];
         if (coef != 0) {
-            struct bpf_iter_num ij;
-            long long *j;
-            bpf_iter_num_new(&ij, 0, NPAR + 1);
-            while ((j = bpf_iter_num_next(&ij))) {
-                unsigned char g = genpoly[NPAR - *j];
-                if (g != 0) {
-                    long long idx = *i + *j;
-                    buf[idx] ^= gfexp[gflog[g] + gflog[coef]];
-                }
+            unsigned char g = genpoly[NPAR - jj];
+            if (g != 0) {
+                long long idx = ii + jj;
+                buf[idx] ^= gfexp[gflog[g] + gflog[coef]];
             }
-            bpf_iter_num_destroy(&ij);
         }
     }
     bpf_iter_num_destroy(&it);

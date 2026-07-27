@@ -11,132 +11,125 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %2 = alloca i32, align 4
   %3 = alloca %struct.bpf_iter_num, align 8
   %4 = alloca %struct.bpf_iter_num, align 8
-  %5 = alloca %struct.bpf_iter_num, align 8
+  %5 = alloca i32, align 4
   %6 = alloca i32, align 4
-  %7 = alloca i32, align 4
-  %8 = alloca %struct.bpf_iter_num, align 8
-  %9 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
-  %10 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #2, !srcloc !4
+  %7 = alloca %struct.bpf_iter_num, align 8
+  %8 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 0, i32 0, i32 0, i32 0) #2, !srcloc !3
+  %9 = tail call ptr asm sideeffect ".byte 0x18, 0x11, 0x00, 0x00, ${1:c}, ${2:c}, ${3:c}, ${4:c}, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00", "={r1},i,i,i,i"(i32 1, i32 0, i32 0, i32 0) #2, !srcloc !4
   call void @llvm.lifetime.start.p0(i64 64, ptr nonnull %1) #2
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %2)
   store volatile i32 65535, ptr %2, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %3) #2
-  %11 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #2
-  %12 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #2
-  %13 = icmp eq ptr %12, null
-  br i1 %13, label %22, label %14
+  %10 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %3, i32 noundef 0, i32 noundef 16) #2
+  %11 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #2
+  %12 = icmp eq ptr %11, null
+  br i1 %12, label %21, label %13
 
-14:                                               ; preds = %0, %14
-  %15 = phi ptr [ %20, %14 ], [ %12, %0 ]
-  %16 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %9, ptr noundef nonnull %15) #2
-  %17 = load i32, ptr %16, align 4, !tbaa !5
-  %18 = load i64, ptr %15, align 8, !tbaa !9
-  %19 = getelementptr inbounds [16 x i32], ptr %1, i64 0, i64 %18
-  store volatile i32 %17, ptr %19, align 4, !tbaa !5
-  %20 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #2
-  %21 = icmp eq ptr %20, null
-  br i1 %21, label %22, label %14, !llvm.loop !11
+13:                                               ; preds = %0, %13
+  %14 = phi ptr [ %19, %13 ], [ %11, %0 ]
+  %15 = call ptr inttoptr (i64 1 to ptr)(ptr noundef %8, ptr noundef nonnull %14) #2
+  %16 = load i32, ptr %15, align 4, !tbaa !5
+  %17 = load i64, ptr %14, align 8, !tbaa !9
+  %18 = getelementptr inbounds [16 x i32], ptr %1, i64 0, i64 %17
+  store volatile i32 %16, ptr %18, align 4, !tbaa !5
+  %19 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %3) #2
+  %20 = icmp eq ptr %19, null
+  br i1 %20, label %21, label %13, !llvm.loop !11
 
-22:                                               ; preds = %14, %0
+21:                                               ; preds = %13, %0
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %3) #2
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %4) #2
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %5) #2
-  %23 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %4, i32 noundef 0, i32 noundef 64) #2
-  %24 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #2
-  %25 = icmp eq ptr %24, null
-  br i1 %25, label %61, label %26
+  %22 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %4, i32 noundef 0, i32 noundef 512) #2
+  %23 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #2
+  %24 = icmp eq ptr %23, null
+  br i1 %24, label %57, label %25
 
-26:                                               ; preds = %22, %58
-  %27 = phi ptr [ %59, %58 ], [ %24, %22 ]
-  %28 = load i64, ptr %27, align 8, !tbaa !9
-  %29 = freeze i64 %28
-  %30 = sdiv i64 %29, 4
-  %31 = getelementptr inbounds [16 x i32], ptr %1, i64 0, i64 %30
-  %32 = load volatile i32, ptr %31, align 4, !tbaa !5
-  %33 = mul i64 %30, 4
-  %34 = sub i64 %29, %33
-  %35 = trunc nsw i64 %34 to i32
-  %36 = shl nsw i32 %35, 3
-  %37 = sub nsw i32 24, %36
-  %38 = lshr i32 %32, %37
-  %39 = shl i32 %38, 8
-  %40 = and i32 %39, 65280
-  %41 = load volatile i32, ptr %2, align 4, !tbaa !5
-  %42 = xor i32 %40, %41
-  store volatile i32 %42, ptr %2, align 4, !tbaa !5
-  %43 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %5, i32 noundef 0, i32 noundef 8) #2
-  %44 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #2
-  %45 = icmp eq ptr %44, null
-  br i1 %45, label %58, label %46
+25:                                               ; preds = %21, %45
+  %26 = phi ptr [ %55, %45 ], [ %23, %21 ]
+  %27 = load i64, ptr %26, align 8, !tbaa !9
+  %28 = and i64 %27, 7
+  %29 = icmp eq i64 %28, 0
+  br i1 %29, label %30, label %45
 
-46:                                               ; preds = %26, %46
-  %47 = load volatile i32, ptr %2, align 4, !tbaa !5
-  %48 = and i32 %47, 32768
-  %49 = icmp eq i32 %48, 0
-  %50 = load volatile i32, ptr %2, align 4, !tbaa !5
-  %51 = shl i32 %50, 1
-  %52 = xor i32 %51, 4129
-  %53 = select i1 %49, i32 %51, i32 %52
-  store volatile i32 %53, ptr %2, align 4, !tbaa !5
-  %54 = load volatile i32, ptr %2, align 4, !tbaa !5
-  %55 = and i32 %54, 65535
-  store volatile i32 %55, ptr %2, align 4, !tbaa !5
-  %56 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #2
-  %57 = icmp eq ptr %56, null
-  br i1 %57, label %58, label %46, !llvm.loop !14
+30:                                               ; preds = %25
+  %31 = ashr exact i64 %27, 3
+  %32 = trunc i64 %31 to i32
+  %33 = lshr i64 %31, 2
+  %34 = and i64 %33, 1073741823
+  %35 = getelementptr inbounds nuw [16 x i32], ptr %1, i64 0, i64 %34
+  %36 = load volatile i32, ptr %35, align 4, !tbaa !5
+  %37 = shl i32 %32, 3
+  %38 = and i32 %37, 24
+  %39 = xor i32 %38, 24
+  %40 = lshr i32 %36, %39
+  %41 = shl i32 %40, 8
+  %42 = and i32 %41, 65280
+  %43 = load volatile i32, ptr %2, align 4, !tbaa !5
+  %44 = xor i32 %42, %43
+  store volatile i32 %44, ptr %2, align 4, !tbaa !5
+  br label %45
 
-58:                                               ; preds = %46, %26
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #2
-  %59 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #2
-  %60 = icmp eq ptr %59, null
-  br i1 %60, label %61, label %26, !llvm.loop !15
+45:                                               ; preds = %30, %25
+  %46 = load volatile i32, ptr %2, align 4, !tbaa !5
+  %47 = and i32 %46, 32768
+  %48 = icmp eq i32 %47, 0
+  %49 = load volatile i32, ptr %2, align 4, !tbaa !5
+  %50 = shl i32 %49, 1
+  %51 = xor i32 %50, 4129
+  %52 = select i1 %48, i32 %50, i32 %51
+  store volatile i32 %52, ptr %2, align 4, !tbaa !5
+  %53 = load volatile i32, ptr %2, align 4, !tbaa !5
+  %54 = and i32 %53, 65535
+  store volatile i32 %54, ptr %2, align 4, !tbaa !5
+  %55 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #2
+  %56 = icmp eq ptr %55, null
+  br i1 %56, label %57, label %25, !llvm.loop !14
 
-61:                                               ; preds = %58, %22
+57:                                               ; preds = %45, %21
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %4) #2
-  %62 = load volatile i32, ptr %1, align 4, !tbaa !5
-  %63 = and i32 %62, 16383
-  %64 = or disjoint i32 %63, 49152
+  %58 = load volatile i32, ptr %1, align 4, !tbaa !5
+  %59 = and i32 %58, 16383
+  %60 = or disjoint i32 %59, 49152
+  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %5) #2
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %6) #2
-  call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %7) #2
-  store i32 0, ptr %6, align 4, !tbaa !5
-  store i32 291, ptr %7, align 4, !tbaa !5
-  %65 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %10, ptr noundef nonnull %6, ptr noundef nonnull %7, i64 noundef 0) #2
-  store i32 1, ptr %6, align 4, !tbaa !5
-  store i32 %64, ptr %7, align 4, !tbaa !5
-  %66 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %10, ptr noundef nonnull %6, ptr noundef nonnull %7, i64 noundef 0) #2
-  store i32 2, ptr %6, align 4, !tbaa !5
-  store i32 63, ptr %7, align 4, !tbaa !5
-  %67 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %10, ptr noundef nonnull %6, ptr noundef nonnull %7, i64 noundef 0) #2
-  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %8) #2
-  %68 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %8, i32 noundef 0, i32 noundef 16) #2
-  %69 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %8) #2
-  %70 = icmp eq ptr %69, null
-  br i1 %70, label %81, label %71
+  store i32 0, ptr %5, align 4, !tbaa !5
+  store i32 291, ptr %6, align 4, !tbaa !5
+  %61 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %9, ptr noundef nonnull %5, ptr noundef nonnull %6, i64 noundef 0) #2
+  store i32 1, ptr %5, align 4, !tbaa !5
+  store i32 %60, ptr %6, align 4, !tbaa !5
+  %62 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %9, ptr noundef nonnull %5, ptr noundef nonnull %6, i64 noundef 0) #2
+  store i32 2, ptr %5, align 4, !tbaa !5
+  store i32 63, ptr %6, align 4, !tbaa !5
+  %63 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %9, ptr noundef nonnull %5, ptr noundef nonnull %6, i64 noundef 0) #2
+  call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %7) #2
+  %64 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 16) #2
+  %65 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %66 = icmp eq ptr %65, null
+  br i1 %66, label %77, label %67
 
-71:                                               ; preds = %61, %71
-  %72 = phi ptr [ %79, %71 ], [ %69, %61 ]
-  %73 = load i64, ptr %72, align 8, !tbaa !9
-  %74 = trunc i64 %73 to i32
-  %75 = add nsw i32 %74, 3
-  store i32 %75, ptr %6, align 4, !tbaa !5
-  %76 = getelementptr inbounds [16 x i32], ptr %1, i64 0, i64 %73
-  %77 = load volatile i32, ptr %76, align 4, !tbaa !5
-  store i32 %77, ptr %7, align 4, !tbaa !5
-  %78 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %10, ptr noundef nonnull %6, ptr noundef nonnull %7, i64 noundef 0) #2
-  %79 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %8) #2
-  %80 = icmp eq ptr %79, null
-  br i1 %80, label %81, label %71, !llvm.loop !16
+67:                                               ; preds = %57, %67
+  %68 = phi ptr [ %75, %67 ], [ %65, %57 ]
+  %69 = load i64, ptr %68, align 8, !tbaa !9
+  %70 = trunc i64 %69 to i32
+  %71 = add nsw i32 %70, 3
+  store i32 %71, ptr %5, align 4, !tbaa !5
+  %72 = getelementptr inbounds [16 x i32], ptr %1, i64 0, i64 %69
+  %73 = load volatile i32, ptr %72, align 4, !tbaa !5
+  store i32 %73, ptr %6, align 4, !tbaa !5
+  %74 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %9, ptr noundef nonnull %5, ptr noundef nonnull %6, i64 noundef 0) #2
+  %75 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #2
+  %76 = icmp eq ptr %75, null
+  br i1 %76, label %77, label %67, !llvm.loop !15
 
-81:                                               ; preds = %71, %61
-  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %8) #2
-  store i32 19, ptr %6, align 4, !tbaa !5
-  %82 = load volatile i32, ptr %2, align 4, !tbaa !5
-  store i32 %82, ptr %7, align 4, !tbaa !5
-  %83 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %10, ptr noundef nonnull %6, ptr noundef nonnull %7, i64 noundef 0) #2
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %8) #2
-  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %7) #2
+77:                                               ; preds = %67, %57
+  call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #2
+  store i32 19, ptr %5, align 4, !tbaa !5
+  %78 = load volatile i32, ptr %2, align 4, !tbaa !5
+  store i32 %78, ptr %6, align 4, !tbaa !5
+  %79 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %9, ptr noundef nonnull %5, ptr noundef nonnull %6, i64 noundef 0) #2
+  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %7) #2
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %6) #2
-  call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %5) #2
+  call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %5) #2
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %4) #2
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %3) #2
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %2)
@@ -160,8 +153,8 @@ attributes #2 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
-!3 = !{i64 2147505560}
-!4 = !{i64 2147506072}
+!3 = !{i64 2147505801}
+!4 = !{i64 2147506313}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
@@ -173,4 +166,3 @@ attributes #2 = { nounwind }
 !13 = !{!"llvm.loop.unroll.disable"}
 !14 = distinct !{!14, !12, !13}
 !15 = distinct !{!15, !12, !13}
-!16 = distinct !{!16, !12, !13}

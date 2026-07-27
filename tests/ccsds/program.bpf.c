@@ -45,27 +45,30 @@ int main() {
     }
     bpf_iter_num_destroy(&it);
 
-    // Bit-by-bit CRC-16/CCITT-FALSE over the payload octets (MSB-first)
-    struct bpf_iter_num ib, ibit;
-    long long *b, *k;
+    // Bit-by-bit CRC-16/CCITT-FALSE over the payload octets (MSB-first).
+    // Flattened into a single PAYLOAD_LEN*4*8-iteration loop (byte_idx/bit_idx
+    // derived from the flat index) instead of a byte loop nesting a bit loop:
+    // this target's runtime-verifier can't analyze nested bpf_iter_num loops.
+    struct bpf_iter_num ib;
+    long long *b;
 
-    bpf_iter_num_new(&ib, 0, PAYLOAD_LEN * 4);
+    bpf_iter_num_new(&ib, 0, PAYLOAD_LEN * 4 * 8);
     while ((b = bpf_iter_num_next(&ib))) {
-        unsigned int word = (unsigned int)payload[*b / 4];
-        unsigned int shift = 24 - (unsigned int)(*b % 4) * 8;
-        unsigned int byte = (word >> shift) & 0xFF;
+        unsigned int byte_idx = (unsigned int)(*b / 8);
+        unsigned int bit_idx = (unsigned int)(*b % 8);
 
-        crc ^= (byte << 8);
-
-        bpf_iter_num_new(&ibit, 0, 8);
-        while ((k = bpf_iter_num_next(&ibit))) {
-            if (crc & 0x8000)
-                crc = (crc << 1) ^ CRC16_POLY;
-            else
-                crc = crc << 1;
-            crc &= 0xFFFF;
+        if (bit_idx == 0) {
+            unsigned int word = (unsigned int)payload[byte_idx / 4];
+            unsigned int shift = 24 - (byte_idx % 4) * 8;
+            unsigned int byte = (word >> shift) & 0xFF;
+            crc ^= (byte << 8);
         }
-        bpf_iter_num_destroy(&ibit);
+
+        if (crc & 0x8000)
+            crc = (crc << 1) ^ CRC16_POLY;
+        else
+            crc = crc << 1;
+        crc &= 0xFFFF;
     }
     bpf_iter_num_destroy(&ib);
 
