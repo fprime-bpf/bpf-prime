@@ -73,7 +73,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store volatile float %49, ptr %47, align 4, !tbaa !7
   %50 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %4) #3
   %51 = icmp eq ptr %50, null
-  br i1 %51, label %52, label %25, !llvm.loop !11
+  br i1 %51, label %52, label %25, !llvm.loop !12
 
 52:                                               ; preds = %25, %21
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %4) #3
@@ -103,13 +103,14 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
 !3 = !{!4, !4, i64 0}
 !4 = !{!"long long", !5, i64 0}
 !5 = !{!"omnipotent char", !6, i64 0}
 !6 = !{!"Simple C/C++ TBAA"}
 !7 = !{!8, !8, i64 0}
 !8 = !{!"float", !5, i64 0}
-!9 = distinct !{!9, !10}
+!9 = distinct !{!9, !10, !11}
 !10 = !{!"llvm.loop.mustprogress"}
-!11 = distinct !{!11, !10}
+!11 = !{!"llvm.loop.unroll.disable"}
+!12 = distinct !{!12, !10, !11}
