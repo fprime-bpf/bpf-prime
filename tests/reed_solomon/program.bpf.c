@@ -9,9 +9,11 @@
 // RS(K+NPAR, K) over GF(2^8) with field polynomial x^8+x^4+x^3+x^2+1
 // (0x11D, the CCSDS/AES field polynomial).
 //
-// Map layout (fds are local to this VM slot):
-//   fd 0: K entries, int (low byte used) -- input data symbols
-//   fd 1: NPAR entries, int             -- output parity symbols
+// Map layout (fds match the shared benchmark harness's allocation in
+// Components/Tests/testsWrappers.cpp -- fds 0-14 are claimed by the other
+// benchmarks, and ccsds claims 15-16, so this one starts at 17):
+//   fd 17: K entries, int (low byte used) -- input data symbols
+//   fd 18: NPAR entries, int             -- output parity symbols
 
 #include "../bpf_shim.h"
 
@@ -21,7 +23,7 @@
 #define NPAR 4
 
 int main() {
-    void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1);
+    void *in_map = MAP_BY_FD(17), *out_map = MAP_BY_FD(18);
     void *result;
 
     volatile unsigned char gflog[GF_SIZE];
@@ -40,8 +42,13 @@ int main() {
         gfexp[*i] = (unsigned char)x;
         gflog[x] = (unsigned char)*i;
         x <<= 1;
-        if (x & 0x100)
-            x ^= GF_POLY;
+        // Branch-free field-polynomial reduction, same trick as the CCSDS
+        // CRC step: even though x is fully determined by the iteration
+        // count (no message data involved), 255 back-to-back data-shaped
+        // `if`s here turned out to still be a major source of DFS forking
+        // in practice, not just the message-dependent checks below.
+        unsigned int reduce_mask = 0u - ((x >> 8) & 1u);
+        x ^= (GF_POLY & reduce_mask);
     }
     bpf_iter_num_destroy(&it);
 
@@ -53,7 +60,7 @@ int main() {
 
     // Build the generator polynomial g(x) = (x + a^0)(x + a^1)...(x + a^(NPAR-1)),
     // stored low-degree-first: genpoly[0] is the constant term, genpoly[NPAR]
-    // is the (monic) leading term. NPAR (4) is a small compile-time constant,
+    // is the (monic) leading term. NPAR is a small compile-time constant,
     // so the outer "multiply running polynomial by (x+root)" step is unrolled
     // by hand (deg=0..NPAR-1) instead of nesting a bpf_iter_num loop inside
     // another: this target's runtime-verifier can't analyze nested loops, and
@@ -139,37 +146,55 @@ int main() {
     while ((i = bpf_iter_num_next(&it))) buf[*i] = 0;
     bpf_iter_num_destroy(&it);
 
-    // Snapshot the message symbols before encoding. The systematic encode
-    // below is one bpf_iter_num_next() coefficient read per message symbol,
-    // reused across NPAR+1 generator-coefficient steps; flattened into a
-    // single loop those steps must all see that same original value, but
-    // the first (jj=0) step zeroes buf[ii] as part of the polynomial-division
-    // cancellation (monic leading term), so re-reading buf[ii] fresh on
-    // every jj would silently lose the later contributions. This target's
-    // runtime-verifier can't analyze nested bpf_iter_num loops, hence the
-    // flattening; the snapshot is what keeps it equivalent to the original
-    // nested form.
-    volatile unsigned char msg_snapshot[K];
-    bpf_iter_num_new(&it, 0, K);
-    while ((i = bpf_iter_num_next(&it))) msg_snapshot[*i] = buf[*i];
-    bpf_iter_num_destroy(&it);
-
-    // Systematic encode via polynomial long division (LFSR form): for each
-    // message symbol, cancel its leading term by XORing in a scaled copy of
-    // the generator polynomial. gflog/gfexp are read on every inner step.
+    // Systematic encode via polynomial long division (LFSR form): one
+    // coefficient read per message symbol
+    // (buf[ii], AFTER any mutations earlier message symbols already made to
+    // it -- this is a genuine LFSR carry-propagation dependency, not just a
+    // convenience read), reused across the NPAR+1 generator-coefficient
+    // steps for that symbol. Flattened into a single ii/jj loop, jj still
+    // reaches 0 first for each ii (bpf_iter_num_next visits the flat index
+    // in increasing order, so ii=k/(NPAR+1) is non-decreasing and jj=0 is
+    // the first sub-step of each ii block) -- so capture coef there and hold
+    // it for the rest of that ii's block, instead of re-reading buf[ii] on
+    // every jj, which would pick up that same block's own jj=0 write (the
+    // monic leading-term cancellation always zeroes buf[ii] first) and
+    // silently drop every later generator-coefficient contribution for that
+    // symbol. This target's runtime-verifier can't analyze nested
+    // bpf_iter_num loops, hence the flattening.
+    unsigned char coef = 0;
     bpf_iter_num_new(&it, 0, K * (NPAR + 1));
     while ((i = bpf_iter_num_next(&it))) {
         unsigned long long ii = (unsigned long long)*i / (NPAR + 1);
         unsigned long long jj = (unsigned long long)*i % (NPAR + 1);
 
-        unsigned char coef = msg_snapshot[ii];
-        if (coef != 0) {
-            unsigned char g = genpoly[NPAR - jj];
-            if (g != 0) {
-                long long idx = ii + jj;
-                buf[idx] ^= gfexp[gflog[g] + gflog[coef]];
-            }
-        }
+        if (jj == 0)
+            coef = buf[ii];
+
+        unsigned char g = genpoly[NPAR - jj];
+
+        // Both "coef != 0" and "g != 0" gate this contribution; coef comes
+        // from the (arbitrary, symbolic) message data so it can't resolve
+        // to a single concrete path, and in practice g didn't reliably
+        // either (its value threads back through several array
+        // reads/writes the runtime-verifier apparently doesn't fully
+        // concretize). Make both branch-free instead of nesting `if`s, so
+        // the DFS never forks on this at all: nz_mask is 0xFFFFFFFF when
+        // the byte is nonzero, else 0 (sign-bit trick: negating a nonzero
+        // byte sets the sign bit of its OR with the original, so an
+        // arithmetic right shift by 31 sign-extends to all-ones; zero
+        // keeps both sides zero). gflog[0] is never written (log(0) is
+        // undefined) so this can read stack garbage when coef or g is 0,
+        // but that's safe: the mask zeroes the whole contribution before
+        // it's XORed in.
+        int coef_signed = (int)coef;
+        unsigned int coef_nz_mask = (unsigned int)((coef_signed | -coef_signed) >> 31);
+        int g_signed = (int)g;
+        unsigned int g_nz_mask = (unsigned int)((g_signed | -g_signed) >> 31);
+        unsigned int nz_mask = coef_nz_mask & g_nz_mask;
+
+        long long idx = ii + jj;
+        unsigned char contribution = gfexp[gflog[g] + gflog[coef]];
+        buf[idx] ^= (unsigned char)(contribution & nz_mask);
     }
     bpf_iter_num_destroy(&it);
 

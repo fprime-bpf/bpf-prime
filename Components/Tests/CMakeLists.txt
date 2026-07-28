@@ -24,6 +24,9 @@ set(SOURCE_FILES
   "${CMAKE_CURRENT_LIST_DIR}/Matmul.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/NCCScore.cpp"
   "${CMAKE_CURRENT_LIST_DIR}/StarTracker.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/Ccsds.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/ReedSolomon.cpp"
+  "${CMAKE_CURRENT_LIST_DIR}/CfdpChunk.cpp"
 )
 
 # Uncomment and add any modules that this component depends on, else

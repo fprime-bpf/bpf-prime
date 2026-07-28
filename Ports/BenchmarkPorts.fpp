@@ -7,7 +7,10 @@ module Components {
         LOW_PASS_FILTER,
         MATMUL,
         NCC_SCORE,
-        STAR_TRACKER
+        STAR_TRACKER,
+        CCSDS,
+        REED_SOLOMON,
+        CFDP_CHUNK
     }
 
     port RunBpfBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64

@@ -44,4 +44,22 @@ int main();
 
 } // namespace StarTracker
 
+namespace Ccsds {
+
+int main();
+
+} // namespace Ccsds
+
+namespace ReedSolomon {
+
+int main();
+
+} // namespace ReedSolomon
+
+namespace CfdpChunk {
+
+int main();
+
+} // namespace CfdpChunk
+
 } // namespace Components

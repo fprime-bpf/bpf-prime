@@ -37,6 +37,9 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
         case BENCHMARK_TEST::MATMUL: TIME_NATIVE_TEST(Matmul); break;
         case BENCHMARK_TEST::NCC_SCORE: TIME_NATIVE_TEST(NCCScore); break;
         case BENCHMARK_TEST::STAR_TRACKER: TIME_NATIVE_TEST(StarTracker); break;
+        case BENCHMARK_TEST::CCSDS: TIME_NATIVE_TEST(Ccsds); break;
+        case BENCHMARK_TEST::REED_SOLOMON: TIME_NATIVE_TEST(ReedSolomon); break;
+        case BENCHMARK_TEST::CFDP_CHUNK: TIME_NATIVE_TEST(CfdpChunk); break;
         default:
             return -1;
     }
@@ -58,6 +61,9 @@ const char *Tests::get_test_dir(BENCHMARK_TEST test) {
         case BENCHMARK_TEST::MATMUL: return "tests/matmul/";
         case BENCHMARK_TEST::NCC_SCORE: return "tests/nccscore/";
         case BENCHMARK_TEST::STAR_TRACKER: return "tests/startracker/";
+        case BENCHMARK_TEST::CCSDS: return "tests/ccsds/";
+        case BENCHMARK_TEST::REED_SOLOMON: return "tests/reed_solomon/";
+        case BENCHMARK_TEST::CFDP_CHUNK: return "tests/cfdp_chunk/";
         default:
             return "";
     }
@@ -185,7 +191,14 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 Fw::Success Tests::benchmark() {
     const U32 passes = 10000;
 
-    const U32 max_entries[] = { 7, 7, 7, 7, 7, 100, 100, 100, 6, 3, 16, 256, 16, 2500, 25 };
+    // fds 0-14: aberr/aes/kalman/low_pass_filter/nccscore/startracker (see TestInfo below).
+    // fds 15-16: ccsds (in, out). fds 17-18: reed_solomon (in, out).
+    // fds 19-21: cfdp_chunk (file data, persistent chunk-index state, out PDU) --
+    // fd 20 is deliberately never touched by any fill_maps lambda below, since
+    // cfdp_chunk's whole point is that its checkpoint state persists across
+    // invocations rather than being reset each pass.
+    const U32 max_entries[] = { 7, 7, 7, 7, 7, 100, 100, 100, 6, 3, 16, 256, 16, 2500, 25,
+                                 16, 20, 16, 4, 64, 1, 11 };
 
     for (U32 fd = 0; fd < (sizeof(max_entries) / sizeof(max_entries[0])); fd++) {
         bpf_map_def map_def = {
@@ -250,6 +263,18 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(0, 0, 7);
             tests->populate_map_random(1, 0, 7);
             tests->populate_map_random(2, 0, 7);
+        }},
+
+        {passes, BENCHMARK_TEST::CCSDS, "CCSDS", [](Tests* tests) {
+            tests->populate_map_random(15, 0, 16);
+        }},
+
+        {passes, BENCHMARK_TEST::REED_SOLOMON, "Reed-Solomon", [](Tests* tests) {
+            tests->populate_map_random(17, 0, 16);
+        }},
+
+        {passes, BENCHMARK_TEST::CFDP_CHUNK, "CFDP Chunk", [](Tests* tests) {
+            tests->populate_map_random(19, 0, 64);
         }}
     };
 
