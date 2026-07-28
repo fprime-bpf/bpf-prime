@@ -5,9 +5,11 @@
 // payload and appends a bit-by-bit CRC-16/CCITT-FALSE checksum over that
 // payload -- no lookup table, in contrast to the Reed-Solomon benchmark.
 //
-// Map layout (fds are local to this VM slot):
-//   fd 0: PAYLOAD_LEN entries, int  -- input telemetry parameter words
-//   fd 1: 3 + PAYLOAD_LEN + 1 entries, int -- output frame:
+// Map layout (fds match the shared benchmark harness's allocation in
+// Components/Tests/testsWrappers.cpp -- fds 0-14 are claimed by the other
+// benchmarks, so this one starts at 15):
+//   fd 15: PAYLOAD_LEN entries, int  -- input telemetry parameter words
+//   fd 16: 3 + PAYLOAD_LEN + 1 entries, int -- output frame:
 //         [0] header word 1 (version/type/sec-hdr-flag/APID)
 //         [1] header word 2 (seq flags/seq count)
 //         [2] header word 3 (packet data length - 1, in octets)
@@ -28,7 +30,7 @@
 #define CRC16_INIT 0xFFFF
 
 int main() {
-    void *in_map = MAP_BY_FD(0), *out_map = MAP_BY_FD(1);
+    void *in_map = MAP_BY_FD(15), *out_map = MAP_BY_FD(16);
     void *result;
 
     volatile int payload[PAYLOAD_LEN];
@@ -64,11 +66,15 @@ int main() {
             crc ^= (byte << 8);
         }
 
-        if (crc & 0x8000)
-            crc = (crc << 1) ^ CRC16_POLY;
-        else
-            crc = crc << 1;
-        crc &= 0xFFFF;
+        // Branchless CRC bit step: this decision genuinely depends on the
+        // (arbitrary, symbolic) message content, so the runtime-verifier's
+        // DFS can't resolve it and would fork real state on every one of
+        // the 512 flattened iterations. msb_mask is 0xFFFFFFFF when the top
+        // bit is set, else 0 -- unsigned 0 - 1 wraps to all-ones, 0 - 0
+        // stays 0 -- so ANDing it against CRC16_POLY reproduces the
+        // "XOR the poly in, or don't" choice with no branch at all.
+        unsigned int msb_mask = 0u - ((crc >> 15) & 1u);
+        crc = ((crc << 1) ^ (CRC16_POLY & msb_mask)) & 0xFFFF;
     }
     bpf_iter_num_destroy(&ib);
 

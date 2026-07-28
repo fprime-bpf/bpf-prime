@@ -6,12 +6,14 @@
 // PDU sequence would -- this is deliberately a checkpoint/migration-style
 // benchmark, since the entire resumable state is that one map entry.
 //
-// Map layout (fds are local to this VM slot):
-//   fd 0: FILE_LEN entries, int -- backing "file" data
-//   fd 1: 1 entry, int          -- persistent chunk index (do not
+// Map layout (fds match the shared benchmark harness's allocation in
+// Components/Tests/testsWrappers.cpp -- fds 0-14 are claimed by the other
+// benchmarks, and ccsds/reed_solomon claim 15-18, so this one starts at 19):
+//   fd 19: FILE_LEN entries, int -- backing "file" data
+//   fd 20: 1 entry, int          -- persistent chunk index (do not
 //                                  reinitialize between runs; starts at 0
 //                                  since array maps zero-init)
-//   fd 2: 3 + CHUNK_LEN entries, int -- output File Data PDU:
+//   fd 21: 3 + CHUNK_LEN entries, int -- output File Data PDU:
 //         [0] offset, [1] length, [2] additive checksum, [3..] chunk data
 
 #include "../bpf_shim.h"
@@ -21,7 +23,7 @@
 #define NUM_CHUNKS (FILE_LEN / CHUNK_LEN)
 
 int main() {
-    void *file_map = MAP_BY_FD(0), *state_map = MAP_BY_FD(1), *out_map = MAP_BY_FD(2);
+    void *file_map = MAP_BY_FD(19), *state_map = MAP_BY_FD(20), *out_map = MAP_BY_FD(21);
     void *result;
 
     int state_key = 0;
