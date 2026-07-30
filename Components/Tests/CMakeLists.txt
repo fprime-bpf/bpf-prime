@@ -46,6 +46,15 @@ register_fprime_module()
 
 get_module_name("${CMAKE_CURRENT_LIST_DIR}")
 
+# BENCHMARK's native comparison path was a full optimization level behind the
+# bpf (llvmbpf's optimizeModule(), OptimizationLevel::O3) and wasm (WAMR's
+# default LLVMJITOptions, also O3) JIT paths -- RelWithDebInfo's default is
+# -O2. A later -O flag on the compile command line wins over the earlier one,
+# so this doesn't need to fight CMAKE_CXX_FLAGS_RELWITHDEBINFO's cached default.
+if(CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    target_compile_options("${MODULE_NAME}" PRIVATE -O3)
+endif()
+
 ### Unit Tests ###
 # set(UT_SOURCE_FILES
 #   "${CMAKE_CURRENT_LIST_DIR}/LLVMSequencer.fpp"
