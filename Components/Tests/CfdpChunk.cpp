@@ -16,7 +16,7 @@ int main() {
 
     int state_key = 0;
     result = maps::bpf_map_lookup_elem(state_map, &state_key);
-    int chunk_index = *(int*)result % NUM_CHUNKS;
+    int chunk_index = result ? (*(int*)result % NUM_CHUNKS) : 0;
     if (chunk_index < 0) chunk_index += NUM_CHUNKS;
 
     int offset = chunk_index * CHUNK_LEN;

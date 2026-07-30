@@ -7,7 +7,7 @@ inline float sqroot(float s) {
     if (s <= 0)
         return 0;
 
-    long i = *(long*)&s;
+    int i = *(int*)&s;
     i = 0x5f3759df - (i >> 1);
     s = *(float*)&i;
     r = s * (1.5f - r * s * s);

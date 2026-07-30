@@ -5,106 +5,89 @@
 typedef char AES_Block_t[16];
 typedef char AES_Key128_t[256];
 
+// Branch-free GF(2^8) multiply. Each round used to have two data-dependent `if`s
+// (conditionally add `a`; conditionally reduce by the field polynomial on shift
+// overflow) -- with 33 calls to this function per AES block and a 128-block outer
+// loop, those 16 branches/call were the dominant source of the verifier's DFS
+// forking. Same "0u - bit" branch-free masking trick reed_solomon/program.bpf.c
+// already uses for its field-table build, applied here for the same reason.
 __attribute__((always_inline)) inline char GF_Mult(char a, char b) {
-    char result = 0;
-    char shiftEscapesField = 0;
-
-    // Loop through byte `b`
-    // // If the LSB is set (i.e. we're not multiplying out by zero for this polynomial term)
-    // // then we xor the result with `a` (i.e. adding the polynomial terms of a)
-    // if (b & 1) {
-    //   result ^= a;
-    // }
-    //
-    // // Double `a`, keeping track of whether that causes `a` to leave the field.
-    // shiftEscapesField = a & 0x80;
-    // a <<= 1;
-    //
-    // // Since the next bit we look at in `b` will represent multiplying the terms in `a`
-    // // by the next power of 2, we can achieve the same result by shifting `a` left.
-    // // If `a` left the field, we need to modulo with irreduciable polynomial term.
-    // if (shiftEscapesField) {
-    //   // Note that we use 0x1b instead of 0x11b. If we weren't taking advantage of
-    //   // u8 overflow (i.e. by using u16, we would use the "real" term)
-    //   a ^= 0x1b;
-    // }
-    //
-    // // Shift `b` down in order to look at the next LSB (worth twice as much in the multiplication)
-    // b >>= 1;
+    unsigned char result = 0;
+    unsigned char ua = (unsigned char)a;
+    unsigned char ub = (unsigned char)b;
+    unsigned char lsb_mask, hi_mask;
 
     // i = 0
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 1
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 2
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 3
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 4
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 5
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 6
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
     // i = 7
-    if (b & 1)
-        result ^= a;
-    shiftEscapesField = a & 0x80;
-    a <<= 1;
-    if (shiftEscapesField)
-        a ^= 0x1b;
-    b >>= 1;
+    lsb_mask = (unsigned char)(0u - (ub & 1u));
+    result ^= ua & lsb_mask;
+    hi_mask = (unsigned char)(0u - (ua >> 7));
+    ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
+    ub >>= 1;
 
-    return result;
+    return (char)result;
+}
+
+// Branch-free version of `if (v >= 0 && v < 16) v = key[v];` (the SubBytes bounds
+// check below). char is signed on this target, so v>=0 && v<16 is exactly
+// (unsigned char)v < 16, i.e. bits 4-7 of v's unsigned reinterpretation are all
+// zero. Same "0u - bit" select-mask trick as GF_Mult above, applied to a smaller
+// but still real second source of DFS forking (16 branches/block, one per byte).
+__attribute__((always_inline)) inline char AES_MaybeSubstitute(char v, AES_Key128_t key) {
+    unsigned char uv = (unsigned char)v;
+    unsigned int any_hi_bit = ((uv >> 4) & 1u) | ((uv >> 5) & 1u) | ((uv >> 6) & 1u) | ((uv >> 7) & 1u);
+    unsigned char oor_mask = (unsigned char)(0u - any_hi_bit);  // 0xFF if v was outside [0,16), else 0x00
+    unsigned char in_mask = (unsigned char)~oor_mask;
+    char subbed = key[uv & 0x0F];
+    return (char)((subbed & in_mask) | (v & oor_mask));
 }
 
 __attribute__((always_inline)) inline void AES_ShiftRows(AES_Block_t block) {
@@ -229,56 +212,40 @@ int main() {
         // SubBytes
         int index;
         index = 0 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 0 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 0 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 0 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
 
         index = 1 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 1 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 1 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 1 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
 
         index = 2 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 2 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 2 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 2 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
 
         index = 3 * 4 + 0;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 3 * 4 + 1;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 3 * 4 + 2;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
         index = 3 * 4 + 3;
-        if (block[index] >= 0 && block[index] < 16)
-            block[index] = key[block[index]];
+        block[index] = AES_MaybeSubstitute(block[index], key);
 
         AES_ShiftRows(block);
 
