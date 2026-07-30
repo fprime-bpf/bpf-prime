@@ -213,7 +213,7 @@ Fw::Success Tests::benchmark() {
     }
 
     struct sched_param p;
-    p.sched_priority = 20;
+    p.sched_priority = 51;
     int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
     if (rc != 0) {
         this->log_WARNING_HI_BenchMarkFailed(
