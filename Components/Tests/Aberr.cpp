@@ -19,147 +19,96 @@ inline float sqroot(float s) {
     return 1.0f / r;
 }
 
+// Branch-free, table-driven piecewise-linear sine/cosine -- replaces the 15-way
+// ternary cascade each of these used to have. RISC-V has no hardware FP
+// select/cmov, so every `? :` compiled down to a real conditional branch (~339
+// across aberr's hot loop on this target, confirmed by disassembly), each one
+// data-dependent on the actual angle computed that call -- essentially
+// unpredictable, which is expensive on an in-order core like the U54/NOEL-V.
+// The bpf target doesn't hit this: its custom FPU extension lowers the same
+// ternaries as branchless selects (confirmed via its optimized IR: 472 selects,
+// only 24 br), which is what made it several times faster here than native even
+// at matched -O3. This gives native/wasm the same branch-free shape by turning
+// "which of 16 segments is rad in" into an array index instead of a threshold
+// cascade -- SINE_TABLE[k]/COSINE_TABLE[k] are just sin(k*step)/cos(k*step) for
+// k = 0..16 (index 16 is the wraparound, equal to index 0).
+//
+// seg is clamped to [0,15] for safe indexing, but `offset` is deliberately
+// computed from the *unclamped* rad: the original cascade never clamped offset
+// either, only which v1/v2 pair got used once every threshold had fired. This
+// benchmark calls sine/cosine with the raw eccentric anomaly E, which is far
+// outside [0, 2*PI) (E ~ omega*t_emit ~ 400 rad), so the single if-based wrap
+// below doesn't fully normalize it -- reproducing that exact (if numerically
+// odd) fallback behavior keeps native/wasm computing the identical result bpf
+// does, rather than silently changing what the benchmark measures.
+static const float SINE_TABLE[17] = {
+    0.0f, 0.38268343f, 0.70710678f, 0.92387953f, 1.0f, 0.92387953f, 0.70710678f, 0.38268343f,
+    0.0f, -0.38268343f, -0.70710678f, -0.92387953f, -1.0f, -0.92387953f, -0.70710678f, -0.38268343f,
+    0.0f,
+};
+static const float COSINE_TABLE[17] = {
+    1.0f, 0.92387953f, 0.70710678f, 0.38268343f, 0.0f, -0.38268343f, -0.70710678f, -0.92387953f,
+    -1.0f, -0.92387953f, -0.70710678f, -0.38268343f, 0.0f, 0.38268343f, 0.70710678f, 0.92387953f,
+    1.0f,
+};
+
+static inline int clamp_segment(int seg) {
+    unsigned int neg_mask = 0u - (unsigned int)(seg < 0);
+    seg &= (int)~neg_mask;
+    unsigned int over_mask = 0u - (unsigned int)(seg > 15);
+    return (int)(((unsigned int)seg & ~over_mask) | (15u & over_mask));
+}
+
+// Branch-free float select via bit-masking (same technique as clamp_segment,
+// applied to the float's bit pattern -- same style as sqroot's `*(int*)&s`
+// reinterpretation above). Needed for one case the table lookup alone doesn't
+// cover: if the first threshold (rad >= step) never fires -- i.e. rad is still
+// negative even after the single wrap-adjustment below, which happens for the
+// out-of-domain angles this benchmark actually calls sine/cosine with -- the
+// original cascade leaves `offset` at its *pre-wrap-adjustment* initial value,
+// not the post-wrap `rad`. Reproducing that exactly (rather than "fixing" it)
+// is what keeps this bit-for-bit identical to the branchy version.
+static inline float select_f(int cond, float a, float b) {
+    unsigned int mask = 0u - (unsigned int)(cond != 0);
+    unsigned int ai = *(unsigned int*)&a;
+    unsigned int bi = *(unsigned int*)&b;
+    unsigned int ri = (ai & mask) | (bi & ~mask);
+    return *(float*)&ri;
+}
+
 inline float sine(float rad) {
-    float step = 0.125f * PI, v1 = 0.0f, v2 = 0.38268343f, frac, offset = rad;
+    float step = 0.125f * PI;
+    float orig_rad = rad;
 
     if (rad < 0.0f)
         rad = rad + 2.0f * PI;
     if (rad >= 2.0f * PI)
         rad = rad - 2.0f * PI;
 
-    offset = (rad >= step) ? (rad - step) : offset;
-    v1 = (rad >= step) ? 0.38268343f : v1;
-    v2 = (rad >= step) ? 0.70710678f : v2;
-
-    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
-    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 2.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
-    v1 = (rad >= 3.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 3.0f * step) ? 1.0f : v2;
-
-    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
-    v1 = (rad >= 4.0f * step) ? 1.0f : v1;
-    v2 = (rad >= 4.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
-    v1 = (rad >= 5.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 5.0f * step) ? 0.70710678f : v2;
-
-    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
-    v1 = (rad >= 6.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 6.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
-    v1 = (rad >= 7.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 7.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
-    v1 = (rad >= 8.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 8.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
-    v1 = (rad >= 9.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
-    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 10.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
-    v1 = (rad >= 11.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 11.0f * step) ? -1.0f : v2;
-
-    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
-    v1 = (rad >= 12.0f * step) ? -1.0f : v1;
-    v2 = (rad >= 12.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
-    v1 = (rad >= 13.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 13.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
-    v1 = (rad >= 14.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 14.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
-    v1 = (rad >= 15.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 15.0f * step) ? 0.0f : v2;
-
-    frac = offset / step;
+    int raw_seg = (int)(rad / step);
+    int seg = clamp_segment(raw_seg);
+    float offset = select_f(raw_seg >= 1, rad - (float)seg * step, orig_rad);
+    float v1 = SINE_TABLE[seg];
+    float v2 = SINE_TABLE[seg + 1];
+    float frac = offset / step;
     return v1 + frac * (v2 - v1);
 }
 
 inline float cosine(float rad) {
-    float step = 0.125f * PI, v1 = 1.0f, v2 = 0.92387953f, frac, offset = rad;
+    float step = 0.125f * PI;
+    float orig_rad = rad;
 
     if (rad < 0.0f)
         rad = rad + 2.0f * PI;
     if (rad >= 2.0f * PI)
         rad = rad - 2.0f * PI;
 
-    offset = (rad >= step) ? (rad - step) : offset;
-    v1 = (rad >= step) ? 0.92387953f : v1;
-    v2 = (rad >= step) ? 0.70710678f : v2;
-
-    offset = (rad >= 2.0f * step) ? (rad - 2.0f * step) : offset;
-    v1 = (rad >= 2.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 2.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 3.0f * step) ? (rad - 3.0f * step) : offset;
-    v1 = (rad >= 3.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 3.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 4.0f * step) ? (rad - 4.0f * step) : offset;
-    v1 = (rad >= 4.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 4.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 5.0f * step) ? (rad - 5.0f * step) : offset;
-    v1 = (rad >= 5.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 5.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 6.0f * step) ? (rad - 6.0f * step) : offset;
-    v1 = (rad >= 6.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 6.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 7.0f * step) ? (rad - 7.0f * step) : offset;
-    v1 = (rad >= 7.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 7.0f * step) ? -1.0f : v2;
-
-    offset = (rad >= 8.0f * step) ? (rad - 8.0f * step) : offset;
-    v1 = (rad >= 8.0f * step) ? -1.0f : v1;
-    v2 = (rad >= 8.0f * step) ? -0.92387953f : v2;
-
-    offset = (rad >= 9.0f * step) ? (rad - 9.0f * step) : offset;
-    v1 = (rad >= 9.0f * step) ? -0.92387953f : v1;
-    v2 = (rad >= 9.0f * step) ? -0.70710678f : v2;
-
-    offset = (rad >= 10.0f * step) ? (rad - 10.0f * step) : offset;
-    v1 = (rad >= 10.0f * step) ? -0.70710678f : v1;
-    v2 = (rad >= 10.0f * step) ? -0.38268343f : v2;
-
-    offset = (rad >= 11.0f * step) ? (rad - 11.0f * step) : offset;
-    v1 = (rad >= 11.0f * step) ? -0.38268343f : v1;
-    v2 = (rad >= 11.0f * step) ? 0.0f : v2;
-
-    offset = (rad >= 12.0f * step) ? (rad - 12.0f * step) : offset;
-    v1 = (rad >= 12.0f * step) ? 0.0f : v1;
-    v2 = (rad >= 12.0f * step) ? 0.38268343f : v2;
-
-    offset = (rad >= 13.0f * step) ? (rad - 13.0f * step) : offset;
-    v1 = (rad >= 13.0f * step) ? 0.38268343f : v1;
-    v2 = (rad >= 13.0f * step) ? 0.70710678f : v2;
-
-    offset = (rad >= 14.0f * step) ? (rad - 14.0f * step) : offset;
-    v1 = (rad >= 14.0f * step) ? 0.70710678f : v1;
-    v2 = (rad >= 14.0f * step) ? 0.92387953f : v2;
-
-    offset = (rad >= 15.0f * step) ? (rad - 15.0f * step) : offset;
-    v1 = (rad >= 15.0f * step) ? 0.92387953f : v1;
-    v2 = (rad >= 15.0f * step) ? 1.0f : v2;
-
-    frac = offset / step;
+    int raw_seg = (int)(rad / step);
+    int seg = clamp_segment(raw_seg);
+    float offset = select_f(raw_seg >= 1, rad - (float)seg * step, orig_rad);
+    float v1 = COSINE_TABLE[seg];
+    float v2 = COSINE_TABLE[seg + 1];
+    float frac = offset / step;
     return v1 + frac * (v2 - v1);
 }
 

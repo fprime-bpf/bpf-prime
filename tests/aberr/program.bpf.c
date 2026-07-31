@@ -211,34 +211,62 @@ inline float _atan2(float y, float x) {
     return sum;
 }
 
+// Manually unrolled version of this benchmark. All of this program's loops
+// (the two fixed-3 map-load loops, the MAX_ITER=5 convergence loop, and the
+// fixed-3 output loop) have compile-time-constant bounds -- unrolling them is
+// a purely mechanical, lossless transformation, not a behavior change.
+//
+// This sidesteps a real bug in llvmbpf's AOT/JIT compilation pipeline
+// (do_aot_compile/do_jit_compile, via optimizeModule()'s O3 pipeline):
+// bpf_iter_num_new()/bpf_iter_num_next() write and read loop-iterator state
+// through a stack address passed to those calls as a plain integer argument.
+// LLVM's alias analysis cannot always correlate that address with a
+// separately-typed (pointer-based) re-derivation of the same address once a
+// loop's PHI nodes are involved, so the optimizer can incorrectly treat the
+// call as not writing to memory a later access reads -- silently folding
+// away the iterator-dependent computation (confirmed via IR inspection:
+// beta2/gamma and the whole convergence loop's math were being
+// constant-folded to values traced back to iterator bound immediates, not
+// the real map-loaded data). Without loops, there's no PHI merging for this
+// analysis to get wrong.
 int main() {
     void *input_map = MAP_BY_FD(8), *out_map = MAP_BY_FD(9), *res;
     volatile float v[3], v_orig[3], s_obs[3], u_corrected[3];
     volatile float t, a, e, omega, tau, dist, tau_old;
     volatile float beta2, gamma, t_emit, M, E, nu, r, h;
     volatile float s_dot_u, denom, factor, u_corr_mag;
-    struct bpf_iter_num it;
-    long long* i;
+    long key;
 
     tau = 0.0f;
 
     // Load observer position into v
-    bpf_iter_num_new(&it, 0, 3);
-    while ((i = bpf_iter_num_next(&it))) {
-        res = bpf_map_lookup_elem(input_map, i);
-        v[*i] = *(float*)res;
-        v_orig[*i] = v[*i];
-    }
-    bpf_iter_num_destroy(&it);
+    key = 0;
+    res = bpf_map_lookup_elem(input_map, &key);
+    v[0] = *(float*)res;
+    v_orig[0] = v[0];
+
+    key = 1;
+    res = bpf_map_lookup_elem(input_map, &key);
+    v[1] = *(float*)res;
+    v_orig[1] = v[1];
+
+    key = 2;
+    res = bpf_map_lookup_elem(input_map, &key);
+    v[2] = *(float*)res;
+    v_orig[2] = v[2];
 
     // Load and compute s_obs
-    bpf_iter_num_new(&it, 0, 3);
-    while ((i = bpf_iter_num_next(&it))) {
-        long j = *i + 3;
-        res = bpf_map_lookup_elem(input_map, &j);
-        s_obs[*i] = (*(float*)res) / C_LIGHT;
-    }
-    bpf_iter_num_destroy(&it);
+    key = 3;
+    res = bpf_map_lookup_elem(input_map, &key);
+    s_obs[0] = (*(float*)res) / C_LIGHT;
+
+    key = 4;
+    res = bpf_map_lookup_elem(input_map, &key);
+    s_obs[1] = (*(float*)res) / C_LIGHT;
+
+    key = 5;
+    res = bpf_map_lookup_elem(input_map, &key);
+    s_obs[2] = (*(float*)res) / C_LIGHT;
 
     beta2 = s_obs[0] * s_obs[0] + s_obs[1] * s_obs[1] + s_obs[2] * s_obs[2];
     gamma = 1.0f / sqroot(1.0f - beta2);
@@ -248,64 +276,68 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
-    bpf_iter_num_new(&it, 0, 5);
-    while ((i = bpf_iter_num_next(&it))) {
-        t_emit = t - tau;
-        M = omega * t_emit;
-        E = M;
-
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-        E = M + e * sine(E);
-
-        nu = 2.0f * _atan2(sqroot(1 + e) * sine(E / 2), sqroot(1 - e) * cosine(E / 2));
-        r = a * (1 - e * cosine(E));
-
-        float cos_nu = cosine(nu);
-        float sin_nu = sine(nu);
-
-        float d0 = r * cos_nu - v_orig[0];
-        v[0] = d0;
-        float d1 = r * sin_nu - v_orig[1];
-        v[1] = d1;
-        float d2 = 0.0f - v_orig[2];
-        v[2] = d2;
-
-        dist = sqroot(d0 * d0 + d1 * d1 + d2 * d2);
-
-        // Normalize v (which is diff) to get unit vector
-        v[0] /= dist;
-        v[1] /= dist;
-        v[2] /= dist;
-
-        // Aberration correction
-        s_dot_u = s_obs[0] * v[0] + s_obs[1] * v[1] + s_obs[2] * v[2];
-        denom = gamma * (1.0f + s_dot_u);
-        factor = gamma / (1.0f + gamma) * s_dot_u;
-
-        u_corrected[0] = (v[0] + factor * s_obs[0] + s_obs[0]) / denom;
-        u_corrected[1] = (v[1] + factor * s_obs[1] + s_obs[1]) / denom;
-        u_corrected[2] = (v[2] + factor * s_obs[2] + s_obs[2]) / denom;
-
-        u_corr_mag =
-            sqroot(u_corrected[0] * u_corrected[0] + u_corrected[1] * u_corrected[1] + u_corrected[2] * u_corrected[2]);
-        u_corrected[0] /= u_corr_mag;
-        u_corrected[1] /= u_corr_mag;
-        u_corrected[2] /= u_corr_mag;
-
-        tau = dist / C_LIGHT;
+#define ABERR_ITER_BODY \
+    t_emit = t - tau; \
+    M = omega * t_emit; \
+    E = M; \
+    E = M + e * sine(E); \
+    E = M + e * sine(E); \
+    E = M + e * sine(E); \
+    E = M + e * sine(E); \
+    E = M + e * sine(E); \
+    nu = 2.0f * _atan2(sqroot(1 + e) * sine(E / 2), sqroot(1 - e) * cosine(E / 2)); \
+    r = a * (1 - e * cosine(E)); \
+    { \
+        float cos_nu = cosine(nu); \
+        float sin_nu = sine(nu); \
+        float d0 = r * cos_nu - v_orig[0]; \
+        v[0] = d0; \
+        float d1 = r * sin_nu - v_orig[1]; \
+        v[1] = d1; \
+        float d2 = 0.0f - v_orig[2]; \
+        v[2] = d2; \
+        dist = sqroot(d0 * d0 + d1 * d1 + d2 * d2); \
+        v[0] /= dist; \
+        v[1] /= dist; \
+        v[2] /= dist; \
+        s_dot_u = s_obs[0] * v[0] + s_obs[1] * v[1] + s_obs[2] * v[2]; \
+        denom = gamma * (1.0f + s_dot_u); \
+        factor = gamma / (1.0f + gamma) * s_dot_u; \
+        u_corrected[0] = (v[0] + factor * s_obs[0] + s_obs[0]) / denom; \
+        u_corrected[1] = (v[1] + factor * s_obs[1] + s_obs[1]) / denom; \
+        u_corrected[2] = (v[2] + factor * s_obs[2] + s_obs[2]) / denom; \
+        u_corr_mag = sqroot(u_corrected[0] * u_corrected[0] + u_corrected[1] * u_corrected[1] + \
+                             u_corrected[2] * u_corrected[2]); \
+        u_corrected[0] /= u_corr_mag; \
+        u_corrected[1] /= u_corr_mag; \
+        u_corrected[2] /= u_corr_mag; \
+        tau = dist / C_LIGHT; \
     }
-    bpf_iter_num_destroy(&it);
+
+    { ABERR_ITER_BODY } // iteration 0
+    { ABERR_ITER_BODY } // iteration 1
+    { ABERR_ITER_BODY } // iteration 2
+    { ABERR_ITER_BODY } // iteration 3
+    { ABERR_ITER_BODY } // iteration 4
+
+#undef ABERR_ITER_BODY
 
     // Write results
-    bpf_iter_num_new(&it, 0, 3);
-    while ((i = bpf_iter_num_next(&it))) {
-        float result = v_orig[*i] + dist * u_corrected[*i];
-        bpf_map_update_elem(out_map, i, &result, 0);
+    key = 0;
+    {
+        float result = v_orig[0] + dist * u_corrected[0];
+        bpf_map_update_elem(out_map, &key, &result, 0);
     }
-    bpf_iter_num_destroy(&it);
+    key = 1;
+    {
+        float result = v_orig[1] + dist * u_corrected[1];
+        bpf_map_update_elem(out_map, &key, &result, 0);
+    }
+    key = 2;
+    {
+        float result = v_orig[2] + dist * u_corrected[2];
+        bpf_map_update_elem(out_map, &key, &result, 0);
+    }
 
     return 0;
 }

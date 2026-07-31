@@ -3,12 +3,23 @@
 #define MAT_DIM 10
 #define MAT_SIZE (MAT_DIM * MAT_DIM)
 
+// Matches program.bpf.c's int_to_float_small(): the bpf target has no
+// hardware int-to-float instruction, so that version uses a bit trick
+// instead of a plain (float) cast. Kept identical here (rather than just
+// casting, which wasm could do natively) so all three implementations
+// compute bit-for-bit the same value.
+float int_to_float_small(int i) {
+    unsigned int bits = ((unsigned int)i) | 0x4B000000u;
+    float biased = *(float*)&bits;
+    return biased - 8388608.0f;
+}
+
 int main() {
     float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
 
     for (int i = 0; i < MAT_SIZE; i++) {
-        mat_1[i] = (float)bpf_rand_int(0, 100);
-        mat_2[i] = (float)bpf_rand_int(0, 100);
+        mat_1[i] = int_to_float_small(bpf_rand_int(0, 100));
+        mat_2[i] = int_to_float_small(bpf_rand_int(0, 100));
         mat_res[i] = 0.0f;
     }
 

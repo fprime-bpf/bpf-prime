@@ -59,7 +59,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   store volatile i32 %30, ptr %32, align 4, !tbaa !5
   %33 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
   %34 = icmp eq ptr %33, null
-  br i1 %34, label %35, label %27, !llvm.loop !13
+  br i1 %34, label %35, label %27, !llvm.loop !14
 
 35:                                               ; preds = %27, %23
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
@@ -128,14 +128,14 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %90 = add i32 %83, %89
   %91 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %8) #3
   %92 = icmp eq ptr %91, null
-  br i1 %92, label %93, label %55, !llvm.loop !14
+  br i1 %92, label %93, label %55, !llvm.loop !15
 
 93:                                               ; preds = %55, %49
   %94 = phi i32 [ %51, %49 ], [ %90, %55 ]
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %8) #3
   %95 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #3
   %96 = icmp eq ptr %95, null
-  br i1 %96, label %97, label %49, !llvm.loop !15
+  br i1 %96, label %97, label %49, !llvm.loop !16
 
 97:                                               ; preds = %93, %44
   %98 = phi i32 [ 0, %44 ], [ %94, %93 ]
@@ -157,13 +157,13 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
 107:                                              ; preds = %101, %97
   %108 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
   %109 = icmp eq ptr %108, null
-  br i1 %109, label %110, label %44, !llvm.loop !16
+  br i1 %109, label %110, label %44, !llvm.loop !17
 
 110:                                              ; preds = %107, %39
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %6) #3
   %111 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
   %112 = icmp eq ptr %111, null
-  br i1 %112, label %113, label %39, !llvm.loop !17
+  br i1 %112, label %113, label %39, !llvm.loop !18
 
 113:                                              ; preds = %110, %35
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
@@ -201,19 +201,20 @@ attributes #3 = { nounwind }
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.1.0 (https://github.com/fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
-!3 = !{i64 2147504267}
-!4 = !{i64 2147504783}
+!2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
+!3 = !{i64 2147504513}
+!4 = !{i64 2147505029}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
 !8 = !{!"Simple C/C++ TBAA"}
 !9 = !{!10, !10, i64 0}
 !10 = !{!"long long", !7, i64 0}
-!11 = distinct !{!11, !12}
+!11 = distinct !{!11, !12, !13}
 !12 = !{!"llvm.loop.mustprogress"}
-!13 = distinct !{!13, !12}
-!14 = distinct !{!14, !12}
-!15 = distinct !{!15, !12}
-!16 = distinct !{!16, !12}
-!17 = distinct !{!17, !12}
+!13 = !{!"llvm.loop.unroll.disable"}
+!14 = distinct !{!14, !12, !13}
+!15 = distinct !{!15, !12, !13}
+!16 = distinct !{!16, !12, !13}
+!17 = distinct !{!17, !12, !13}
+!18 = distinct !{!18, !12, !13}
