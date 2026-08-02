@@ -11,75 +11,27 @@ namespace Aes {
 typedef char AES_Block_t[16];
 typedef char AES_Key128_t[256];
 
-// Branch-free GF(2^8) multiply -- kept in lockstep with tests/aes/program.bpf.c's
-// GF_Mult, which was rewritten this way to fix a DFS state-explosion problem in
-// the runtime-verifier (33 calls/block x 16 data-dependent branches/call). This
-// native copy is mirrored so all three (bpf/native/wasm) benchmark paths keep
-// computing the exact same thing; it doesn't itself have a state-explosion
-// problem, this is purely to stay in sync with the bpf version's algorithm.
-static char GF_Mult(char a, char b) {
-  unsigned char result = 0;
-  unsigned char ua = (unsigned char)a;
+// Native-only specialization: MixColumns only ever calls GF_Mult with the
+// literal constants 0x02 and 0x03, but LLVM doesn't fold the generic
+// branch-free 8-round GF_Mult loop (see tests/aes/program.bpf.c) down to
+// the trivial xtime form even with the multiplier inlined as a constant.
+// program.bpf.c keeps the generic loop because the runtime-verifier's DFS
+// WCET analyzer needs that specific branch-free shape to avoid a state
+// explosion (33 calls/block x 16 data-dependent branches/call) -- that's
+// a static-analysis constraint, not a property of the arithmetic, so the
+// native path (not analyzed that way) is free to compute the same GF(2^8)
+// values directly. Output is bit-identical to the generic form.
+static inline unsigned char GF_Xtime(unsigned char x) {
+  return (unsigned char)((x << 1) ^ (0x1b & (unsigned char)(0u - (x >> 7))));
+}
+
+static char GF_Mult2(char b) {
+  return (char)GF_Xtime((unsigned char)b);
+}
+
+static char GF_Mult3(char b) {
   unsigned char ub = (unsigned char)b;
-  unsigned char lsb_mask, hi_mask;
-
-  // i = 0
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 1
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 2
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 3
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 4
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 5
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 6
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  // i = 7
-  lsb_mask = (unsigned char)(0u - (ub & 1u));
-  result ^= ua & lsb_mask;
-  hi_mask = (unsigned char)(0u - (ua >> 7));
-  ua = (unsigned char)(ua << 1) ^ (0x1b & hi_mask);
-  ub >>= 1;
-
-  return (char)result;
+  return (char)(GF_Xtime(ub) ^ ub);
 }
 
 // Branch-free version of `if (v >= 0 && v < 16) v = key[v];` -- mirrors
@@ -122,10 +74,10 @@ static void AES_MixColumns(AES_Block_t block) {
   int base;
 
   base = 0 * 4;
-  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
-  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
-  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
-  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+  temp[0] = GF_Mult2(block[base]) ^ GF_Mult3(block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult2(block[base + 1]) ^ GF_Mult3(block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult2(block[base + 2]) ^ GF_Mult3(block[base + 3]);
+  temp[3] = GF_Mult3(block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult2(block[base + 3]);
 
   block[base] = temp[0];
   block[base + 1] = temp[1];
@@ -133,10 +85,10 @@ static void AES_MixColumns(AES_Block_t block) {
   block[base + 3] = temp[3];
 
   base = 1 * 4;
-  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
-  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
-  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
-  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+  temp[0] = GF_Mult2(block[base]) ^ GF_Mult3(block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult2(block[base + 1]) ^ GF_Mult3(block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult2(block[base + 2]) ^ GF_Mult3(block[base + 3]);
+  temp[3] = GF_Mult3(block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult2(block[base + 3]);
 
   block[base] = temp[0];
   block[base + 1] = temp[1];
@@ -144,10 +96,10 @@ static void AES_MixColumns(AES_Block_t block) {
   block[base + 3] = temp[3];
 
   base = 2 * 4;
-  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
-  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
-  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
-  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+  temp[0] = GF_Mult2(block[base]) ^ GF_Mult3(block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult2(block[base + 1]) ^ GF_Mult3(block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult2(block[base + 2]) ^ GF_Mult3(block[base + 3]);
+  temp[3] = GF_Mult3(block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult2(block[base + 3]);
 
   block[base] = temp[0];
   block[base + 1] = temp[1];
@@ -155,10 +107,10 @@ static void AES_MixColumns(AES_Block_t block) {
   block[base + 3] = temp[3];
 
   base = 3 * 4;
-  temp[0] = GF_Mult(0x02, block[base]) ^ GF_Mult(0x03, block[base + 1]) ^ block[base + 2] ^ block[base + 3];
-  temp[1] = block[base] ^ GF_Mult(0x02, block[base + 1]) ^ GF_Mult(0x03, block[base + 2]) ^ block[base + 3];
-  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult(0x02, block[base + 2]) ^ GF_Mult(0x03, block[base + 3]);
-  temp[3] = GF_Mult(0x03, block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult(0x02, block[base + 3]);
+  temp[0] = GF_Mult2(block[base]) ^ GF_Mult3(block[base + 1]) ^ block[base + 2] ^ block[base + 3];
+  temp[1] = block[base] ^ GF_Mult2(block[base + 1]) ^ GF_Mult3(block[base + 2]) ^ block[base + 3];
+  temp[2] = block[base] ^ block[base + 1] ^ GF_Mult2(block[base + 2]) ^ GF_Mult3(block[base + 3]);
+  temp[3] = GF_Mult3(block[base]) ^ block[base + 1] ^ block[base + 2] ^ GF_Mult2(block[base + 3]);
 
   block[base] = temp[0];
   block[base + 1] = temp[1];
