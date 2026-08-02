@@ -1,4 +1,5 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/cpu_cycles.hpp"
 #include "Components/WasmSequencer/WasmSequencer.hpp"
 #include "Components/Tests/Tests.hpp"
 #include "Components/Tests/NativeTests.hpp"
@@ -13,19 +14,16 @@
 #include <random>
 #include <sstream>
 
-using timer = std::chrono::high_resolution_clock;
-using ns = std::chrono::nanoseconds;
-
-#define TIME_NATIVE_TEST(test)  \
-    test_name = #test;          \
-    start = timer::now();       \
-    exit_status = test::main(); \
-    end = timer::now();
+#define TIME_NATIVE_TEST(test)       \
+    test_name = #test;               \
+    start = get_cpu_cycles();        \
+    exit_status = test::main();      \
+    end = get_cpu_cycles();
 
 namespace Components {
 
 F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
-    timer::time_point start, end;
+    uint64_t start, end;
     const char* test_name;
     I32 exit_status;
 
@@ -49,7 +47,7 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
         return -1;
     }
 
-    return std::chrono::duration<F64, ns::period>(end - start).count();
+    return cpu_cycles_to_ns(end - start);
 }
 
 const char *Tests::get_test_dir(BENCHMARK_TEST test) {
@@ -70,7 +68,7 @@ const char *Tests::get_test_dir(BENCHMARK_TEST test) {
 }
 
 F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
-    timer::time_point start, end;
+    uint64_t start, end;
 
     if (compile) {
         auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.o";
@@ -82,18 +80,18 @@ F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
 
     auto vm = this->vms[test];
 
-    start = timer::now();
+    start = get_cpu_cycles();
     auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
-    end = timer::now();
+    end = get_cpu_cycles();
 
     if (run_result)
         return -1;
 
-    return std::chrono::duration<F64, ns::period>(end - start).count();
+    return cpu_cycles_to_ns(end - start);
 }
 
 F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool compile) {
-    timer::time_point start, end;
+    uint64_t start, end;
 
     if (compile) {
         auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.wasm";
@@ -104,20 +102,20 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
             return -1;
     }
 
-    
+
     if (!this->wamr_register_thread())
         return -1;
 
     uint32_t argv[1] = {0};
-        
-    start = timer::now();
+
+    start = get_cpu_cycles();
     auto run_result = wasm_runtime_call_wasm(exec_env, func.value(), 0, argv);
-    end = timer::now();
-    
+    end = get_cpu_cycles();
+
     if (!run_result)
         return -1;
 
-    return std::chrono::duration<F64, ns::period>(end - start).count();
+    return cpu_cycles_to_ns(end - start);
 }
 
 namespace {

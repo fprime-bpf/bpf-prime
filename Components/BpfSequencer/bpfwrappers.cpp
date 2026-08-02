@@ -1,4 +1,5 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/cpu_cycles.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/efg.hpp"
 #include "bpf.hpp"
@@ -10,9 +11,6 @@
 #include <memory>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
-
-using timer = std::chrono::high_resolution_clock;
-using ms = std::chrono::milliseconds;
 
 namespace Components {
 
@@ -101,7 +99,7 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
 
 Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     uint64_t err = 0;
-    timer::time_point start, end;
+    uint64_t start, end;
 
     // Validate VM ID
     if (!validate_vm_id(vmId))
@@ -115,13 +113,13 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     auto vm = vms[vmId];
 
     if (log_time)
-        start = timer::now();
-    
+        start = get_cpu_cycles();
+
     // Run the compiled sequence using VM's own bpf_mem
     err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
-    
+
     if (log_time)
-        end = timer::now();
+        end = get_cpu_cycles();
 
     if (err) {
         Fw::LogStringArg errMsg(vm->bpf_vm.get_error_message().c_str());
@@ -130,7 +128,7 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     }
 
     if (log_time)
-        this->log_ACTIVITY_LO_CommandRunSuccess(vmId, std::chrono::duration<F64, ms::period>(end - start).count());
+        this->log_ACTIVITY_LO_CommandRunSuccess(vmId, cpu_cycles_to_ns(end - start) / 1e6);
     return Fw::Success::SUCCESS;
 }
 
