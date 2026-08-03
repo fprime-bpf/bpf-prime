@@ -10,6 +10,7 @@
 #define Components_BpfSequencer_HPP
 
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
+#include "Components/BpfSequencer/core_isolation.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
 #include "Os/Mutex.hpp"
@@ -128,6 +129,10 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
     U32 num_workers = 2;
+
+    // Saved IRQ/workqueue affinity per worker core, for restoring on destruction.
+    std::vector<std::vector<std::pair<std::string, std::string>>> saved_worker_irq_affinities;
+    std::vector<std::string> saved_worker_workqueue_affinities;
     
     // Per-worker timing for telemetry (max 6 workers to match ExecutorTickDurations array)
     // Tracks tick durations in microseconds for each worker

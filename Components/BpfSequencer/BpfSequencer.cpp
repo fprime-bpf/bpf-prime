@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <pthread.h>
 #include <sched.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 namespace Components {
 
@@ -56,12 +58,20 @@ bpf_mem_size(0) {
 BpfSequencer ::~BpfSequencer() {
     // Signal workers to stop
     running = false;
-    
+
     // Join all worker threads
     for (auto& thread : workers) {
         if (thread.joinable()) {
             thread.join();
         }
+    }
+
+    // Restore each worker core's IRQ/workqueue affinity.
+    for (auto& saved : saved_worker_irq_affinities) {
+        restore_irq_affinities(saved);
+    }
+    for (auto& saved : saved_worker_workqueue_affinities) {
+        restore_workqueue_affinity(saved);
     }
 }
 
@@ -71,13 +81,17 @@ void BpfSequencer::run_worker(U32 worker_id) {
     using Clock = std::chrono::high_resolution_clock;
 
     #ifdef __linux__
-    // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
+    // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks
     // are meant to run on non-looping routines
-    struct sched_param p; 
-    p.sched_priority = 20; 
-    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) { 
+    struct sched_param p;
+    p.sched_priority = 20;
+    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
         this->log_WARNING_HI_WorkerPrioritySetFailed();
-    } 
+    }
+
+    // Pin to a dedicated core, matching worker_id.
+    unsigned long worker_affinity_mask = 1UL << worker_id;
+    syscall(SYS_sched_setaffinity, 0, sizeof(worker_affinity_mask), &worker_affinity_mask);
     #endif
 
     // Initialize tick timing state for this worker
@@ -317,6 +331,14 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     worker_enabled.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++)
         worker_enabled.emplace_back(true);
+
+    // Exclude each worker's future core from IRQ/workqueue scheduling.
+    saved_worker_irq_affinities.reserve(num_workers);
+    saved_worker_workqueue_affinities.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++) {
+        saved_worker_irq_affinities.push_back(exclude_core_from_irqs(static_cast<int>(i)));
+        saved_worker_workqueue_affinities.push_back(exclude_core_from_workqueues(static_cast<int>(i)));
+    }
 
     // Initialize worker threads
     workers.reserve(num_workers);
