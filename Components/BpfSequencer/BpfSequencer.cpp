@@ -59,6 +59,14 @@ BpfSequencer ::~BpfSequencer() {
     // Signal workers to stop
     running = false;
 
+    // Unblock any worker parked in job_queue.receive() so it can see `running`
+    // is false and return, instead of waiting forever for a job that will never come.
+    ScheduledJob wake_job{};
+    for (size_t i = 0; i < workers.size(); i++) {
+        job_queue.send(reinterpret_cast<const U8*>(&wake_job), sizeof(wake_job), 0,
+                        Os::QueueInterface::BlockingType::NONBLOCKING);
+    }
+
     // Join all worker threads
     for (auto& thread : workers) {
         if (thread.joinable()) {
