@@ -210,6 +210,10 @@ Fw::Success Tests::benchmark() {
         BpfSequencer::maps.create_map(map_def, fd);
     }
 
+    int orig_policy = sched_getscheduler(0);
+    struct sched_param orig_param{};
+    sched_getparam(0, &orig_param);
+
     struct sched_param p;
     p.sched_priority = 51;
     int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
@@ -279,16 +283,23 @@ Fw::Success Tests::benchmark() {
 
     create_output_file();
 
-    for (const auto& test : tests) {
-        auto result = benchmark_test(test.passes, test.test, test.test_name, tests->fill_maps);
+    Fw::Success result = Fw::Success::SUCCESS;
 
-        if (result != Fw::Success::SUCCESS) {
+    for (const auto& test : tests) {
+        auto test_result = benchmark_test(test.passes, test.test, test.test_name, tests->fill_maps);
+
+        if (test_result != Fw::Success::SUCCESS) {
             this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
-            return Fw::Success::FAILURE;
+            result = Fw::Success::FAILURE;
+            break;
         }
+
+        sched_yield();
     }
 
-    return Fw::Success::SUCCESS;
+    sched_setscheduler(0, orig_policy, &orig_param);
+
+    return result;
 }
 
 Fw::Success Tests::populate_map_random(U32 fd, U32 start, U32 length) {
