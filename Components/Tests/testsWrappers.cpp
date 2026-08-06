@@ -123,7 +123,6 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
 }
 
 namespace {
-
 constexpr int BENCHMARK_CORE = 2;
 
 const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
@@ -131,9 +130,11 @@ const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
 void create_output_file() {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
 }
+
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
+
 void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64, F64>>& test_results) {
     output_new_test(test_name);
 
@@ -151,11 +152,24 @@ void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64,
 
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
 }
-}  // namespace
+
+std::string read_rcu_stall_suppress() {
+    std::ifstream in("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress");
+    std::string val;
+    std::getline(in, val);
+    return val;
+}
+
+void write_rcu_stall_suppress(const std::string& val) {
+    std::ofstream("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress") << val;
+}
+}
 
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {
-    std::vector<std::tuple<F64, F64, F64>> test_results;
-    test_results.reserve(passes);
+    std::vector<F64> bpf_times, native_times, wasm_times;
+    bpf_times.reserve(passes);
+    native_times.reserve(passes);
+    wasm_times.reserve(passes);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -167,6 +181,11 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
+        bpf_times.push_back(bpf_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("BPF"));
+
+    for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto native_time = this->get_benchmark_native(test);
 
@@ -175,7 +194,12 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
             return Fw::Success::FAILURE;
         }
-        
+
+        native_times.push_back(native_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("Native"));
+
+    for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
 
@@ -185,7 +209,14 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        test_results.emplace_back(bpf_time, native_time, wasm_time);
+        wasm_times.push_back(wasm_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));
+
+    std::vector<std::tuple<F64, F64, F64>> test_results;
+    test_results.reserve(passes);
+    for (U32 i = 0; i < passes; ++i) {
+        test_results.emplace_back(bpf_times[i], native_times[i], wasm_times[i]);
     }
 
     output_test_results(test_name, test_results);
@@ -225,6 +256,9 @@ Fw::Success Tests::benchmark() {
 
     auto saved_irq_affinities = exclude_core_from_irqs(BENCHMARK_CORE);
     auto saved_workqueue_affinity = exclude_core_from_workqueues(BENCHMARK_CORE);
+
+    auto saved_rcu_stall_suppress = read_rcu_stall_suppress();
+    write_rcu_stall_suppress("1");
 
     int orig_policy = sched_getscheduler(0);
     struct sched_param orig_param{};
@@ -316,6 +350,7 @@ Fw::Success Tests::benchmark() {
     sched_setscheduler(0, orig_policy, &orig_param);
     restore_irq_affinities(saved_irq_affinities);
     restore_workqueue_affinity(saved_workqueue_affinity);
+    write_rcu_stall_suppress(saved_rcu_stall_suppress);
     syscall(SYS_sched_setaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
 
     return result;

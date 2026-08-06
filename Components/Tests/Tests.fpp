@@ -45,6 +45,10 @@ module Components {
             severity warning low \
             format "Could not complete benchmark: Test '{}' Pass #{} failed, exit code {}"
 
+        event BenchmarkTestCompleted(testName: string, backend: string) \
+            severity activity high \
+            format "Benchmark test '{}' ({}) completed"
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

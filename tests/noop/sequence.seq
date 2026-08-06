@@ -1,0 +1,5 @@
+; Minimal test: load a trivial BPF program (return 0 only) and run it once.
+; Used to isolate whether LOAD_SEQUENCE compile hangs are proportional to
+; program complexity or a structural issue independent of program size.
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/noop/a.o"
+R00:00:02 BPFPrimeTest.bpfSequencer.RUN_SEQUENCE 0
