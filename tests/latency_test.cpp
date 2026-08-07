@@ -4,6 +4,7 @@
 #include <cstring>
 #include <unordered_map>
 #include "Components/BpfSequencer/maps/shared_mutex.hpp"
+#include "Components/BpfSequencer/BpfSequencer.hpp"
 
 /*
  * Merged NOEL-V instruction/pipeline latency sweep -- combines what were
@@ -128,6 +129,33 @@ do {                                                                        \
     report(name, end - start, reps);                                       \
 } while (0)
 
+/* Single-precision counterpart. noelv.py's FADD/FSUB/FMUL/FDIV/FNEG/FMOV
+ * overrides currently give the 32-bit (single) and 64-bit (double) variant
+ * of every float op the exact same cost -- but nanofpunv.vhd's FADD/FSUB
+ * state machine is a bit-serial mantissa loop (nf_div4/nf_div5-style), and
+ * single precision has less than half the mantissa bits of double (24 vs
+ * 53), so it should need meaningfully fewer iterations, not an identical
+ * cost. This has never been measured on real hardware at all -- only the
+ * double-precision case was (MEASURE_FOP above). */
+#define MEASURE_FOP_S(name, insn, opa, opb, reps)                           \
+do {                                                                        \
+    register float fa asm("fa0") = (opa);                                  \
+    register float fb asm("fa1") = (opb);                                  \
+    uint64_t start, end;                                                   \
+    asm volatile(                                                          \
+        "fence\n"                                                         \
+        "rdcycle %[start]\n"                                              \
+        ".rept " #reps "\n"                                               \
+        insn " fa2, %[a0], %[a1]\n"                                       \
+        ".endr\n"                                                         \
+        "rdcycle %[end]\n"                                                \
+        : [start] "=&r"(start), [end] "=&r"(end)                          \
+        : [a0] "f"(fa), [a1] "f"(fb)                                      \
+        : "fa2"                                                           \
+    );                                                                     \
+    report(name, end - start, reps);                                       \
+} while (0)
+
 /* Helper-call proxy: called through a volatile function pointer so the
  * compiler can't inline/devirtualize it -- forces a real jalr/ret, same
  * shape as the BPF interpreter's helper dispatch. NOTE: this only measures
@@ -154,6 +182,16 @@ static void run_pipeline_tests(void) {
     MEASURE_FOP("fsub.d normal (2.5-1.5)",   "fsub.d", 2.5, 1.5, 500);
     MEASURE_FOP("fsub.d cancel (1.0-~1.0)",  "fsub.d", 1.0, 0x1.fffffffffffffp-1, 500);
     MEASURE_FOP("fadd.d subnorm (+DBL_TRUE_MIN)", "fadd.d", 1.0, 5e-324, 500);
+
+    /* Single-precision counterpart -- same operand shapes (normal/cancel/
+     * subnorm), never measured before. Compare directly against the
+     * double-precision numbers above to see whether FADD_X/FSUB_X really
+     * should differ from FADD64_X/FSUB64_X. */
+    printf("\n--- FADD/FSUB (single) ---\n");
+    MEASURE_FOP_S("fadd.s normal (1.5+2.5)",   "fadd.s", 1.5f, 2.5f, 500);
+    MEASURE_FOP_S("fsub.s normal (2.5-1.5)",   "fsub.s", 2.5f, 1.5f, 500);
+    MEASURE_FOP_S("fsub.s cancel (1.0-~1.0)",  "fsub.s", 1.0f, 0x1.fffffep-1f, 500);
+    MEASURE_FOP_S("fadd.s subnorm (+FLT_TRUE_MIN)", "fadd.s", 1.0f, 1e-45f, 500);
 
     printf("\n--- Helper-call proxy (native jalr/ret only) ---\n");
     {
@@ -486,10 +524,154 @@ static void run_map_helper_tests(void) {
     report("unique_lock (update/delete_elem's lock)", end - start, n);
 }
 
+/* =============== 5. bpf_iter_num_new/_next/_destroy real cost =============== */
+
+/* CALL_5/6/7 (bpf_iter_num_new/_next/_destroy) still use the flat
+ * default_helper_call_cost guess -- unlike CALL_1/2/3 (map lookup/update),
+ * which we've now measured directly. Components/BpfSequencer/
+ * iter_bpf_helpers.cpp shows these are actually trivial: no mutex, no
+ * container, just a few field reads/writes and a comparison (bpf_iter_num_
+ * next is an increment, a bounds check, and a pointer-or-NULL return). So
+ * unlike the map helpers, the hypothesis here is the opposite direction --
+ * default_helper_call_cost=100 might be *too high* for these specifically,
+ * since a generic call+ret (section 2's helper-call proxy) alone measured
+ * only ~9 cycles. Measuring directly rather than assuming either way. */
+static void run_iter_num_tests(void) {
+    printf("\n\n=== 5. bpf_iter_num_new/_next/_destroy real cost ===\n\n");
+
+    Components::BpfSequencer::bpf_iter_num it;
+    const int n = 2000;
+    uint64_t start, end;
+
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        Components::BpfSequencer::bpf_iter_num_new(&it, 0, 7);
+    }
+    end = rdcycle();
+    report("bpf_iter_num_new(0,7)", end - start, n);
+
+    // Steady-state next(): huge range so it always returns non-NULL, same
+    // as the common case inside a real bpf_iter_num_new/_next loop.
+    Components::BpfSequencer::bpf_iter_num_new(&it, 0, 1000000000);
+    volatile long long sink = 0;
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        I64 *r = Components::BpfSequencer::bpf_iter_num_next(&it);
+        sink = *r;
+    }
+    end = rdcycle();
+    report("bpf_iter_num_next (steady, non-NULL)", end - start, n);
+    (void)sink;
+
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        Components::BpfSequencer::bpf_iter_num_destroy(&it);
+    }
+    end = rdcycle();
+    report("bpf_iter_num_destroy", end - start, n);
+}
+
+/* =============== 6. Branch: real loop-carried backward edge =============== */
+
+/* Section 2's "--- Branch ---" test only measured a trivial, isolated,
+ * always-taken-or-always-not-taken FORWARD hop (beq/bne zero,zero,1f with
+ * "1:" immediately following) wrapped in a C for-loop -- that shape doesn't
+ * match what JEQ_K/JNE_K actually look like in low_pass_filter's compiled
+ * output. Decoding program.bpf.o directly: every bpf_iter_num_next() call
+ * is followed by a JNE_K (K=0, i.e. "is result non-NULL?") that branches
+ * BACKWARD to the top of the loop body when true, and falls through to a
+ * JEQ_K (K=0) forward exit only once, on the final NULL iteration. In the
+ * worst-case path this JNE_K is the single most common branch-classified
+ * instruction (14 occurrences, vs. 2 for the exit JEQ_K) -- but the model's
+ * JEQ_K=JNE_K=7 cost was carried over mechanically from PolarFire's original
+ * base table, never measured against this actual backward-taken shape.
+ *
+ * This measures a real decrementing backward-branch loop: N-1 taken
+ * iterations (mirrors the steady-state "next() returned non-NULL, continue"
+ * case) plus exactly 1 not-taken iteration (mirrors the single loop-exit
+ * check) -- the same "steady-state + one different final state" shape used
+ * for the div/store/iter_num measurements above, instead of an artificial
+ * always-one-way loop. */
+static void run_branch_tests(void) {
+    printf("\n\n=== 6. Branch: real loop-carried backward edge ===\n\n");
+
+    /* addi + bnez, backward-branching loop: N-1 taken + 1 not-taken.
+     * Isolate the branch's own contribution by comparing against the
+     * standalone "addi" cost already measured in section 2's ALU sanity
+     * check (both operate on registers only, no memory). */
+    {
+        uint64_t start, end;
+        const long n = 10000;
+        register long counter asm("a2") = n;
+        asm volatile(
+            "fence\n"
+            "rdcycle %[start]\n"
+            "1:\n"
+            "addi %[c], %[c], -1\n"
+            "bnez %[c], 1b\n"
+            "rdcycle %[end]\n"
+            : [start] "=&r"(start), [end] "=&r"(end), [c] "+&r"(counter)
+            :
+            :
+        );
+        report("addi+bnez backward loop ((N-1) taken + 1 not-taken)", end - start, n);
+    }
+
+    /* Same shape but with beqz (branches away/forward past the loop on
+     * counter==0, i.e. how the JEQ_K exit check is actually shaped: taken
+     * exactly once, on the very last iteration, matching the real N-1
+     * skip + 1 taken pattern instead of section 2's always-taken case). */
+    {
+        uint64_t start, end;
+        const long n = 10000;
+        register long counter asm("a2") = n;
+        asm volatile(
+            "fence\n"
+            "rdcycle %[start]\n"
+            "1:\n"
+            "addi %[c], %[c], -1\n"
+            "beqz %[c], 2f\n"
+            "j 1b\n"
+            "2:\n"
+            "rdcycle %[end]\n"
+            : [start] "=&r"(start), [end] "=&r"(end), [c] "+&r"(counter)
+            :
+            :
+        );
+        report("addi+beqz/j (N-1 not-taken + 1 taken exit)", end - start, n);
+    }
+
+    /* Pure backward-taken cost with a longer, more realistic body between
+     * the branch and its target (7 nops, roughly matching a filter
+     * iteration's instruction count) -- checks whether branch cost depends
+     * on target distance/instructions-in-flight, not just the branch
+     * opcode itself. */
+    {
+        uint64_t start, end;
+        const long n = 10000;
+        register long counter asm("a2") = n;
+        asm volatile(
+            "fence\n"
+            "rdcycle %[start]\n"
+            "1:\n"
+            "nop\nnop\nnop\nnop\nnop\nnop\nnop\n"
+            "addi %[c], %[c], -1\n"
+            "bnez %[c], 1b\n"
+            "rdcycle %[end]\n"
+            : [start] "=&r"(start), [end] "=&r"(end), [c] "+&r"(counter)
+            :
+            :
+        );
+        report("addi+bnez backward loop, 7-nop body", end - start, n);
+    }
+}
+
 int main(void) {
     run_div_tests();
     run_pipeline_tests();
     run_lddw_tests();
     run_map_helper_tests();
+    run_iter_num_tests();
+    run_branch_tests();
     return 0;
 }

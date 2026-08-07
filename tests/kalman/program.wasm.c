@@ -3,31 +3,28 @@
 int main() {
     uint64_t in_map = MAP_BY_FD(3), out_map = MAP_BY_FD(4);
     uint32_t result;
-    float ins[7], preds[7];
+    const int N_SAMPLES = 7;
 
-    // Read in position and attitude
-    for (int i = 0; i < 7; i++) {
+    // Scalar Kalman filter: state x (e.g. a single-axis position/attitude
+    // estimate) and its estimate covariance p, carried across steps.
+    float x = 0.0f;           // initial state estimate (no prior)
+    float p = 1000.0f;        // initial estimate covariance (low confidence)
+    const float q = 0.01f;    // process noise covariance
+    const float r = 0.5f;     // measurement noise covariance
+
+    for (int i = 0; i < N_SAMPLES; i++) {
         result = bpf_map_lookup_elem(in_map, i);
-        ins[i] = *(float *)&result;
-        preds[i] = ins[i];
-    }
+        float z = *(float *)&result;
 
-    // Get predictions
-   for (int i = 0; i < 7; i++) {
-        if (i != 6)
-            preds[i] = preds[i + 1] / 1.5f;
-        else
-            preds[i] = preds[0] / 1.5f;
-    }
+        // Predict
+        float p_pred = p + q;
 
-    for (int i = 0; i < 7; i++) {
-        // Diff with actual and multiply with factor
-        ins[i] = ins[i] - preds[i];
-        ins[i] *= 0.05f;
+        // Update: Kalman gain, then correct state and covariance estimate
+        float k = p_pred / (p_pred + r);
+        x = x + k * (z - x);
+        p = (1.0f - k) * p_pred;
 
-        // Write out estimate to BPF map
-        preds[i] = preds[i] - ins[i];
-        bpf_map_update_elem(out_map, i, preds[i], 0);
+        bpf_map_update_elem(out_map, i, x, 0);
     }
 
     return 0;
