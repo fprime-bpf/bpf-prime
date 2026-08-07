@@ -299,8 +299,8 @@ Fw::Success Tests::benchmark() {
         }},
 
         {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter", [](Tests* tests) {
-            tests->populate_map_random(2, 0, 2);
-            tests->populate_map_random(4, 0, 2);
+            tests->populate_map_random(2, 0, 7);
+            tests->populate_map_random(4, 0, 7);
         }},
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
