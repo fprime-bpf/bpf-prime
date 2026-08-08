@@ -666,6 +666,90 @@ static void run_branch_tests(void) {
     }
 }
 
+/* =============== 7. Cache latency sweep (L1/L2/miss geometry) =============== */
+
+/* Section 2's "--- Memory ---" test only bracketed the extremes -- a single
+ * always-resident hot word (definitely L1) vs. a 16MB/4KB-stride sweep
+ * (definitely a miss) -- specifically because "we don't have confirmed
+ * L1/L2 geometry for this bitstream" (see that section's comment). Neither
+ * board's actual L1 size, L2 presence/size, or per-tier hit cost has ever
+ * been measured; profiles/polarfire.py and profiles/noelv.py's
+ * l1_hit_cycles/l2_hit_cycles/l3_hit_cycles/miss_cycles are inherited
+ * guesses.
+ *
+ * This does a classic working-set-size sweep to find those tiers
+ * empirically: pointer-chase a randomized cyclic permutation of 8-byte
+ * slots confined to a buffer of size S, for a geometric range of S from 1KB
+ * (definitely L1) to 16MB (definitely DRAM). Pointer-chasing (each load's
+ * address depends on the previous load's *value*) defeats
+ * prefetching/out-of-order overlap, so the result is a clean per-access
+ * latency curve, not a throughput number. Where cycles/access jumps sharply
+ * as S grows marks a real cache-tier boundary -- the plateau cost before
+ * each jump is that tier's real hit cost.
+ */
+static void run_cache_sweep_tests(void) {
+    printf("\n\n=== 7. Cache latency sweep (working-set size vs. cycles/access) ===\n\n");
+    printf("%-10s %-16s\n", "size(B)", "cycles/access");
+
+    static const size_t sizes[] = {
+        1  * 1024,   2  * 1024,   4   * 1024,  8   * 1024,
+        16 * 1024,   24 * 1024,   32  * 1024,  48  * 1024,
+        64 * 1024,   96 * 1024,   128 * 1024,  192 * 1024,
+        256 * 1024,  512 * 1024,
+        1  * 1024 * 1024, 2 * 1024 * 1024, 4 * 1024 * 1024,
+        8  * 1024 * 1024, 16 * 1024 * 1024,
+    };
+
+    for (size_t size : sizes) {
+        size_t n = size / sizeof(void *);
+        if (n < 2) continue;
+
+        void **buf = (void **)malloc(size);
+        size_t *idx = (size_t *)malloc(n * sizeof(size_t));
+        for (size_t i = 0; i < n; i++) idx[i] = i;
+
+        /* xorshift64 -- doesn't need to be cryptographic, just enough to
+         * decorrelate access order from linear address order. */
+        uint64_t rng = 0x9E3779B97F4A7C15ULL ^ (uint64_t)size;
+        for (size_t i = n - 1; i > 0; i--) {
+            rng ^= rng << 13; rng ^= rng >> 7; rng ^= rng << 17;
+            size_t j = rng % (i + 1);
+            size_t t = idx[i]; idx[i] = idx[j]; idx[j] = t;
+        }
+        for (size_t i = 0; i < n; i++)
+            buf[idx[i]] = (void *)&buf[idx[(i + 1) % n]];
+
+        /* Warm-up lap: touch every line once so the timed run measures
+         * steady-state residency, not cold-start compulsory misses.
+         *
+         * `p` MUST be dereferenced through a volatile-qualified pointer type
+         * (not just `volatile void *p`, which only makes the variable
+         * itself volatile, not the memory it points to) -- otherwise -O3
+         * can see the entire chase as a pure, side-effect-free computation
+         * whose final result is discarded by `(void)p`, and is free to
+         * delete the whole loop. That's exactly what happened on the first
+         * hardware run: uniformly ~0.00 cycles/access at every size,
+         * because the timed region between the two rdcycle asm blocks had
+         * been optimized away to nothing. */
+        void *p = buf[0];
+        for (size_t i = 0; i < n; i++) p = *(void *volatile *)p;
+
+        const int laps = 4;
+        long iters = (long)n * laps;
+        uint64_t start, end;
+        asm volatile("fence\n" "rdcycle %0" : "=r"(start));
+        for (long i = 0; i < iters; i++) p = *(void *volatile *)p;
+        asm volatile("rdcycle %0" : "=r"(end));
+
+        double cyc_per_access = (double)(end - start) / (double)iters;
+        printf("%-10zu %-16.2f\n", size, cyc_per_access);
+
+        (void)p;
+        free(idx);
+        free(buf);
+    }
+}
+
 int main(void) {
     run_div_tests();
     run_pipeline_tests();
@@ -673,5 +757,6 @@ int main(void) {
     run_map_helper_tests();
     run_iter_num_tests();
     run_branch_tests();
+    run_cache_sweep_tests();
     return 0;
 }
