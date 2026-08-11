@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <sys/mman.h>
 #include <unordered_map>
 #include "Components/BpfSequencer/maps/shared_mutex.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
@@ -750,11 +751,66 @@ static void run_branch_tests(void) {
  * latency curve, not a throughput number. Where cycles/access jumps sharply
  * as S grows marks a real cache-tier boundary -- the plateau cost before
  * each jump is that tier's real hit cost.
+ *
+ * First hardware run showed a clean L1 plateau/jump but no clean L2 plateau
+ * before the DRAM asymptote -- cycles/access climbed continuously and
+ * noisily from 24KB through 512KB even though L2's real RTL-confirmed
+ * capacity (256KB) should give a flat region out to there. Default 4KB
+ * pages mean a working set anywhere above a few hundred KB also starts
+ * crossing the TLB's reach, so the sweep was conflating real L2 behavior
+ * with TLB-miss cost. Run the same sweep under 2MB pages too -- a handful
+ * of TLB entries then covers the entire tested range, so a clean plateau
+ * appearing there (and not in the 4KB run) confirms the TLB-confound
+ * diagnosis and gives an l2_hit_cycles/miss_cycles pair that isn't
+ * inflated by page-walk cost.
  */
-static void run_cache_sweep_tests(void) {
-    printf("\n\n=== 7. Cache latency sweep (working-set size vs. cycles/access) ===\n\n");
-    printf("%-10s %-16s\n", "size(B)", "cycles/access");
+enum class PageMode { HUGETLB, THP_REQUESTED, DEFAULT_4K, DEFAULT_4K_MMAP_FAILED };
 
+static const char *page_mode_label(PageMode mode) {
+    switch (mode) {
+        case PageMode::HUGETLB:                return "2MB hugetlbfs";
+        case PageMode::THP_REQUESTED:          return "2MB THP-requested (best-effort)";
+        case PageMode::DEFAULT_4K:              return "4KB (madvise(MADV_HUGEPAGE) failed)";
+        case PageMode::DEFAULT_4K_MMAP_FAILED:  return "4KB (mmap failed, malloc fallback)";
+    }
+    return "?";
+}
+
+struct PageAlloc {
+    void *ptr;
+    size_t mapped_size;  // 0 if this came from malloc, not mmap
+    PageMode mode;
+};
+
+static PageAlloc alloc_pages(size_t size, bool prefer_huge) {
+    static const size_t HUGE_PAGE = 2 * 1024 * 1024;
+
+    if (prefer_huge) {
+        size_t huge_sz = (size + HUGE_PAGE - 1) & ~(HUGE_PAGE - 1);
+        void *p = mmap(nullptr, huge_sz, PROT_READ | PROT_WRITE,
+                        MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+        if (p != MAP_FAILED)
+            return {p, huge_sz, PageMode::HUGETLB};
+    }
+
+    void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (p == MAP_FAILED)
+        return {malloc(size), 0, PageMode::DEFAULT_4K_MMAP_FAILED};
+
+    if (prefer_huge && madvise(p, size, MADV_HUGEPAGE) == 0)
+        return {p, size, PageMode::THP_REQUESTED};
+
+    return {p, size, PageMode::DEFAULT_4K};
+}
+
+static void free_pages(PageAlloc a) {
+    if (a.mapped_size)
+        munmap(a.ptr, a.mapped_size);
+    else
+        free(a.ptr);
+}
+
+static void run_cache_sweep(bool prefer_huge) {
     static const size_t sizes[] = {
         1  * 1024,   2  * 1024,   4   * 1024,  8   * 1024,
         16 * 1024,   24 * 1024,   32  * 1024,  48  * 1024,
@@ -764,11 +820,14 @@ static void run_cache_sweep_tests(void) {
         8  * 1024 * 1024, 16 * 1024 * 1024,
     };
 
+    printf("%-10s %-16s %s\n", "size(B)", "cycles/access", "page mode");
+
     for (size_t size : sizes) {
         size_t n = size / sizeof(void *);
         if (n < 2) continue;
 
-        void **buf = (void **)malloc(size);
+        PageAlloc alloc = alloc_pages(size, prefer_huge);
+        void **buf = (void **)alloc.ptr;
         size_t *idx = (size_t *)malloc(n * sizeof(size_t));
         for (size_t i = 0; i < n; i++) idx[i] = i;
 
@@ -806,12 +865,22 @@ static void run_cache_sweep_tests(void) {
         asm volatile("rdcycle %0" : "=r"(end));
 
         double cyc_per_access = (double)(end - start) / (double)iters;
-        printf("%-10zu %-16.2f\n", size, cyc_per_access);
+        printf("%-10zu %-16.2f %s\n", size, cyc_per_access, page_mode_label(alloc.mode));
 
         (void)p;
         free(idx);
-        free(buf);
+        free_pages(alloc);
     }
+}
+
+static void run_cache_sweep_tests(void) {
+    printf("\n\n=== 7. Cache latency sweep (working-set size vs. cycles/access) ===\n\n");
+
+    printf("\n--- 4KB pages (original baseline, may show TLB confound) ---\n");
+    run_cache_sweep(/*prefer_huge=*/false);
+
+    printf("\n--- 2MB pages (isolates cache tiers from TLB reach) ---\n");
+    run_cache_sweep(/*prefer_huge=*/true);
 }
 
 int main(void) {

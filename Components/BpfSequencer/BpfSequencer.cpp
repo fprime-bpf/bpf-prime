@@ -253,11 +253,8 @@ void BpfSequencer::rebuild_deadline_schedule() {
             if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
 
             U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time / ms_per_tick));
-            // vm_id is unique per VM and vm_id < k_num_vms <= num_ticks, so offsetting by it
-            // de-collides VMs that would otherwise land on the same tick (e.g. every rate
-            // group's first instance, which always computes to scheduled_time 0) without
-            // needing true randomness -- same slot every rebuild, fully reproducible.
-            schedule_time_tick = (schedule_time_tick + vm_id) % num_ticks;
+            // De-collide VMs that would otherwise land on the same tick
+            schedule_time_tick = (schedule_time_tick + (vm_id % timer_freq_hz)) % num_ticks;
 
             schedule[schedule_time_tick].push_back(vm_id);
         }
@@ -305,13 +302,14 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         
         FwSizeType size = sizeof(ScheduledJob);
         FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
+
         auto status = job_queue.send(
             reinterpret_cast<const U8*>(&job),
             size,
             priority,
-            Os::QueueInterface::BlockingType::BLOCKING
+            Os::QueueInterface::BlockingType::NONBLOCKING
         );
-        
+
         if (status == Os::QueueInterface::Status::FULL) {
             // Queue full - log warning and drop job
             this->log_WARNING_HI_SchedulerQueueFull(vm_id);
@@ -365,9 +363,6 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
         saved_worker_workqueue_affinities.push_back(exclude_core_from_workqueues(static_cast<int>(i)));
     }
 
-    // Same no-preempt treatment as Tests::benchmark(): a worker spinning at RT
-    // priority on an isolated core can otherwise get flagged for withholding
-    // RCU grace periods.
     this->saved_rcu_stall_suppress = read_rcu_stall_suppress();
     write_rcu_stall_suppress("1");
 
