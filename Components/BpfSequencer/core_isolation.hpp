@@ -18,4 +18,10 @@ std::string exclude_core_from_workqueues(int core);
 
 void restore_workqueue_affinity(const std::string& original);
 
+// Reads/writes rcu_cpu_stall_suppress, so a core spinning in a tight RT loop
+// doesn't get flagged (or panic) for withholding RCU grace periods.
+std::string read_rcu_stall_suppress();
+
+void write_rcu_stall_suppress(const std::string& val);
+
 }  // namespace Components

@@ -134,7 +134,7 @@ module BPFPrimeTest {
     connections BPFPrimeTest {
       tests.getBpfBenchmark -> bpfSequencer.getBenchmark
       tests.getWasmBenchmark -> wasmSequencer.getBenchmark
-      rateGroup1.RateGroupMemberOut[0] -> bpfSequencer.schedIn # RUn this is 1 Hz
+      rateGroup1.RateGroupMemberOut[0] -> bpfSequencer.schedIn # 100Hz (divided from base 1kHz timer)
     }
 
   }

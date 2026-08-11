@@ -1,0 +1,68 @@
+; Confirms the PolarFire naive-WCET base-admission result: with aberr
+; removed from the analysis (dispatched on-demand, not as a periodic
+; rate-group member), the full 6-task suite fits simultaneously under naive
+; WCET (4.8%-10.6% per-task utilization). Same balanced bucket assignment
+; as the NOEL-V sequences; only the runtime_ms values differ (PolarFire
+; naive).
+;
+; Same binary/toolchain as NOEL-V (identical RISC-V ISA) -- this repo just
+; has no PolarFire buildroot/boot flow, so deploy this .bin via whatever
+; PolarFire-side loading mechanism is available.
+;
+; Default (mutex-protected) BPFPrimeTest binary. startracker, kalman, and
+; low_pass_filter share map fds (fd2, fd4) and are all in the 1Hz group --
+; see the NOEL-V sequences' headers for why this is a real (mutex-serialized)
+; hazard under the shared-worker-pool model, not a per-bucket-isolated one.
+
+; ---- Map setup ----
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 0, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 0, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 1, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 1, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 2, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 2, 0, 7
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 3, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 3, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 4, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 4, 0, 7
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 15, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 15, 0, 16
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 16, BPF_MAP_TYPE_ARRAY, 4, 4, 20, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 17, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 17, 0, 16
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 18, BPF_MAP_TYPE_ARRAY, 4, 4, 4, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 19, BPF_MAP_TYPE_ARRAY, 4, 4, 64, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 19, 0, 64
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 20, BPF_MAP_TYPE_ARRAY, 4, 4, 1, 0
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 21, BPF_MAP_TYPE_ARRAY, 4, 4, 11, 0
+
+; ---- Load one VM instance per program ----
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/reed_solomon/a.o"
+
+; ---- Start the rate groups (1s buffer after loads) ----
+
+; 1Hz: startracker (8.5%), kalman (4.9%), low_pass_filter (4.8%), cfdp_chunk (7.8%)
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 1.0, 84.94
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 1.0, 48.93
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 1.0, 47.83
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 1.0, 78.03
+
+; 0.1Hz: ccsds (10.6%), reed_solomon (6.5%)
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 0.1, 1057.82
+R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 5, 0.1, 649.12
+
+; Watch for: zero SchedulerSlip events on vm 0-5 over an extended run. Every
+; task fits its own bucket comfortably standalone here (max is ccsds at
+; 10.6%), so this should be the least eventful of the six confirmation runs
+; -- any slip here would be a real surprise worth investigating closely.

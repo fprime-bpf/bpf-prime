@@ -321,6 +321,70 @@ static void run_pipeline_tests(void) {
     MEASURE_IOP("srl", "srl", 0xFF00000000000000ULL, 5ULL, 500);
     MEASURE_IOP("sra", "sra", 0xFF00000000000000ULL, 5ULL, 500);
 
+    /* Simple ALU, BPF-matching 2-operand shape (dst op= src). The "Simple
+     * ALU" block above uses a synthetic 3-operand form (`add a2, a0, a1`)
+     * that structurally can NEVER compress under RVC -- C.ADD/C.AND/C.OR/
+     * C.XOR/C.SUB (the CR/CA-format compressed ALU ops) all require
+     * rd=rs1. Real eBPF ALU_X semantics are `dst op= src`, a 2-operand
+     * accumulate form -- verified via objdump on this exact toolchain
+     * that `add a0, a0, a1` compiles to the 2-byte `c.add` (and and/or/
+     * xor/sub likewise compress; sll/srl/sra never do -- RVC has no
+     * register-register shift at all, compressed or not). This creates a
+     * genuine loop-carried dependency (each op reads the previous op's
+     * result) unlike the independent-operand block above, but that's the
+     * realistic shape for real BPF code (e.g. an accumulator). Includes a
+     * `.option norvc`-forced control for `add` so the encoding-size
+     * effect can be isolated from the dependency-chain effect -- same
+     * semantic instruction, same dependency chain, only the encoding
+     * width differs. */
+    printf("\n--- Simple ALU (compressed, BPF dst-op=-src shape) ---\n");
+#define MEASURE_IOP2(name, insn, reps)                                     \
+    do {                                                                   \
+        register uint64_t ra asm("a0") = 5;                                \
+        register uint64_t rb asm("a1") = 7;                                \
+        uint64_t start, end;                                               \
+        asm volatile(                                                      \
+            "fence\n"                                                     \
+            "rdcycle %[start]\n"                                          \
+            ".rept " #reps "\n"                                           \
+            insn " a0, a0, a1\n"                                          \
+            ".endr\n"                                                     \
+            "rdcycle %[end]\n"                                            \
+            : [start] "=&r"(start), [end] "=&r"(end), "+r"(ra)             \
+            : "r"(rb)                                                     \
+        );                                                                 \
+        report(name, end - start, reps);                                   \
+    } while (0)
+
+    MEASURE_IOP2("add (compressed, dependent)", "add", 500);
+    MEASURE_IOP2("and (compressed, dependent)", "and", 500);
+    MEASURE_IOP2("or  (compressed, dependent)", "or", 500);
+    MEASURE_IOP2("xor (compressed, dependent)", "xor", 500);
+    MEASURE_IOP2("sub (compressed, dependent)", "sub", 500);
+    MEASURE_IOP2("sll (uncompressed, dependent)", "sll", 500);
+    MEASURE_IOP2("srl (uncompressed, dependent)", "srl", 500);
+    MEASURE_IOP2("sra (uncompressed, dependent)", "sra", 500);
+#undef MEASURE_IOP2
+
+    {
+        register uint64_t ra asm("a0") = 5;
+        register uint64_t rb asm("a1") = 7;
+        uint64_t start, end;
+        asm volatile(
+            "fence\n"
+            "rdcycle %[start]\n"
+            ".option norvc\n"
+            ".rept 500\n"
+            "add a0, a0, a1\n"
+            ".endr\n"
+            ".option rvc\n"
+            "rdcycle %[end]\n"
+            : [start] "=&r"(start), [end] "=&r"(end), "+r"(ra)
+            : "r"(rb)
+        );
+        report("add (forced uncompressed, dependent)", end - start, 500);
+    }
+
     /* Memory hit vs. likely-miss. We don't have confirmed L1/L2 geometry
      * for this bitstream, so this isn't a precise per-tier split -- just a
      * coarse "definitely resident" (repeated access to one hot word) vs.

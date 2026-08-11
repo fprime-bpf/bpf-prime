@@ -153,16 +153,6 @@ void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64,
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
 }
 
-std::string read_rcu_stall_suppress() {
-    std::ifstream in("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress");
-    std::string val;
-    std::getline(in, val);
-    return val;
-}
-
-void write_rcu_stall_suppress(const std::string& val) {
-    std::ofstream("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress") << val;
-}
 }
 
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {

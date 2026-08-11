@@ -119,4 +119,15 @@ void restore_workqueue_affinity(const std::string& original) {
     std::ofstream("/sys/devices/virtual/workqueue/cpumask") << original;
 }
 
+std::string read_rcu_stall_suppress() {
+    std::ifstream in("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress");
+    std::string val;
+    std::getline(in, val);
+    return val;
+}
+
+void write_rcu_stall_suppress(const std::string& val) {
+    std::ofstream("/sys/module/rcupdate/parameters/rcu_cpu_stall_suppress") << val;
+}
+
 }  // namespace Components
