@@ -8,17 +8,21 @@ namespace LowPassFilter {
 
 int main() {
     void *in_map = (void*)maps::map_by_fd(2), *out_map = (void*)maps::map_by_fd(4);
-    int key = 0;
+    const int N_SAMPLES = 7;
+    float samples[N_SAMPLES];
+    float y = 0.0f;
+    const float alpha = 0.2f;
 
-    void *input_result = maps::bpf_map_lookup_elem(in_map, &key);
-    float value = *((float *)input_result);
+    for (int i = 0; i < N_SAMPLES; i++) {
+        void *result = maps::bpf_map_lookup_elem(in_map, &i);
+        samples[i] = *((float *)result);
+    }
 
-    key = 1;
-    void *min_result = maps::bpf_map_lookup_elem(in_map, &key);
-    float min = *((float *) min_result);
-
-    if (value > min)
-        maps::bpf_map_update_elem(out_map, &key, &value, 0);
+    // Single-pole IIR low-pass filter: y[n] = alpha*x[n] + (1-alpha)*y[n-1]
+    for (int i = 0; i < N_SAMPLES; i++) {
+        y = alpha * samples[i] + (1.0f - alpha) * y;
+        maps::bpf_map_update_elem(out_map, &i, &y, 0);
+    }
 
     return 0;
 }

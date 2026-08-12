@@ -43,6 +43,10 @@ void print_usage(const char* app) {
  * @param signum
  */
 static void signalHandler(int signum) {
+    // Revert to default so a second signal force-kills instead of re-entering
+    // shutdown code that may already be mid-teardown.
+    signal(SIGINT, SIG_DFL);
+    signal(SIGTERM, SIG_DFL);
     BPFPrimeTest::stopRateGroups();
 }
 

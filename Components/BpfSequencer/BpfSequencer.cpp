@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <pthread.h>
 #include <sched.h>
+#include <sys/syscall.h>
+#include <unistd.h>
 
 namespace Components {
 
@@ -56,13 +58,30 @@ bpf_mem_size(0) {
 BpfSequencer ::~BpfSequencer() {
     // Signal workers to stop
     running = false;
-    
+
+    // Unblock any worker parked in job_queue.receive() so it can see `running`
+    // is false and return, instead of waiting forever for a job that will never come.
+    ScheduledJob wake_job{};
+    for (size_t i = 0; i < workers.size(); i++) {
+        job_queue.send(reinterpret_cast<const U8*>(&wake_job), sizeof(wake_job), 0,
+                        Os::QueueInterface::BlockingType::NONBLOCKING);
+    }
+
     // Join all worker threads
     for (auto& thread : workers) {
         if (thread.joinable()) {
             thread.join();
         }
     }
+
+    // Restore each worker core's IRQ/workqueue affinity.
+    for (auto& saved : saved_worker_irq_affinities) {
+        restore_irq_affinities(saved);
+    }
+    for (auto& saved : saved_worker_workqueue_affinities) {
+        restore_workqueue_affinity(saved);
+    }
+    write_rcu_stall_suppress(saved_rcu_stall_suppress);
 }
 
 // Worker function - pops jobs from shared queue and executes them
@@ -71,13 +90,18 @@ void BpfSequencer::run_worker(U32 worker_id) {
     using Clock = std::chrono::high_resolution_clock;
 
     #ifdef __linux__
-    // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks 
+    // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks
     // are meant to run on non-looping routines
-    struct sched_param p; 
-    p.sched_priority = 20; 
-    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) { 
+    // Same priority Tests::benchmark() uses for its own no-preempt timing run.
+    struct sched_param p;
+    p.sched_priority = 51;
+    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
         this->log_WARNING_HI_WorkerPrioritySetFailed();
-    } 
+    }
+
+    // Pin to a dedicated core, matching worker_id.
+    unsigned long worker_affinity_mask = 1UL << worker_id;
+    syscall(SYS_sched_setaffinity, 0, sizeof(worker_affinity_mask), &worker_affinity_mask);
     #endif
 
     // Initialize tick timing state for this worker
@@ -212,19 +236,26 @@ void BpfSequencer::rebuild_deadline_schedule() {
         // Calculate how many times we run this per cycle
         U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms); 
         
+        // schedule[] is indexed by schedIn tick, not by millisecond. ms_per_tick is purely
+        // 1000/timer_freq_hz -- independent of how many seconds k_cycle_period_ms spans.
+        F32 ms_per_tick = 1000.0f / static_cast<F32>(timer_freq_hz);
+        U32 num_ticks = this->cycle_length_ticks();
+
         // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
             F32 deadline = i * period_ms; // When this task needs to be done
             F32 scheduled_time = is_overloaded ? deadline - vm->runtime_ms : deadline - period_ms; // EDF task scheduling
             F32 latest_run_time = deadline - vm->runtime_ms; // Latest time we can run this task
             vms[vm_id]->latest_run_time = latest_run_time;
-            
-            // Clamp schedule_time to valid range [0, 1000]
+
+            // Clamp schedule_time to valid range [0, k_cycle_period_ms]
             if (scheduled_time < 0.0f) scheduled_time = 0.0f;
             if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
 
-            U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time));
-            
+            U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time / ms_per_tick));
+            // De-collide VMs that would otherwise land on the same tick
+            schedule_time_tick = (schedule_time_tick + (vm_id % timer_freq_hz)) % num_ticks;
+
             schedule[schedule_time_tick].push_back(vm_id);
         }
     }
@@ -271,13 +302,14 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
         
         FwSizeType size = sizeof(ScheduledJob);
         FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
+
         auto status = job_queue.send(
             reinterpret_cast<const U8*>(&job),
             size,
             priority,
-            Os::QueueInterface::BlockingType::BLOCKING
+            Os::QueueInterface::BlockingType::NONBLOCKING
         );
-        
+
         if (status == Os::QueueInterface::Status::FULL) {
             // Queue full - log warning and drop job
             this->log_WARNING_HI_SchedulerQueueFull(vm_id);
@@ -308,6 +340,11 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     this->timer_freq_hz = timer_freq_hz;
     // this->num_workers = this->num_rate_groups > 0 ? this->num_rate_groups : 2;
 
+    // schedule[] must hold one slot per tick in a full k_cycle_period_ms cycle.
+    FW_ASSERT(this->cycle_length_ticks() <= this->schedule.size(),
+              static_cast<FwAssertArgType>(this->cycle_length_ticks()),
+              static_cast<FwAssertArgType>(this->schedule.size()));
+
     // Explicitly initialize worker tick timing state
     for (U32 i = 0; i < k_max_workers; i++) {
         worker_tick_timing[i].tick_duration_us = 0;
@@ -317,6 +354,17 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     worker_enabled.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++)
         worker_enabled.emplace_back(true);
+
+    // Exclude each worker's future core from IRQ/workqueue scheduling.
+    saved_worker_irq_affinities.reserve(num_workers);
+    saved_worker_workqueue_affinities.reserve(num_workers);
+    for (U32 i = 0; i < num_workers; i++) {
+        saved_worker_irq_affinities.push_back(exclude_core_from_irqs(static_cast<int>(i)));
+        saved_worker_workqueue_affinities.push_back(exclude_core_from_workqueues(static_cast<int>(i)));
+    }
+
+    this->saved_rcu_stall_suppress = read_rcu_stall_suppress();
+    write_rcu_stall_suppress("1");
 
     // Initialize worker threads
     workers.reserve(num_workers);
@@ -388,8 +436,7 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     this->ticks++;
     
     // Calculate position in scheduling cycle
-    U32 cycle_length_ticks = timer_freq_hz;  // Ticks per 1-second cycle
-    cycle_tick = (ticks - 1) % cycle_length_ticks;
+    cycle_tick = (ticks - 1) % this->cycle_length_ticks();
 
     // Push jobs for this tick into the shared queue
     schedule_jobs_for_tick(cycle_tick);

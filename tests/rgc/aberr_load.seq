@@ -1,0 +1,29 @@
+; Isolated LOAD_SEQUENCE timing test for aberr. Purpose: measure how long
+; the on-device LLVM JIT compile (triggered by LOAD_SEQUENCE, see vm.cpp's
+; call into llvmbpf's LLJIT) actually takes for aberr's 208KB a.o -- the
+; anomalously large one that caused a health-monitor FATAL abort when
+; loaded as part of a larger sequence (it blew past bpfSequencer's default
+; ping threshold, WARN=3/FATAL=5 misses at the 4s health-check period,
+; i.e. ~12s/~20s).
+;
+; Raises that threshold first so THIS run can't hit the same abort while we
+; measure -- 200/400 missed pings = ~13min/~27min of slack, comfortably
+; more than needed even if the real load time is far worse than expected.
+;
+; To read the result: diff the timestamps of the OpCodeDispatched event for
+; the LOAD_SEQUENCE command below against its own CommandLoaded event (or
+; CS_CommandComplete for this sequence) -- that delta is the real load time.
+
+R00:00:00 CdhCore.health.HLTH_CHNG_PING "BPFPrimeTest_bpfSequencer", 200, 400
+
+; Aberr's maps (fd8, fd9) -- created before load in case load-time linking
+; needs them to already exist, matching the convention every other sequence
+; in this project follows (maps before LOAD_SEQUENCE).
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 8, BPF_MAP_TYPE_ARRAY, 4, 4, 6, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 8, 0, 6
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 9, BPF_MAP_TYPE_ARRAY, 4, 4, 3, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 9, 0, 3
+
+; The command to time -- nothing else queued after it, so its own
+; dispatch-to-complete gap is unambiguous in the event log.
+R00:00:02 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/aberr/a.o"

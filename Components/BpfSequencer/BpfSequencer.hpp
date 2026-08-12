@@ -10,6 +10,7 @@
 #define Components_BpfSequencer_HPP
 
 #include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
+#include "Components/BpfSequencer/core_isolation.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Os/File.hpp"
 #include "Os/Mutex.hpp"
@@ -19,6 +20,7 @@
 #include "maps/maps.hpp"
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <map>
 #include <queue>
 #include <thread>
@@ -83,7 +85,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // CONSTANTS
     static constexpr U8 k_num_vms = 64;
     static constexpr U8 k_max_rate_groups = 5;
-    static constexpr F32 k_cycle_period_ms = 1000.0f;  // One full scheduling cycle in ms
+    static constexpr F32 k_cycle_period_ms = 10000.0f;  // LCM of configured periods (1Hz, 0.1Hz) in ms
     
     bool running = false;
 
@@ -128,6 +130,12 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
     U32 num_workers = 2;
+
+    // Saved IRQ/workqueue affinity per worker core, for restoring on destruction.
+    std::vector<std::vector<std::pair<std::string, std::string>>> saved_worker_irq_affinities;
+    std::vector<std::string> saved_worker_workqueue_affinities;
+    // Saved rcu_cpu_stall_suppress value, for restoring on destruction.
+    std::string saved_rcu_stall_suppress;
     
     // Per-worker timing for telemetry (max 6 workers to match ExecutorTickDurations array)
     // Tracks tick durations in microseconds for each worker
@@ -154,9 +162,14 @@ class BpfSequencer : public BpfSequencerComponentBase {
     
     // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
     void rebuild_deadline_schedule();
-    
+
     // Push jobs for the current tick into the shared queue
     void schedule_jobs_for_tick(U32 tick);
+
+    // Ticks spanning one full k_cycle_period_ms cycle at the current timer_freq_hz.
+    U32 cycle_length_ticks() const {
+        return static_cast<U32>(std::round(k_cycle_period_ms * timer_freq_hz / 1000.0f));
+    }
 
     // Register all external functions for new vm instance
     U32 register_external_functions(bpftime::llvmbpf_vm& vm);

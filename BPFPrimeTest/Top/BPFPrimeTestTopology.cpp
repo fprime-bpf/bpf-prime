@@ -17,9 +17,10 @@ using namespace BPFPrimeTest;
 // Instantiate a malloc allocator for cmdSeq buffer allocation
 Fw::MallocAllocator mallocator;
 
-// The reference topology divides the incoming clock signal (1kHz) into sub-signals: 1kHz, 1/2Hz, and 1/4Hz with 0
-// offset
-Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{1, 0}, {1000, 0}, {4000, 0}}};
+// Divides the incoming 1kHz clock signal into sub-signals: rateGroup1 100Hz (drives bpfSequencer.schedIn --
+// dropped from undivided 1kHz since nothing here needs sub-10ms granularity, and 1kHz left too little headroom
+// per tick for the OS to reliably keep up on NOEL-V), rateGroup2 1Hz, rateGroup3 0.25Hz.
+Svc::RateGroupDriver::DividerSet rateGroupDivisorsSet{{{10, 0}, {1000, 0}, {4000, 0}}};
 
 // Rate groups may supply a context token to each of the attached children whose purpose is set by the project. The
 // reference topology sets each token to zero as these contexts are unused in this project.
@@ -31,7 +32,7 @@ enum TopologyConstants {
     COMM_PRIORITY = 100,
 };
 
-U32 bpfSequencerRateGroups[5] = {1, 10, 100, 1000, 10000};  // 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz
+U32 bpfSequencerRateGroups[5] = {1, 10, 100, 1000, 10000};  // 100Hz, 10Hz, 1Hz, 0.1Hz, 0.01Hz (timer freq is now 100Hz)
 
 /**
  * \brief configure/setup components in project-specific way
@@ -53,7 +54,7 @@ void configureTopology() {
     cmdSeq.allocateBuffer(0, mallocator, 5 * 1024);
 
     bpfSequencer.configure(bpfSequencerRateGroups,
-                        1000);  // Configure rate groups to 1kHz, 100Hz, 10Hz, 1Hz, 0.1Hz, timer freq 1kHz
+                        100);  // Configure rate groups to 100Hz, 10Hz, 1Hz, 0.1Hz, 0.01Hz, timer freq 100Hz
 
     bpfSequencer.register_bpf_helpers({
         { 4, { reinterpret_cast<void*>(Components::Tests::helper_example_noop), "Noop" } }

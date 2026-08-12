@@ -1,4 +1,5 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
+#include "Components/BpfSequencer/core_isolation.hpp"
 #include "Components/BpfSequencer/cpu_cycles.hpp"
 #include "Components/WasmSequencer/WasmSequencer.hpp"
 #include "Components/Tests/Tests.hpp"
@@ -6,6 +7,7 @@
 
 #include <pthread.h>
 #include <sched.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 #include <algorithm>
 #include <chrono>
@@ -13,6 +15,8 @@
 #include <fstream>
 #include <random>
 #include <sstream>
+#include <string>
+#include <vector>
 
 #define TIME_NATIVE_TEST(test)       \
     test_name = #test;               \
@@ -81,7 +85,7 @@ F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
     auto vm = this->vms[test];
 
     start = get_cpu_cycles();
-    auto run_result = vm->bpf_vm.exec(nullptr, 0, vm->res);
+    auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
     end = get_cpu_cycles();
 
     if (run_result)
@@ -119,14 +123,18 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
 }
 
 namespace {
+constexpr int BENCHMARK_CORE = 2;
+
 const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
 
 void create_output_file() {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
 }
+
 void output_new_test(const char* test_name) {
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
 }
+
 void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64, F64>>& test_results) {
     output_new_test(test_name);
 
@@ -144,11 +152,14 @@ void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64,
 
     std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
 }
-}  // namespace
+
+}
 
 Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {
-    std::vector<std::tuple<F64, F64, F64>> test_results;
-    test_results.reserve(passes);
+    std::vector<F64> bpf_times, native_times, wasm_times;
+    bpf_times.reserve(passes);
+    native_times.reserve(passes);
+    wasm_times.reserve(passes);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -160,6 +171,11 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
+        bpf_times.push_back(bpf_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("BPF"));
+
+    for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto native_time = this->get_benchmark_native(test);
 
@@ -168,7 +184,12 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             this->log_WARNING_LO_FailedBenchmarkTest(test_name_arg, i, native_time);
             return Fw::Success::FAILURE;
         }
-        
+
+        native_times.push_back(native_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("Native"));
+
+    for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
 
@@ -178,7 +199,14 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
             return Fw::Success::FAILURE;
         }
 
-        test_results.emplace_back(bpf_time, native_time, wasm_time);
+        wasm_times.push_back(wasm_time);
+    }
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));
+
+    std::vector<std::tuple<F64, F64, F64>> test_results;
+    test_results.reserve(passes);
+    for (U32 i = 0; i < passes; ++i) {
+        test_results.emplace_back(bpf_times[i], native_times[i], wasm_times[i]);
     }
 
     output_test_results(test_name, test_results);
@@ -210,6 +238,18 @@ Fw::Success Tests::benchmark() {
         BpfSequencer::maps.create_map(map_def, fd);
     }
 
+    unsigned long orig_affinity_mask = 0;
+    syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
+
+    unsigned long benchmark_affinity_mask = 1UL << BENCHMARK_CORE;
+    syscall(SYS_sched_setaffinity, 0, sizeof(benchmark_affinity_mask), &benchmark_affinity_mask);
+
+    auto saved_irq_affinities = exclude_core_from_irqs(BENCHMARK_CORE);
+    auto saved_workqueue_affinity = exclude_core_from_workqueues(BENCHMARK_CORE);
+
+    auto saved_rcu_stall_suppress = read_rcu_stall_suppress();
+    write_rcu_stall_suppress("1");
+
     int orig_policy = sched_getscheduler(0);
     struct sched_param orig_param{};
     sched_getparam(0, &orig_param);
@@ -237,7 +277,7 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(9, 0, 3);
         }},
 
-        /*{passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
+        {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
             tests->populate_map_random(10, 0, 16);
             tests->populate_map_random(11, 0, 256);
             tests->populate_map_random(12, 0, 16);
@@ -249,9 +289,9 @@ Fw::Success Tests::benchmark() {
         }},
 
         {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter", [](Tests* tests) {
-            tests->populate_map_random(2, 0, 2);
-            tests->populate_map_random(4, 0, 2);
-        }},*/
+            tests->populate_map_random(2, 0, 7);
+            tests->populate_map_random(4, 0, 7);
+        }},
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
         }},
@@ -259,7 +299,7 @@ Fw::Success Tests::benchmark() {
         {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
             tests->populate_map_random(13, 0, 2500);
             tests->populate_map_random(14, 0, 25);
-        }}/*,
+        }},
 
         {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
             tests->populate_map_random(0, 0, 7);
@@ -277,7 +317,7 @@ Fw::Success Tests::benchmark() {
 
         {passes, BENCHMARK_TEST::CFDP_CHUNK, "CFDP Chunk", [](Tests* tests) {
             tests->populate_map_random(19, 0, 64);
-        }}*/
+        }}
     };
 
 
@@ -298,6 +338,10 @@ Fw::Success Tests::benchmark() {
     }
 
     sched_setscheduler(0, orig_policy, &orig_param);
+    restore_irq_affinities(saved_irq_affinities);
+    restore_workqueue_affinity(saved_workqueue_affinity);
+    write_rcu_stall_suppress(saved_rcu_stall_suppress);
+    syscall(SYS_sched_setaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
 
     return result;
 }
