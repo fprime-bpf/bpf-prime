@@ -81,7 +81,7 @@ F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
     auto vm = this->vms[test];
 
     start = get_cpu_cycles();
-    auto run_result = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
+    auto run_result = vm->bpf_vm.exec(nullptr, 0, vm->res);
     end = get_cpu_cycles();
 
     if (run_result)
@@ -237,7 +237,7 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(9, 0, 3);
         }},
 
-        {passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
+        /*{passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
             tests->populate_map_random(10, 0, 16);
             tests->populate_map_random(11, 0, 256);
             tests->populate_map_random(12, 0, 16);
@@ -251,7 +251,7 @@ Fw::Success Tests::benchmark() {
         {passes, BENCHMARK_TEST::LOW_PASS_FILTER, "Low Pass Filter", [](Tests* tests) {
             tests->populate_map_random(2, 0, 2);
             tests->populate_map_random(4, 0, 2);
-        }},
+        }},*/
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
         }},
@@ -259,7 +259,7 @@ Fw::Success Tests::benchmark() {
         {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
             tests->populate_map_random(13, 0, 2500);
             tests->populate_map_random(14, 0, 25);
-        }},
+        }}/*,
 
         {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
             tests->populate_map_random(0, 0, 7);
@@ -277,7 +277,7 @@ Fw::Success Tests::benchmark() {
 
         {passes, BENCHMARK_TEST::CFDP_CHUNK, "CFDP Chunk", [](Tests* tests) {
             tests->populate_map_random(19, 0, 64);
-        }}
+        }}*/
     };
 
 

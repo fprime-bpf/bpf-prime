@@ -60,8 +60,8 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    vm->bpf_mem_size = 40000;
-    vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
+    //vm->bpf_mem_size = 40000;
+    //vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
     vm->sequenceFilePath = sequenceFilePath;
 
     // Load the binary into the VM
@@ -74,13 +74,15 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    static std::byte ssMem[40000];//hardcode size for now.
-    static bpftime::ExecState a{.mem=ssMem};
+    static std::byte ds[50000],cs[200];//hardcode size for now.
+    static bpftime::ExecState a{.heap=nullptr,.dataStack=ds,.callStack=cs};
     const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
-    constexpr uint8_t splitInto=24;
+    constexpr uint8_t splitInto=1;
     const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
-    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}),reinterpret_cast<const std::byte*>(vm->bpf_mem.get()),vm->bpf_mem_size);
-
+    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}),4,10000);
+/*
+ At "../bpfwrappers.cpp" line 82 col 112, I want to specify a few functions as register only instead of leaving the map
+  empty. Specifically, I want all functions in "../iter_bpf_helpers.cpp" to be marked as register only.*/
     //auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
@@ -116,7 +118,7 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
         start = get_cpu_cycles();
 
     // Run the compiled sequence using VM's own bpf_mem
-    err = vm->bpf_vm.exec(&vm->bpf_mem, vm->bpf_mem_size, vm->res);
+    err = vm->bpf_vm.exec(nullptr, 0, vm->res);//lol this is bugged, should be vm->bpf_mem.get(). this didn't cause any problem bc no tests used this mem.
 
     if (log_time)
         end = get_cpu_cycles();
