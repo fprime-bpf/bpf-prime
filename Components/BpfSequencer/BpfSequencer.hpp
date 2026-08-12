@@ -129,7 +129,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<std::thread> workers;
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
-    U32 num_workers = 2;
+    U32 num_workers = 0;
 
     // Saved IRQ/workqueue affinity per worker core, for restoring on destruction.
     std::vector<std::vector<std::pair<std::string, std::string>>> saved_worker_irq_affinities;
