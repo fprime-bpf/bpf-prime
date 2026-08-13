@@ -129,7 +129,8 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::vector<std::thread> workers;
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
-    U32 num_workers = 2;
+    U32 num_workers = 0;
+    bool benchmark_build = true;
 
     // Saved IRQ/workqueue affinity per worker core, for restoring on destruction.
     std::vector<std::vector<std::pair<std::string, std::string>>> saved_worker_irq_affinities;
@@ -165,6 +166,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     // Push jobs for the current tick into the shared queue
     void schedule_jobs_for_tick(U32 tick);
+
+    // Parses a rate_group_ilp.py-generated YAML schedule and populates schedule[]/vms[].
+    Fw::Success load_schedule(const char* filePath);
 
     // Ticks spanning one full k_cycle_period_ms cycle at the current timer_freq_hz.
     U32 cycle_length_ticks() const {
@@ -226,6 +230,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id) override;
+
+    //! Handler for LOAD_SCHEDULE command
+    void LOAD_SCHEDULE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  const Fw::CmdStringArg& scheduleFilePath) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!

@@ -53,6 +53,12 @@ module Components {
         sync command StopRateGroup(vm_id: U32)
         event RateGroupStopped(vm_id: U32) severity activity low format "VM {} rate group stopped"
 
+        @ Load a pre-generated schedule from a YAML file on the target filesystem and start dispatching it
+        async command LOAD_SCHEDULE(scheduleFilePath: string)
+        event ScheduleLoaded(filePath: string, count: U32) severity activity low format "Schedule loaded from {}: {} entries"
+        event ScheduleLoadFailed(filePath: string, errMsg: string) severity warning high format "Failed to load schedule from {}: {}"
+        event ScheduleEntryOutOfRange(tick: U32, max_tick: U32) severity warning high format "Schedule tick {} exceeds max {}"
+
         ###############################################################################
         # Standard AC Ports: Required for Channels, Events, Commands, and Parameters  #
         ###############################################################################

@@ -163,7 +163,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto bpf_time = this->getBpfBenchmark_out(0, test, i == 0);
+        auto bpf_time = this->getBpfBenchmark_out(0, test, false);  // pre-compiled above benchmark()'s SCHED_RR section
 
         if (bpf_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -191,7 +191,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
+        auto wasm_time = this->getWasmBenchmark_out(0, test, false);  // pre-compiled above benchmark()'s SCHED_RR section
 
         if (wasm_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -236,32 +236,6 @@ Fw::Success Tests::benchmark() {
         };
 
         BpfSequencer::maps.create_map(map_def, fd);
-    }
-
-    unsigned long orig_affinity_mask = 0;
-    syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
-
-    unsigned long benchmark_affinity_mask = 1UL << BENCHMARK_CORE;
-    syscall(SYS_sched_setaffinity, 0, sizeof(benchmark_affinity_mask), &benchmark_affinity_mask);
-
-    auto saved_irq_affinities = exclude_core_from_irqs(BENCHMARK_CORE);
-    auto saved_workqueue_affinity = exclude_core_from_workqueues(BENCHMARK_CORE);
-
-    auto saved_rcu_stall_suppress = read_rcu_stall_suppress();
-    write_rcu_stall_suppress("1");
-
-    int orig_policy = sched_getscheduler(0);
-    struct sched_param orig_param{};
-    sched_getparam(0, &orig_param);
-
-    struct sched_param p;
-    p.sched_priority = 51;
-    int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
-    if (rc != 0) {
-        this->log_WARNING_HI_BenchMarkFailed(
-            Fw::LogStringArg(strerror(rc))
-        );
-        // return Fw::Success::FAILURE;
     }
 
     struct TestInfo {
@@ -320,13 +294,54 @@ Fw::Success Tests::benchmark() {
         }}
     };
 
+    // Pre-compile every BPF/WASM program at normal priority/scheduling, before the real-time,
+    // IRQ-excluded section below -- JIT compilation (esp. aberr's ~208KB program) can take long
+    // enough to trip the health-monitor ping timeout if it runs while isolated.
+    for (const auto& test : tests) {
+        auto bpf_time = this->getBpfBenchmark_out(0, test.test, true);
+        if (bpf_time < 0) {
+            this->log_WARNING_LO_FailedBenchmarkTest(Fw::LogStringArg(test.test_name), 0, bpf_time);
+            return Fw::Success::FAILURE;
+        }
+        auto wasm_time = this->getWasmBenchmark_out(0, test.test, true);
+        if (wasm_time < 0) {
+            this->log_WARNING_LO_FailedBenchmarkTest(Fw::LogStringArg(test.test_name), 0, wasm_time);
+            return Fw::Success::FAILURE;
+        }
+    }
+
+    unsigned long orig_affinity_mask = 0;
+    syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
+
+    unsigned long benchmark_affinity_mask = 1UL << BENCHMARK_CORE;
+    syscall(SYS_sched_setaffinity, 0, sizeof(benchmark_affinity_mask), &benchmark_affinity_mask);
+
+    auto saved_irq_affinities = exclude_core_from_irqs(BENCHMARK_CORE);
+    auto saved_workqueue_affinity = exclude_core_from_workqueues(BENCHMARK_CORE);
+
+    auto saved_rcu_stall_suppress = read_rcu_stall_suppress();
+    write_rcu_stall_suppress("1");
+
+    int orig_policy = sched_getscheduler(0);
+    struct sched_param orig_param{};
+    sched_getparam(0, &orig_param);
+
+    struct sched_param p;
+    p.sched_priority = 51;
+    int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
+    if (rc != 0) {
+        this->log_WARNING_HI_BenchMarkFailed(
+            Fw::LogStringArg(strerror(rc))
+        );
+        // return Fw::Success::FAILURE;
+    }
 
     create_output_file();
 
     Fw::Success result = Fw::Success::SUCCESS;
 
     for (const auto& test : tests) {
-        auto test_result = benchmark_test(test.passes, test.test, test.test_name, tests->fill_maps);
+        auto test_result = benchmark_test(test.passes, test.test, test.test_name, test.fill_maps);
 
         if (test_result != Fw::Success::SUCCESS) {
             this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));

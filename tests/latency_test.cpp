@@ -157,6 +157,44 @@ do {                                                                        \
     report(name, end - start, reps);                                       \
 } while (0)
 
+/* Single-operand double-precision FP op (FNEG/FMOV): a0 unused, unlike MEASURE_FOP. */
+#define MEASURE_FOP1(name, insn, opa, reps)                                 \
+do {                                                                        \
+    register double fa asm("fa0") = (opa);                                 \
+    uint64_t start, end;                                                   \
+    asm volatile(                                                          \
+        "fence\n"                                                         \
+        "rdcycle %[start]\n"                                              \
+        ".rept " #reps "\n"                                               \
+        insn " fa2, %[a0]\n"                                              \
+        ".endr\n"                                                         \
+        "rdcycle %[end]\n"                                                \
+        : [start] "=&r"(start), [end] "=&r"(end)                          \
+        : [a0] "f"(fa)                                                    \
+        : "fa2"                                                           \
+    );                                                                     \
+    report(name, end - start, reps);                                       \
+} while (0)
+
+/* Single-precision counterpart to MEASURE_FOP1. */
+#define MEASURE_FOP1_S(name, insn, opa, reps)                               \
+do {                                                                        \
+    register float fa asm("fa0") = (opa);                                  \
+    uint64_t start, end;                                                   \
+    asm volatile(                                                          \
+        "fence\n"                                                         \
+        "rdcycle %[start]\n"                                              \
+        ".rept " #reps "\n"                                               \
+        insn " fa2, %[a0]\n"                                              \
+        ".endr\n"                                                         \
+        "rdcycle %[end]\n"                                                \
+        : [start] "=&r"(start), [end] "=&r"(end)                          \
+        : [a0] "f"(fa)                                                    \
+        : "fa2"                                                           \
+    );                                                                     \
+    report(name, end - start, reps);                                       \
+} while (0)
+
 /* Helper-call proxy: called through a volatile function pointer so the
  * compiler can't inline/devirtualize it -- forces a real jalr/ret, same
  * shape as the BPF interpreter's helper dispatch. NOTE: this only measures
@@ -193,6 +231,29 @@ static void run_pipeline_tests(void) {
     MEASURE_FOP_S("fsub.s normal (2.5-1.5)",   "fsub.s", 2.5f, 1.5f, 500);
     MEASURE_FOP_S("fsub.s cancel (1.0-~1.0)",  "fsub.s", 1.0f, 0x1.fffffep-1f, 500);
     MEASURE_FOP_S("fadd.s subnorm (+FLT_TRUE_MIN)", "fadd.s", 1.0f, 1e-45f, 500);
+
+    // FMUL/FDIV/FNEG/FMOV: never measured before, noelv.py currently gives single/double the same cost for all four.
+    printf("\n--- FMUL/FDIV (double) ---\n");
+    MEASURE_FOP("fmul.d normal (1.5*2.5)",            "fmul.d", 1.5, 2.5, 500);
+    MEASURE_FOP("fmul.d underflow (1e-160*1e-160)",   "fmul.d", 1e-160, 1e-160, 500);
+    MEASURE_FOP("fdiv.d normal (2.5/1.5)",            "fdiv.d", 2.5, 1.5, 500);
+    MEASURE_FOP("fdiv.d worst (1.0/3.0)",             "fdiv.d", 1.0, 3.0, 500);
+    MEASURE_FOP("fdiv.d subnorm (DBL_TRUE_MIN/2.0)",  "fdiv.d", 5e-324, 2.0, 500);
+
+    printf("\n--- FMUL/FDIV (single) ---\n");
+    MEASURE_FOP_S("fmul.s normal (1.5*2.5)",              "fmul.s", 1.5f, 2.5f, 500);
+    MEASURE_FOP_S("fmul.s underflow (1e-20f*1e-20f)",     "fmul.s", 1e-20f, 1e-20f, 500);
+    MEASURE_FOP_S("fdiv.s normal (2.5/1.5)",              "fdiv.s", 2.5f, 1.5f, 500);
+    MEASURE_FOP_S("fdiv.s worst (1.0/3.0)",               "fdiv.s", 1.0f, 3.0f, 500);
+    MEASURE_FOP_S("fdiv.s subnorm (FLT_TRUE_MIN/2.0)",    "fdiv.s", 1e-45f, 2.0f, 500);
+
+    printf("\n--- FNEG/FMOV (double) ---\n");
+    MEASURE_FOP1("fneg.d normal (-1.5)", "fneg.d", 1.5, 500);
+    MEASURE_FOP1("fmv.d normal (1.5)",   "fmv.d", 1.5, 500);
+
+    printf("\n--- FNEG/FMOV (single) ---\n");
+    MEASURE_FOP1_S("fneg.s normal (-1.5)", "fneg.s", 1.5f, 500);
+    MEASURE_FOP1_S("fmv.s normal (1.5)",   "fmv.s", 1.5f, 500);
 
     printf("\n--- Helper-call proxy (native jalr/ret only) ---\n");
     {
@@ -766,41 +827,52 @@ static void run_branch_tests(void) {
  */
 enum class PageMode { HUGETLB, THP_REQUESTED, DEFAULT_4K, DEFAULT_4K_MMAP_FAILED };
 
-static const char *page_mode_label(PageMode mode) {
-    switch (mode) {
-        case PageMode::HUGETLB:                return "2MB hugetlbfs";
-        case PageMode::THP_REQUESTED:          return "2MB THP-requested (best-effort)";
-        case PageMode::DEFAULT_4K:              return "4KB (madvise(MADV_HUGEPAGE) failed)";
-        case PageMode::DEFAULT_4K_MMAP_FAILED:  return "4KB (mmap failed, malloc fallback)";
+struct PageAlloc {
+    void *ptr;
+    size_t mapped_size;      // 0 if this came from malloc, not mmap
+    PageMode mode;
+    int hugetlb_errno = 0;   // errno from the failed MAP_HUGETLB attempt, if prefer_huge was set
+};
+
+static const char *page_mode_label(const PageAlloc &a, char *buf, size_t buf_sz) {
+    switch (a.mode) {
+        case PageMode::HUGETLB:
+            return "2MB hugetlbfs";
+        case PageMode::THP_REQUESTED:
+            snprintf(buf, buf_sz, "2MB THP-requested (best-effort, MAP_HUGETLB errno=%d %s)",
+                     a.hugetlb_errno, strerror(a.hugetlb_errno));
+            return buf;
+        case PageMode::DEFAULT_4K:
+            snprintf(buf, buf_sz, "4KB (MAP_HUGETLB errno=%d %s, madvise(MADV_HUGEPAGE) also failed)",
+                     a.hugetlb_errno, strerror(a.hugetlb_errno));
+            return buf;
+        case PageMode::DEFAULT_4K_MMAP_FAILED:
+            return "4KB (plain mmap failed too, malloc fallback)";
     }
     return "?";
 }
 
-struct PageAlloc {
-    void *ptr;
-    size_t mapped_size;  // 0 if this came from malloc, not mmap
-    PageMode mode;
-};
-
 static PageAlloc alloc_pages(size_t size, bool prefer_huge) {
     static const size_t HUGE_PAGE = 2 * 1024 * 1024;
+    int huge_errno = 0;
 
     if (prefer_huge) {
         size_t huge_sz = (size + HUGE_PAGE - 1) & ~(HUGE_PAGE - 1);
         void *p = mmap(nullptr, huge_sz, PROT_READ | PROT_WRITE,
                         MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
         if (p != MAP_FAILED)
-            return {p, huge_sz, PageMode::HUGETLB};
+            return {p, huge_sz, PageMode::HUGETLB, 0};
+        huge_errno = errno;
     }
 
     void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED)
-        return {malloc(size), 0, PageMode::DEFAULT_4K_MMAP_FAILED};
+        return {malloc(size), 0, PageMode::DEFAULT_4K_MMAP_FAILED, huge_errno};
 
     if (prefer_huge && madvise(p, size, MADV_HUGEPAGE) == 0)
-        return {p, size, PageMode::THP_REQUESTED};
+        return {p, size, PageMode::THP_REQUESTED, huge_errno};
 
-    return {p, size, PageMode::DEFAULT_4K};
+    return {p, size, PageMode::DEFAULT_4K, huge_errno};
 }
 
 static void free_pages(PageAlloc a) {
@@ -865,7 +937,8 @@ static void run_cache_sweep(bool prefer_huge) {
         asm volatile("rdcycle %0" : "=r"(end));
 
         double cyc_per_access = (double)(end - start) / (double)iters;
-        printf("%-10zu %-16.2f %s\n", size, cyc_per_access, page_mode_label(alloc.mode));
+        char mode_buf[128];
+        printf("%-10zu %-16.2f %s\n", size, cyc_per_access, page_mode_label(alloc, mode_buf, sizeof(mode_buf)));
 
         (void)p;
         free(idx);

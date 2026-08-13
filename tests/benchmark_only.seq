@@ -1,1 +1,2 @@
-R00:00:01 BPFPrimeTest.tests.BENCHMARK
+R00:00:01 CdhCore.health.HLTH_PING_ENABLE "BPFPrimeTest_tests", DISABLED
+R00:00:02 BPFPrimeTest.tests.BENCHMARK
