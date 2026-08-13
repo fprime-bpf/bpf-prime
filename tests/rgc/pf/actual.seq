@@ -1,14 +1,5 @@
-; Actual (measured) multi-copy rate-group configuration for PolarFire.
-; Loads one VM instance per admitted redundant copy of each task, per
-; rate_group_ilp.py's solve_with_copies() result for this platform/metric
-; (m=2 workers, max_copies=6) -- e.g. reed_solomon gets 6 concurrent
-; instances here, all at the same rate, because that many fit without any
-; instance missing its deadline. All copies of a task run the identical
-; compiled binary and share that task's map fds (same computation,
-; redundant execution, not independent state).
-;
-; 36 total VM instances (vmId 0-35).
-; aberr excluded throughout: dispatched on-demand, not a periodic rate-group member.
+; Static pre-generated schedule for polarfire (actual, m=2, gap=0.00%).
+; 36 VMs, 252 dispatches over 1000 ticks @ 100Hz.
 
 ; ---- Map setup ----
 
@@ -58,18 +49,18 @@ R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 14, "tests/low_pass_filter/a.o
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 15, "tests/low_pass_filter/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 16, "tests/low_pass_filter/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 17, "tests/low_pass_filter/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 18, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 19, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 20, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 21, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 22, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 23, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 24, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 25, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 26, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 27, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 28, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 29, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 18, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 19, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 20, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 21, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 22, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 23, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 24, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 25, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 26, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 27, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 28, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 29, "tests/cfdp_chunk/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 30, "tests/reed_solomon/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 31, "tests/reed_solomon/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 32, "tests/reed_solomon/a.o"
@@ -77,47 +68,6 @@ R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 33, "tests/reed_solomon/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 34, "tests/reed_solomon/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 35, "tests/reed_solomon/a.o"
 
-; ---- Start the rate groups (1s buffer after loads) ----
+; ---- Load and start the pre-generated schedule ----
 
-; 1Hz -- runtime_ms is 1000x the single-execution cost, matching run_worker's 1000x-per-dispatch loop
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 5, 1.0, 22.56
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 6, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 7, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 8, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 9, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 10, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 11, 1.0, 25.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 12, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 13, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 14, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 15, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 16, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 17, 1.0, 25.83
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 18, 1.0, 33.66
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 19, 1.0, 33.66
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 20, 1.0, 33.66
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 21, 1.0, 33.66
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 22, 1.0, 33.66
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 23, 1.0, 33.66
-
-; 0.1Hz -- runtime_ms is 1000x the single-execution cost, matching run_worker's 1000x-per-dispatch loop
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 24, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 25, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 26, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 27, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 28, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 29, 0.1, 80.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 30, 0.1, 69.40
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 31, 0.1, 69.40
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 32, 0.1, 69.40
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 33, 0.1, 69.40
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 34, 0.1, 69.40
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 35, 0.1, 69.40
-
-; Watch for: SchedulerSlip/SchedulerQueueFull/RateGroupCycleSlip across an
-; extended run.
+R00:00:02 BPFPrimeTest.bpfSequencer.LOAD_SCHEDULE "tests/rgc/pf/actual.yaml"

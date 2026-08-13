@@ -1,14 +1,5 @@
-; Cache-aware (estimate) multi-copy rate-group configuration for NOEL-V.
-; Loads one VM instance per admitted redundant copy of each task, per
-; rate_group_ilp.py's solve_with_copies() result for this platform/metric
-; (m=2 workers, max_copies=6) -- e.g. reed_solomon gets 6 concurrent
-; instances here, all at the same rate, because that many fit without any
-; instance missing its deadline. All copies of a task run the identical
-; compiled binary and share that task's map fds (same computation,
-; redundant execution, not independent state).
-;
-; 11 total VM instances (vmId 0-10).
-; aberr excluded throughout: dispatched on-demand, not a periodic rate-group member.
+; Static pre-generated schedule for noelv (cache_aware, m=2, gap=300.00%).
+; 9 VMs, 54 dispatches over 1000 ticks @ 100Hz.
 
 ; ---- Map setup ----
 
@@ -41,33 +32,15 @@ R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 21, 0, 11
 ; ---- Load one VM instance per admitted copy ----
 
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/kalman/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/low_pass_filter/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/low_pass_filter/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/reed_solomon/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/cfdp_chunk/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/reed_solomon/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/reed_solomon/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/reed_solomon/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 10, "tests/reed_solomon/a.o"
 
-; ---- Start the rate groups (1s buffer after loads) ----
+; ---- Load and start the pre-generated schedule ----
 
-; 1Hz -- runtime_ms is 1000x the single-execution cost, matching run_worker's 1000x-per-dispatch loop
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 1.0, 142.72
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 1.0, 182.23
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 1.0, 203.90
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 1.0, 307.97
-
-; 0.1Hz -- runtime_ms is 1000x the single-execution cost, matching run_worker's 1000x-per-dispatch loop
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 0.1, 2979.62
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 5, 0.1, 1127.14
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 6, 0.1, 1127.14
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 7, 0.1, 1127.14
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 8, 0.1, 1127.14
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 9, 0.1, 1127.14
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 10, 0.1, 1127.14
-
-; Watch for: SchedulerSlip/SchedulerQueueFull/RateGroupCycleSlip across an
-; extended run.
+R00:00:02 BPFPrimeTest.bpfSequencer.LOAD_SCHEDULE "tests/rgc/nv/cache_aware.yaml"
