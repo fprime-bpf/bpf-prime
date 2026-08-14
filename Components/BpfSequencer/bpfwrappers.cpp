@@ -77,12 +77,9 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     static std::byte ds[50000],cs[200];//hardcode size for now.
     static bpftime::ExecState a{.heap=nullptr,.dataStack=ds,.callStack=cs};
     const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
-    constexpr uint8_t splitInto=1;
+    constexpr uint8_t splitInto=32;
     const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
-    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{}),4,10000);
-/*
- At "../bpfwrappers.cpp" line 82 col 112, I want to specify a few functions as register only instead of leaving the map
-  empty. Specifically, I want all functions in "../iter_bpf_helpers.cpp" to be marked as register only.*/
+    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{1,8,9,10,11,12}),4,10000);
     //auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
