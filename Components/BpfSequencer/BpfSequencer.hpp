@@ -320,13 +320,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     static I32 bpf_rand_int(I32 min, I32 max) noexcept;
     
-    static F32 bpf_math_sqrt(F32 elem) noexcept;
+    static I32 bpf_math_sqrt(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_sin(F32 elem) noexcept;
+    static I32 bpf_math_sin(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_cos(F32 elem) noexcept;
+    static I32 bpf_math_cos(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_atan2(F32 x, F32 y) noexcept;
+    static I32 bpf_math_atan2(I32 x_bits, I32 y_bits) noexcept;
   private:
     bool validate_vm_id(U32 vmId);
 

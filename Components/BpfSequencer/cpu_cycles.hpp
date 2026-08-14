@@ -24,7 +24,7 @@ static inline uint64_t get_cpu_cycles() {
 #error "get_cpu_cycles: unsupported architecture (expected x86_64, aarch64, or riscv64)"
 #endif
 
-static constexpr double CPU_CYCLES_HZ = 667000000.0;
+static constexpr double CPU_CYCLES_HZ = 100000000.0;
 
 static inline double cpu_cycles_to_ns(uint64_t cycles) {
     return (double)cycles * (1e9 / CPU_CYCLES_HZ);
