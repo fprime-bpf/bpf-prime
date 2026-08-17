@@ -1,0 +1,76 @@
+; Static pre-generated schedule for noelv (actual, m=2, gap=38.46%).
+; 39 VMs, 282 dispatches over 1000 ticks @ 100Hz.
+
+; ---- Map setup ----
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 0, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 0, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 1, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 1, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 2, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 2, 0, 7
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 3, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 3, 0, 7
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 4, BPF_MAP_TYPE_ARRAY, 4, 4, 7, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 4, 0, 7
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 15, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 15, 0, 16
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 16, BPF_MAP_TYPE_ARRAY, 4, 4, 20, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 17, BPF_MAP_TYPE_ARRAY, 4, 4, 16, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 17, 0, 16
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 18, BPF_MAP_TYPE_ARRAY, 4, 4, 4, 0
+
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 19, BPF_MAP_TYPE_ARRAY, 4, 4, 64, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 19, 0, 64
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 20, BPF_MAP_TYPE_ARRAY, 4, 4, 1, 0
+R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 21, BPF_MAP_TYPE_ARRAY, 4, 4, 11, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 21, 0, 11
+
+; ---- Load one VM instance per admitted copy ----
+
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/startracker/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 10, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 11, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 12, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 13, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 14, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 15, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 16, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 17, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 18, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 19, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 20, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 21, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 22, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 23, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 24, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 25, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 26, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 27, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 28, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 29, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 30, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 31, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 32, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 33, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 34, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 35, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 36, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 37, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 38, "tests/reed_solomon/a.o"
+
+; ---- Load and start the pre-generated schedule ----
+
+R00:00:02 BPFPrimeTest.bpfSequencer.LOAD_SCHEDULE "tests/rgc/nv/actual.yaml"

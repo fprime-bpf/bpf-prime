@@ -73,66 +73,56 @@ int main() {
     while ((z = bpf_iter_num_next(&izero))) genpoly[*z] = 0;
     bpf_iter_num_destroy(&izero);
 
+    // kidx is fully determined by the (compile-time-unrolled) step index, so
+    // hand-unrolling makes kidx>=1/kidx<=0 fold at compile time; hi is nonzero
+    // only reads a genuinely dynamic byte when kidx==0, so nz_mask+OPT_BARRIER
+    // (same reason as RS_STEP's, LLVM canonicalizes the branch-free trick back
+    // into a select otherwise) is only needed there, but applied uniformly for
+    // simplicity since the cost is negligible at this scale.
+#define OPT_BARRIER(x) asm volatile("" : "+r"(x))
+#define DEG_STEP(KIDX, DEG, ROOT) { \
+        long long kidx = (KIDX); \
+        unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0; \
+        unsigned char hi = (kidx <= (DEG)) ? genpoly[kidx] : 0; \
+        int hi_signed = (int)hi; \
+        int hi_or = hi_signed | -hi_signed; \
+        OPT_BARRIER(hi_or); \
+        unsigned int hi_nz_mask = (unsigned int)(hi_or >> 31); \
+        unsigned char prod = gfexp[gflog[hi] + gflog[(ROOT)]] & hi_nz_mask; /* gflog[0] undefined but masked out when hi==0, same as RS_STEP */ \
+        genpoly[kidx] = lo ^ prod; \
+    }
     {
         // deg = 0
         unsigned char root = gfexp[0];
-        struct bpf_iter_num ik;
-        long long *kk;
-        bpf_iter_num_new(&ik, 0, 2);
-        while ((kk = bpf_iter_num_next(&ik))) {
-            long long kidx = 1 - *kk;
-            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
-            unsigned char hi = (kidx <= 0) ? genpoly[kidx] : 0;
-            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
-            genpoly[kidx] = lo ^ prod;
-        }
-        bpf_iter_num_destroy(&ik);
+        DEG_STEP(1, 0, root)
+        DEG_STEP(0, 0, root)
     }
     {
         // deg = 1
         unsigned char root = gfexp[1];
-        struct bpf_iter_num ik;
-        long long *kk;
-        bpf_iter_num_new(&ik, 0, 3);
-        while ((kk = bpf_iter_num_next(&ik))) {
-            long long kidx = 2 - *kk;
-            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
-            unsigned char hi = (kidx <= 1) ? genpoly[kidx] : 0;
-            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
-            genpoly[kidx] = lo ^ prod;
-        }
-        bpf_iter_num_destroy(&ik);
+        DEG_STEP(2, 1, root)
+        DEG_STEP(1, 1, root)
+        DEG_STEP(0, 1, root)
     }
     {
         // deg = 2
         unsigned char root = gfexp[2];
-        struct bpf_iter_num ik;
-        long long *kk;
-        bpf_iter_num_new(&ik, 0, 4);
-        while ((kk = bpf_iter_num_next(&ik))) {
-            long long kidx = 3 - *kk;
-            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
-            unsigned char hi = (kidx <= 2) ? genpoly[kidx] : 0;
-            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
-            genpoly[kidx] = lo ^ prod;
-        }
-        bpf_iter_num_destroy(&ik);
+        DEG_STEP(3, 2, root)
+        DEG_STEP(2, 2, root)
+        DEG_STEP(1, 2, root)
+        DEG_STEP(0, 2, root)
     }
     {
         // deg = 3
         unsigned char root = gfexp[3];
-        struct bpf_iter_num ik;
-        long long *kk;
-        bpf_iter_num_new(&ik, 0, 5);
-        while ((kk = bpf_iter_num_next(&ik))) {
-            long long kidx = 4 - *kk;
-            unsigned char lo = (kidx >= 1) ? genpoly[kidx - 1] : 0;
-            unsigned char hi = (kidx <= 3) ? genpoly[kidx] : 0;
-            unsigned char prod = (hi != 0) ? gfexp[gflog[hi] + gflog[root]] : 0;
-            genpoly[kidx] = lo ^ prod;
-        }
-        bpf_iter_num_destroy(&ik);
+        DEG_STEP(4, 3, root)
+        DEG_STEP(3, 3, root)
+        DEG_STEP(2, 3, root)
+        DEG_STEP(1, 3, root)
+        DEG_STEP(0, 3, root)
     }
+#undef DEG_STEP
+#undef OPT_BARRIER
 
     // Load the message into a zero-padded work buffer [data | parity-region]
     bpf_iter_num_new(&it, 0, K);
@@ -146,57 +136,35 @@ int main() {
     while ((i = bpf_iter_num_next(&it))) buf[*i] = 0;
     bpf_iter_num_destroy(&it);
 
-    // Systematic encode via polynomial long division (LFSR form): one
-    // coefficient read per message symbol
-    // (buf[ii], AFTER any mutations earlier message symbols already made to
-    // it -- this is a genuine LFSR carry-propagation dependency, not just a
-    // convenience read), reused across the NPAR+1 generator-coefficient
-    // steps for that symbol. Flattened into a single ii/jj loop, jj still
-    // reaches 0 first for each ii (bpf_iter_num_next visits the flat index
-    // in increasing order, so ii=k/(NPAR+1) is non-decreasing and jj=0 is
-    // the first sub-step of each ii block) -- so capture coef there and hold
-    // it for the rest of that ii's block, instead of re-reading buf[ii] on
-    // every jj, which would pick up that same block's own jj=0 write (the
-    // monic leading-term cancellation always zeroes buf[ii] first) and
-    // silently drop every later generator-coefficient contribution for that
-    // symbol. This target's runtime-verifier can't analyze nested
-    // bpf_iter_num loops, hence the flattening.
-    unsigned char coef = 0;
-    bpf_iter_num_new(&it, 0, K * (NPAR + 1));
+    // Systematic encode via polynomial long division (LFSR form).
+    // Outer ii via bpf_iter_num (K); jj hand-unrolled since NPAR is a compile-time constant, avoiding the runtime jj that forked the DFS.
+    // OPT_BARRIER sits between the OR and the shift so LLVM can't fuse "OR-of-x-and-negx then ashr 31" back
+    // into a select, which BPF has no cmov for and lowers as a real branch (also forked the DFS).
+#define OPT_BARRIER(x) asm volatile("" : "+r"(x))
+#define RS_STEP(JJ) { \
+        unsigned char g = genpoly[NPAR - (JJ)]; \
+        int coef_signed = (int)coef; \
+        int coef_or = coef_signed | -coef_signed; \
+        OPT_BARRIER(coef_or); \
+        unsigned int coef_nz_mask = (unsigned int)(coef_or >> 31); \
+        int g_signed = (int)g; \
+        int g_or = g_signed | -g_signed; \
+        OPT_BARRIER(g_or); \
+        unsigned int g_nz_mask = (unsigned int)(g_or >> 31); \
+        unsigned int nz_mask = coef_nz_mask & g_nz_mask; /* avoids reading gflog[0] (undefined) when coef or g is 0 */ \
+        long long idx = ii + (JJ); \
+        unsigned char contribution = gfexp[gflog[g] + gflog[coef]]; \
+        buf[idx] ^= (unsigned char)(contribution & nz_mask); \
+    }
+    bpf_iter_num_new(&it, 0, K);
     while ((i = bpf_iter_num_next(&it))) {
-        unsigned long long ii = (unsigned long long)*i / (NPAR + 1);
-        unsigned long long jj = (unsigned long long)*i % (NPAR + 1);
-
-        if (jj == 0)
-            coef = buf[ii];
-
-        unsigned char g = genpoly[NPAR - jj];
-
-        // Both "coef != 0" and "g != 0" gate this contribution; coef comes
-        // from the (arbitrary, symbolic) message data so it can't resolve
-        // to a single concrete path, and in practice g didn't reliably
-        // either (its value threads back through several array
-        // reads/writes the runtime-verifier apparently doesn't fully
-        // concretize). Make both branch-free instead of nesting `if`s, so
-        // the DFS never forks on this at all: nz_mask is 0xFFFFFFFF when
-        // the byte is nonzero, else 0 (sign-bit trick: negating a nonzero
-        // byte sets the sign bit of its OR with the original, so an
-        // arithmetic right shift by 31 sign-extends to all-ones; zero
-        // keeps both sides zero). gflog[0] is never written (log(0) is
-        // undefined) so this can read stack garbage when coef or g is 0,
-        // but that's safe: the mask zeroes the whole contribution before
-        // it's XORed in.
-        int coef_signed = (int)coef;
-        unsigned int coef_nz_mask = (unsigned int)((coef_signed | -coef_signed) >> 31);
-        int g_signed = (int)g;
-        unsigned int g_nz_mask = (unsigned int)((g_signed | -g_signed) >> 31);
-        unsigned int nz_mask = coef_nz_mask & g_nz_mask;
-
-        long long idx = ii + jj;
-        unsigned char contribution = gfexp[gflog[g] + gflog[coef]];
-        buf[idx] ^= (unsigned char)(contribution & nz_mask);
+        unsigned long long ii = (unsigned long long)*i;
+        unsigned char coef = buf[ii]; // once per ii, before this ii's own RS_STEP writes below (LFSR carry dependency)
+        RS_STEP(0) RS_STEP(1) RS_STEP(2) RS_STEP(3) RS_STEP(4)
     }
     bpf_iter_num_destroy(&it);
+#undef RS_STEP
+#undef OPT_BARRIER
 
     // Write out the parity symbols
     struct bpf_iter_num iw;

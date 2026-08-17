@@ -45,20 +45,29 @@ I32 BpfSequencer::bpf_rand_int(I32 min, I32 max) noexcept {
     return rand() % (max - min + 1) + min;
 }
 
-F32 BpfSequencer::bpf_math_sqrt(F32 elem) noexcept {
-    return std::sqrt(elem);
+I32 BpfSequencer::bpf_math_sqrt(I32 elem_bits) noexcept {
+    F32 elem = *reinterpret_cast<F32*>(&elem_bits);
+    F32 result = std::sqrt(elem);
+    return *reinterpret_cast<I32*>(&result);
 }
 
-F32 BpfSequencer::bpf_math_sin(F32 elem) noexcept {
-    return std::sin(elem);
+I32 BpfSequencer::bpf_math_sin(I32 elem_bits) noexcept {
+    F32 elem = *reinterpret_cast<F32*>(&elem_bits);
+    F32 result = std::sin(elem);
+    return *reinterpret_cast<I32*>(&result);
 }
 
-F32 BpfSequencer::bpf_math_cos(F32 elem) noexcept {
-    return std::cos(elem);
+I32 BpfSequencer::bpf_math_cos(I32 elem_bits) noexcept {
+    F32 elem = *reinterpret_cast<F32*>(&elem_bits);
+    F32 result = std::cos(elem);
+    return *reinterpret_cast<I32*>(&result);
 }
 
-F32 BpfSequencer::bpf_math_atan2(F32 x, F32 y) noexcept {
-    return std::atan2(x, y);
+I32 BpfSequencer::bpf_math_atan2(I32 x_bits, I32 y_bits) noexcept {
+    F32 x = *reinterpret_cast<F32*>(&x_bits);
+    F32 y = *reinterpret_cast<F32*>(&y_bits);
+    F32 result = std::atan2(x, y);
+    return *reinterpret_cast<I32*>(&result);
 }
 
 

@@ -76,6 +76,11 @@ class WasmSequencer final : public WasmSequencerComponentBase {
     static uint32_t bpf_map_delete_elem(wasm_exec_env_t exec_env, uint64_t map_ptr, uint32_t key);
     static int32_t bpf_rand_int(wasm_exec_env_t exec_env, int32_t min, int32_t max);
     static uint64_t MAP_BY_FD(wasm_exec_env_t exec_env, uint32_t fd);
+
+    static float bpf_math_sqrt(wasm_exec_env_t exec_env, float elem);
+    static float bpf_math_sin(wasm_exec_env_t exec_env, float elem);
+    static float bpf_math_cos(wasm_exec_env_t exec_env, float elem);
+    static float bpf_math_atan2(wasm_exec_env_t exec_env, float y, float x);
 };
 
 }  // namespace Components

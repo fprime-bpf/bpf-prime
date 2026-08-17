@@ -6,6 +6,7 @@
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include <cmath>
+#include <cstdlib>
 #include "BpfSequencer.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include <thread>
@@ -51,7 +52,7 @@ bpf_mem_size(0) {
         { 9, { reinterpret_cast<void*>(bpf_math_sqrt), "bpf_math_sqrt" } },
         { 10, { reinterpret_cast<void*>(bpf_math_sin), "bpf_math_sin" } },
         { 11, { reinterpret_cast<void*>(bpf_math_cos), "bpf_math_cos" } },
-        { 12, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
+        { 13, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
     });
 }
 
@@ -155,9 +156,16 @@ void BpfSequencer::run_worker(U32 worker_id) {
             continue;
         }
         
-        // Finally Execute the VM
-        run(job.vm_id);
-        
+        // Run 1000x per dispatch, matching the ILP's current 1000x runtime assumption.
+        if (benchmark_build) {
+            for (int rep = 0; rep < 1000; rep++) {
+                run(job.vm_id);
+            }
+        }
+        else {
+            run(job.vm_id);
+        }
+
         // Clear the running flag
         vm->is_running.store(false, std::memory_order_release);
 
@@ -528,6 +536,62 @@ void BpfSequencer::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
 
     this->log_ACTIVITY_LO_RateGroupStopped(vm_id);
     return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::OK);
+}
+
+void BpfSequencer::LOAD_SCHEDULE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, const Fw::CmdStringArg& scheduleFilePath) {
+    Fw::Success result = this->load_schedule(scheduleFilePath.toChar());
+    return this->cmdResponse_out(opCode, cmdSeq, result_to_response(result));
+}
+
+// Scans a rate_group_ilp.py-generated YAML for "vm_id:"/"tick:"/"runtime_ms:" triples; doesn't
+// need a real YAML parser since we control the generator's fixed key order and block-list layout.
+Fw::Success BpfSequencer::load_schedule(const char* filePath) {
+    Fw::LogStringArg loggerFilePath(filePath);
+
+    FwSizeType size;
+    const char* err_msg;
+    U8* buf = read_from_file(filePath, size, err_msg);
+    if (!buf) {
+        this->log_WARNING_HI_ScheduleLoadFailed(loggerFilePath, Fw::LogStringArg(err_msg));
+        return Fw::Success::FAILURE;
+    }
+
+    std::string text(reinterpret_cast<const char*>(buf), size);
+    delete[] buf;
+
+    Os::ScopeLock lock(scheduler_mutex);
+    for (auto& tick_jobs : schedule) {
+        tick_jobs.clear();
+    }
+
+    U32 count = 0;
+    size_t pos = 0;
+    while (true) {
+        size_t vm_pos = text.find("vm_id:", pos);
+        if (vm_pos == std::string::npos) break;
+        size_t tick_pos = text.find("tick:", vm_pos);
+        size_t rt_pos = text.find("runtime_ms:", tick_pos);
+        if (tick_pos == std::string::npos || rt_pos == std::string::npos) break;
+        pos = rt_pos + 11;
+
+        U32 vm_id = static_cast<U32>(std::strtoul(text.c_str() + vm_pos + 6, nullptr, 10));
+        U32 tick = static_cast<U32>(std::strtoul(text.c_str() + tick_pos + 5, nullptr, 10));
+        F32 runtime_ms = std::strtof(text.c_str() + rt_pos + 11, nullptr);
+
+        if (vm_id >= k_num_vms || !vms[vm_id]) continue;  // VM was never LOAD_SEQUENCE'd; skip
+        if (tick >= this->cycle_length_ticks()) {
+            this->log_WARNING_HI_ScheduleEntryOutOfRange(tick, this->cycle_length_ticks() - 1);
+            continue;
+        }
+
+        vms[vm_id]->runtime_ms = runtime_ms;
+        schedule[tick].push_back(vm_id);
+        count++;
+    }
+
+    this->ticks = 0;
+    this->log_ACTIVITY_LO_ScheduleLoaded(loggerFilePath, count);
+    return Fw::Success::SUCCESS;
 }
 
 void BpfSequencer::BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,

@@ -18,10 +18,37 @@ static unsigned int (* const bpf_iter_num_new)(struct bpf_iter_num *it, int star
 static long long *(* const bpf_iter_num_next)(struct bpf_iter_num *it) = (void *) 6;
 static void (* const bpf_iter_num_destroy)(struct bpf_iter_num *it) = (void *) 7;
 static int (* const bpf_rand_int)(int min, int max) = (void *) 8;
-static float (* const bpf_math_sqrt)(float elem) = (void *) 9;
-static float (* const bpf_math_sin)(float elem) = (void *) 10;
-static float (* const bpf_math_cos)(float elem) = (void *) 11;
-static float (* const bpf_math_atan2)(float elem) = (void *) 12;
+// bpf_math_{sqrt,sin,cos,atan2} below wrap these raw helpers, which take/return
+// F32 bit patterns as int, not float directly: the "duotronic" BPF backend's
+// calling convention (CC_BPF64/RetCC_BPF64) has no rule for f32 call
+// arguments or return values, so any BPF CALL with a float in its signature
+// crashes llc ("stack arguments are not supported") -- confirmed via isolated
+// repro. i32 (promoted to i64) works fine, so the wrappers below marshal via
+// *(int*)&/(*(float*)&) at both call sites and (see BpfSequencer's
+// iter_bpf_helpers.cpp) inside the registered helper itself. The wrappers are
+// force-inlined so no *further* float-signature call is ever actually emitted.
+static int (* const bpf_math_sqrt_bits)(int elem_bits) = (void *) 9;
+static int (* const bpf_math_sin_bits)(int elem_bits) = (void *) 10;
+static int (* const bpf_math_cos_bits)(int elem_bits) = (void *) 11;
+// index 13, not 12: llvmbpf hardcodes helper index 12 as bpf_tail_call and exits the program right after any call to it.
+static int (* const bpf_math_atan2_bits)(int x_bits, int y_bits) = (void *) 13;
+
+__attribute__((always_inline)) static inline float bpf_math_sqrt(float elem) {
+    int bits = bpf_math_sqrt_bits(*(int*)&elem);
+    return *(float*)&bits;
+}
+__attribute__((always_inline)) static inline float bpf_math_sin(float elem) {
+    int bits = bpf_math_sin_bits(*(int*)&elem);
+    return *(float*)&bits;
+}
+__attribute__((always_inline)) static inline float bpf_math_cos(float elem) {
+    int bits = bpf_math_cos_bits(*(int*)&elem);
+    return *(float*)&bits;
+}
+__attribute__((always_inline)) static inline float bpf_math_atan2(float x, float y) {
+    int bits = bpf_math_atan2_bits(*(int*)&x, *(int*)&y);
+    return *(float*)&bits;
+}
 
 #define MAP_BY_FD(MAP_FD) ({ \
     register void *map_ptr_reg asm("r1");                                \

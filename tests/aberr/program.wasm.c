@@ -4,151 +4,18 @@
 #define MAX_ITER 5
 #define PI    3.14159265359f
 
-float sqroot(float s) {
-    float r = s / 2;
-    if (s <= 0)
-        return 0;
-
-    int i = *(int*)&s;
-    i = 0x5f3759df - (i >> 1);
-    s = *(float*)&i;
-    r = s * (1.5f - r * s * s);
-
-    return 1.0f / r;
+// sqroot/sine/cosine/_atan2 call the same bpf_math_* native host functions BPF uses, instead of WAMR-JIT-compiled sqrtf/sinf/cosf/atan2f.
+static inline float sqroot(float s) {
+    return bpf_math_sqrt(s);
 }
-
-// Branch-free, table-driven piecewise-linear sine/cosine -- replaces the 15-way
-// ternary cascade each of these used to have. RISC-V has no hardware FP
-// select/cmov, so every `? :` compiled down to a real conditional branch (~339
-// across aberr's hot loop on this target, confirmed by disassembly), each one
-// data-dependent on the actual angle computed that call -- essentially
-// unpredictable, which is expensive on an in-order core like the U54/NOEL-V.
-// The bpf target doesn't hit this: its custom FPU extension lowers the same
-// ternaries as branchless selects (confirmed via its optimized IR: 472 selects,
-// only 24 br), which is what made it several times faster here than native even
-// at matched -O3. This gives native/wasm the same branch-free shape by turning
-// "which of 16 segments is rad in" into an array index instead of a threshold
-// cascade -- SINE_TABLE[k]/COSINE_TABLE[k] are just sin(k*step)/cos(k*step) for
-// k = 0..16 (index 16 is the wraparound, equal to index 0).
-static const float SINE_TABLE[17] = {
-    0.0f, 0.38268343f, 0.70710678f, 0.92387953f, 1.0f, 0.92387953f, 0.70710678f, 0.38268343f,
-    0.0f, -0.38268343f, -0.70710678f, -0.92387953f, -1.0f, -0.92387953f, -0.70710678f, -0.38268343f,
-    0.0f,
-};
-static const float COSINE_TABLE[17] = {
-    1.0f, 0.92387953f, 0.70710678f, 0.38268343f, 0.0f, -0.38268343f, -0.70710678f, -0.92387953f,
-    -1.0f, -0.92387953f, -0.70710678f, -0.38268343f, 0.0f, 0.38268343f, 0.70710678f, 0.92387953f,
-    1.0f,
-};
-
-static int clamp_segment(int seg) {
-    unsigned int neg_mask = 0u - (unsigned int)(seg < 0);
-    seg &= (int)~neg_mask;
-    unsigned int over_mask = 0u - (unsigned int)(seg > 15);
-    return (int)(((unsigned int)seg & ~over_mask) | (15u & over_mask));
+static inline float sine(float rad) {
+    return bpf_math_sin(rad);
 }
-
-// Branch-free float select via bit-masking. Needed for one case the table
-// lookup alone doesn't cover: if the first threshold (rad >= step) never
-// fires -- i.e. rad is still negative even after the single wrap-adjustment
-// below, which happens for the out-of-domain angles this benchmark actually
-// calls sine/cosine with -- the original cascade leaves `offset` at its
-// *pre-wrap-adjustment* initial value, not the post-wrap `rad`. Reproducing
-// that exactly (rather than "fixing" it) is what keeps this bit-for-bit
-// identical to the branchy version.
-static float select_f(int cond, float a, float b) {
-    unsigned int mask = 0u - (unsigned int)(cond != 0);
-    unsigned int ai = *(unsigned int*)&a;
-    unsigned int bi = *(unsigned int*)&b;
-    unsigned int ri = (ai & mask) | (bi & ~mask);
-    return *(float*)&ri;
+static inline float cosine(float rad) {
+    return bpf_math_cos(rad);
 }
-
-float sine(float rad) {
-    float step = 0.125f * PI;
-    float orig_rad = rad;
-
-    if (rad < 0.0f)
-        rad = rad + 2.0f * PI;
-    if (rad >= 2.0f * PI)
-        rad = rad - 2.0f * PI;
-
-    int raw_seg = (int)(rad / step);
-    int seg = clamp_segment(raw_seg);
-    float offset = select_f(raw_seg >= 1, rad - (float)seg * step, orig_rad);
-    float v1 = SINE_TABLE[seg];
-    float v2 = SINE_TABLE[seg + 1];
-    float frac = offset / step;
-    return v1 + frac * (v2 - v1);
-}
-
-float cosine(float rad) {
-    float step = 0.125f * PI;
-    float orig_rad = rad;
-
-    if (rad < 0.0f)
-        rad = rad + 2.0f * PI;
-    if (rad >= 2.0f * PI)
-        rad = rad - 2.0f * PI;
-
-    int raw_seg = (int)(rad / step);
-    int seg = clamp_segment(raw_seg);
-    float offset = select_f(raw_seg >= 1, rad - (float)seg * step, orig_rad);
-    float v1 = COSINE_TABLE[seg];
-    float v2 = COSINE_TABLE[seg + 1];
-    float frac = offset / step;
-    return v1 + frac * (v2 - v1);
-}
-
-float _atan2(float y, float x) {
-    long y_bits = *(long*)&y & 0xFFFFFFFF;
-    long x_bits = *(long*)&x & 0xFFFFFFFF;
-
-    if (x_bits == 0 && y_bits == 0) {
-        return 0.0f;
-    }
-
-    long abs_y_bits = y_bits & 0x7FFFFFFF;
-    long abs_x_bits = x_bits & 0x7FFFFFFF;
-
-    float div_result;
-    int use_x = (abs_x_bits > abs_y_bits) ? 1 : 0;  // Integer comparison only
-
-    if (use_x) {
-        div_result = y / x;
-    } else {
-        div_result = x / y;
-    }
-
-    float z_squared = div_result * div_result;
-    float neg_z_squared = -z_squared;
-
-    float term1 = div_result;
-    float term2 = term1 * neg_z_squared / 3.0f;
-    float term3 = term2 * neg_z_squared / 5.0f;
-    float term4 = term3 * neg_z_squared / 7.0f;
-    float term5 = term4 * neg_z_squared / 9.0f;
-
-    float sum = term1 + term2 + term3 + term4 + term5;
-
-    if (use_x == 0) {
-        if (y_bits >= 0) {
-            sum = 1.5707963f - sum;
-        } else {
-            sum = -1.5707963f - sum;
-        }
-        return sum;
-    }
-
-    if (x_bits < 0) {
-        if (y_bits >= 0) {
-            sum = sum + PI;
-        } else {
-            sum = sum - PI;
-        }
-    }
-
-    return sum;
+static inline float _atan2(float y, float x) {
+    return bpf_math_atan2(y, x);
 }
 
 int main() {
@@ -183,6 +50,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
+#pragma clang loop unroll(disable)
     for (long iter = 0; iter < MAX_ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;

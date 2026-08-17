@@ -7,24 +7,9 @@
 #include "Components/BpfSequencer/maps/shared_mutex.hpp"
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 
-/*
- * Merged NOEL-V instruction/pipeline latency sweep -- combines what were
- * previously four separate binaries (div_latency_test.c,
- * pipeline_latency_test.c, lddw_latency_test.cpp, map_helper_latency_test.cpp)
- * into one, so a single run on the board covers everything. Each original
- * file's logic is now its own run_*() section below, called in sequence
- * from main(). See each section's header comment for the rationale specific
- * to that measurement (moved over unchanged from the original files).
- *
- * All integer/FP .rept blocks read from FIXED, never-overwritten operand
- * registers across the whole block -- chaining the result back into the
- * operand register lets it collapse toward a degenerate value (e.g. 0 for
- * a dividend, which short-circuits div64.vhd's divider immediately),
- * silently measuring the cheapest case instead of steady-state latency.
- * The functional units involved aren't fully pipelined on this core, so
- * back-to-back independent ops still serialize -- this measures true
- * per-op latency, not throughput inflated by overlap.
- */
+// NOEL-V latency sweep merging 4 old binaries; see each run_*() for rationale.
+// All .rept blocks read fixed operand registers, never the result, to avoid
+// collapsing toward a degenerate (cheap) case and to measure true per-op cost.
 
 static inline uint64_t rdcycle(void) {
     uint64_t c;
@@ -37,14 +22,9 @@ static void report(const char *name, uint64_t cyc, int reps) {
            name, (unsigned long)cyc, reps, (double)cyc / reps);
 }
 
-/* ===================== 1. DIV/MOD (div_latency_test.c) ===================== */
+// === 1. DIV/MOD ===
 
-/* div64.vhd (lib/gaisler/noelv/core/div64.vhd) is an SRT-style divider that
- * finds each operand's leading-one bit (firstone()) and only iterates
- * (leading-one(dividend) - leading-one(divisor)) steps -- latency is
- * data-dependent, not fixed. This measures how far apart the best case
- * (operands the same magnitude, ~0 iterations) and worst case (huge
- * dividend / divisor=1, near-maximal iterations) actually are. */
+// SRT divider, data-dependent latency; measures best- vs worst-case iterations.
 #define MEASURE_DIV(name, insn, dividend_val, divisor_val, reps)            \
 do {                                                                        \
     register uint64_t rd asm("a0") = (uint64_t)(dividend_val);             \
@@ -86,11 +66,9 @@ static void run_div_tests(void) {
     MEASURE_DIV("div worst (INT64_MIN/1)",  "div", 0x8000000000000000ULL, 1ULL, 500);
 }
 
-/* ================ 2. Pipeline sweep (pipeline_latency_test.c) ================ */
+// === 2. Pipeline sweep ===
 
-/* Generic integer op: a2 = insn(a0, a1), unrolled `reps` times, a0/a1 never
- * touched -- isolates true per-op latency on this in-order core, since
- * back-to-back independent ops still serialize on a busy functional unit. */
+// a2 = insn(a0, a1) x reps; isolates true per-op latency, no overlap.
 #define MEASURE_IOP(name, insn, opa, opb, reps)                             \
 do {                                                                        \
     register uint64_t ra asm("a0") = (uint64_t)(opa);                      \
@@ -110,7 +88,7 @@ do {                                                                        \
     report(name, end - start, reps);                                       \
 } while (0)
 
-/* Same idea for double-precision FP ops. */
+// Same idea for double-precision FP ops.
 #define MEASURE_FOP(name, insn, opa, opb, reps)                             \
 do {                                                                        \
     register double fa asm("fa0") = (opa);                                 \
@@ -130,14 +108,7 @@ do {                                                                        \
     report(name, end - start, reps);                                       \
 } while (0)
 
-/* Single-precision counterpart. noelv.py's FADD/FSUB/FMUL/FDIV/FNEG/FMOV
- * overrides currently give the 32-bit (single) and 64-bit (double) variant
- * of every float op the exact same cost -- but nanofpunv.vhd's FADD/FSUB
- * state machine is a bit-serial mantissa loop (nf_div4/nf_div5-style), and
- * single precision has less than half the mantissa bits of double (24 vs
- * 53), so it should need meaningfully fewer iterations, not an identical
- * cost. This has never been measured on real hardware at all -- only the
- * double-precision case was (MEASURE_FOP above). */
+// Single-precision counterpart; single-vs-double FADD/FSUB never measured yet.
 #define MEASURE_FOP_S(name, insn, opa, opb, reps)                           \
 do {                                                                        \
     register float fa asm("fa0") = (opa);                                  \
@@ -157,11 +128,45 @@ do {                                                                        \
     report(name, end - start, reps);                                       \
 } while (0)
 
-/* Helper-call proxy: called through a volatile function pointer so the
- * compiler can't inline/devirtualize it -- forces a real jalr/ret, same
- * shape as the BPF interpreter's helper dispatch. NOTE: this only measures
- * native call+return latency, not the full helper marshaling cost inside
- * BpfSequencer -- that's what section 4 (map helpers) actually measures. */
+// Single-operand double FP op (FNEG/FMOV): a0 unused, unlike MEASURE_FOP.
+#define MEASURE_FOP1(name, insn, opa, reps)                                 \
+do {                                                                        \
+    register double fa asm("fa0") = (opa);                                 \
+    uint64_t start, end;                                                   \
+    asm volatile(                                                          \
+        "fence\n"                                                         \
+        "rdcycle %[start]\n"                                              \
+        ".rept " #reps "\n"                                               \
+        insn " fa2, %[a0]\n"                                              \
+        ".endr\n"                                                         \
+        "rdcycle %[end]\n"                                                \
+        : [start] "=&r"(start), [end] "=&r"(end)                          \
+        : [a0] "f"(fa)                                                    \
+        : "fa2"                                                           \
+    );                                                                     \
+    report(name, end - start, reps);                                       \
+} while (0)
+
+// Single-precision counterpart to MEASURE_FOP1.
+#define MEASURE_FOP1_S(name, insn, opa, reps)                               \
+do {                                                                        \
+    register float fa asm("fa0") = (opa);                                  \
+    uint64_t start, end;                                                   \
+    asm volatile(                                                          \
+        "fence\n"                                                         \
+        "rdcycle %[start]\n"                                              \
+        ".rept " #reps "\n"                                               \
+        insn " fa2, %[a0]\n"                                              \
+        ".endr\n"                                                         \
+        "rdcycle %[end]\n"                                                \
+        : [start] "=&r"(start), [end] "=&r"(end)                          \
+        : [a0] "f"(fa)                                                    \
+        : "fa2"                                                           \
+    );                                                                     \
+    report(name, end - start, reps);                                       \
+} while (0)
+
+// Helper-call proxy: volatile fn ptr forces jalr/ret, native call+ret only.
 __attribute__((noinline)) static uint64_t helper_noop(uint64_t x) {
     return x + 1;
 }
@@ -170,29 +175,42 @@ static uint64_t (*volatile helper_ptr)(uint64_t) = helper_noop;
 static void run_pipeline_tests(void) {
     printf("\n\n=== 2. Pipeline latency sweep ===\n\n");
 
-    /* FADD/FSUB: alignment shift + post-cancellation renorm.
-     * nanofpunv.vhd's nf_addsub* states hit the same OPACT_SHFTN
-     * data-dependent shift-count path as div's OPACT_SHFTN before nf_div4.
-     * "normal" = ordinary operands, no cancellation/denorm.
-     * "cancel" = 1.0 - (largest double below 1.0): maximal leading-zero
-     *   cancellation, forces the biggest possible renormalization shift.
-     * "subnorm" = one operand is the smallest positive subnormal double,
-     *   forcing the is_normal()-gated renormalization path to actually run. */
+    // FADD/FSUB shapes: normal, cancel (max leading-zero cancel), subnorm.
     printf("--- FADD/FSUB (double) ---\n");
     MEASURE_FOP("fadd.d normal (1.5+2.5)",   "fadd.d", 1.5, 2.5, 500);
     MEASURE_FOP("fsub.d normal (2.5-1.5)",   "fsub.d", 2.5, 1.5, 500);
     MEASURE_FOP("fsub.d cancel (1.0-~1.0)",  "fsub.d", 1.0, 0x1.fffffffffffffp-1, 500);
     MEASURE_FOP("fadd.d subnorm (+DBL_TRUE_MIN)", "fadd.d", 1.0, 5e-324, 500);
 
-    /* Single-precision counterpart -- same operand shapes (normal/cancel/
-     * subnorm), never measured before. Compare directly against the
-     * double-precision numbers above to see whether FADD_X/FSUB_X really
-     * should differ from FADD64_X/FSUB64_X. */
+    // Single-precision counterpart, same operand shapes, never measured before.
     printf("\n--- FADD/FSUB (single) ---\n");
     MEASURE_FOP_S("fadd.s normal (1.5+2.5)",   "fadd.s", 1.5f, 2.5f, 500);
     MEASURE_FOP_S("fsub.s normal (2.5-1.5)",   "fsub.s", 2.5f, 1.5f, 500);
     MEASURE_FOP_S("fsub.s cancel (1.0-~1.0)",  "fsub.s", 1.0f, 0x1.fffffep-1f, 500);
     MEASURE_FOP_S("fadd.s subnorm (+FLT_TRUE_MIN)", "fadd.s", 1.0f, 1e-45f, 500);
+
+    // FMUL/FDIV/FNEG/FMOV: never independently measured before this.
+    printf("\n--- FMUL/FDIV (double) ---\n");
+    MEASURE_FOP("fmul.d normal (1.5*2.5)",            "fmul.d", 1.5, 2.5, 500);
+    MEASURE_FOP("fmul.d underflow (1e-160*1e-160)",   "fmul.d", 1e-160, 1e-160, 500);
+    MEASURE_FOP("fdiv.d normal (2.5/1.5)",            "fdiv.d", 2.5, 1.5, 500);
+    MEASURE_FOP("fdiv.d worst (1.0/3.0)",             "fdiv.d", 1.0, 3.0, 500);
+    MEASURE_FOP("fdiv.d subnorm (DBL_TRUE_MIN/2.0)",  "fdiv.d", 5e-324, 2.0, 500);
+
+    printf("\n--- FMUL/FDIV (single) ---\n");
+    MEASURE_FOP_S("fmul.s normal (1.5*2.5)",              "fmul.s", 1.5f, 2.5f, 500);
+    MEASURE_FOP_S("fmul.s underflow (1e-20f*1e-20f)",     "fmul.s", 1e-20f, 1e-20f, 500);
+    MEASURE_FOP_S("fdiv.s normal (2.5/1.5)",              "fdiv.s", 2.5f, 1.5f, 500);
+    MEASURE_FOP_S("fdiv.s worst (1.0/3.0)",               "fdiv.s", 1.0f, 3.0f, 500);
+    MEASURE_FOP_S("fdiv.s subnorm (FLT_TRUE_MIN/2.0)",    "fdiv.s", 1e-45f, 2.0f, 500);
+
+    printf("\n--- FNEG/FMOV (double) ---\n");
+    MEASURE_FOP1("fneg.d normal (-1.5)", "fneg.d", 1.5, 500);
+    MEASURE_FOP1("fmv.d normal (1.5)",   "fmv.d", 1.5, 500);
+
+    printf("\n--- FNEG/FMOV (single) ---\n");
+    MEASURE_FOP1_S("fneg.s normal (-1.5)", "fneg.s", 1.5f, 500);
+    MEASURE_FOP1_S("fmv.s normal (1.5)",   "fmv.s", 1.5f, 500);
 
     printf("\n--- Helper-call proxy (native jalr/ret only) ---\n");
     {
@@ -207,10 +225,7 @@ static void run_pipeline_tests(void) {
         if (sink == 0xdeadbeef) printf("(unreachable, keeps sink live)\n");
     }
 
-    /* MUL/MUL64 sanity check: mul64.vhd is `v.ready := '1'` always (fixed
-     * 2-stage pipeline), so this is expected to be near-constant regardless
-     * of operand magnitude -- confirming the model's flat-constant *shape*
-     * is correct here, unlike DIV. */
+    // MUL/MUL64 sanity check: fixed 2-stage pipeline, expect ~constant cost.
     printf("\n--- MUL/MUL64 (expect ~constant across operands) ---\n");
     MEASURE_IOP("mul small (3*4)",     "mul",  3ULL, 4ULL, 500);
     MEASURE_IOP("mul large (2^63-ish)","mul",  0x7FFFFFFFFFFFFFFFULL, 0x7FFFFFFFFFFFFFFFULL, 500);
@@ -218,9 +233,7 @@ static void run_pipeline_tests(void) {
     MEASURE_IOP("mulw small (3*4)",    "mulw", 3ULL, 4ULL, 500);
     MEASURE_IOP("mulw large",          "mulw", 0x7FFFFFFFULL, 0x7FFFFFFFULL, 500);
 
-    /* Branch taken vs. not-taken: the model charges one cost per branch
-     * opcode with no taken/not-taken split; check whether that's actually
-     * two different costs. */
+    // Branch taken vs. not-taken: model charges one cost regardless of that.
     printf("\n--- Branch ---\n");
     {
         uint64_t start, end;
@@ -237,8 +250,7 @@ static void run_pipeline_tests(void) {
         asm volatile("rdcycle %0" : "=r"(end));
         report("bne (never taken)", end - start, n);
 
-        /* JA: eBPF's unconditional jump -- only conditional branches were
-         * measured above. */
+        // JA: eBPF's unconditional jump, not measured above.
         asm volatile("fence\n" "rdcycle %0" : "=r"(start));
         for (int i = 0; i < n; i++)
             asm volatile("j 1f\n" "1:\n");
@@ -246,12 +258,7 @@ static void run_pipeline_tests(void) {
         report("j (unconditional, JA)", end - start, n);
     }
 
-    /* Immediate-operand ALU (_K variants): MEASURE_IOP above only used
-     * register-register (_X-shape) forms. The _K variants need the
-     * immediate materialized first: addi covers small (fits in 12 bits)
-     * immediates in one instruction, but eBPF K-immediates are 32-bit, so a
-     * large constant needs a real li (lui+addi) sequence -- never measured
-     * separately from the ALU op itself. */
+    // _K needs li materialization first (32-bit K-imm vs 12-bit addi imm).
     printf("\n--- Immediate-operand ALU (_K shape) ---\n");
     {
         register uint64_t ra asm("a0") = 5;
@@ -284,12 +291,7 @@ static void run_pipeline_tests(void) {
         report("li (32-bit const) + add", end - start, 500);
     }
 
-    /* Float compare-and-branch (JFULE_X shape): RISC-V has no fused
-     * FP-compare-and-branch: eBPF's JFULE_X compiles to an fle.s (or
-     * similar) producing 0/1 in an integer register, then a separate
-     * bnez/beqz. JFULE_X's overridden cost (18 cycles) came from the
-     * mechanical Polarfire->NOELV diff, never independently measured like
-     * FADD/FSUB were -- measure the real compare+branch pair. */
+    // JFULE_X shape: fle.s+bnez pair; RISC-V has no fused FP compare-branch.
     printf("\n--- Float compare-and-branch (JFULE_X shape) ---\n");
     {
         register float fa asm("fa0") = 1.5f;
@@ -311,7 +313,7 @@ static void run_pipeline_tests(void) {
         report("fle.s + bnez (JFULE_X pair)", end - start, 500);
     }
 
-    /* Simple ALU sanity check (expect ~1 cycle, low risk). */
+    // Simple ALU sanity check (expect ~1 cycle, low risk).
     printf("\n--- Simple ALU ---\n");
     MEASURE_IOP("add", "add", 5ULL, 7ULL, 500);
     MEASURE_IOP("sub", "sub", 5ULL, 7ULL, 500);
@@ -322,22 +324,7 @@ static void run_pipeline_tests(void) {
     MEASURE_IOP("srl", "srl", 0xFF00000000000000ULL, 5ULL, 500);
     MEASURE_IOP("sra", "sra", 0xFF00000000000000ULL, 5ULL, 500);
 
-    /* Simple ALU, BPF-matching 2-operand shape (dst op= src). The "Simple
-     * ALU" block above uses a synthetic 3-operand form (`add a2, a0, a1`)
-     * that structurally can NEVER compress under RVC -- C.ADD/C.AND/C.OR/
-     * C.XOR/C.SUB (the CR/CA-format compressed ALU ops) all require
-     * rd=rs1. Real eBPF ALU_X semantics are `dst op= src`, a 2-operand
-     * accumulate form -- verified via objdump on this exact toolchain
-     * that `add a0, a0, a1` compiles to the 2-byte `c.add` (and and/or/
-     * xor/sub likewise compress; sll/srl/sra never do -- RVC has no
-     * register-register shift at all, compressed or not). This creates a
-     * genuine loop-carried dependency (each op reads the previous op's
-     * result) unlike the independent-operand block above, but that's the
-     * realistic shape for real BPF code (e.g. an accumulator). Includes a
-     * `.option norvc`-forced control for `add` so the encoding-size
-     * effect can be isolated from the dependency-chain effect -- same
-     * semantic instruction, same dependency chain, only the encoding
-     * width differs. */
+    // BPF ALU_X's dst-op=-src shape; add/and/or/xor/sub compress under RVC.
     printf("\n--- Simple ALU (compressed, BPF dst-op=-src shape) ---\n");
 #define MEASURE_IOP2(name, insn, reps)                                     \
     do {                                                                   \
@@ -386,11 +373,7 @@ static void run_pipeline_tests(void) {
         report("add (forced uncompressed, dependent)", end - start, 500);
     }
 
-    /* Memory hit vs. likely-miss. We don't have confirmed L1/L2 geometry
-     * for this bitstream, so this isn't a precise per-tier split -- just a
-     * coarse "definitely resident" (repeated access to one hot word) vs.
-     * "definitely not resident" (16MB buffer, 4KB stride, one pass)
-     * comparison to sanity-check l1_hit_cycles=13 and miss_cycles=300. */
+    // Memory: resident hot word (L1) vs. 16MB/4KB-stride sweep (likely miss).
     printf("\n--- Memory ---\n");
     {
         static volatile uint64_t hot = 42;
@@ -418,14 +401,7 @@ static void run_pipeline_tests(void) {
         (void)sum;
     }
 
-    /* Stores: isolated vs. back-to-back burst. cctrl5nv.vhd has a real
-     * store buffer (`stbuffull` flag, with a documented "fast write path" /
-     * "slow write path" split) -- an isolated store should be absorbed
-     * cheaply without stalling the pipeline, but the buffer has finite
-     * depth, so a sustained run of stores (exactly the adversarial case a
-     * WCET bound has to cover) can fill it and stall. Same shape of
-     * problem as DIV: not free, not one fixed number, state-dependent.
-     * sd/sw/fsw == eBPF STX_DW/STX_W/FSTX_W. */
+    // Stores: isolated (buffer drains) vs. burst (buffer can fill up).
     printf("\n--- Store: isolated vs. burst ---\n");
     {
         static volatile uint64_t store_target_isolated;
@@ -493,27 +469,14 @@ static void run_pipeline_tests(void) {
     }
 }
 
-/* ==================== 3. LDDW / map_by_fd (lddw_latency_test.cpp) ==================== */
+// === 3. LDDW / map_by_fd ===
 
-/* eBPF's LDDW (64-bit immediate load) is charged as a flat instruction cost
- * in the model, but for map-pointer resolution (bpf_shim.h's MAP_BY_FD) it
- * isn't a simple constant materialization -- BpfSequencer.cpp wires it to
- * maps::map_by_fd (Components/BpfSequencer/maps/map_lddw_helpers.cpp), a
- * real function that does map_instances.find() followed by
- * map_instances[fd] -- two std::unordered_map<U32, map*> operations, not a
- * load. map_by_fd's real implementation is a *static* method reading
- * BpfSequencer's static `maps` instance, so exactly reproducing the call
- * would require linking the whole Component framework. Instead this
- * reproduces the identical operation shape -- the same container/key type
- * doing find()+operator[] -- since that's what actually drives the cost,
- * not BpfSequencer's class scaffolding around it. */
+// LDDW is a flat cost, but map_by_fd is really 2 unordered_map ops (find+[]).
 static void run_lddw_tests(void) {
     printf("\n\n=== 3. LDDW / map_by_fd proxy cost ===\n\n");
 
     std::unordered_map<uint32_t, void *> map_instances;
-    // A handful of entries, matching this project's real map counts
-    // (low_pass_filter uses fd 2 and 4; nothing here needs more than a
-    // few live maps at once).
+    // Matches this project's real map counts (a handful of live maps).
     for (uint32_t fd = 0; fd < 8; fd++) {
         map_instances[fd] = reinterpret_cast<void *>(0x1000 + fd);
     }
@@ -522,7 +485,7 @@ static void run_lddw_tests(void) {
     volatile void *sink = nullptr;
     uint64_t start, end;
 
-    // Reproduces map_by_fd's hit path exactly: find() then operator[].
+    // Reproduces map_by_fd's hit path: find() then operator[].
     start = rdcycle();
     for (int i = 0; i < n; i++) {
         uint32_t fd = 2;
@@ -533,8 +496,7 @@ static void run_lddw_tests(void) {
     end = rdcycle();
     report("unordered_map find()+[] (map_by_fd hit)", end - start, n);
 
-    // Miss path: map_by_fd returns 0 immediately after find() fails,
-    // skipping the second lookup -- cheaper, but worth confirming.
+    // Miss path: map_by_fd returns early after find() fails.
     start = rdcycle();
     for (int i = 0; i < n; i++) {
         uint32_t fd = 999;
@@ -548,22 +510,9 @@ static void run_lddw_tests(void) {
     (void)sink;
 }
 
-/* =============== 4. Map helper locks (map_helper_latency_test.cpp) =============== */
+// === 4. Map helper locks ===
 
-/* Measures the real cost of shared_mutex's lock_shared()/unlock_shared() and
- * lock_unique()/unlock_unique() -- what every bpf_map_lookup_elem/update_elem
- * call pays via maps/map_bpf_helpers.cpp -- on real NOEL-V hardware.
- *
- * shared_mutex.cpp shows each of the four operations does a FULL Os::Mutex
- * lock()+unlock() pair internally (lock_shared/unlock_shared are each their
- * own critical section, not one shared one), and unlock_shared()/
- * unlock_unique() additionally call condvar.notifyAll() when applicable.
- * So a single bpf_map_lookup_elem call = lock_shared() + unlock_shared() =
- * TWO full mutex lock/unlock pairs + one notifyAll(). This measures that
- * real, uncontended (single-thread, no waiters) cost directly, to compare
- * against the flat miss_cycles=300 the WCET model used to charge CALL_1/
- * CALL_2/CALL_3 (the map helper indices) before it got its own
- * map_lookup_cycles/map_update_cycles/map_delete_cycles fields. */
+// Real shared_lock/unique_lock cost via Os::Mutex; what map helpers pay.
 static void run_map_helper_tests(void) {
     printf("\n\n=== 4. shared_mutex (Os::Mutex-backed) real cost ===\n\n");
 
@@ -571,8 +520,7 @@ static void run_map_helper_tests(void) {
     const int n = 2000;
     uint64_t start, end;
 
-    // lock_shared()+unlock_shared() together == the RAII pattern
-    // bpf_map_lookup_elem actually uses (shared_lock ctor/dtor).
+    // shared_lock ctor/dtor == what bpf_map_lookup_elem actually uses.
     start = rdcycle();
     for (int i = 0; i < n; i++) {
         shared_lock lock(m);
@@ -580,7 +528,7 @@ static void run_map_helper_tests(void) {
     end = rdcycle();
     report("shared_lock (lookup_elem's lock)", end - start, n);
 
-    // lock_unique()+unlock_unique(): what bpf_map_update_elem/delete_elem use.
+    // unique_lock: what bpf_map_update_elem/delete_elem use.
     start = rdcycle();
     for (int i = 0; i < n; i++) {
         unique_lock lock(m);
@@ -589,18 +537,9 @@ static void run_map_helper_tests(void) {
     report("unique_lock (update/delete_elem's lock)", end - start, n);
 }
 
-/* =============== 5. bpf_iter_num_new/_next/_destroy real cost =============== */
+// === 5. bpf_iter_num_new/_next/_destroy real cost ===
 
-/* CALL_5/6/7 (bpf_iter_num_new/_next/_destroy) still use the flat
- * default_helper_call_cost guess -- unlike CALL_1/2/3 (map lookup/update),
- * which we've now measured directly. Components/BpfSequencer/
- * iter_bpf_helpers.cpp shows these are actually trivial: no mutex, no
- * container, just a few field reads/writes and a comparison (bpf_iter_num_
- * next is an increment, a bounds check, and a pointer-or-NULL return). So
- * unlike the map helpers, the hypothesis here is the opposite direction --
- * default_helper_call_cost=100 might be *too high* for these specifically,
- * since a generic call+ret (section 2's helper-call proxy) alone measured
- * only ~9 cycles. Measuring directly rather than assuming either way. */
+// Still uses the flat guess; likely too high given how trivial this is.
 static void run_iter_num_tests(void) {
     printf("\n\n=== 5. bpf_iter_num_new/_next/_destroy real cost ===\n\n");
 
@@ -615,8 +554,7 @@ static void run_iter_num_tests(void) {
     end = rdcycle();
     report("bpf_iter_num_new(0,7)", end - start, n);
 
-    // Steady-state next(): huge range so it always returns non-NULL, same
-    // as the common case inside a real bpf_iter_num_new/_next loop.
+    // Huge range so next() always returns non-NULL, the common real case.
     Components::BpfSequencer::bpf_iter_num_new(&it, 0, 1000000000);
     volatile long long sink = 0;
     start = rdcycle();
@@ -636,34 +574,13 @@ static void run_iter_num_tests(void) {
     report("bpf_iter_num_destroy", end - start, n);
 }
 
-/* =============== 6. Branch: real loop-carried backward edge =============== */
+// === 6. Branch: real loop-carried backward edge ===
 
-/* Section 2's "--- Branch ---" test only measured a trivial, isolated,
- * always-taken-or-always-not-taken FORWARD hop (beq/bne zero,zero,1f with
- * "1:" immediately following) wrapped in a C for-loop -- that shape doesn't
- * match what JEQ_K/JNE_K actually look like in low_pass_filter's compiled
- * output. Decoding program.bpf.o directly: every bpf_iter_num_next() call
- * is followed by a JNE_K (K=0, i.e. "is result non-NULL?") that branches
- * BACKWARD to the top of the loop body when true, and falls through to a
- * JEQ_K (K=0) forward exit only once, on the final NULL iteration. In the
- * worst-case path this JNE_K is the single most common branch-classified
- * instruction (14 occurrences, vs. 2 for the exit JEQ_K) -- but the model's
- * JEQ_K=JNE_K=7 cost was carried over mechanically from PolarFire's original
- * base table, never measured against this actual backward-taken shape.
- *
- * This measures a real decrementing backward-branch loop: N-1 taken
- * iterations (mirrors the steady-state "next() returned non-NULL, continue"
- * case) plus exactly 1 not-taken iteration (mirrors the single loop-exit
- * check) -- the same "steady-state + one different final state" shape used
- * for the div/store/iter_num measurements above, instead of an artificial
- * always-one-way loop. */
+// Section 2 only measured a trivial forward hop; this is the real BPF shape.
 static void run_branch_tests(void) {
     printf("\n\n=== 6. Branch: real loop-carried backward edge ===\n\n");
 
-    /* addi + bnez, backward-branching loop: N-1 taken + 1 not-taken.
-     * Isolate the branch's own contribution by comparing against the
-     * standalone "addi" cost already measured in section 2's ALU sanity
-     * check (both operate on registers only, no memory). */
+    // addi+bnez backward loop: N-1 taken + 1 not-taken; isolates branch cost.
     {
         uint64_t start, end;
         const long n = 10000;
@@ -682,10 +599,7 @@ static void run_branch_tests(void) {
         report("addi+bnez backward loop ((N-1) taken + 1 not-taken)", end - start, n);
     }
 
-    /* Same shape but with beqz (branches away/forward past the loop on
-     * counter==0, i.e. how the JEQ_K exit check is actually shaped: taken
-     * exactly once, on the very last iteration, matching the real N-1
-     * skip + 1 taken pattern instead of section 2's always-taken case). */
+    // beqz variant: matches JEQ_K exit shape, taken once on the last iteration.
     {
         uint64_t start, end;
         const long n = 10000;
@@ -706,11 +620,7 @@ static void run_branch_tests(void) {
         report("addi+beqz/j (N-1 not-taken + 1 taken exit)", end - start, n);
     }
 
-    /* Pure backward-taken cost with a longer, more realistic body between
-     * the branch and its target (7 nops, roughly matching a filter
-     * iteration's instruction count) -- checks whether branch cost depends
-     * on target distance/instructions-in-flight, not just the branch
-     * opcode itself. */
+    // Backward-taken cost with a 7-nop body; checks target-distance effects.
     {
         uint64_t start, end;
         const long n = 10000;
@@ -731,76 +641,57 @@ static void run_branch_tests(void) {
     }
 }
 
-/* =============== 7. Cache latency sweep (L1/L2/miss geometry) =============== */
+// === 7. Cache latency sweep (L1/L2/miss geometry) ===
 
-/* Section 2's "--- Memory ---" test only bracketed the extremes -- a single
- * always-resident hot word (definitely L1) vs. a 16MB/4KB-stride sweep
- * (definitely a miss) -- specifically because "we don't have confirmed
- * L1/L2 geometry for this bitstream" (see that section's comment). Neither
- * board's actual L1 size, L2 presence/size, or per-tier hit cost has ever
- * been measured; profiles/polarfire.py and profiles/noelv.py's
- * l1_hit_cycles/l2_hit_cycles/l3_hit_cycles/miss_cycles are inherited
- * guesses.
- *
- * This does a classic working-set-size sweep to find those tiers
- * empirically: pointer-chase a randomized cyclic permutation of 8-byte
- * slots confined to a buffer of size S, for a geometric range of S from 1KB
- * (definitely L1) to 16MB (definitely DRAM). Pointer-chasing (each load's
- * address depends on the previous load's *value*) defeats
- * prefetching/out-of-order overlap, so the result is a clean per-access
- * latency curve, not a throughput number. Where cycles/access jumps sharply
- * as S grows marks a real cache-tier boundary -- the plateau cost before
- * each jump is that tier's real hit cost.
- *
- * First hardware run showed a clean L1 plateau/jump but no clean L2 plateau
- * before the DRAM asymptote -- cycles/access climbed continuously and
- * noisily from 24KB through 512KB even though L2's real RTL-confirmed
- * capacity (256KB) should give a flat region out to there. Default 4KB
- * pages mean a working set anywhere above a few hundred KB also starts
- * crossing the TLB's reach, so the sweep was conflating real L2 behavior
- * with TLB-miss cost. Run the same sweep under 2MB pages too -- a handful
- * of TLB entries then covers the entire tested range, so a clean plateau
- * appearing there (and not in the 4KB run) confirms the TLB-confound
- * diagnosis and gives an l2_hit_cycles/miss_cycles pair that isn't
- * inflated by page-walk cost.
- */
+// Working-set sweep to find L1/L2/miss tiers; 2MB pages isolate TLB confound.
 enum class PageMode { HUGETLB, THP_REQUESTED, DEFAULT_4K, DEFAULT_4K_MMAP_FAILED };
 
-static const char *page_mode_label(PageMode mode) {
-    switch (mode) {
-        case PageMode::HUGETLB:                return "2MB hugetlbfs";
-        case PageMode::THP_REQUESTED:          return "2MB THP-requested (best-effort)";
-        case PageMode::DEFAULT_4K:              return "4KB (madvise(MADV_HUGEPAGE) failed)";
-        case PageMode::DEFAULT_4K_MMAP_FAILED:  return "4KB (mmap failed, malloc fallback)";
+struct PageAlloc {
+    void *ptr;
+    size_t mapped_size;      // 0 if this came from malloc, not mmap
+    PageMode mode;
+    int hugetlb_errno = 0;   // errno from the failed MAP_HUGETLB attempt
+};
+
+static const char *page_mode_label(const PageAlloc &a, char *buf, size_t buf_sz) {
+    switch (a.mode) {
+        case PageMode::HUGETLB:
+            return "2MB hugetlbfs";
+        case PageMode::THP_REQUESTED:
+            snprintf(buf, buf_sz, "2MB THP-requested (best-effort, MAP_HUGETLB errno=%d %s)",
+                     a.hugetlb_errno, strerror(a.hugetlb_errno));
+            return buf;
+        case PageMode::DEFAULT_4K:
+            snprintf(buf, buf_sz, "4KB (MAP_HUGETLB errno=%d %s, madvise(MADV_HUGEPAGE) also failed)",
+                     a.hugetlb_errno, strerror(a.hugetlb_errno));
+            return buf;
+        case PageMode::DEFAULT_4K_MMAP_FAILED:
+            return "4KB (plain mmap failed too, malloc fallback)";
     }
     return "?";
 }
 
-struct PageAlloc {
-    void *ptr;
-    size_t mapped_size;  // 0 if this came from malloc, not mmap
-    PageMode mode;
-};
-
 static PageAlloc alloc_pages(size_t size, bool prefer_huge) {
     static const size_t HUGE_PAGE = 2 * 1024 * 1024;
+    int huge_errno = 0;
 
     if (prefer_huge) {
         size_t huge_sz = (size + HUGE_PAGE - 1) & ~(HUGE_PAGE - 1);
         void *p = mmap(nullptr, huge_sz, PROT_READ | PROT_WRITE,
                         MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
         if (p != MAP_FAILED)
-            return {p, huge_sz, PageMode::HUGETLB};
+            return {p, huge_sz, PageMode::HUGETLB, 0};
+        huge_errno = errno;
     }
 
     void *p = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (p == MAP_FAILED)
-        return {malloc(size), 0, PageMode::DEFAULT_4K_MMAP_FAILED};
+        return {malloc(size), 0, PageMode::DEFAULT_4K_MMAP_FAILED, huge_errno};
 
     if (prefer_huge && madvise(p, size, MADV_HUGEPAGE) == 0)
-        return {p, size, PageMode::THP_REQUESTED};
+        return {p, size, PageMode::THP_REQUESTED, huge_errno};
 
-    return {p, size, PageMode::DEFAULT_4K};
+    return {p, size, PageMode::DEFAULT_4K, huge_errno};
 }
 
 static void free_pages(PageAlloc a) {
@@ -831,8 +722,7 @@ static void run_cache_sweep(bool prefer_huge) {
         size_t *idx = (size_t *)malloc(n * sizeof(size_t));
         for (size_t i = 0; i < n; i++) idx[i] = i;
 
-        /* xorshift64 -- doesn't need to be cryptographic, just enough to
-         * decorrelate access order from linear address order. */
+        // xorshift64: not cryptographic, just decorrelates access order.
         uint64_t rng = 0x9E3779B97F4A7C15ULL ^ (uint64_t)size;
         for (size_t i = n - 1; i > 0; i--) {
             rng ^= rng << 13; rng ^= rng >> 7; rng ^= rng << 17;
@@ -842,18 +732,7 @@ static void run_cache_sweep(bool prefer_huge) {
         for (size_t i = 0; i < n; i++)
             buf[idx[i]] = (void *)&buf[idx[(i + 1) % n]];
 
-        /* Warm-up lap: touch every line once so the timed run measures
-         * steady-state residency, not cold-start compulsory misses.
-         *
-         * `p` MUST be dereferenced through a volatile-qualified pointer type
-         * (not just `volatile void *p`, which only makes the variable
-         * itself volatile, not the memory it points to) -- otherwise -O3
-         * can see the entire chase as a pure, side-effect-free computation
-         * whose final result is discarded by `(void)p`, and is free to
-         * delete the whole loop. That's exactly what happened on the first
-         * hardware run: uniformly ~0.00 cycles/access at every size,
-         * because the timed region between the two rdcycle asm blocks had
-         * been optimized away to nothing. */
+        // Warm-up lap; must use a volatile-qualified deref or -O3 deletes it.
         void *p = buf[0];
         for (size_t i = 0; i < n; i++) p = *(void *volatile *)p;
 
@@ -865,7 +744,8 @@ static void run_cache_sweep(bool prefer_huge) {
         asm volatile("rdcycle %0" : "=r"(end));
 
         double cyc_per_access = (double)(end - start) / (double)iters;
-        printf("%-10zu %-16.2f %s\n", size, cyc_per_access, page_mode_label(alloc.mode));
+        char mode_buf[128];
+        printf("%-10zu %-16.2f %s\n", size, cyc_per_access, page_mode_label(alloc, mode_buf, sizeof(mode_buf)));
 
         (void)p;
         free(idx);
@@ -883,6 +763,69 @@ static void run_cache_sweep_tests(void) {
     run_cache_sweep(/*prefer_huge=*/true);
 }
 
+// === 8. bpf_math_sqrt/sin/cos/atan2 real cost ===
+
+// CALL_9-12 use a flat guess; measuring real libm cost, in/out-of-range angle.
+static void run_math_helper_tests(void) {
+    printf("\n\n=== 8. bpf_math_sqrt/sin/cos/atan2 real cost ===\n\n");
+
+    const int n = 2000;
+    uint64_t start, end;
+    volatile I32 sink = 0;
+
+    auto f2i = [](F32 f) { return *reinterpret_cast<I32*>(&f); };
+
+    I32 sqrt_arg = f2i(2.0f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_sqrt(sqrt_arg);
+    }
+    end = rdcycle();
+    report("bpf_math_sqrt(2.0)", end - start, n);
+
+    I32 sin_small = f2i(1.5f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_sin(sin_small);
+    }
+    end = rdcycle();
+    report("bpf_math_sin(1.5, in-range)", end - start, n);
+
+    I32 sin_large = f2i(403.0f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_sin(sin_large);
+    }
+    end = rdcycle();
+    report("bpf_math_sin(403.0, out-of-range)", end - start, n);
+
+    I32 cos_small = f2i(1.5f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_cos(cos_small);
+    }
+    end = rdcycle();
+    report("bpf_math_cos(1.5, in-range)", end - start, n);
+
+    I32 cos_large = f2i(403.0f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_cos(cos_large);
+    }
+    end = rdcycle();
+    report("bpf_math_cos(403.0, out-of-range)", end - start, n);
+
+    I32 atan2_y = f2i(1.5f), atan2_x = f2i(2.5f);
+    start = rdcycle();
+    for (int i = 0; i < n; i++) {
+        sink = Components::BpfSequencer::bpf_math_atan2(atan2_y, atan2_x);
+    }
+    end = rdcycle();
+    report("bpf_math_atan2(1.5, 2.5)", end - start, n);
+
+    (void)sink;
+}
+
 int main(void) {
     run_div_tests();
     run_pipeline_tests();
@@ -891,5 +834,6 @@ int main(void) {
     run_iter_num_tests();
     run_branch_tests();
     run_cache_sweep_tests();
+    run_math_helper_tests();
     return 0;
 }

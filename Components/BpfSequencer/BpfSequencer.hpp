@@ -166,6 +166,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // Push jobs for the current tick into the shared queue
     void schedule_jobs_for_tick(U32 tick);
 
+    // Parses a rate_group_ilp.py-generated YAML schedule and populates schedule[]/vms[].
+    Fw::Success load_schedule(const char* filePath);
+
     // Ticks spanning one full k_cycle_period_ms cycle at the current timer_freq_hz.
     U32 cycle_length_ticks() const {
         return static_cast<U32>(std::round(k_cycle_period_ms * timer_freq_hz / 1000.0f));
@@ -226,6 +229,11 @@ class BpfSequencer : public BpfSequencerComponentBase {
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id) override;
+
+    //! Handler for LOAD_SCHEDULE command
+    void LOAD_SCHEDULE_cmdHandler(FwOpcodeType opCode,  //!< The opcode
+                                  U32 cmdSeq,           //!< The command sequence number
+                                  const Fw::CmdStringArg& scheduleFilePath) override;
 
     //! Handler implementation for command BPF_MAP_CREATE
     //!
@@ -311,13 +319,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     static I32 bpf_rand_int(I32 min, I32 max) noexcept;
     
-    static F32 bpf_math_sqrt(F32 elem) noexcept;
+    static I32 bpf_math_sqrt(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_sin(F32 elem) noexcept;
+    static I32 bpf_math_sin(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_cos(F32 elem) noexcept;
+    static I32 bpf_math_cos(I32 elem_bits) noexcept;
 
-    static F32 bpf_math_atan2(F32 x, F32 y) noexcept;
+    static I32 bpf_math_atan2(I32 x_bits, I32 y_bits) noexcept;
   private:
     bool validate_vm_id(U32 vmId);
 

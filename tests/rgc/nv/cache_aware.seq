@@ -1,16 +1,5 @@
-; Confirms the PolarFire cache-aware-WCET base-admission result: with aberr
-; removed from the analysis, the full 6-task suite fits under cache-aware
-; WCET. Per-task utilization at these buckets: startracker 5.8%, kalman
-; 3.6%, low_pass_filter 3.2%, cfdp_chunk 5.6%, ccsds 5.1%, reed_solomon
-; 5.0% -- all comfortable, no task anywhere near its own bucket's limit.
-;
-; Same binary/toolchain as NOEL-V (identical RISC-V ISA); no PolarFire
-; buildroot/boot flow in this repo, deploy via whatever PolarFire-side
-; mechanism is available.
-;
-; Default (mutex-protected) BPFPrimeTest binary. Same fd-sharing note as the
-; NOEL-V sequences applies (startracker/kalman/low_pass_filter in the 1Hz
-; group share fd2/fd4).
+; Static pre-generated schedule for noelv (cache_aware, m=2, gap=260.00%).
+; 15 VMs, 114 dispatches over 1000 ticks @ 100Hz.
 
 ; ---- Map setup ----
 
@@ -38,26 +27,26 @@ R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 19, BPF_MAP_TYPE_ARRAY, 4, 4,
 R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 19, 0, 64
 R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 20, BPF_MAP_TYPE_ARRAY, 4, 4, 1, 0
 R00:00:01 BPFPrimeTest.bpfSequencer.BPF_MAP_CREATE 21, BPF_MAP_TYPE_ARRAY, 4, 4, 11, 0
+R00:00:01 BPFPrimeTest.tests.POPULATE_MAP_RANDOM, 21, 0, 11
 
-; ---- Load one VM instance per program ----
+; ---- Load one VM instance per admitted copy ----
 
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 0, "tests/startracker/a.o"
 R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 1, "tests/kalman/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/low_pass_filter/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/cfdp_chunk/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/ccsds/a.o"
-R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 2, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 3, "tests/kalman/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 4, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 5, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 6, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 7, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 8, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 9, "tests/low_pass_filter/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 10, "tests/ccsds/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 11, "tests/cfdp_chunk/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 12, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 13, "tests/reed_solomon/a.o"
+R00:00:01 BPFPrimeTest.bpfSequencer.LOAD_SEQUENCE 14, "tests/reed_solomon/a.o"
 
-; ---- Start the rate groups (1s buffer after loads) ----
+; ---- Load and start the pre-generated schedule ----
 
-; 1Hz
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 0, 1.0, 58.15
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 1, 1.0, 35.78
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 2, 1.0, 32.44
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 3, 1.0, 55.54
-
-; 0.1Hz
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 4, 0.1, 508.86
-R00:00:02 BPFPrimeTest.bpfSequencer.SetVMRateGroup 5, 0.1, 495.17
-
-; Watch for: zero SchedulerSlip events on vm 0-5 over an extended run.
+R00:00:02 BPFPrimeTest.bpfSequencer.LOAD_SCHEDULE "tests/rgc/nv/cache_aware.yaml"
