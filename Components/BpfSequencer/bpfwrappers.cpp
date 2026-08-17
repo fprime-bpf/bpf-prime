@@ -79,7 +79,7 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
     constexpr uint8_t splitInto=32;
     const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
-    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition(efg.get(),vm->bpf_vm.instructions,maxCompSize,false,{1,8,9,10,11,12}),4,10000);
+    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition2(efg.get(),vm->bpf_vm.instructions,/*maxCompSize,false,*/{1,8,9,10,11,12}),4,10000);
     //auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
