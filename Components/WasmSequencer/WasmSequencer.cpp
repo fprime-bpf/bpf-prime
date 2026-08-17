@@ -14,15 +14,19 @@ namespace Components {
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
-WasmSequencer ::WasmSequencer(const char* const compName) 
+WasmSequencer ::WasmSequencer(const char* const compName)
     : WasmSequencerComponentBase(compName), buffer(nullptr), module(nullptr), module_inst(nullptr), exec_env(nullptr) {
-    
+
     static NativeSymbol bpf_helpers[] = {
         {"bpf_map_lookup_elem", (void*)WasmSequencer::bpf_map_lookup_elem, "(Ii)i", nullptr},
         {"bpf_map_update_elem", (void*)WasmSequencer::bpf_map_update_elem, "(IiiI)i", nullptr},
         {"bpf_map_delete_elem", (void*)WasmSequencer::bpf_map_delete_elem, "(Ii)i", nullptr},
         {"bpf_rand_int", (void*)WasmSequencer::bpf_rand_int, "(ii)i", nullptr},
         {"MAP_BY_FD", (void*)WasmSequencer::MAP_BY_FD, "(i)I", nullptr},
+        {"bpf_math_sqrt", (void*)WasmSequencer::bpf_math_sqrt, "(f)f", nullptr},
+        {"bpf_math_sin", (void*)WasmSequencer::bpf_math_sin, "(f)f", nullptr},
+        {"bpf_math_cos", (void*)WasmSequencer::bpf_math_cos, "(f)f", nullptr},
+        {"bpf_math_atan2", (void*)WasmSequencer::bpf_math_atan2, "(ff)f", nullptr},
     };
 
     if (!wasm_runtime_init()) {

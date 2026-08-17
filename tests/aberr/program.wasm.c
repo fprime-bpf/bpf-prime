@@ -1,26 +1,21 @@
 #include "../wasm_shim.h"
-#include <math.h>
 
 #define C_LIGHT 299792458.0f
 #define MAX_ITER 5
 #define PI    3.14159265359f
 
-// sqroot/sine/cosine/_atan2 are now real libm calls (sqrtf/sinf/cosf/atan2f)
-// instead of the hand-rolled piecewise-linear/ternary-chain approximations
-// this file used to have -- see tests/aberr/program.bpf.c for why (the BPF
-// variant's WCET analysis needed the branch count gone; native/wasm are kept
-// matching it for a fair cross-target comparison).
+// sqroot/sine/cosine/_atan2 call the same bpf_math_* native host functions BPF uses, instead of WAMR-JIT-compiled sqrtf/sinf/cosf/atan2f.
 static inline float sqroot(float s) {
-    return sqrtf(s);
+    return bpf_math_sqrt(s);
 }
 static inline float sine(float rad) {
-    return sinf(rad);
+    return bpf_math_sin(rad);
 }
 static inline float cosine(float rad) {
-    return cosf(rad);
+    return bpf_math_cos(rad);
 }
 static inline float _atan2(float y, float x) {
-    return atan2f(y, x);
+    return bpf_math_atan2(y, x);
 }
 
 int main() {
@@ -55,6 +50,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
+#pragma clang loop unroll(disable)
     for (long iter = 0; iter < MAX_ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;

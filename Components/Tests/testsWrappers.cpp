@@ -163,7 +163,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto bpf_time = this->getBpfBenchmark_out(0, test, false);  // pre-compiled above benchmark()'s SCHED_RR section
+        auto bpf_time = this->getBpfBenchmark_out(0, test, i == 0);
 
         if (bpf_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -191,7 +191,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto wasm_time = this->getWasmBenchmark_out(0, test, false);  // pre-compiled above benchmark()'s SCHED_RR section
+        auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
 
         if (wasm_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -293,22 +293,6 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(19, 0, 64);
         }}
     };
-
-    // Pre-compile every BPF/WASM program at normal priority/scheduling, before the real-time,
-    // IRQ-excluded section below -- JIT compilation (esp. aberr's ~208KB program) can take long
-    // enough to trip the health-monitor ping timeout if it runs while isolated.
-    for (const auto& test : tests) {
-        auto bpf_time = this->getBpfBenchmark_out(0, test.test, true);
-        if (bpf_time < 0) {
-            this->log_WARNING_LO_FailedBenchmarkTest(Fw::LogStringArg(test.test_name), 0, bpf_time);
-            return Fw::Success::FAILURE;
-        }
-        auto wasm_time = this->getWasmBenchmark_out(0, test.test, true);
-        if (wasm_time < 0) {
-            this->log_WARNING_LO_FailedBenchmarkTest(Fw::LogStringArg(test.test_name), 0, wasm_time);
-            return Fw::Success::FAILURE;
-        }
-    }
 
     unsigned long orig_affinity_mask = 0;
     syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);

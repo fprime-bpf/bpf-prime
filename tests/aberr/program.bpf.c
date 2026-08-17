@@ -99,11 +99,11 @@ int main() {
         tau = dist / C_LIGHT; \
     }
 
-    { ABERR_ITER_BODY } // iteration 0
-    { ABERR_ITER_BODY } // iteration 1
-    { ABERR_ITER_BODY } // iteration 2
-    { ABERR_ITER_BODY } // iteration 3
-    { ABERR_ITER_BODY } // iteration 4
+    // Real backward-branch loop, not unrolled: unrolled form let SimplifyCFG collapse the function and drop most helper calls.
+#pragma clang loop unroll(disable)
+    for (long iter = 0; iter < 5; iter++) {
+        ABERR_ITER_BODY
+    }
 
 #undef ABERR_ITER_BODY
 

@@ -61,6 +61,7 @@ int main() {
     e = 0.04f;
     omega = 100.0f;
 
+#pragma clang loop unroll(disable)
     for (long iter = 0; iter < MAX_ITER; iter++) {
         t_emit = t - tau;
         M = omega * t_emit;

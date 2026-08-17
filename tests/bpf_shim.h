@@ -30,7 +30,8 @@ static int (* const bpf_rand_int)(int min, int max) = (void *) 8;
 static int (* const bpf_math_sqrt_bits)(int elem_bits) = (void *) 9;
 static int (* const bpf_math_sin_bits)(int elem_bits) = (void *) 10;
 static int (* const bpf_math_cos_bits)(int elem_bits) = (void *) 11;
-static int (* const bpf_math_atan2_bits)(int x_bits, int y_bits) = (void *) 12;
+// index 13, not 12: llvmbpf hardcodes helper index 12 as bpf_tail_call and exits the program right after any call to it.
+static int (* const bpf_math_atan2_bits)(int x_bits, int y_bits) = (void *) 13;
 
 __attribute__((always_inline)) static inline float bpf_math_sqrt(float elem) {
     int bits = bpf_math_sqrt_bits(*(int*)&elem);

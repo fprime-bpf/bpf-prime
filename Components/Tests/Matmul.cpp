@@ -21,7 +21,7 @@ inline float int_to_float_small(int i) {
 }
 
 int main() {
-    float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
+    volatile float mat_1[MAT_SIZE], mat_2[MAT_SIZE], mat_res[MAT_SIZE];
 
     for (int i = 0; i < MAT_SIZE; i++) {
         mat_1[i] = int_to_float_small(BpfSequencer::bpf_rand_int(0, 100));

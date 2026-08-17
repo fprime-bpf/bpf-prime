@@ -1,4 +1,6 @@
 #include "wasm_export.h"
+#include <cmath>
+#include <cstdio>
 #include <vector>
 #include <new>
 #include "Components/WasmSequencer/WasmSequencer.hpp"
@@ -26,6 +28,20 @@ int32_t WasmSequencer::bpf_rand_int(wasm_exec_env_t exec_env, int32_t min, int32
 
 uint64_t WasmSequencer::MAP_BY_FD(wasm_exec_env_t exec_env, uint32_t fd) {
     return maps::map_by_fd(fd);
+}
+
+// Native imports so WASM's transcendental calls run the same AOT-compiled libm as native/BPF, instead of WAMR-JIT-compiled sinf/cosf/atan2f.
+float WasmSequencer::bpf_math_sqrt(wasm_exec_env_t exec_env, float elem) {
+    return std::sqrt(elem);
+}
+float WasmSequencer::bpf_math_sin(wasm_exec_env_t exec_env, float elem) {
+    return std::sin(elem);
+}
+float WasmSequencer::bpf_math_cos(wasm_exec_env_t exec_env, float elem) {
+    return std::cos(elem);
+}
+float WasmSequencer::bpf_math_atan2(wasm_exec_env_t exec_env, float y, float x) {
+    return std::atan2(y, x);
 }
 
 Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
@@ -73,6 +89,10 @@ Fw::Success WasmSequencer::load(const char* sequenceFilePath) {
         Fw::LogStringArg errMsg("Failed to set JIT running mode for WASM");
         this->log_ACTIVITY_HI_WasmLoadFailed(loggerFilePath, errMsg);
     }
+    // Diagnostic: set_running_mode() above only warns on failure and keeps going,
+    // so confirm here what mode is actually active (1=Interp 2=FastJIT 3=LLVMJIT 4=MultiTier).
+    fprintf(stderr, "[WasmSequencer] %s running mode = %d\n", sequenceFilePath,
+            (int)wasm_runtime_get_running_mode(module_inst));
 
     const char *exported_func_name = "run";
     wasm_function_inst_t exported_func = wasm_runtime_lookup_function(module_inst, exported_func_name);

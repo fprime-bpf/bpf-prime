@@ -52,7 +52,7 @@ bpf_mem_size(0) {
         { 9, { reinterpret_cast<void*>(bpf_math_sqrt), "bpf_math_sqrt" } },
         { 10, { reinterpret_cast<void*>(bpf_math_sin), "bpf_math_sin" } },
         { 11, { reinterpret_cast<void*>(bpf_math_cos), "bpf_math_cos" } },
-        { 12, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
+        { 13, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
     });
 }
 
@@ -162,7 +162,9 @@ void BpfSequencer::run_worker(U32 worker_id) {
                 run(job.vm_id);
             }
         }
-        run(job.vm_id);
+        else {
+            run(job.vm_id);
+        }
 
         // Clear the running flag
         vm->is_running.store(false, std::memory_order_release);

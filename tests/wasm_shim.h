@@ -22,3 +22,13 @@ __attribute__((import_module("env"), import_name("bpf_rand_int")))
 int32_t bpf_rand_int(int32_t min, int32_t max);
 __attribute__((import_module("env"), import_name("MAP_BY_FD")))
 uint64_t MAP_BY_FD(uint32_t fd);
+
+// Native imports so WASM's transcendental calls run the same AOT-compiled libm as native/BPF, instead of WAMR-JIT-compiled sinf/cosf/atan2f.
+__attribute__((import_module("env"), import_name("bpf_math_sqrt")))
+float bpf_math_sqrt(float elem);
+__attribute__((import_module("env"), import_name("bpf_math_sin")))
+float bpf_math_sin(float elem);
+__attribute__((import_module("env"), import_name("bpf_math_cos")))
+float bpf_math_cos(float elem);
+__attribute__((import_module("env"), import_name("bpf_math_atan2")))
+float bpf_math_atan2(float y, float x);
