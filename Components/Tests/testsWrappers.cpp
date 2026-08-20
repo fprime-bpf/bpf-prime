@@ -248,7 +248,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 4096;
+    const U32 passes = 9000;
 
     // fds 0-14: aberr/aes/kalman/low_pass_filter/nccscore/startracker (see TestInfo below).
     // fds 15-16: ccsds (in, out). fds 17-18: reed_solomon (in, out).
@@ -301,7 +301,7 @@ Fw::Success Tests::benchmark() {
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {}},
 
-        {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
+        {900, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
          [](Tests* tests) {
              tests->populate_map_random(13, 0, 2500);
              tests->populate_map_random(14, 0, 25);
@@ -358,7 +358,7 @@ Fw::Success Tests::benchmark() {
     for (U16 splitInto : split_configs) {
         const auto output_file = output_file_name(splitInto);
         create_output_file(output_file, splitInto);
-
+        this->log_DIAGNOSTIC_Parts(splitInto);
         for (const auto& test : tests) {
             auto test_result =
                 benchmark_test(test.passes, test.test, test.test_name, test.fill_maps, splitInto, output_file);

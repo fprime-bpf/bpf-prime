@@ -15,6 +15,8 @@ module Components {
 
         event BenchMarkFailed(msg: string) severity warning high format "Benchmark failed: {}"
 
+        event Parts(msg: U16) severity diagnostic format "splitInto: {}"
+
         @ Report successful test
         event NCCScoreTestPassed() \
             severity activity low \

@@ -89,10 +89,11 @@ Fw::Success BpfSequencer::load(U32 vmId,
 
     if (benchmark_output_file != nullptr) {
         std::ofstream output(benchmark_output_file, std::ios::app);
-        auto it=partition_result.cbegin();
-        output << "  partition_pcs: ["<<it->first;
-        for (++it;it!=partition_result.cend();++it)
-            output<<", "<<it->first;
+        output << "  partition_pcs: [0";
+        for(const auto&a:findExits(efg.get(),vm->bpf_vm.instructions))
+            output<<", "<<a;
+        for(const auto&a:partition_result)
+            output<<", "<<a.first;
         output << "]\n";
     }
 
