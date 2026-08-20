@@ -1,20 +1,27 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/cpu_cycles.hpp"
-#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/efg.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "bpf.hpp"
 #include "maps/maps.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstring>
-#include <new>
+#include <fstream>
 #include <memory>
+#include <new>
+#include <utility>
+#include <vector>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
 
 namespace Components {
 
-Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
+Fw::Success BpfSequencer::load(U32 vmId,
+                               const char* sequenceFilePath,
+                               U16 splitInto,
+                               const char* benchmark_output_file) {
     delete[] this->buffer;
     Fw::LogStringArg loggerFilePath(sequenceFilePath);
 
@@ -41,27 +48,21 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
     // Register external functions
     I32 res = this->register_external_functions(vm->bpf_vm);
     if (res) {
-        this->log_WARNING_HI_RegisterFunctionsFailed(
-            vmId,
-            Fw::LogStringArg(std::strerror(-res))
-        );
+        this->log_WARNING_HI_RegisterFunctionsFailed(vmId, Fw::LogStringArg(std::strerror(-res)));
         return Fw::Success::FAILURE;
     }
 
     // Read sequence file into buffer
     FwSizeType size_result;
-    const char *err_msg;
+    const char* err_msg;
     this->buffer = read_from_file(sequenceFilePath, size_result, err_msg);
     if (!this->buffer) {
-        this->log_ACTIVITY_HI_CommandLoadFailed(
-            loggerFilePath,
-            Fw::LogStringArg(err_msg)
-        );
+        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, Fw::LogStringArg(err_msg));
         return Fw::Success::FAILURE;
     }
 
-    //vm->bpf_mem_size = 40000;
-    //vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
+    // vm->bpf_mem_size = 40000;
+    // vm->bpf_mem = std::make_unique<uint8_t[]>(vm->bpf_mem_size);
     vm->sequenceFilePath = sequenceFilePath;
 
     // Load the binary into the VM
@@ -74,13 +75,37 @@ Fw::Success BpfSequencer::load(U32 vmId, const char* sequenceFilePath) {
         return Fw::Success::FAILURE;
     }
 
-    static std::byte ds[50000],cs[200];//hardcode size for now.
-    static bpftime::ExecState a{.heap=nullptr,.dataStack=ds,.callStack=cs};
-    const std::unique_ptr<G_t> efg=buildEFG(vm->bpf_vm.instructions);
-    constexpr uint8_t splitInto=32;
-    const uint16_t maxCompSize=(vm->bpf_vm.instructions.size()+splitInto-1)/splitInto;
-    auto compile_res=vm->bpf_vm.compileWithSS(&a,partition2(efg.get(),vm->bpf_vm.instructions,/*maxCompSize,false,*/{1,8,9,10,11,12}),4,10000);
-    //auto compile_res = vm->bpf_vm.compile(&a);
+    if (splitInto == 0) {
+        Fw::LogStringArg errMsg("splitInto must be non-zero");
+        this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+        return Fw::Success::FAILURE;
+    }
+
+    static std::byte ds[50000], cs[200];  // hardcode size for now.
+    static bpftime::ExecState a{.heap = nullptr, .dataStack = ds, .callStack = cs};
+    const std::unique_ptr<G_t> efg = buildEFG(vm->bpf_vm.instructions);
+    const uint16_t maxCompSize = (vm->bpf_vm.instructions.size() + splitInto - 1) / splitInto;
+    auto partition_result = partition(efg.get(), vm->bpf_vm.instructions, maxCompSize, true, {1, 8, 9, 10, 11, 13, 6});
+
+    if (benchmark_output_file != nullptr) {
+        std::vector<uint16_t> partition_pcs;
+        partition_pcs.reserve(partition_result.size());
+        for (const auto& boundary : partition_result) {
+            partition_pcs.push_back(boundary.first);
+        }
+
+        std::ofstream output(benchmark_output_file, std::ios::app);
+        output << "  partition_pcs: [";
+        for (std::size_t i = 0; i < partition_pcs.size(); ++i) {
+            if (i != 0)
+                output << ", ";
+            output << partition_pcs[i];
+        }
+        output << "]\n";
+    }
+
+    auto compile_res = vm->bpf_vm.compileWithSS(&a, std::move(partition_result), 4, 10000);
+    // auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(
             std::string("Failed to compile BPF program - " + vm->bpf_vm.get_error_message()).c_str());
@@ -115,7 +140,8 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
         start = get_cpu_cycles();
 
     // Run the compiled sequence using VM's own bpf_mem
-    err = vm->bpf_vm.exec(nullptr, 0, vm->res);//lol this is bugged, should be vm->bpf_mem.get(). this didn't cause any problem bc no tests used this mem.
+    err = vm->bpf_vm.exec(nullptr, 0, vm->res);  // lol this is bugged, should be vm->bpf_mem.get(). this didn't cause
+                                                 // any problem bc no tests used this mem.
 
     if (log_time)
         end = get_cpu_cycles();
@@ -131,7 +157,7 @@ Fw::Success BpfSequencer::run(U32 vmId, bool log_time) {
     return Fw::Success::SUCCESS;
 }
 
-U8 *BpfSequencer::read_from_file(const char *fn, FwSizeType& size, const char*& err_msg) {
+U8* BpfSequencer::read_from_file(const char* fn, FwSizeType& size, const char*& err_msg) {
     // Open the file
     Os::File file;
     Os::File::Status openStatus = file.open(fn, Os::File::OPEN_READ);
@@ -149,7 +175,7 @@ U8 *BpfSequencer::read_from_file(const char *fn, FwSizeType& size, const char*& 
     }
 
     // Allocate memory for the buffer
-    U8 *buffer = new (std::nothrow) U8[size];
+    U8* buffer = new (std::nothrow) U8[size];
     if (buffer == nullptr) {
         file.close();
         err_msg = "Failed to allocate file buffer";

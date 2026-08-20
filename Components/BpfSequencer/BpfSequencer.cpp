@@ -5,18 +5,18 @@
 // ======================================================================
 
 #include "Components/BpfSequencer/BpfSequencer.hpp"
-#include <cmath>
-#include <cstdlib>
-#include "BpfSequencer.hpp"
-#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
-#include <thread>
-#include <chrono>
-#include <stdio.h>
-#include <stdexcept>
 #include <pthread.h>
 #include <sched.h>
+#include <stdio.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <chrono>
+#include <cmath>
+#include <cstdlib>
+#include <stdexcept>
+#include <thread>
+#include "BpfSequencer.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 
 namespace Components {
 
@@ -28,10 +28,8 @@ BpfSequencerVM::~BpfSequencerVM() {
 // Component construction and destruction
 // ----------------------------------------------------------------------
 
-BpfSequencer ::BpfSequencer(const char* const compName) : 
-BpfSequencerComponentBase(compName),
-bpf_mem(nullptr),
-bpf_mem_size(0) { 
+BpfSequencer ::BpfSequencer(const char* const compName)
+    : BpfSequencerComponentBase(compName), bpf_mem(nullptr), bpf_mem_size(0) {
     running = true;
 
     // Initialize the job queue
@@ -41,19 +39,17 @@ bpf_mem_size(0) {
     const auto status = job_queue.create(QUEUE_MAGIC_NUMBER, queue_name, queue_depth, message_size);
     FW_ASSERT(status == Os::QueueInterface::Status::OP_OK);
 
-    this->register_bpf_helpers({
-        { 1, { reinterpret_cast<void*>(maps::bpf_map_lookup_elem), "bpf_map_lookup_elem" } },
-        { 2, { reinterpret_cast<void*>(maps::bpf_map_update_elem), "bpf_map_update_elem" } },
-        { 3, { reinterpret_cast<void*>(maps::bpf_map_delete_elem), "bpf_map_delete_elem" } },
-        { 5, { reinterpret_cast<void*>(bpf_iter_num_new), "bpf_iter_num_new" } },
-        { 6, { reinterpret_cast<void*>(bpf_iter_num_next), "bpf_iter_num_next" } },
-        { 7, { reinterpret_cast<void*>(bpf_iter_num_destroy), "bpf_iter_num_destroy" } },
-        { 8, { reinterpret_cast<void*>(bpf_rand_int), "bpf_rand_int" } },
-        { 9, { reinterpret_cast<void*>(bpf_math_sqrt), "bpf_math_sqrt" } },
-        { 10, { reinterpret_cast<void*>(bpf_math_sin), "bpf_math_sin" } },
-        { 11, { reinterpret_cast<void*>(bpf_math_cos), "bpf_math_cos" } },
-        { 13, { reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2" } }
-    });
+    this->register_bpf_helpers({{1, {reinterpret_cast<void*>(maps::bpf_map_lookup_elem), "bpf_map_lookup_elem"}},
+                                {2, {reinterpret_cast<void*>(maps::bpf_map_update_elem), "bpf_map_update_elem"}},
+                                {3, {reinterpret_cast<void*>(maps::bpf_map_delete_elem), "bpf_map_delete_elem"}},
+                                {5, {reinterpret_cast<void*>(bpf_iter_num_new), "bpf_iter_num_new"}},
+                                {6, {reinterpret_cast<void*>(bpf_iter_num_next), "bpf_iter_num_next"}},
+                                {7, {reinterpret_cast<void*>(bpf_iter_num_destroy), "bpf_iter_num_destroy"}},
+                                {8, {reinterpret_cast<void*>(bpf_rand_int), "bpf_rand_int"}},
+                                {9, {reinterpret_cast<void*>(bpf_math_sqrt), "bpf_math_sqrt"}},
+                                {10, {reinterpret_cast<void*>(bpf_math_sin), "bpf_math_sin"}},
+                                {11, {reinterpret_cast<void*>(bpf_math_cos), "bpf_math_cos"}},
+                                {13, {reinterpret_cast<void*>(bpf_math_atan2), "bpf_math_atan2"}}});
 }
 
 BpfSequencer ::~BpfSequencer() {
@@ -65,7 +61,7 @@ BpfSequencer ::~BpfSequencer() {
     ScheduledJob wake_job{};
     for (size_t i = 0; i < workers.size(); i++) {
         job_queue.send(reinterpret_cast<const U8*>(&wake_job), sizeof(wake_job), 0,
-                        Os::QueueInterface::BlockingType::NONBLOCKING);
+                       Os::QueueInterface::BlockingType::NONBLOCKING);
     }
 
     // Join all worker threads
@@ -90,20 +86,20 @@ void BpfSequencer::run_worker(U32 worker_id) {
     using namespace std::chrono_literals;
     using Clock = std::chrono::high_resolution_clock;
 
-    #ifdef __linux__
+#ifdef __linux__
     // NOTE: We cannot use standard fprime threads/thread priority because the fprime tasks
     // are meant to run on non-looping routines
     // Same priority Tests::benchmark() uses for its own no-preempt timing run.
     struct sched_param p;
     p.sched_priority = 51;
-    if(pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
+    if (pthread_setschedparam(pthread_self(), SCHED_RR, &p) != 0) {
         this->log_WARNING_HI_WorkerPrioritySetFailed();
     }
 
     // Pin to a dedicated core, matching worker_id.
     unsigned long worker_affinity_mask = 1UL << worker_id;
     syscall(SYS_sched_setaffinity, 0, sizeof(worker_affinity_mask), &worker_affinity_mask);
-    #endif
+#endif
 
     // Initialize tick timing state for this worker
     auto& timing = worker_tick_timing[worker_id];
@@ -119,13 +115,8 @@ void BpfSequencer::run_worker(U32 worker_id) {
         if (!worker_enabled[worker_id])
             std::this_thread::sleep_for(500us);
 
-        auto status = job_queue.receive(
-            reinterpret_cast<U8*>(&job),
-            sizeof(ScheduledJob),
-            Os::QueueInterface::BlockingType::BLOCKING,
-            size,
-            priority
-        );
+        auto status = job_queue.receive(reinterpret_cast<U8*>(&job), sizeof(ScheduledJob),
+                                        Os::QueueInterface::BlockingType::BLOCKING, size, priority);
 
         if (status != Os::QueueInterface::Status::OP_OK)
             continue;  // Queue empty or error
@@ -134,35 +125,33 @@ void BpfSequencer::run_worker(U32 worker_id) {
             return;
         }
 
-        // Record tick start time after receiving a job 
+        // Record tick start time after receiving a job
         // Avoids race conditions where another worker grabs the job we saw
         if (timing.next_tick_pending) {
             timing.tick_start = this->current_tick_dispatch_time.load(std::memory_order_acquire);
             timing.next_tick_pending = false;
         }
-        
+
         // Get the VM for this job
         std::shared_ptr<BpfSequencerVM>& vm = vms[job.vm_id];
-        
+
         // Atomically try to raise the running flag using compare_exchange
-        // If the flag is already set, this indicates a slip 
+        // If the flag is already set, this indicates a slip
         bool expected = false;
-        if (!vm->is_running.compare_exchange_strong(expected, true, 
-                                                    std::memory_order_acq_rel,
+        if (!vm->is_running.compare_exchange_strong(expected, true, std::memory_order_acq_rel,
                                                     std::memory_order_acquire)) {
             // Slip! Set the slip_detected flag for this VM
             slip_detected[job.vm_id].store(true, std::memory_order_release);
             // Continue to next job - don't execute this one since the previous is still running
             continue;
         }
-        
+
         // Run 1000x per dispatch, matching the ILP's current 1000x runtime assumption.
         if (benchmark_build) {
             for (int rep = 0; rep < 1000; rep++) {
                 run(job.vm_id);
             }
-        }
-        else {
+        } else {
             run(job.vm_id);
         }
 
@@ -171,12 +160,12 @@ void BpfSequencer::run_worker(U32 worker_id) {
 
         // Check if queue is empty
         if (job_queue.getMessagesAvailable() == 0) {
-            // Queue is empty 
+            // Queue is empty
             // Report the duration of the previous tick if we were processing
             if (!timing.next_tick_pending) {
                 auto now = Clock::now();
-                auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(
-                    now - timing.tick_start).count();
+                auto duration_us =
+                    std::chrono::duration_cast<std::chrono::microseconds>(now - timing.tick_start).count();
                 timing.tick_duration_us = static_cast<U32>(duration_us);
                 timing.next_tick_pending = true;
             }
@@ -197,21 +186,25 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
     // Calculate total density of all VM jobs
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
-        if (!vms[vm_id]) continue;
+        if (!vms[vm_id])
+            continue;
 
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
-        
-        if (rg_id >= k_max_rate_groups || rg_id < 0) continue;  // Not assigned to a rate group
-        
-        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each runjk/`
-        if (interval == 0) continue;
-        
+
+        if (rg_id >= k_max_rate_groups || rg_id < 0)
+            continue;  // Not assigned to a rate group
+
+        U32 interval = rate_group_intervals[rg_id];  // Number of ticks between each runjk/`
+        if (interval == 0)
+            continue;
+
         // Calculate the period in ms
         // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
         // Period is 1 tick
         F32 period_ms = interval * (1000.0f / timer_freq_hz);
-        if (period_ms <= 0.0f) continue; 
+        if (period_ms <= 0.0f)
+            continue;
 
         // Calculate how many times we run this per cycle
         U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms);
@@ -225,25 +218,29 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
     // For each VM, if it's assigned to a rate group, calculate its deadlines
     for (U32 vm_id = 0; vm_id < k_num_vms; vm_id++) {
-        if (!vms[vm_id]) continue;
+        if (!vms[vm_id])
+            continue;
 
         auto& vm = vms[vm_id];
         U32 rg_id = vm->rate_group_id;
-        
-        if (rg_id >= k_max_rate_groups || rg_id < 0) continue;  // Not assigned to a rate group
-        
-        U32 interval = rate_group_intervals[rg_id]; // Number of ticks between each runjk/`
-        if (interval == 0) continue;
-        
+
+        if (rg_id >= k_max_rate_groups || rg_id < 0)
+            continue;  // Not assigned to a rate group
+
+        U32 interval = rate_group_intervals[rg_id];  // Number of ticks between each runjk/`
+        if (interval == 0)
+            continue;
+
         // Calculate the period in ms
         // Example 1000hz rg: 1 tick * (1000 / 1000) = 1
         // Period is 1 tick
         F32 period_ms = interval * (1000.0f / timer_freq_hz);
-        if (period_ms <= 0.0f) continue; 
+        if (period_ms <= 0.0f)
+            continue;
 
         // Calculate how many times we run this per cycle
-        U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms); 
-        
+        U32 runs_per_cycle = static_cast<U32>(k_cycle_period_ms / period_ms);
+
         // schedule[] is indexed by schedIn tick, not by millisecond. ms_per_tick is purely
         // 1000/timer_freq_hz -- independent of how many seconds k_cycle_period_ms spans.
         F32 ms_per_tick = 1000.0f / static_cast<F32>(timer_freq_hz);
@@ -251,14 +248,17 @@ void BpfSequencer::rebuild_deadline_schedule() {
 
         // For each run, calculate the scheduled_time = deadline - runtime
         for (U32 i = 1; i <= runs_per_cycle; i++) {
-            F32 deadline = i * period_ms; // When this task needs to be done
-            F32 scheduled_time = is_overloaded ? deadline - vm->runtime_ms : deadline - period_ms; // EDF task scheduling
-            F32 latest_run_time = deadline - vm->runtime_ms; // Latest time we can run this task
+            F32 deadline = i * period_ms;  // When this task needs to be done
+            F32 scheduled_time =
+                is_overloaded ? deadline - vm->runtime_ms : deadline - period_ms;  // EDF task scheduling
+            F32 latest_run_time = deadline - vm->runtime_ms;                       // Latest time we can run this task
             vms[vm_id]->latest_run_time = latest_run_time;
 
             // Clamp schedule_time to valid range [0, k_cycle_period_ms]
-            if (scheduled_time < 0.0f) scheduled_time = 0.0f;
-            if (scheduled_time > k_cycle_period_ms) scheduled_time = k_cycle_period_ms;
+            if (scheduled_time < 0.0f)
+                scheduled_time = 0.0f;
+            if (scheduled_time > k_cycle_period_ms)
+                scheduled_time = k_cycle_period_ms;
 
             U32 schedule_time_tick = static_cast<U32>(std::round(scheduled_time / ms_per_tick));
             // De-collide VMs that would otherwise land on the same tick
@@ -305,18 +305,15 @@ void BpfSequencer::schedule_jobs_for_tick(U32 tick) {
 
     for (auto vm_id : jobs) {
         ScheduledJob job;
-            job.deadline = vms[vm_id]->latest_run_time;
-        job.vm_id = vm_id;;
-        
+        job.deadline = vms[vm_id]->latest_run_time;
+        job.vm_id = vm_id;
+        ;
+
         FwSizeType size = sizeof(ScheduledJob);
         FwQueuePriorityType priority = static_cast<FwQueuePriorityType>(job.deadline);
 
-        auto status = job_queue.send(
-            reinterpret_cast<const U8*>(&job),
-            size,
-            priority,
-            Os::QueueInterface::BlockingType::NONBLOCKING
-        );
+        auto status = job_queue.send(reinterpret_cast<const U8*>(&job), size, priority,
+                                     Os::QueueInterface::BlockingType::NONBLOCKING);
 
         if (status == Os::QueueInterface::Status::FULL) {
             // Queue full - log warning and drop job
@@ -377,9 +374,7 @@ void BpfSequencer::configure(U32 rate_groups[5], U32 timer_freq_hz) {
     // Initialize worker threads
     workers.reserve(num_workers);
     for (U32 i = 0; i < num_workers; i++) {
-        workers.emplace_back([this, i]() {
-            this->run_worker(i);
-        });
+        workers.emplace_back([this, i]() { this->run_worker(i); });
     }
 
     this->configured = true;
@@ -398,13 +393,11 @@ void BpfSequencer::register_bpf_helpers(const std::vector<std::pair<U32, VmExter
 }
 
 U32 BpfSequencer::register_external_functions(bpftime::llvmbpf_vm& vm) {
-
     // Register lddw helpers
     vm.set_lddw_helpers(maps::map_by_fd, maps::map_by_idx, maps::map_val, nullptr, nullptr);
 
     // Register external functions
     for (const auto& [index, helper] : bpf_helpers) {
-
         U32 result = vm.register_external_function(index, helper.name, helper.fn);
 
         if (result)
@@ -442,7 +435,7 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     this->tlmWrite_executorTickDurations(tick_durations);
 
     this->ticks++;
-    
+
     // Calculate position in scheduling cycle
     cycle_tick = (ticks - 1) % this->cycle_length_ticks();
 
@@ -450,8 +443,11 @@ void BpfSequencer::schedIn_handler(FwIndexType portNum, U32 context) {
     schedule_jobs_for_tick(cycle_tick);
 }
 
-F64 BpfSequencer::getBenchmark_handler(FwIndexType portNum, const Components::BENCHMARK_TEST& test, bool compile) {
-    return get_benchmark_bpf(test, compile);
+F64 BpfSequencer::getBenchmark_handler(FwIndexType portNum,
+                                       const Components::BENCHMARK_TEST& test,
+                                       bool compile,
+                                       U16 splitInto) {
+    return get_benchmark_bpf(test, compile, splitInto);
 }
 
 // Ping in and out
@@ -484,7 +480,11 @@ void BpfSequencer::RUN_SEQUENCE_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 
 }
 
 // Set VM Rate Groups - deadline is calculated as: interval - runtime
-void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32 vm_id, F32 rate_group_hz, F32 runtime_ms) {
+void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode,
+                                             U32 cmdSeq,
+                                             U32 vm_id,
+                                             F32 rate_group_hz,
+                                             F32 runtime_ms) {
     if (!vms[vm_id]) {  // If we don't have a VM loaded
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
     }
@@ -507,7 +507,7 @@ void BpfSequencer::SetVMRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U3
 
             // Rebuild the schedule with the new VM
             rebuild_deadline_schedule();
-            
+
             this->log_ACTIVITY_LO_RateGroupSet(vm_id, rate_group_hz);
             break;
         }
@@ -526,11 +526,11 @@ void BpfSequencer::StopRateGroup_cmdHandler(FwOpcodeType opCode, U32 cmdSeq, U32
     if (!vms[vm_id]) {
         return this->cmdResponse_out(opCode, cmdSeq, Fw::CmdResponse::FORMAT_ERROR);
     }
-    
+
     // Remove VM from its rate group
     vms[vm_id]->rate_group_id = static_cast<U32>(-1);
     vms[vm_id]->runtime_ms = 0.0f;
-    
+
     // Rebuild schedule without this VM
     rebuild_deadline_schedule();
 
@@ -568,17 +568,20 @@ Fw::Success BpfSequencer::load_schedule(const char* filePath) {
     size_t pos = 0;
     while (true) {
         size_t vm_pos = text.find("vm_id:", pos);
-        if (vm_pos == std::string::npos) break;
+        if (vm_pos == std::string::npos)
+            break;
         size_t tick_pos = text.find("tick:", vm_pos);
         size_t rt_pos = text.find("runtime_ms:", tick_pos);
-        if (tick_pos == std::string::npos || rt_pos == std::string::npos) break;
+        if (tick_pos == std::string::npos || rt_pos == std::string::npos)
+            break;
         pos = rt_pos + 11;
 
         U32 vm_id = static_cast<U32>(std::strtoul(text.c_str() + vm_pos + 6, nullptr, 10));
         U32 tick = static_cast<U32>(std::strtoul(text.c_str() + tick_pos + 5, nullptr, 10));
         F32 runtime_ms = std::strtof(text.c_str() + rt_pos + 11, nullptr);
 
-        if (vm_id >= k_num_vms || !vms[vm_id]) continue;  // VM was never LOAD_SEQUENCE'd; skip
+        if (vm_id >= k_num_vms || !vms[vm_id])
+            continue;  // VM was never LOAD_SEQUENCE'd; skip
         if (tick >= this->cycle_length_ticks()) {
             this->log_WARNING_HI_ScheduleEntryOutOfRange(tick, this->cycle_length_ticks() - 1);
             continue;

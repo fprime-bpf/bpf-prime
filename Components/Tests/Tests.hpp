@@ -10,6 +10,8 @@
 #include "Components/Tests/TestsComponentAc.hpp"
 #include "Fw/Types/SuccessEnumAc.hpp"
 
+#include <string>
+
 namespace Components {
 
 class Tests final : public TestsComponentBase {
@@ -29,7 +31,7 @@ class Tests final : public TestsComponentBase {
     // ----------------------------------------------------------------------
     // Handler implementations for typed input ports
     // ----------------------------------------------------------------------
-                                   
+
   private:
     // ----------------------------------------------------------------------
     // Handler implementations for commands
@@ -39,9 +41,9 @@ class Tests final : public TestsComponentBase {
     //!
     //! Run low pass filter test natively, without an eBPF runtime
     void NCCScore_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                    U32 cmdSeq            //!< The command sequence number
-                                    ) override;
-                                    
+                             U32 cmdSeq            //!< The command sequence number
+                             ) override;
+
     //! Handler implementation for command POPULATE_MAP_RANDOM
     //!
     //! Populate a BPF map with random values. Intended for arraymaps
@@ -63,13 +65,19 @@ class Tests final : public TestsComponentBase {
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
   public:
-    static void helper_example_noop() { }
-    static const char *get_test_dir(BENCHMARK_TEST test);
+    static void helper_example_noop() {}
+    static const char* get_test_dir(BENCHMARK_TEST test);
+
   private:
-    Fw::CmdResponse test_status_to_response(const char *test_name, I32 result);
+    Fw::CmdResponse test_status_to_response(const char* test_name, I32 result);
     Fw::Success populate_map_random(U32 fd, U32 start, U32 length);
     Fw::Success benchmark();
-    Fw::Success benchmark_test(U32 passes, BENCHMARK_TEST test, const char *test_name, void (*fill_maps)(Tests*));
+    Fw::Success benchmark_test(U32 passes,
+                               BENCHMARK_TEST test,
+                               const char* test_name,
+                               void (*fill_maps)(Tests*),
+                               U16 splitInto,
+                               const std::string& output_file);
     F64 get_benchmark_native(BENCHMARK_TEST test);
 };
 

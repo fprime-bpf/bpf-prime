@@ -9,21 +9,21 @@
 #ifndef Components_BpfSequencer_HPP
 #define Components_BpfSequencer_HPP
 
-#include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
-#include "Components/BpfSequencer/core_isolation.hpp"
-#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
-#include "Os/File.hpp"
-#include "Os/Mutex.hpp"
-#include "Os/Generic/PriorityQueue.hpp"
-#include "Fw/Types/StringBase.hpp"
-#include "Fw/Types/SuccessEnumAc.hpp"
-#include "maps/maps.hpp"
 #include <array>
 #include <chrono>
 #include <cmath>
 #include <map>
 #include <queue>
 #include <thread>
+#include "Components/BpfSequencer/BpfSequencerComponentAc.hpp"
+#include "Components/BpfSequencer/core_isolation.hpp"
+#include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
+#include "Fw/Types/StringBase.hpp"
+#include "Fw/Types/SuccessEnumAc.hpp"
+#include "Os/File.hpp"
+#include "Os/Generic/PriorityQueue.hpp"
+#include "Os/Mutex.hpp"
+#include "maps/maps.hpp"
 
 #define BPF_PRIME_VM_COUNT 64
 
@@ -42,21 +42,21 @@ struct BpfSequencerVM {
     std::unique_ptr<uint8_t[]> bpf_mem = nullptr;
     size_t bpf_mem_size = 0;
     std::string sequenceFilePath;
-    
+
     // VM scheduling info
     U32 rate_group_id = static_cast<U32>(-1);  // Which rate group this VM belongs to (-1 = none)
-    F32 runtime_ms = 0.0f;  // Estimated runtime in ms
-    F32 latest_run_time = 0.0f;  // Latest time this VM can run in the current cycle
-    
+    F32 runtime_ms = 0.0f;                     // Estimated runtime in ms
+    F32 latest_run_time = 0.0f;                // Latest time this VM can run in the current cycle
+
     // Per-job running flag, true if this VM's job is currently executing, used to detect slips
     std::atomic<bool> is_running{false};
-    
+
     ~BpfSequencerVM();
 };
 
 struct VmExternalFunction {
-  void *fn;
-  const char *name;
+    void* fn;
+    const char* name;
 };
 
 class BpfSequencer : public BpfSequencerComponentBase {
@@ -72,7 +72,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     //! Destroy BpfSequencer object
     ~BpfSequencer();
-    
+
     // User will set up rate groups via this function
     void configure(U32 rate_groups[5], U32 timer_freq_hz);
 
@@ -80,18 +80,18 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // Note: Indices 1-3 are used internally for eBPF map helper functions. Start with index 4
     void register_bpf_helper(U32 index, const VmExternalFunction& helper);
     void register_bpf_helpers(const std::vector<std::pair<U32, VmExternalFunction>>& helpers);
-    
+
   private:
     // CONSTANTS
     static constexpr U8 k_num_vms = 64;
     static constexpr U8 k_max_rate_groups = 5;
     static constexpr F32 k_cycle_period_ms = 10000.0f;  // LCM of configured periods (1Hz, 0.1Hz) in ms
-    
+
     bool running = false;
 
     // VM array - each VM has its own scheduling data now
     std::shared_ptr<BpfSequencerVM> vms[k_num_vms];
-    
+
     // Rate group configuration
     U32 rate_group_intervals[k_max_rate_groups] = {};
     U32 num_rate_groups = 0;
@@ -113,30 +113,31 @@ class BpfSequencer : public BpfSequencerComponentBase {
     std::unordered_map<U32, VmExternalFunction> bpf_helpers;
 
     // ========== Multithreading with EDF Scheduling ==========
-    
+
     // Shared priority queue for earliest-deadline-first scheduling
     // All executors pop from this shared queue
     static const FwSizeType MAX_JOBS = 64;
 
     Os::Generic::PriorityQueue job_queue;
     Os::Mutex scheduler_mutex;
-    
+
     // Slip detection: atomic integer that stores the VM ID that slipped
     // Value of -1 means no slip detected
     std::array<std::atomic<bool>, k_num_vms> slip_detected{};
-    
+
     // Worker threads
     std::vector<std::thread> workers;
     std::vector<bool> worker_enabled;
     F32 runtime_overflow = 0.0f;
     U32 num_workers = 0;
+    bool benchmark_build = true;
 
     // Saved IRQ/workqueue affinity per worker core, for restoring on destruction.
     std::vector<std::vector<std::pair<std::string, std::string>>> saved_worker_irq_affinities;
     std::vector<std::string> saved_worker_workqueue_affinities;
     // Saved rcu_cpu_stall_suppress value, for restoring on destruction.
     std::string saved_rcu_stall_suppress;
-    
+
     // Per-worker timing for telemetry (max 6 workers to match ExecutorTickDurations array)
     // Tracks tick durations in microseconds for each worker
     static constexpr U32 k_max_workers = 6;
@@ -153,13 +154,13 @@ class BpfSequencer : public BpfSequencerComponentBase {
 
     // Use an array for the schedule (faster access than a map)
     std::array<std::vector<U32>, 1000> schedule;
-    
+
     // Current position in the scheduling cycle (in ticks)
     U32 cycle_tick = 0;
-    
+
     // Worker function that pops jobs from shared queue and executes
     void run_worker(U32 worker_id);
-    
+
     // Rebuild the deadline schedule based on all VMs' rate groups and runtimes
     void rebuild_deadline_schedule();
 
@@ -170,9 +171,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     Fw::Success load_schedule(const char* filePath);
 
     // Ticks spanning one full k_cycle_period_ms cycle at the current timer_freq_hz.
-    U32 cycle_length_ticks() const {
-        return static_cast<U32>(std::round(k_cycle_period_ms * timer_freq_hz / 1000.0f));
-    }
+    U32 cycle_length_ticks() const { return static_cast<U32>(std::round(k_cycle_period_ms * timer_freq_hz / 1000.0f)); }
 
     // Register all external functions for new vm instance
     U32 register_external_functions(bpftime::llvmbpf_vm& vm);
@@ -187,8 +186,9 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //!
     //! Run bpf benchmark, return runtime (IN)
     F64 getBenchmark_handler(FwIndexType portNum,  //!< The port number
-                               const Components::BENCHMARK_TEST& test,
-                               bool compile) override;
+                             const Components::BENCHMARK_TEST& test,
+                             bool compile,
+                             U16 splitInto) override;
 
     //! Handler implementation for pingIn
     //!
@@ -217,15 +217,15 @@ class BpfSequencer : public BpfSequencerComponentBase {
                                  U32 cmdSeq,           //!< The command sequence number
                                  U32 vmId              //!< The index of the selected BPF VM (0-63)
                                  ) override;
-    
+
     //! Handler for SetVMRateGroup command
     //! @param runtime_ms Expected runtime of the VM in milliseconds
     void SetVMRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
-                                  U32 cmdSeq,           //!< The command sequence number
-                                  U32 vm_id,
-                                  F32 rate_group_hz,
-                                  F32 runtime_ms) override;
-                                  
+                                   U32 cmdSeq,           //!< The command sequence number
+                                   U32 vm_id,
+                                   F32 rate_group_hz,
+                                   F32 runtime_ms) override;
+
     void StopRateGroup_cmdHandler(FwOpcodeType opCode,  //!< The opcode
                                   U32 cmdSeq,           //!< The command sequence number
                                   U32 vm_id) override;
@@ -238,16 +238,15 @@ class BpfSequencer : public BpfSequencerComponentBase {
     //! Handler implementation for command BPF_MAP_CREATE
     //!
     //! Create a map
-    void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,                          //!< The opcode
-                                   U32 cmdSeq,                                   //!< The command sequence number
-                                   U32 fd,                                       //!< Map file descriptor
+    void BPF_MAP_CREATE_cmdHandler(FwOpcodeType opCode,                         //!< The opcode
+                                   U32 cmdSeq,                                  //!< The command sequence number
+                                   U32 fd,                                      //!< Map file descriptor
                                    Components::BpfSequencer_BPF_MAP_TYPE type,  //!< Map type
-                                   U32 key_size,                                 //!< Size of map keys (in bytes)
-                                   U32 value_size,                               //!< Size of map values (in bytes)
-                                   U32 max_entries,                              //!< Maximum amount of entries
-                                   U32 map_flags                                 //!< Map flags
+                                   U32 key_size,                                //!< Size of map keys (in bytes)
+                                   U32 value_size,                              //!< Size of map values (in bytes)
+                                   U32 max_entries,                             //!< Maximum amount of entries
+                                   U32 map_flags                                //!< Map flags
                                    ) override;
-                                   
 
     //! Handler implementation for command BPF_MAP_LOOKUP_ELEM
     //!
@@ -289,36 +288,39 @@ class BpfSequencer : public BpfSequencerComponentBase {
     // ----------------------------------------------------------------------
     // Handler implementations for wrapper functions
     // ----------------------------------------------------------------------
-    
-    Fw::Success load(U32 vmId, const char* sequenceFilePath);
+
+    Fw::Success load(U32 vmId,
+                     const char* sequenceFilePath,
+                     U16 splitInto = 32,
+                     const char* benchmark_output_file = nullptr);
 
     Fw::Success run(U32 vmId, bool log_time = false);
 
     Fw::Success map_create(const bpf_map_def& map_def, U32 fd);
-    
-    Fw::Success map_lookup_elem(U32 fd, U8 *key, U32 key_size, const char *output_path);
-    
-    Fw::Success map_update_elem(U32 fd, U8 *key, U32 key_size, U8 *value, U32 value_size, U64 flags);
-    
-    Fw::Success map_delete_elem(U32 fd, U8 *key, U32 key_size);
 
-    F64 get_benchmark_bpf(BENCHMARK_TEST test, bool compile);
+    Fw::Success map_lookup_elem(U32 fd, U8* key, U32 key_size, const char* output_path);
+
+    Fw::Success map_update_elem(U32 fd, U8* key, U32 key_size, U8* value, U32 value_size, U64 flags);
+
+    Fw::Success map_delete_elem(U32 fd, U8* key, U32 key_size);
+
+    F64 get_benchmark_bpf(BENCHMARK_TEST test, bool compile, U16 splitInto);
 
   public:
     struct bpf_iter_num;
 
     static Fw::CmdResponse result_to_response(Fw::Success result);
 
-    static U8 *read_from_file(const char *fn, FwSizeType& size, const char*& err_msg);
-    
-    static U32 bpf_iter_num_new(struct bpf_iter_num *it, I32 start, I32 end) noexcept;
+    static U8* read_from_file(const char* fn, FwSizeType& size, const char*& err_msg);
 
-    static I64 *bpf_iter_num_next(struct bpf_iter_num *it) noexcept;
-    
-    static void bpf_iter_num_destroy(struct bpf_iter_num *it) noexcept;
+    static U32 bpf_iter_num_new(struct bpf_iter_num* it, I32 start, I32 end) noexcept;
+
+    static I64* bpf_iter_num_next(struct bpf_iter_num* it) noexcept;
+
+    static void bpf_iter_num_destroy(struct bpf_iter_num* it) noexcept;
 
     static I32 bpf_rand_int(I32 min, I32 max) noexcept;
-    
+
     static I32 bpf_math_sqrt(I32 elem_bits) noexcept;
 
     static I32 bpf_math_sin(I32 elem_bits) noexcept;
@@ -326,6 +328,7 @@ class BpfSequencer : public BpfSequencerComponentBase {
     static I32 bpf_math_cos(I32 elem_bits) noexcept;
 
     static I32 bpf_math_atan2(I32 x_bits, I32 y_bits) noexcept;
+
   private:
     bool validate_vm_id(U32 vmId);
 

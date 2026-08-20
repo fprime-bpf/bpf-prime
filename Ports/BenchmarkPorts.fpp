@@ -13,7 +13,7 @@ module Components {
         CFDP_CHUNK
     }
 
-    port RunBpfBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64
+    port RunBpfBenchmark(test: BENCHMARK_TEST, compile: bool, splitInto: U16) -> F64
     port RunWasmBenchmark(test: BENCHMARK_TEST, compile: bool) -> F64
     
 }

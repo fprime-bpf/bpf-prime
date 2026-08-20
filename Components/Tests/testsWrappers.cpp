@@ -1,15 +1,16 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/core_isolation.hpp"
 #include "Components/BpfSequencer/cpu_cycles.hpp"
-#include "Components/WasmSequencer/WasmSequencer.hpp"
-#include "Components/Tests/Tests.hpp"
 #include "Components/Tests/NativeTests.hpp"
+#include "Components/Tests/Tests.hpp"
+#include "Components/WasmSequencer/WasmSequencer.hpp"
 
 #include <pthread.h>
 #include <sched.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <algorithm>
+#include <array>
 #include <chrono>
 #include <climits>
 #include <fstream>
@@ -18,10 +19,10 @@
 #include <string>
 #include <vector>
 
-#define TIME_NATIVE_TEST(test)       \
-    test_name = #test;               \
-    start = get_cpu_cycles();        \
-    exit_status = test::main();      \
+#define TIME_NATIVE_TEST(test)  \
+    test_name = #test;          \
+    start = get_cpu_cycles();   \
+    exit_status = test::main(); \
     end = get_cpu_cycles();
 
 namespace Components {
@@ -32,16 +33,36 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
     I32 exit_status;
 
     switch (test) {
-        case BENCHMARK_TEST::ABERR: TIME_NATIVE_TEST(Aberr); break;
-        case BENCHMARK_TEST::AES: TIME_NATIVE_TEST(Aes); break;
-        case BENCHMARK_TEST::KALMAN: TIME_NATIVE_TEST(Kalman); break;
-        case BENCHMARK_TEST::LOW_PASS_FILTER: TIME_NATIVE_TEST(LowPassFilter); break;
-        case BENCHMARK_TEST::MATMUL: TIME_NATIVE_TEST(Matmul); break;
-        case BENCHMARK_TEST::NCC_SCORE: TIME_NATIVE_TEST(NCCScore); break;
-        case BENCHMARK_TEST::STAR_TRACKER: TIME_NATIVE_TEST(StarTracker); break;
-        case BENCHMARK_TEST::CCSDS: TIME_NATIVE_TEST(Ccsds); break;
-        case BENCHMARK_TEST::REED_SOLOMON: TIME_NATIVE_TEST(ReedSolomon); break;
-        case BENCHMARK_TEST::CFDP_CHUNK: TIME_NATIVE_TEST(CfdpChunk); break;
+        case BENCHMARK_TEST::ABERR:
+            TIME_NATIVE_TEST(Aberr);
+            break;
+        case BENCHMARK_TEST::AES:
+            TIME_NATIVE_TEST(Aes);
+            break;
+        case BENCHMARK_TEST::KALMAN:
+            TIME_NATIVE_TEST(Kalman);
+            break;
+        case BENCHMARK_TEST::LOW_PASS_FILTER:
+            TIME_NATIVE_TEST(LowPassFilter);
+            break;
+        case BENCHMARK_TEST::MATMUL:
+            TIME_NATIVE_TEST(Matmul);
+            break;
+        case BENCHMARK_TEST::NCC_SCORE:
+            TIME_NATIVE_TEST(NCCScore);
+            break;
+        case BENCHMARK_TEST::STAR_TRACKER:
+            TIME_NATIVE_TEST(StarTracker);
+            break;
+        case BENCHMARK_TEST::CCSDS:
+            TIME_NATIVE_TEST(Ccsds);
+            break;
+        case BENCHMARK_TEST::REED_SOLOMON:
+            TIME_NATIVE_TEST(ReedSolomon);
+            break;
+        case BENCHMARK_TEST::CFDP_CHUNK:
+            TIME_NATIVE_TEST(CfdpChunk);
+            break;
         default:
             return -1;
     }
@@ -54,29 +75,40 @@ F64 Tests::get_benchmark_native(BENCHMARK_TEST test) {
     return cpu_cycles_to_ns(end - start);
 }
 
-const char *Tests::get_test_dir(BENCHMARK_TEST test) {
+const char* Tests::get_test_dir(BENCHMARK_TEST test) {
     switch (test) {
-        case BENCHMARK_TEST::ABERR: return "tests/aberr/";
-        case BENCHMARK_TEST::AES: return "tests/aes/";
-        case BENCHMARK_TEST::KALMAN: return "tests/kalman/";
-        case BENCHMARK_TEST::LOW_PASS_FILTER: return "tests/low_pass_filter/";
-        case BENCHMARK_TEST::MATMUL: return "tests/matmul/";
-        case BENCHMARK_TEST::NCC_SCORE: return "tests/nccscore/";
-        case BENCHMARK_TEST::STAR_TRACKER: return "tests/startracker/";
-        case BENCHMARK_TEST::CCSDS: return "tests/ccsds/";
-        case BENCHMARK_TEST::REED_SOLOMON: return "tests/reed_solomon/";
-        case BENCHMARK_TEST::CFDP_CHUNK: return "tests/cfdp_chunk/";
+        case BENCHMARK_TEST::ABERR:
+            return "tests/aberr/";
+        case BENCHMARK_TEST::AES:
+            return "tests/aes/";
+        case BENCHMARK_TEST::KALMAN:
+            return "tests/kalman/";
+        case BENCHMARK_TEST::LOW_PASS_FILTER:
+            return "tests/low_pass_filter/";
+        case BENCHMARK_TEST::MATMUL:
+            return "tests/matmul/";
+        case BENCHMARK_TEST::NCC_SCORE:
+            return "tests/nccscore/";
+        case BENCHMARK_TEST::STAR_TRACKER:
+            return "tests/startracker/";
+        case BENCHMARK_TEST::CCSDS:
+            return "tests/ccsds/";
+        case BENCHMARK_TEST::REED_SOLOMON:
+            return "tests/reed_solomon/";
+        case BENCHMARK_TEST::CFDP_CHUNK:
+            return "tests/cfdp_chunk/";
         default:
             return "";
     }
 }
 
-F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile) {
+F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile, U16 splitInto) {
     uint64_t start, end;
 
     if (compile) {
         auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.o";
-        auto load_result = this->load(test, bytecode_path.c_str());
+        auto output_file = "BENCHMARK_RESULT-" + std::to_string(splitInto) + ".yml";
+        auto load_result = this->load(test, bytecode_path.c_str(), splitInto, output_file.c_str());
 
         if (load_result != Fw::Success::SUCCESS)
             return -1;
@@ -101,11 +133,9 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
         auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.wasm";
         auto load_result = this->load(bytecode_path.c_str());
 
-
         if (load_result != Fw::Success::SUCCESS)
             return -1;
     }
-
 
     if (!this->wamr_register_thread())
         return -1;
@@ -125,45 +155,48 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
 namespace {
 constexpr int BENCHMARK_CORE = 2;
 
-const char* const OUTPUT_FILE_NAME = "BENCHMARK_RESULTS.yml";
-
-void create_output_file() {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::trunc);
+std::string output_file_name(U16 splitInto) {
+    return "BENCHMARK_RESULT-" + std::to_string(splitInto) + ".yml";
 }
 
-void output_new_test(const char* test_name) {
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << test_name << ":\n";
+void create_output_file(const std::string& output_file, U16 splitInto) {
+    std::ofstream(output_file, std::ios::trunc) << "split_into: " << splitInto << "\n";
 }
 
-void output_test_results(const char *test_name, std::vector<std::tuple<F64, F64, F64>>& test_results) {
-    output_new_test(test_name);
+void output_new_test(const std::string& output_file, const char* test_name) {
+    std::ofstream(output_file, std::ios::app) << test_name << ":\n";
+}
 
+void output_test_results(const std::string& output_file, const std::vector<std::tuple<F64, F64, F64>>& test_results) {
     std::ostringstream oss;
+    oss << "  samples:\n";
 
-    for (auto& [bpf_time, native_time, wasm_time] : test_results) {
-        oss << "  - [" 
-            << bpf_time
-            << ", "
-            << native_time 
-            << ", "
-            << wasm_time
-            << "]\n";
+    for (const auto& [bpf_time, native_time, wasm_time] : test_results) {
+        oss << "    - [" << bpf_time << ", " << native_time << ", " << wasm_time << "]\n";
     }
 
-    std::ofstream(OUTPUT_FILE_NAME, std::ios::app) << oss.str();
+    std::ofstream(output_file, std::ios::app) << oss.str();
 }
 
-}
+}  // namespace
 
-Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* test_name, void (*fill_maps)(Tests*)) {
+Fw::Success Tests::benchmark_test(U32 passes,
+                                  BENCHMARK_TEST test,
+                                  const char* test_name,
+                                  void (*fill_maps)(Tests*),
+                                  U16 splitInto,
+                                  const std::string& output_file) {
     std::vector<F64> bpf_times, native_times, wasm_times;
     bpf_times.reserve(passes);
     native_times.reserve(passes);
     wasm_times.reserve(passes);
 
+    // The BPF compiler appends partition_pcs during the first BPF pass.
+    output_new_test(output_file, test_name);
+
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
-        auto bpf_time = this->getBpfBenchmark_out(0, test, i == 0);
+        auto bpf_time = this->getBpfBenchmark_out(0, test, i == 0, splitInto);
 
         if (bpf_time < 0) {
             Fw::LogStringArg test_name_arg(test_name);
@@ -209,7 +242,7 @@ Fw::Success Tests::benchmark_test(U32 passes, BENCHMARK_TEST test, const char* t
         test_results.emplace_back(bpf_times[i], native_times[i], wasm_times[i]);
     }
 
-    output_test_results(test_name, test_results);
+    output_test_results(output_file, test_results);
     return Fw::Success::SUCCESS;
 }
 
@@ -223,17 +256,14 @@ Fw::Success Tests::benchmark() {
     // fd 20 is deliberately never touched by any fill_maps lambda below, since
     // cfdp_chunk's whole point is that its checkpoint state persists across
     // invocations rather than being reset each pass.
-    const U32 max_entries[] = { 7, 7, 7, 7, 7, 100, 100, 100, 6, 3, 16, 256, 16, 2500, 25,
-                                 16, 20, 16, 4, 64, 1, 11 };
+    const U32 max_entries[] = {7, 7, 7, 7, 7, 100, 100, 100, 6, 3, 16, 256, 16, 2500, 25, 16, 20, 16, 4, 64, 1, 11};
 
     for (U32 fd = 0; fd < (sizeof(max_entries) / sizeof(max_entries[0])); fd++) {
-        bpf_map_def map_def = {
-            .type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
-            .key_size = 4,
-            .value_size = 4,
-            .max_entries = max_entries[fd],
-            .map_flags = 0
-        };
+        bpf_map_def map_def = {.type = BpfSequencer_BPF_MAP_TYPE::BPF_MAP_TYPE_ARRAY,
+                               .key_size = 4,
+                               .value_size = 4,
+                               .max_entries = max_entries[fd],
+                               .map_flags = 0};
 
         BpfSequencer::maps.create_map(map_def, fd);
     }
@@ -246,18 +276,20 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        {9000, BENCHMARK_TEST::ABERR, "Aberration", [](Tests* tests) {
-            tests->populate_map_random(8, 0, 6);
-            tests->populate_map_random(9, 0, 3);
-        }},
+        {9000, BENCHMARK_TEST::ABERR, "Aberration",
+         [](Tests* tests) {
+             tests->populate_map_random(8, 0, 6);
+             tests->populate_map_random(9, 0, 3);
+         }},
 
-        /*{passes, BENCHMARK_TEST::AES, "AES", [](Tests* tests) {
-            tests->populate_map_random(10, 0, 16);
-            tests->populate_map_random(11, 0, 256);
-            tests->populate_map_random(12, 0, 16);
-        }},
+        {passes, BENCHMARK_TEST::AES, "AES",
+         [](Tests* tests) {
+             tests->populate_map_random(10, 0, 16);
+             tests->populate_map_random(11, 0, 256);
+             tests->populate_map_random(12, 0, 16);
+         }},
 
-        {passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) {
+        /*{passes, BENCHMARK_TEST::KALMAN, "Kalman", [](Tests* tests) {
             tests->populate_map_random(3, 0, 7);
             tests->populate_map_random(4, 0, 7);
         }},
@@ -267,31 +299,31 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(4, 0, 7);
         }},*/
 
-        {9000, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {
-        }},
+        {9000, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {}},
 
-        {900, BENCHMARK_TEST::NCC_SCORE, "NCC Score", [](Tests* tests) {
-            tests->populate_map_random(13, 0, 2500);
-            tests->populate_map_random(14, 0, 25);
-        }}/*,
+        {900, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
+         [](Tests* tests) {
+             tests->populate_map_random(13, 0, 2500);
+             tests->populate_map_random(14, 0, 25);
+         }} /*,
 
-        {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
-            tests->populate_map_random(0, 0, 7);
-            tests->populate_map_random(1, 0, 7);
-            tests->populate_map_random(2, 0, 7);
-        }},
+          {passes, BENCHMARK_TEST::STAR_TRACKER, "StarTracker", [](Tests* tests) {
+              tests->populate_map_random(0, 0, 7);
+              tests->populate_map_random(1, 0, 7);
+              tests->populate_map_random(2, 0, 7);
+          }},
 
-        {passes, BENCHMARK_TEST::CCSDS, "CCSDS", [](Tests* tests) {
-            tests->populate_map_random(15, 0, 16);
-        }},
+          {passes, BENCHMARK_TEST::CCSDS, "CCSDS", [](Tests* tests) {
+              tests->populate_map_random(15, 0, 16);
+          }},
 
-        {passes, BENCHMARK_TEST::REED_SOLOMON, "Reed-Solomon", [](Tests* tests) {
-            tests->populate_map_random(17, 0, 16);
-        }},
+          {passes, BENCHMARK_TEST::REED_SOLOMON, "Reed-Solomon", [](Tests* tests) {
+              tests->populate_map_random(17, 0, 16);
+          }},
 
-        {passes, BENCHMARK_TEST::CFDP_CHUNK, "CFDP Chunk", [](Tests* tests) {
-            tests->populate_map_random(19, 0, 64);
-        }}*/
+          {passes, BENCHMARK_TEST::CFDP_CHUNK, "CFDP Chunk", [](Tests* tests) {
+              tests->populate_map_random(19, 0, 64);
+          }}*/
     };
 
     unsigned long orig_affinity_mask = 0;
@@ -314,26 +346,34 @@ Fw::Success Tests::benchmark() {
     p.sched_priority = 51;
     int rc = pthread_setschedparam(pthread_self(), SCHED_RR, &p);
     if (rc != 0) {
-        this->log_WARNING_HI_BenchMarkFailed(
-            Fw::LogStringArg(strerror(rc))
-        );
+        this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(strerror(rc)));
         // return Fw::Success::FAILURE;
     }
 
-    create_output_file();
-
     Fw::Success result = Fw::Success::SUCCESS;
 
-    for (const auto& test : tests) {
-        auto test_result = benchmark_test(test.passes, test.test, test.test_name, test.fill_maps);
+    // Each configuration gets an independent result file and recompiles every
+    // BPF workload with its own maximum component size.
+    constexpr std::array<U16, 14> split_configs{1, 2,3, 4,5,6, 8,10,12, 16,20,24,28, 32};
+    for (U16 splitInto : split_configs) {
+        const auto output_file = output_file_name(splitInto);
+        create_output_file(output_file, splitInto);
 
-        if (test_result != Fw::Success::SUCCESS) {
-            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
-            result = Fw::Success::FAILURE;
-            break;
+        for (const auto& test : tests) {
+            auto test_result =
+                benchmark_test(test.passes, test.test, test.test_name, test.fill_maps, splitInto, output_file);
+
+            if (test_result != Fw::Success::SUCCESS) {
+                this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
+                result = Fw::Success::FAILURE;
+                break;
+            }
+
+            sched_yield();
         }
 
-        sched_yield();
+        if (result != Fw::Success::SUCCESS)
+            break;
     }
 
     sched_setscheduler(0, orig_policy, &orig_param);
@@ -365,11 +405,10 @@ Fw::Success Tests::populate_map_random(U32 fd, U32 start, U32 length) {
         this->log_WARNING_LO_FailedToPopulateMap(Fw::LogStringArg(errMsg));
         return Fw::Success::FAILURE;
     }
-    
+
     std::vector<U8> value(map->value_size);
-    
-    static thread_local
-        std::independent_bits_engine<std::mt19937, CHAR_BIT, U8> engine(std::random_device{}());
+
+    static thread_local std::independent_bits_engine<std::mt19937, CHAR_BIT, U8> engine(std::random_device{}());
 
     for (U32 i = 0; i < length; i++) {
         U32 key = start + i;
