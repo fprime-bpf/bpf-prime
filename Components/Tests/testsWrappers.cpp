@@ -208,7 +208,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
     }
     this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("BPF"));
 
-    for (U32 i = 0; i < passes; ++i) {
+    /*for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto native_time = this->get_benchmark_native(test);
 
@@ -220,9 +220,9 @@ Fw::Success Tests::benchmark_test(U32 passes,
 
         native_times.push_back(native_time);
     }
-    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("Native"));
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("Native"));*/
 
-    for (U32 i = 0; i < passes; ++i) {
+    /*for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
         auto wasm_time = this->getWasmBenchmark_out(0, test, i == 0);
 
@@ -234,7 +234,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
 
         wasm_times.push_back(wasm_time);
     }
-    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));
+    this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));*/
 
     std::vector<std::tuple<F64, F64, F64>> test_results;
     test_results.reserve(passes);
@@ -248,7 +248,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 10000;
+    const U32 passes = 4096;
 
     // fds 0-14: aberr/aes/kalman/low_pass_filter/nccscore/startracker (see TestInfo below).
     // fds 15-16: ccsds (in, out). fds 17-18: reed_solomon (in, out).
@@ -276,7 +276,7 @@ Fw::Success Tests::benchmark() {
     };
 
     TestInfo tests[]{
-        {9000, BENCHMARK_TEST::ABERR, "Aberration",
+        {passes, BENCHMARK_TEST::ABERR, "Aberration",
          [](Tests* tests) {
              tests->populate_map_random(8, 0, 6);
              tests->populate_map_random(9, 0, 3);
@@ -299,9 +299,9 @@ Fw::Success Tests::benchmark() {
             tests->populate_map_random(4, 0, 7);
         }},*/
 
-        {9000, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {}},
+        {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {}},
 
-        {900, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
+        {passes, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
          [](Tests* tests) {
              tests->populate_map_random(13, 0, 2500);
              tests->populate_map_random(14, 0, 25);

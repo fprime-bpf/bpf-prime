@@ -85,22 +85,14 @@ Fw::Success BpfSequencer::load(U32 vmId,
     static bpftime::ExecState a{.heap = nullptr, .dataStack = ds, .callStack = cs};
     const std::unique_ptr<G_t> efg = buildEFG(vm->bpf_vm.instructions);
     const uint16_t maxCompSize = (vm->bpf_vm.instructions.size() + splitInto - 1) / splitInto;
-    auto partition_result = partition(efg.get(), vm->bpf_vm.instructions, maxCompSize, true, {1, 8, 9, 10, 11, 13, 6});
+    auto partition_result = partition(efg.get(), vm->bpf_vm.instructions, maxCompSize, true, {1, 8, 9, 10, 11, 13, 6,7});
 
     if (benchmark_output_file != nullptr) {
-        std::vector<uint16_t> partition_pcs;
-        partition_pcs.reserve(partition_result.size());
-        for (const auto& boundary : partition_result) {
-            partition_pcs.push_back(boundary.first);
-        }
-
         std::ofstream output(benchmark_output_file, std::ios::app);
-        output << "  partition_pcs: [";
-        for (std::size_t i = 0; i < partition_pcs.size(); ++i) {
-            if (i != 0)
-                output << ", ";
-            output << partition_pcs[i];
-        }
+        auto it=partition_result.cbegin();
+        output << "  partition_pcs: ["<<it->first;
+        for (++it;it!=partition_result.cend();++it)
+            output<<", "<<it->first;
         output << "]\n";
     }
 
