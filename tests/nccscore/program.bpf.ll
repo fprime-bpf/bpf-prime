@@ -22,7 +22,7 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   call void @llvm.lifetime.start.p0(i64 100, ptr nonnull %2) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %3) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %4)
-  store volatile i32 -1, ptr %4, align 4, !tbaa !5
+  store volatile i32 2147483647, ptr %4, align 4, !tbaa !5
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %5) #3
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %6) #3
   call void @llvm.lifetime.start.p0(i64 32, ptr nonnull %7) #3
@@ -66,17 +66,17 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %36 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %5, i32 noundef 0, i32 noundef 46) #3
   %37 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
   %38 = icmp eq ptr %37, null
-  br i1 %38, label %113, label %39
+  br i1 %38, label %123, label %39
 
-39:                                               ; preds = %35, %110
-  %40 = phi ptr [ %111, %110 ], [ %37, %35 ]
+39:                                               ; preds = %35, %120
+  %40 = phi ptr [ %121, %120 ], [ %37, %35 ]
   %41 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %6, i32 noundef 0, i32 noundef 46) #3
   %42 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
   %43 = icmp eq ptr %42, null
-  br i1 %43, label %110, label %44
+  br i1 %43, label %120, label %44
 
-44:                                               ; preds = %39, %107
-  %45 = phi ptr [ %108, %107 ], [ %42, %39 ]
+44:                                               ; preds = %39, %97
+  %45 = phi ptr [ %118, %97 ], [ %42, %39 ]
   %46 = call i32 inttoptr (i64 5 to ptr)(ptr noundef nonnull %7, i32 noundef 0, i32 noundef 5) #3
   %47 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %7) #3
   %48 = icmp eq ptr %47, null
@@ -141,35 +141,41 @@ define dso_local noundef i32 @main() local_unnamed_addr #0 {
   %98 = phi i32 [ 0, %44 ], [ %94, %93 ]
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %7) #3
   %99 = load volatile i32, ptr %4, align 4, !tbaa !5
-  %100 = icmp ult i32 %98, %99
-  br i1 %100, label %101, label %107
+  %100 = sub nsw i32 %98, %99
+  %101 = call i32 asm sideeffect "", "=r,0"(i32 %100) #3, !srcloc !17
+  %102 = ashr i32 %101, 31
+  %103 = call i32 asm sideeffect "", "=r,0"(i32 %102) #3, !srcloc !18
+  %104 = load i64, ptr %40, align 8, !tbaa !9
+  %105 = mul nsw i64 %104, 50
+  %106 = load i64, ptr %45, align 8, !tbaa !9
+  %107 = add nsw i64 %105, %106
+  %108 = trunc i64 %107 to i32
+  %109 = load volatile i32, ptr %4, align 4, !tbaa !5
+  %110 = xor i32 %103, -1
+  %111 = and i32 %109, %110
+  %112 = and i32 %103, %98
+  %113 = or i32 %111, %112
+  store volatile i32 %113, ptr %4, align 4, !tbaa !5
+  %114 = load volatile i32, ptr %3, align 4, !tbaa !5
+  %115 = and i32 %114, %110
+  %116 = and i32 %103, %108
+  %117 = or i32 %115, %116
+  store volatile i32 %117, ptr %3, align 4, !tbaa !5
+  %118 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
+  %119 = icmp eq ptr %118, null
+  br i1 %119, label %120, label %44, !llvm.loop !19
 
-101:                                              ; preds = %97
-  %102 = load i64, ptr %40, align 8, !tbaa !9
-  %103 = mul nsw i64 %102, 50
-  %104 = load i64, ptr %45, align 8, !tbaa !9
-  %105 = add nsw i64 %103, %104
-  %106 = trunc i64 %105 to i32
-  store volatile i32 %106, ptr %3, align 4, !tbaa !5
-  store volatile i32 %98, ptr %4, align 4, !tbaa !5
-  br label %107
-
-107:                                              ; preds = %101, %97
-  %108 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %6) #3
-  %109 = icmp eq ptr %108, null
-  br i1 %109, label %110, label %44, !llvm.loop !17
-
-110:                                              ; preds = %107, %39
+120:                                              ; preds = %97, %39
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %6) #3
-  %111 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
-  %112 = icmp eq ptr %111, null
-  br i1 %112, label %113, label %39, !llvm.loop !18
+  %121 = call ptr inttoptr (i64 6 to ptr)(ptr noundef nonnull %5) #3
+  %122 = icmp eq ptr %121, null
+  br i1 %122, label %123, label %39, !llvm.loop !20
 
-113:                                              ; preds = %110, %35
+123:                                              ; preds = %120, %35
   call void inttoptr (i64 7 to ptr)(ptr noundef nonnull %5) #3
   call void @llvm.lifetime.start.p0(i64 4, ptr nonnull %9) #3
   store i32 0, ptr %9, align 4, !tbaa !5
-  %114 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %11, ptr noundef nonnull %9, ptr noundef nonnull %3, i64 noundef 0) #3
+  %124 = call i64 inttoptr (i64 2 to ptr)(ptr noundef %11, ptr noundef nonnull %9, ptr noundef nonnull %3, i64 noundef 0) #3
   call void @llvm.lifetime.end.p0(i64 4, ptr nonnull %9) #3
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %8) #3
   call void @llvm.lifetime.end.p0(i64 32, ptr nonnull %7) #3
@@ -202,8 +208,8 @@ attributes #3 = { nounwind }
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
 !2 = !{!"clang version 20.1.0 (git@github.com:fprime-bpf/llvm-project.git 03a843fe2f5c0023ee1e6ee21d74290f4387a642)"}
-!3 = !{i64 2147504513}
-!4 = !{i64 2147505029}
+!3 = !{i64 2147507304}
+!4 = !{i64 2147507820}
 !5 = !{!6, !6, i64 0}
 !6 = !{!"int", !7, i64 0}
 !7 = !{!"omnipotent char", !8, i64 0}
@@ -216,5 +222,7 @@ attributes #3 = { nounwind }
 !14 = distinct !{!14, !12, !13}
 !15 = distinct !{!15, !12, !13}
 !16 = distinct !{!16, !12, !13}
-!17 = distinct !{!17, !12, !13}
-!18 = distinct !{!18, !12, !13}
+!17 = !{i64 3562}
+!18 = !{i64 3640}
+!19 = distinct !{!19, !12, !13}
+!20 = distinct !{!20, !12, !13}

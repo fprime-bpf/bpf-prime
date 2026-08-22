@@ -21,6 +21,8 @@ int main() {
     volatile float beta2, gamma, t_emit, M, E, nu, r, h;
     volatile float s_dot_u, denom, factor, u_corr_mag;
     long key;
+    struct bpf_iter_num it;
+    long long *iter_ptr;
 
     tau = 0.0f;
 
@@ -99,11 +101,14 @@ int main() {
         tau = dist / C_LIGHT; \
     }
 
-    // Real backward-branch loop, not unrolled: unrolled form let SimplifyCFG collapse the function and drop most helper calls.
-#pragma clang loop unroll(disable)
-    for (long iter = 0; iter < 5; iter++) {
+    // bpf_iter_num-based loop, matching the idiom other benchmarks use: runtime-verifier's
+    // analyze_max_iterations only recognizes CALL_5 (bpf_iter_num_new) + w2/w3 bounds to
+    // determine loop trip count for unrolling, not a plain compare-and-branch loop.
+    bpf_iter_num_new(&it, 0, 5);
+    while ((iter_ptr = bpf_iter_num_next(&it))) {
         ABERR_ITER_BODY
     }
+    bpf_iter_num_destroy(&it);
 
 #undef ABERR_ITER_BODY
 

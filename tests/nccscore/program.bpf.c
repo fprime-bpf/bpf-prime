@@ -10,7 +10,8 @@ int main() {
     void *map_image_input = MAP_BY_FD(13), *map_match_image = MAP_BY_FD(14);
     void* result;
     volatile int image_input[IMG_SIZE], match_image[MATCH_SIZE];
-    volatile unsigned int best_match, best_score = 0xffffffff;
+    // Signed/INT_MAX so (score - best_score)'s sign bit is well-defined.
+    volatile int best_match, best_score = 0x7fffffff;
 
     struct bpf_iter_num it, ij, iii, ijj;
     long long* i, *j, *ii, *jj;
@@ -69,10 +70,17 @@ int main() {
             }
             bpf_iter_num_destroy(&iii);
 
-            if (score < best_score) {
-                best_match = *i * IMG_DIM + *j;
-                best_score = score;
-            }
+            // Branchless min-tracking (data-dependent compare would
+            // fork the DFS at every (i,j) position; cf. ccsds msb_mask).
+            // mask is all-ones iff score < best_score.
+            // asm barriers stop clang refolding this into a branch.
+            int diff = score - best_score;
+            asm volatile("" : "+r"(diff));
+            int mask = diff >> 31;
+            asm volatile("" : "+r"(mask));
+            int candidate = (int)(*i * IMG_DIM + *j);
+            best_score = (best_score & ~mask) | (score & mask);
+            best_match = (best_match & ~mask) | (candidate & mask);
         }
         bpf_iter_num_destroy(&ij);
     }
