@@ -1,22 +1,153 @@
 #include "Components/BpfSequencer/BpfSequencer.hpp"
 #include "Components/BpfSequencer/cpu_cycles.hpp"
-#include "Components/BpfSequencer/llvmbpf/include/efg.hpp"
 #include "Components/BpfSequencer/llvmbpf/include/llvmbpf.hpp"
 #include "bpf.hpp"
 #include "maps/maps.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <chrono>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <new>
+#include <stdexcept>
+#include <string>
 #include <utility>
 #include <vector>
 
 #define CREATE_ERRNO_MSG(res) Fw::LogStringArg(std::strerror(-res))
 
 namespace Components {
+
+namespace {
+
+std::string trim(const std::string& value) {
+    const auto first = std::find_if_not(value.begin(), value.end(), [](unsigned char ch) { return std::isspace(ch); });
+    const auto last = std::find_if_not(value.rbegin(), value.rend(), [](unsigned char ch) { return std::isspace(ch); }).base();
+    return first < last ? std::string(first, last) : std::string();
+}
+
+long long parse_integer(const std::string& value, const char* field, std::size_t line_number) {
+    std::size_t parsed = 0;
+    long long result;
+
+    try {
+        result = std::stoll(value, &parsed);
+    } catch (const std::exception&) {
+        throw std::runtime_error("invalid " + std::string(field) + " at line " + std::to_string(line_number));
+    }
+
+    if (parsed != value.size()) {
+        throw std::runtime_error("invalid " + std::string(field) + " at line " + std::to_string(line_number));
+    }
+    return result;
+}
+
+std::vector<bpftime::TimeLoc> load_snapshot_locations(const std::filesystem::path& path,
+                                                       const std::filesystem::path& program_dir,
+                                                       U16 expected_split) {
+    std::ifstream input(path);
+    if (!input) {
+        throw std::runtime_error("cannot open " + path.string());
+    }
+
+    enum class Section { NONE, META, DATA };
+    Section section = Section::NONE;
+    std::string configured_dir;
+    long long configured_split = -1;
+    std::vector<bpftime::TimeLoc> locations;
+    bpftime::TimeLoc* current = nullptr;
+    std::string line;
+    std::size_t line_number = 0;
+
+    while (std::getline(input, line)) {
+        ++line_number;
+        const auto content = trim(line);
+        if (content.empty() || content.front() == '#') {
+            continue;
+        }
+        if (content == "meta:") {
+            section = Section::META;
+            continue;
+        }
+        if (content == "data:") {
+            section = Section::DATA;
+            continue;
+        }
+
+        if (section == Section::META) {
+            const auto separator = content.find(':');
+            if (separator == std::string::npos) {
+                throw std::runtime_error("invalid metadata at line " + std::to_string(line_number));
+            }
+            const auto key = trim(content.substr(0, separator));
+            const auto value = trim(content.substr(separator + 1));
+            if (key == "dir") {
+                configured_dir = value;
+            } else if (key == "split") {
+                configured_split = parse_integer(value, "split", line_number);
+            }
+            continue;
+        }
+
+        if (section != Section::DATA || content.rfind("- ", 0) != 0) {
+            throw std::runtime_error("invalid configuration at line " + std::to_string(line_number));
+        }
+
+        auto item = trim(content.substr(2));
+        const auto separator = item.find(':');
+        if (separator == std::string::npos) {
+            const auto pc = parse_integer(item, "program counter", line_number);
+            if (pc < 0 || pc > std::numeric_limits<uint16_t>::max()) {
+                throw std::runtime_error("program counter is out of range at line " + std::to_string(line_number));
+            }
+            locations.push_back({static_cast<uint16_t>(pc), {}});
+            current = &locations.back();
+            continue;
+        }
+
+        const auto key = trim(item.substr(0, separator));
+        const auto value = trim(item.substr(separator + 1));
+        if (value.empty()) {
+            const auto pc = parse_integer(key, "program counter", line_number);
+            if (pc < 0 || pc > std::numeric_limits<uint16_t>::max()) {
+                throw std::runtime_error("program counter is out of range at line " + std::to_string(line_number));
+            }
+            locations.push_back({static_cast<uint16_t>(pc), {}});
+            current = &locations.back();
+            continue;
+        }
+
+        if (current == nullptr) {
+            throw std::runtime_error("loop location has no program counter at line " + std::to_string(line_number));
+        }
+        const auto offset = parse_integer(key, "loop offset", line_number);
+        const auto iteration = parse_integer(value, "loop iteration", line_number);
+        if (offset < std::numeric_limits<int16_t>::min() || offset > std::numeric_limits<int16_t>::max()) {
+            throw std::runtime_error("loop offset is out of range at line " + std::to_string(line_number));
+        }
+        current->time.push_back({static_cast<int16_t>(offset), iteration});
+    }
+
+    if (configured_dir.empty() || configured_split < 0) {
+        throw std::runtime_error("configuration metadata is incomplete");
+    }
+    if (std::filesystem::path(configured_dir).lexically_normal() != program_dir.lexically_normal()) {
+        throw std::runtime_error("configuration program does not match " + program_dir.string());
+    }
+    if (configured_split != expected_split) {
+        throw std::runtime_error("configuration split does not match its file name");
+    }
+    if (locations.size() != expected_split) {
+        throw std::runtime_error("configuration data count does not match split");
+    }
+    return locations;
+}
+
+}  // namespace
 
 Fw::Success BpfSequencer::load(U32 vmId,
                                const char* sequenceFilePath,
@@ -81,23 +212,27 @@ Fw::Success BpfSequencer::load(U32 vmId,
         return Fw::Success::FAILURE;
     }
 
-    static std::byte ds[50000], cs[200];  // hardcode size for now.
+    alignas(8) static std::byte ds[50000], cs[200];  // hardcode size for now.
     static bpftime::ExecState a{.heap = nullptr, .dataStack = ds, .callStack = cs};
-    const std::unique_ptr<G_t> efg = buildEFG(vm->bpf_vm.instructions);
-    const uint16_t maxCompSize = (vm->bpf_vm.instructions.size() + splitInto - 1) / splitInto;
-    auto partition_result = partition(efg.get(), vm->bpf_vm.instructions, maxCompSize, true, {1, 8, 9, 10, 11, 13, 6,7});
 
+    std::vector<bpftime::TimeLoc> snapshot_locations;
     if (benchmark_output_file != nullptr) {
-        std::ofstream output(benchmark_output_file, std::ios::app);
-        output << "  partition_pcs: [0";
-        for(const auto&a:findExits(efg.get(),vm->bpf_vm.instructions))
-            output<<", "<<a;
-        for(const auto&a:partition_result)
-            output<<", "<<a.first;
-        output << "]\n";
+        const std::filesystem::path program_dir = std::filesystem::path(sequenceFilePath).parent_path();
+        const auto program_name = program_dir.filename().string();
+        const auto config_path =
+            std::filesystem::path("configs") / (program_name + "-" + std::to_string(splitInto) + ".yml");
+        try {
+            snapshot_locations = load_snapshot_locations(config_path, program_dir, splitInto);
+        } catch (const std::exception& error) {
+            Fw::LogStringArg errMsg(error.what());
+            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
+            delete[] this->buffer;
+            this->buffer = nullptr;
+            return Fw::Success::FAILURE;
+        }
     }
 
-    auto compile_res = vm->bpf_vm.compileWithSS(&a, std::move(partition_result), 4, 10000);
+    auto compile_res = vm->bpf_vm.compileWithSS2(&a, 4, 10000, snapshot_locations);
     // auto compile_res = vm->bpf_vm.compile(&a);
     if (!compile_res) {
         Fw::LogStringArg errMsg(

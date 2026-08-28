@@ -10,13 +10,16 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <algorithm>
-#include <array>
-#include <chrono>
+#include <cctype>
 #include <climits>
+#include <filesystem>
 #include <fstream>
+#include <limits>
+#include <optional>
 #include <random>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <vector>
 
 #define TIME_NATIVE_TEST(test)  \
@@ -107,7 +110,10 @@ F64 BpfSequencer::get_benchmark_bpf(BENCHMARK_TEST test, bool compile, U16 split
 
     if (compile) {
         auto bytecode_path = std::string(Tests::get_test_dir(test)) + "a.o";
-        auto output_file = "BENCHMARK_RESULT-" + std::to_string(splitInto) + ".yml";
+        const auto program_name = std::filesystem::path(Tests::get_test_dir(test)).parent_path().filename().string();
+        auto output_file = (std::filesystem::path("results") /
+                            (program_name + "-" + std::to_string(splitInto) + ".yml"))
+                               .string();
         auto load_result = this->load(test, bytecode_path.c_str(), splitInto, output_file.c_str());
 
         if (load_result != Fw::Success::SUCCESS)
@@ -155,24 +161,90 @@ F64 WasmSequencer::get_benchmark_wasm(Components::BENCHMARK_TEST test, bool comp
 namespace {
 constexpr int BENCHMARK_CORE = 2;
 
-std::string output_file_name(U16 splitInto) {
-    return "BENCHMARK_RESULT-" + std::to_string(splitInto) + ".yml";
+struct BenchmarkConfig {
+    std::string program;
+    U16 split;
+};
+
+std::string trim(const std::string& value) {
+    const auto first = std::find_if_not(value.begin(), value.end(), [](unsigned char ch) { return std::isspace(ch); });
+    const auto last = std::find_if_not(value.rbegin(), value.rend(), [](unsigned char ch) { return std::isspace(ch); }).base();
+    return first < last ? std::string(first, last) : std::string();
 }
 
-void create_output_file(const std::string& output_file, U16 splitInto) {
-    std::ofstream(output_file, std::ios::trunc) << "split_into: " << splitInto << "\n";
+std::optional<BenchmarkConfig> read_config_metadata(const std::filesystem::path& path) {
+    std::ifstream input(path);
+    if (!input) {
+        return std::nullopt;
+    }
+
+    std::string program;
+    long long split = -1;
+    std::string line;
+    bool in_meta = false;
+    while (std::getline(input, line)) {
+        const auto content = trim(line);
+        if (content == "meta:") {
+            in_meta = true;
+            continue;
+        }
+        if (content == "data:") {
+            break;
+        }
+        if (!in_meta) {
+            continue;
+        }
+
+        const auto separator = content.find(':');
+        if (separator == std::string::npos) {
+            continue;
+        }
+        const auto key = trim(content.substr(0, separator));
+        const auto value = trim(content.substr(separator + 1));
+        if (key == "dir") {
+            program = std::filesystem::path(value).filename().string();
+        } else if (key == "split") {
+            std::size_t parsed = 0;
+            try {
+                split = std::stoll(value, &parsed);
+            } catch (const std::exception&) {
+                return std::nullopt;
+            }
+            if (parsed != value.size()) {
+                return std::nullopt;
+            }
+        }
+    }
+
+    if (program.empty() || split <= 0 || split > std::numeric_limits<U16>::max()) {
+        return std::nullopt;
+    }
+    return BenchmarkConfig{program, static_cast<U16>(split)};
+}
+
+std::string output_file_name(const BenchmarkConfig& config) {
+    return (std::filesystem::path("results") /
+            (config.program + "-" + std::to_string(config.split) + ".yml"))
+        .string();
+}
+
+bool create_output_file(const std::string& output_file, const BenchmarkConfig& config) {
+    std::ofstream output(output_file, std::ios::trunc);
+    output << "program: " << config.program << "\n";
+    output << "split_into: " << config.split << "\n";
+    return output.good();
 }
 
 void output_new_test(const std::string& output_file, const char* test_name) {
     std::ofstream(output_file, std::ios::app) << test_name << ":\n";
 }
 
-void output_test_results(const std::string& output_file, const std::vector<std::tuple<F64, F64, F64>>& test_results) {
+void output_test_results(const std::string& output_file, const std::vector<F64>& bpf_times) {
     std::ostringstream oss;
     oss << "  samples:\n";
 
-    for (const auto& [bpf_time, native_time, wasm_time] : test_results) {
-        oss << "    - [" << bpf_time << ", " << native_time << ", " << wasm_time << "]\n";
+    for (const auto bpf_time : bpf_times) {
+        oss << "    - " << bpf_time << "\n";
     }
 
     std::ofstream(output_file, std::ios::app) << oss.str();
@@ -186,12 +258,9 @@ Fw::Success Tests::benchmark_test(U32 passes,
                                   void (*fill_maps)(Tests*),
                                   U16 splitInto,
                                   const std::string& output_file) {
-    std::vector<F64> bpf_times, native_times, wasm_times;
+    std::vector<F64> bpf_times;
     bpf_times.reserve(passes);
-    native_times.reserve(passes);
-    wasm_times.reserve(passes);
 
-    // The BPF compiler appends partition_pcs during the first BPF pass.
     output_new_test(output_file, test_name);
 
     for (U32 i = 0; i < passes; ++i) {
@@ -236,13 +305,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
     }
     this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));*/
 
-    std::vector<std::tuple<F64, F64, F64>> test_results;
-    test_results.reserve(passes);
-    for (U32 i = 0; i < passes; ++i) {
-        test_results.emplace_back(bpf_times[i], native_times[i], wasm_times[i]);
-    }
-
-    output_test_results(output_file, test_results);
+    output_test_results(output_file, bpf_times);
     return Fw::Success::SUCCESS;
 }
 
@@ -326,6 +389,35 @@ Fw::Success Tests::benchmark() {
           }}*/
     };
 
+    std::vector<BenchmarkConfig> configs;
+    std::error_code directory_error;
+    for (const auto& entry : std::filesystem::directory_iterator("configs", directory_error)) {
+        if (!entry.is_regular_file() || entry.path().extension() != ".yml") {
+            continue;
+        }
+        const auto config = read_config_metadata(entry.path());
+        if (!config) {
+            const auto message = "Invalid benchmark configuration: " + entry.path().string();
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
+            return Fw::Success::FAILURE;
+        }
+
+        const auto expected_name = config->program + "-" + std::to_string(config->split) + ".yml";
+        if (entry.path().filename() != expected_name) {
+            const auto message = "Configuration file name does not match its metadata: " + entry.path().string();
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
+            return Fw::Success::FAILURE;
+        }
+        configs.push_back(*config);
+    }
+    if (directory_error || configs.empty()) {
+        this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Could not read benchmark configurations"));
+        return Fw::Success::FAILURE;
+    }
+    std::sort(configs.begin(), configs.end(), [](const BenchmarkConfig& left, const BenchmarkConfig& right) {
+        return std::tie(left.program, left.split) < std::tie(right.program, right.split);
+    });
+
     unsigned long orig_affinity_mask = 0;
     syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
 
@@ -352,28 +444,34 @@ Fw::Success Tests::benchmark() {
 
     Fw::Success result = Fw::Success::SUCCESS;
 
-    // Each configuration gets an independent result file and recompiles every
-    // BPF workload with its own maximum component size.
-    constexpr std::array<U16, 14> split_configs{1, 2,3, 4,5,6, 8,10,12, 16,20,24,28, 32};
-    for (U16 splitInto : split_configs) {
-        const auto output_file = output_file_name(splitInto);
-        create_output_file(output_file, splitInto);
-        this->log_DIAGNOSTIC_Parts(splitInto);
-        for (const auto& test : tests) {
-            auto test_result =
-                benchmark_test(test.passes, test.test, test.test_name, test.fill_maps, splitInto, output_file);
-
-            if (test_result != Fw::Success::SUCCESS) {
-                this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
-                result = Fw::Success::FAILURE;
-                break;
-            }
-
-            sched_yield();
+    for (const auto& config : configs) {
+        const auto test = std::find_if(std::begin(tests), std::end(tests), [&config](const TestInfo& candidate) {
+            return std::filesystem::path(Tests::get_test_dir(candidate.test)).parent_path().filename() == config.program;
+        });
+        if (test == std::end(tests)) {
+            const auto message = "No benchmark program matches configuration for " + config.program;
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
+            result = Fw::Success::FAILURE;
+            break;
         }
 
-        if (result != Fw::Success::SUCCESS)
+        const auto output_file = output_file_name(config);
+        if (!create_output_file(output_file, config)) {
+            const auto message = "Could not create benchmark result: " + output_file;
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
+            result = Fw::Success::FAILURE;
             break;
+        }
+
+        this->log_DIAGNOSTIC_Parts(config.split);
+        const auto test_result =
+            benchmark_test(test->passes, test->test, test->test_name, test->fill_maps, config.split, output_file);
+        if (test_result != Fw::Success::SUCCESS) {
+            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Benchmark test failed"));
+            result = Fw::Success::FAILURE;
+            break;
+        }
+        sched_yield();
     }
 
     sched_setscheduler(0, orig_policy, &orig_param);
