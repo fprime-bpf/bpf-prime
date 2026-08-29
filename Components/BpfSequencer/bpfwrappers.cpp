@@ -159,17 +159,8 @@ Fw::Success BpfSequencer::load(U32 vmId,
     if (benchmark_output_file != nullptr) {
         const std::filesystem::path program_dir = std::filesystem::path(sequenceFilePath).parent_path();
         const auto program_name = program_dir.filename().string();
-        const auto config_path =
-            std::filesystem::path("configs") / (program_name + "-" + std::to_string(splitInto) + ".yml");
-        try {
-            snapshot_locations = load_snapshot_locations(config_path, program_dir, splitInto);
-        } catch (const std::exception& error) {
-            Fw::LogStringArg errMsg(error.what());
-            this->log_ACTIVITY_HI_CommandLoadFailed(loggerFilePath, errMsg);
-            delete[] this->buffer;
-            this->buffer = nullptr;
-            return Fw::Success::FAILURE;
-        }
+        const auto config_path = std::filesystem::path("configs") / (program_name + "-" + std::to_string(splitInto) + ".yml");
+        snapshot_locations = load_snapshot_locations(config_path, program_dir, splitInto);
     }
 
     auto compile_res = vm->bpf_vm.compileWithSS2(&a, 4, 10000, snapshot_locations);

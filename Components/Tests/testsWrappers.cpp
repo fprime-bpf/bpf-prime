@@ -165,24 +165,17 @@ struct BenchmarkConfig {
     U16 split;
 };
 
-std::optional<BenchmarkConfig> read_config_metadata(const std::filesystem::path& path) {
-    try {
-        const YAML::Node root = YAML::LoadFile(path.string());
-        const YAML::Node meta = root["meta"];
-        if (!meta.IsMap() || !meta["dir"] || !meta["split"]) {
-            return std::nullopt;
-        }
+BenchmarkConfig read_config_metadata(const std::filesystem::path& path) {
+    const YAML::Node root = YAML::LoadFile(path.string());
+    const YAML::Node meta = root["meta"];
 
-        const auto configured_dir = meta["dir"].as<std::string>();
-        const auto program = std::filesystem::path(configured_dir).filename().string();
-        const auto split = meta["split"].as<long long>();
-        if (program.empty() || split <= 0 || split > std::numeric_limits<U16>::max()) {
-            return std::nullopt;
-        }
-        return BenchmarkConfig{program, static_cast<U16>(split)};
-    } catch (const YAML::Exception&) {
-        return std::nullopt;
+    const auto configured_dir = meta["dir"].as<std::string>();
+    const auto program = std::filesystem::path(configured_dir).filename().string();
+    const auto split = meta["split"].as<long long>();
+    if (program.empty()) {
+        throw std::invalid_argument("no such file");
     }
+    return BenchmarkConfig{program, static_cast<U16>(split)};
 }
 
 std::string output_file_name(const BenchmarkConfig& config) {
@@ -276,7 +269,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode
 Fw::Success Tests::benchmark() {
-    const U32 passes = 9000;
+    const U32 passes = 10000;
 
     // fds 0-14: aberr/aes/kalman/low_pass_filter/nccscore/startracker (see TestInfo below).
     // fds 15-16: ccsds (in, out). fds 17-18: reed_solomon (in, out).
@@ -329,7 +322,7 @@ Fw::Success Tests::benchmark() {
 
         {passes, BENCHMARK_TEST::MATMUL, "Matmul", [](Tests* tests) {}},
 
-        {900, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
+        {1000, BENCHMARK_TEST::NCC_SCORE, "NCC Score",
          [](Tests* tests) {
              tests->populate_map_random(13, 0, 2500);
              tests->populate_map_random(14, 0, 25);
@@ -360,28 +353,15 @@ Fw::Success Tests::benchmark() {
         if (!entry.is_regular_file() || entry.path().extension() != ".yml") {
             continue;
         }
-        const auto config = read_config_metadata(entry.path());
-        if (!config) {
-            const auto message = "Invalid benchmark configuration: " + entry.path().string();
-            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
-            return Fw::Success::FAILURE;
-        }
-
-        const auto expected_name = config->program + "-" + std::to_string(config->split) + ".yml";
-        if (entry.path().filename() != expected_name) {
-            const auto message = "Configuration file name does not match its metadata: " + entry.path().string();
-            this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg(message.c_str()));
-            return Fw::Success::FAILURE;
-        }
-        configs.push_back(*config);
+        configs.push_back(read_config_metadata(entry.path()));
     }
     if (directory_error || configs.empty()) {
         this->log_WARNING_HI_BenchMarkFailed(Fw::LogStringArg("Could not read benchmark configurations"));
         return Fw::Success::FAILURE;
     }
-    std::sort(configs.begin(), configs.end(), [](const BenchmarkConfig& left, const BenchmarkConfig& right) {
-        return std::tie(left.program, left.split) < std::tie(right.program, right.split);
-    });
+    // std::sort(configs.begin(), configs.end(), [](const BenchmarkConfig& left, const BenchmarkConfig& right) {
+    //     return std::tie(left.program, left.split) < std::tie(right.program, right.split);
+    // });
 
     unsigned long orig_affinity_mask = 0;
     syscall(SYS_sched_getaffinity, 0, sizeof(orig_affinity_mask), &orig_affinity_mask);
