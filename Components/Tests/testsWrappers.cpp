@@ -4,20 +4,19 @@
 #include "Components/Tests/NativeTests.hpp"
 #include "Components/Tests/Tests.hpp"
 #include "Components/WasmSequencer/WasmSequencer.hpp"
+#include <yaml-cpp/yaml.h>
 
 #include <pthread.h>
 #include <sched.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <algorithm>
-#include <cctype>
 #include <climits>
 #include <filesystem>
 #include <fstream>
 #include <limits>
 #include <optional>
 #include <random>
-#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -166,60 +165,24 @@ struct BenchmarkConfig {
     U16 split;
 };
 
-std::string trim(const std::string& value) {
-    const auto first = std::find_if_not(value.begin(), value.end(), [](unsigned char ch) { return std::isspace(ch); });
-    const auto last = std::find_if_not(value.rbegin(), value.rend(), [](unsigned char ch) { return std::isspace(ch); }).base();
-    return first < last ? std::string(first, last) : std::string();
-}
-
 std::optional<BenchmarkConfig> read_config_metadata(const std::filesystem::path& path) {
-    std::ifstream input(path);
-    if (!input) {
+    try {
+        const YAML::Node root = YAML::LoadFile(path.string());
+        const YAML::Node meta = root["meta"];
+        if (!meta.IsMap() || !meta["dir"] || !meta["split"]) {
+            return std::nullopt;
+        }
+
+        const auto configured_dir = meta["dir"].as<std::string>();
+        const auto program = std::filesystem::path(configured_dir).filename().string();
+        const auto split = meta["split"].as<long long>();
+        if (program.empty() || split <= 0 || split > std::numeric_limits<U16>::max()) {
+            return std::nullopt;
+        }
+        return BenchmarkConfig{program, static_cast<U16>(split)};
+    } catch (const YAML::Exception&) {
         return std::nullopt;
     }
-
-    std::string program;
-    long long split = -1;
-    std::string line;
-    bool in_meta = false;
-    while (std::getline(input, line)) {
-        const auto content = trim(line);
-        if (content == "meta:") {
-            in_meta = true;
-            continue;
-        }
-        if (content == "data:") {
-            break;
-        }
-        if (!in_meta) {
-            continue;
-        }
-
-        const auto separator = content.find(':');
-        if (separator == std::string::npos) {
-            continue;
-        }
-        const auto key = trim(content.substr(0, separator));
-        const auto value = trim(content.substr(separator + 1));
-        if (key == "dir") {
-            program = std::filesystem::path(value).filename().string();
-        } else if (key == "split") {
-            std::size_t parsed = 0;
-            try {
-                split = std::stoll(value, &parsed);
-            } catch (const std::exception&) {
-                return std::nullopt;
-            }
-            if (parsed != value.size()) {
-                return std::nullopt;
-            }
-        }
-    }
-
-    if (program.empty() || split <= 0 || split > std::numeric_limits<U16>::max()) {
-        return std::nullopt;
-    }
-    return BenchmarkConfig{program, static_cast<U16>(split)};
 }
 
 std::string output_file_name(const BenchmarkConfig& config) {
@@ -229,25 +192,30 @@ std::string output_file_name(const BenchmarkConfig& config) {
 }
 
 bool create_output_file(const std::string& output_file, const BenchmarkConfig& config) {
+    YAML::Node result;
+    result["program"] = config.program;
+    result["split_into"] = config.split;
+
     std::ofstream output(output_file, std::ios::trunc);
-    output << "program: " << config.program << "\n";
-    output << "split_into: " << config.split << "\n";
+    output << result << '\n';
     return output.good();
 }
 
-void output_new_test(const std::string& output_file, const char* test_name) {
-    std::ofstream(output_file, std::ios::app) << test_name << ":\n";
-}
+bool output_test_results(const std::string& output_file, const char* test_name, const std::vector<F64>& bpf_times) {
+    try {
+        YAML::Node result = YAML::LoadFile(output_file);
+        YAML::Node samples(YAML::NodeType::Sequence);
+        for (const auto bpf_time : bpf_times) {
+            samples.push_back(bpf_time);
+        }
+        result[test_name]["samples"] = samples;
 
-void output_test_results(const std::string& output_file, const std::vector<F64>& bpf_times) {
-    std::ostringstream oss;
-    oss << "  samples:\n";
-
-    for (const auto bpf_time : bpf_times) {
-        oss << "    - " << bpf_time << "\n";
+        std::ofstream output(output_file, std::ios::trunc);
+        output << result << '\n';
+        return output.good();
+    } catch (const YAML::Exception&) {
+        return false;
     }
-
-    std::ofstream(output_file, std::ios::app) << oss.str();
 }
 
 }  // namespace
@@ -260,8 +228,6 @@ Fw::Success Tests::benchmark_test(U32 passes,
                                   const std::string& output_file) {
     std::vector<F64> bpf_times;
     bpf_times.reserve(passes);
-
-    output_new_test(output_file, test_name);
 
     for (U32 i = 0; i < passes; ++i) {
         fill_maps(this);
@@ -305,8 +271,7 @@ Fw::Success Tests::benchmark_test(U32 passes,
     }
     this->log_ACTIVITY_HI_BenchmarkTestCompleted(Fw::LogStringArg(test_name), Fw::LogStringArg("WASM"));*/
 
-    output_test_results(output_file, bpf_times);
-    return Fw::Success::SUCCESS;
+    return output_test_results(output_file, test_name, bpf_times) ? Fw::Success::SUCCESS : Fw::Success::FAILURE;
 }
 
 // Note: For accurate benchmarking results, compile the FPrime project in release mode

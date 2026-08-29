@@ -45,6 +45,7 @@ set(MOD_DEPS
 register_fprime_module()
 
 get_module_name("${CMAKE_CURRENT_LIST_DIR}")
+target_link_libraries("${MODULE_NAME}" PUBLIC yaml-cpp::yaml-cpp)
 
 # BENCHMARK's native comparison path was a full optimization level behind the
 # bpf (llvmbpf's optimizeModule(), OptimizationLevel::O3) and wasm (WAMR's
